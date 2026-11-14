@@ -46,6 +46,18 @@ export function getAuth() {
     };
   }
 
+  const envOrigins = [
+    'https://hackerland.in',
+    'https://www.hackerland.in',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    ...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : []),
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+    ...(process.env.VERCEL_PROJECT_PRODUCTION_URL ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`] : []),
+    ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(',').map((s) => s.trim()) ?? []),
+  ];
+  const trustedOrigins = Array.from(new Set(envOrigins.filter(Boolean)));
+
   authInstance = betterAuth({
     database: mongodbAdapter(client.db()),
     emailAndPassword: {
@@ -55,6 +67,7 @@ export function getAuth() {
     socialProviders: Object.keys(socialProviders).length > 0 ? socialProviders : undefined,
     baseURL: process.env.BETTER_AUTH_URL,
     secret: process.env.BETTER_AUTH_SECRET,
+    trustedOrigins,
   });
 
   return authInstance;
