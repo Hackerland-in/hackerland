@@ -65,7 +65,7 @@ export function getAuth() {
       minPasswordLength: 8,
     },
     socialProviders: Object.keys(socialProviders).length > 0 ? socialProviders : undefined,
-    baseURL: process.env.BETTER_AUTH_URL,
+    baseURL: process.env.BETTER_AUTH_URL || 'https://www.hackerland.in',
     secret: process.env.BETTER_AUTH_SECRET,
     trustedOrigins,
   });
