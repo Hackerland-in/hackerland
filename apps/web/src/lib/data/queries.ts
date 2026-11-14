@@ -4,7 +4,7 @@ import type {
   Track,
 } from '@hackerland/core';
 import { ALL_OPPORTUNITIES } from './fixtures/opportunities';
-import { PROFILE_MEERA } from './fixtures/people';
+import { PROFILE_KAVYA, PROFILE_MEERA } from './fixtures/people';
 import { ALL_POSTS } from './fixtures/posts';
 import {
   ALL_PROJECT_SUMMARIES,
@@ -65,10 +65,21 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
  */
 export async function getProfile(handle: string): Promise<ProfileView | null> {
   const normalized = handle.toLowerCase();
+  let profile: ProfileView | null = null;
   if (normalized === PROFILE_MEERA.handle) {
-    return PROFILE_MEERA;
+    profile = PROFILE_MEERA;
+  } else if (normalized === PROFILE_KAVYA.handle) {
+    profile = PROFILE_KAVYA;
   }
-  return null;
+  if (!profile) return null;
+
+  const userProjects = ALL_PROJECT_SUMMARIES.filter((p) =>
+    p.squad.some((s) => s.handle === normalized)
+  );
+  return {
+    ...profile,
+    projects: userProjects.length > 0 ? userProjects : profile.projects,
+  };
 }
 
 /**

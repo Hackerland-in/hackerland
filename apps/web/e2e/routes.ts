@@ -1,0 +1,15 @@
+export const ROUTES: string[] = [
+  '/',
+  '/feed',
+  '/projects',
+  '/projects/aeroglide',
+  '/projects/pixel-pathshala-open-illustration-kit-for-every-government-school-textbook-in-india',
+  '/earn',
+  '/learn',
+  '/u/meera-iyer',
+  '/u/kavya-subramaniam-ramakrishnan',
+  '/new',
+  '/sign-in',
+  '/sign-up',
+  '/design-system',
+];
