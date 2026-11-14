@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import type { ReactNode } from 'react';
 import './globals.css';
+import { SkipLink } from '@/components/layout/skip-link';
+import { AppHeader } from '@/components/layout/app-header';
+import { AppFooter } from '@/components/layout/app-footer';
+import { MobileNav } from '@/components/layout/mobile-nav';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -41,8 +45,14 @@ export default function RootLayout({
       lang="en"
       className={`dark ${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="bg-canvas text-fg font-sans text-body-md antialiased min-h-screen">
-        {children}
+      <body className="flex min-h-screen flex-col bg-canvas text-fg font-sans text-body-md antialiased selection:bg-accent selection:text-on-solid">
+        <SkipLink />
+        <AppHeader />
+        <main id="main" className="flex-1 pb-20 md:pb-0">
+          {children}
+        </main>
+        <AppFooter />
+        <MobileNav />
       </body>
     </html>
   );

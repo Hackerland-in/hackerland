@@ -147,3 +147,64 @@ export const PROFILE_MEERA: ProfileView = {
     },
   ],
 };
+
+export const PROFILE_KAVYA: ProfileView = {
+  handle: PERSON_KAVYA.handle,
+  name: PERSON_KAVYA.name,
+  headline: PERSON_KAVYA.headline ?? 'Computational Fluid Dynamics Researcher · IISc Bangalore',
+  bio: 'Researching fluid-structure interactions, transitional turbulence models, and high-altitude aerodynamic profiles for solar UAVs at IISc.',
+  location: 'Bengaluru, India',
+  avatarUrl: PERSON_KAVYA.avatarUrl,
+  tracks: ['research', 'make'],
+  skills: [
+    'Computational Fluid Dynamics',
+    'OpenFOAM',
+    'Aerodynamic Modeling',
+    'Mesh Generation',
+    'Turbulence Simulation',
+  ],
+  badges: PERSON_KAVYA.badges,
+  links: [
+    { label: 'Google Scholar', url: 'https://scholar.google.com' },
+    { label: 'GitHub', url: 'https://github.com' },
+  ],
+  reputation: 320,
+  stats: {
+    projects: 1,
+    endorsements: 7,
+    contributions: 48,
+    earned: { amount: 45000, currency: 'INR' },
+  },
+  projects: [],
+  mentorships: [
+    {
+      ...PERSON_MEERA,
+      relation: 'mentor',
+      project: 'AeroGlide UAV',
+    },
+  ],
+  credentials: [
+    { title: 'M.Tech in Aerospace Engineering', issuer: 'Indian Institute of Science' },
+  ],
+  endorsements: [
+    {
+      author: PERSON_MEERA,
+      quote: 'Kavya developed an ultra-efficient mesh relaxation algorithm that sped up our high-altitude airfoil stall prediction by 3x.',
+    },
+  ],
+  recentReputation: [
+    {
+      kind: 'bounty-completed',
+      points: 50,
+      label: 'Delivered NACA 6409 laminar bubble CFD analysis',
+      at: '2026-11-11T12:00:00Z',
+    },
+    {
+      kind: 'post-helpful',
+      points: 2,
+      label: 'Helpful answer on OpenFOAM snappyHexMesh refinement',
+      at: '2026-11-07T16:20:00Z',
+    },
+  ],
+};
+

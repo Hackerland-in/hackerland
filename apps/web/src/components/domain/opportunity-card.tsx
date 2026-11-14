@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { Badge, Button, Card, CardBody, CardFooter, CardHeader } from '@hackerland/ui';
-import { formatMoney, OPPORTUNITY_KIND_LABEL, TRACK_META } from '@hackerland/core';
+import { OPPORTUNITY_KIND_LABEL } from '@hackerland/core';
 import { formatDate } from '@/lib/format';
 import type { OpportunityView } from '@/lib/data/types';
+import { Money } from './money';
+import { TrackBadge } from './track-badge';
 
 export interface OpportunityCardProps {
   opportunity: OpportunityView;
@@ -29,9 +31,11 @@ export function OpportunityCard({ opportunity, className }: OpportunityCardProps
                 </Badge>
               )}
             </div>
-            <span className="font-display font-semibold tabular-nums text-headline-sm text-earn">
-              {formatMoney(opportunity.reward.amount, opportunity.reward.currency)}
-            </span>
+            <Money
+              amount={opportunity.reward.amount}
+              currency={opportunity.reward.currency}
+              className="font-display font-semibold tabular-nums text-headline-sm text-earn"
+            />
           </div>
 
           <div className="text-body-xs text-fg-subtle truncate">
@@ -79,9 +83,7 @@ export function OpportunityCard({ opportunity, className }: OpportunityCardProps
 
           <div className="flex flex-wrap gap-1.5">
             {opportunity.tracks.map((track) => (
-              <Badge key={track} tone={track}>
-                {TRACK_META[track]?.label ?? track}
-              </Badge>
+              <TrackBadge key={track} track={track} />
             ))}
           </div>
         </CardBody>
