@@ -29,6 +29,7 @@ import {
 import { InteractiveLab } from './interactive-lab';
 import { ManufacturingLifecyclePipeline } from './lifecycle-pipeline';
 import { HardwareBenchStudio } from './bench/hardware-bench-studio';
+import { CircuitoBuilder } from './circuito/circuito-builder';
 
 export function ManufacturingHub() {
   const [selectedPillarId, setSelectedPillarId] = useState<string>('pcb');
@@ -175,6 +176,11 @@ export function ManufacturingHub() {
           {/* CYBER-PHYSICAL HARDWARE BENCH STUDIO (Modeled on ESP-Labs Companion Architecture) */}
           <div className="space-y-3">
             <HardwareBenchStudio initialTrackId={selectedPillar.id} />
+          </div>
+
+          {/* CIRCUITO.IO AUTONOMOUS CIRCUIT BUILDER & WIRING ENGINE */}
+          <div className="space-y-3">
+            <CircuitoBuilder />
           </div>
 
           {/* SIMULATOR ENGINE (Requirement: Simulation engine for each field) */}

@@ -14,6 +14,7 @@ import {
 import { InteractiveLab } from './interactive-lab';
 import { MANUFACTURING_PILLARS } from './manufacturing-data';
 import { HardwareBenchStudio } from './bench/hardware-bench-studio';
+import { CircuitoBuilder } from './circuito/circuito-builder';
 
 // @ts-expect-error configure react act environment
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -264,5 +265,62 @@ describe('Manufacturing Hub & Simulation Engines', () => {
 
     expect(container.textContent).toContain('Interactive Pinout & Bus Multiplexing Matrix');
     expect(container.textContent).toContain('Click Pin to Inspect Hardware Multiplexer');
+  });
+
+  it('renders CircuitoBuilder and simulates autonomous circuit design with auto-injected passives', () => {
+    act(() => {
+      root.render(<CircuitoBuilder />);
+    });
+
+    expect(container.textContent).toContain('CIRCUITO GENERATOR ENGINE');
+    expect(container.textContent).toContain('Inspired by Circuito.io Autonomous Hardware Design');
+    expect(container.textContent).toContain('Interactive Breadboard Wiring Diagram');
+    expect(container.textContent).toContain('ESP32-S3-WROOM-1');
+
+    // Verify auto-injected passives are displayed
+    expect(container.textContent).toContain('Circuito Automated Passive Supporting Circuitry');
+
+    // Switch to Power & Logic tab
+    const logicTab = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Power & Logic Compatibility Engine')
+    );
+    expect(logicTab).toBeDefined();
+
+    act(() => {
+      logicTab?.click();
+    });
+
+    expect(container.textContent).toContain('Automated Electrical Calculation & Power Budget');
+    expect(container.textContent).toContain('Total Current Draw');
+    expect(container.textContent).toContain('Estimated Runtime');
+
+    // Switch to Generated Code tab
+    const codeTab = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Generated Test Firmware')
+    );
+    expect(codeTab).toBeDefined();
+
+    act(() => {
+      codeTab?.click();
+    });
+
+    expect(container.textContent).toContain('Generated Hardware Test Sketch');
+    expect(container.textContent).toContain('hackerland_circuito_test.ino');
+    expect(container.textContent).toContain('HACKERLAND CIRCUITO ENGINE GENERATED CODE');
+
+    // Switch to BOM tab
+    const bomTab = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Bill of Materials (BOM)')
+    );
+    expect(bomTab).toBeDefined();
+
+    act(() => {
+      bomTab?.click();
+    });
+
+    expect(container.textContent).toContain('Itemized Bill of Materials (BOM) & Domestic Sourcing');
+    expect(container.textContent).toContain('Robu.in');
+    expect(container.textContent).toContain('Quartzcomponents');
+    expect(container.textContent).toContain('ElectronicsComp');
   });
 });
