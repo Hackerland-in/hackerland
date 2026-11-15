@@ -37,6 +37,11 @@ export function OpportunityCard({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
                 <Badge tone="earn">{kindLabel}</Badge>
+                {isBounty && (
+                  <Badge tone="neutral" variant="outline" className="text-caption">
+                    40/60 Escrow
+                  </Badge>
+                )}
                 {opportunity.status !== 'open' && (
                   <Badge tone={opportunity.status === 'in-review' ? 'warning' : 'neutral'}>
                     {opportunity.status === 'in-review' ? 'In Review' : 'Closed'}

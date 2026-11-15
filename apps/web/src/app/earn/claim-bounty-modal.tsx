@@ -5,6 +5,7 @@ import type { OpportunityView } from '@/lib/data/types';
 import { Badge, Button, Textarea } from '@hackerland/ui';
 import { OPPORTUNITY_KIND_LABEL, TRACK_META } from '@hackerland/core';
 import { Money } from '@/components/domain/money';
+import { EscrowMilestoneStepper } from '@/components/domain/escrow-milestone-stepper';
 import { X, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export interface ClaimBountyModalProps {
@@ -127,6 +128,12 @@ export function ClaimBountyModal({
             />
           </div>
         </div>
+
+        <EscrowMilestoneStepper
+          totalAmount={opportunity.reward.amount}
+          currency={opportunity.reward.currency}
+          isBounty={isBounty}
+        />
 
         {error && (
           <div
