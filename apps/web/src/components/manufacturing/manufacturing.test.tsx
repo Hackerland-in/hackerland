@@ -21,6 +21,8 @@ import { FalstadSimulator } from './falstad/falstad-simulator';
 import { FALSTAD_PRESETS, parseSpiceNetlist, solveCircuitJsStep } from './falstad/circuitjs-engine';
 import { HdlSimulator } from './hdl/hdl-simulator';
 import { HDL_PRESETS, runHdlSimulation, generateVcdFile } from './hdl/hdl-engine';
+import { IssSimulator } from './iss/iss-simulator';
+import { ISS_PRESETS, parseAssembly, initCpuState, stepCpu } from './iss/iss-engine';
 
 // @ts-expect-error configure react act environment
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -508,5 +510,97 @@ describe('Manufacturing Hub & Simulation Engines', () => {
 
     expect(container.textContent).toContain('Design Module (Verilog)');
     expect(container.textContent).toContain('traffic_light_fsm');
+  });
+
+  it('parses RISC-V assembly and executes cycle-accurate instruction steps in ISS engine', () => {
+    const fibPreset = ISS_PRESETS.find((p) => p.id === 'fibonacci')!;
+    const instructions = parseAssembly(fibPreset.sourceCode);
+
+    expect(instructions.length).toBeGreaterThan(5);
+    expect(instructions[0]?.mnemonic).toBe('ADDI');
+    expect(instructions[0]?.address).toBe(0x0000);
+    expect(instructions[0]?.machineCode).toBeDefined();
+
+    let state = initCpuState(fibPreset);
+    expect(state.pc).toBe(0x0000);
+    expect(state.cycles).toBe(0);
+
+    // Step 1: addi t0, zero, 0x1000
+    state = stepCpu(state, instructions);
+    expect(state.pc).toBe(0x0004);
+    expect(state.cycles).toBe(1);
+    expect(state.registers[5]).toBe(0x1000); // t0 is x5
+
+    // Step 2: addi a0, zero, 0
+    state = stepCpu(state, instructions);
+    expect(state.registers[10]).toBe(0); // a0 is x10
+
+    // Step 3: addi a1, zero, 1
+    state = stepCpu(state, instructions);
+    expect(state.registers[11]).toBe(1); // a1 is x11
+
+    // Step 4: addi t1, zero, 7
+    state = stepCpu(state, instructions);
+    expect(state.registers[6]).toBe(7); // t1 is x6
+  });
+
+  it('executes full array summation and stores final accumulated sum to data memory', () => {
+    const arrayPreset = ISS_PRESETS.find((p) => p.id === 'array-sum')!;
+    const instructions = parseAssembly(arrayPreset.sourceCode);
+
+    let state = initCpuState(arrayPreset);
+
+    // Run until halted or max 200 steps
+    let steps = 0;
+    while (!state.isHalted && steps < 200) {
+      state = stepCpu(state, instructions);
+      steps++;
+    }
+
+    expect(state.isHalted).toBe(true);
+    // s0 (x8) should have accumulated sum: 10 + 25 + 40 + 5 + 100 = 180
+    expect(state.registers[8]).toBe(180);
+    // Memory at 0x1014 should be stored with 180
+    expect(state.memory[0x1014]).toBe(180);
+  });
+
+  it('renders IssSimulator with 32 registers, 5-stage pipeline, memory inspector, and controls', () => {
+    act(() => {
+      root.render(<IssSimulator />);
+    });
+
+    expect(container.textContent).toContain('RISC-V Instruction Set Simulator (ISS) Studio');
+    expect(container.textContent).toContain('Classic 5-Stage RISC Microarchitecture Pipeline');
+    expect(container.textContent).toContain('RV32I Architectural Register File (32 × 32-Bit)');
+    expect(container.textContent).toContain('Data RAM Segment & Hex Memory Inspector');
+    expect(container.textContent).toContain('Disassembled Machine Code');
+    expect(container.textContent).toContain('zero');
+    expect(container.textContent).toContain('sp');
+
+    // Test clicking Step Single Clock button
+    const stepBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Step Single Clock')
+    );
+    expect(stepBtn).toBeDefined();
+
+    act(() => {
+      stepBtn?.click();
+    });
+
+    expect(container.textContent).toContain('CYCLES:');
+    expect(container.textContent).toContain('RETIRED:');
+
+    // Test switching preset to Array Summation
+    const arrayBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Array Summation')
+    );
+    expect(arrayBtn).toBeDefined();
+
+    act(() => {
+      arrayBtn?.click();
+    });
+
+    expect(container.textContent).toContain('Array Summation & Memory Load/Store (LW / SW)');
+    expect(container.textContent).toContain('0x000000B4');
   });
 });

@@ -33,6 +33,7 @@ import { CircuitoBuilder } from './circuito/circuito-builder';
 import { ActualHardwareSimulator } from './hardware-simulator/actual-hardware-simulator';
 import { FalstadSimulator } from './falstad/falstad-simulator';
 import { HdlSimulator } from './hdl/hdl-simulator';
+import { IssSimulator } from './iss/iss-simulator';
 
 export function ManufacturingHub() {
   const [selectedPillarId, setSelectedPillarId] = useState<string>('pcb');
@@ -199,6 +200,11 @@ export function ManufacturingHub() {
           {/* DIGITAL LOGIC HDL SIMULATOR (Wikipedia List of HDL Simulators: Verilator, Icarus, ModelSim, GTKWave) */}
           <div className="space-y-3">
             <HdlSimulator />
+          </div>
+
+          {/* INSTRUCTION SET SIMULATOR (ISS) (Wikipedia: Instruction set simulator, gem5, QEMU, Spike, CPU Sim) */}
+          <div className="space-y-3">
+            <IssSimulator />
           </div>
 
           {/* SIMULATOR ENGINE (Requirement: Simulation engine for each field) */}
