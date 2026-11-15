@@ -5,13 +5,14 @@ import { MainNav } from './main-nav';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { NotificationPopover } from './notification-popover';
 import { UserNav } from './user-nav';
+import { MobileMenu } from './mobile-menu';
 
 export function AppHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-page items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left: Logo */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 lg:gap-6 shrink-0">
           <Link
             href="/"
             className="flex items-center gap-2.5 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -43,20 +44,20 @@ export function AppHeader() {
         <MainNav />
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Search field on lg+ */}
-          <div className="hidden lg:block w-64">
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Search field on xl+ */}
+          <div className="hidden xl:block w-48">
             <SearchField
-              placeholder="Search projects, people, bounties…"
-              className="w-full text-body-sm"
+              placeholder="Search Hackerland…"
+              className="w-full text-caption"
             />
           </div>
 
-          {/* Search icon below md */}
-          <div className="md:hidden">
+          {/* Search icon below xl */}
+          <div className="xl:hidden">
             <Link href="/feed">
               <IconButton label="Search">
-                <Search className="h-5 w-5" aria-hidden="true" />
+                <Search className="h-4 w-4" aria-hidden="true" />
               </IconButton>
             </Link>
           </div>
@@ -69,8 +70,8 @@ export function AppHeader() {
           {/* Theme toggle (Dark / Day mode) */}
           <ThemeToggle />
 
-          {/* Primary CTA (Start project) on md+ */}
-          <div className="hidden md:block">
+          {/* Primary CTA (Start project) on lg+ */}
+          <div className="hidden lg:block">
             <Button asChild size="sm" variant="primary">
               <Link href="/new">Start project</Link>
             </Button>
@@ -78,6 +79,9 @@ export function AppHeader() {
 
           {/* User Nav (Profile / Menu if logged in, Sign in / Sign up if not) */}
           <UserNav />
+
+          {/* Mobile Menu Hamburger (md:hidden) */}
+          <MobileMenu />
         </div>
       </div>
     </header>
