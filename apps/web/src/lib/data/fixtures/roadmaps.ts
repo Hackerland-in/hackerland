@@ -1,5 +1,131 @@
 import type { RoadmapView } from '../types';
 
+/* =========================================================================
+   1. CODE TRACK
+   ========================================================================= */
+
+export const ROADMAP_FULL_STACK: RoadmapView = {
+  slug: 'full-stack-web',
+  title: 'Full-Stack Modern Web Engineering',
+  track: 'code',
+  level: 'beginner',
+  summary:
+    'Master modern TypeScript, React, Next.js, and backend web architecture with hands-on open-source projects.',
+  hours: 120,
+  learners: 3410,
+  stages: [
+    {
+      title: 'JavaScript Algorithms and Data Structures',
+      status: 'done',
+      modules: [
+        {
+          title: 'JavaScript Algorithms and Data Structures Certification',
+          provider: 'freeCodeCamp',
+          hours: 40,
+          free: true,
+          certified: true,
+          url: 'https://www.freecodecamp.org',
+        },
+        {
+          title: 'MDN Web Standards Deep Dive',
+          provider: 'MDN Web Docs',
+          hours: 20,
+          free: true,
+          certified: false,
+          url: 'https://developer.mozilla.org',
+        },
+      ],
+    },
+    {
+      title: 'Modern React & State Management',
+      status: 'active',
+      modules: [
+        {
+          title: 'Full Stack Open: Deep Dive Into Modern Web Development',
+          provider: 'University of Helsinki',
+          hours: 40,
+          free: true,
+          certified: true,
+          url: 'https://fullstackopen.com/en/',
+        },
+      ],
+    },
+    {
+      title: 'Full Stack Architecture & APIs',
+      status: 'locked',
+      modules: [
+        {
+          title: 'Back End Development and APIs Certification',
+          provider: 'freeCodeCamp',
+          hours: 20,
+          free: true,
+          certified: true,
+          url: 'https://www.freecodecamp.org',
+        },
+      ],
+    },
+  ],
+};
+
+export const ROADMAP_RUST_SYSTEMS: RoadmapView = {
+  slug: 'rust-systems-programming',
+  title: 'Rust Systems & Embedded Concurrency',
+  track: 'code',
+  level: 'intermediate',
+  summary:
+    'Build memory-safe systems software, asynchronous network services, and bare-metal microcontroller drivers with Rust.',
+  hours: 85,
+  learners: 1820,
+  stages: [
+    {
+      title: 'Rust Language Fundamentals & Ownership',
+      status: 'done',
+      modules: [
+        {
+          title: 'The Rust Programming Language Book',
+          provider: 'Rust Foundation',
+          hours: 35,
+          free: true,
+          certified: false,
+          url: 'https://doc.rust-lang.org/book/',
+        },
+      ],
+    },
+    {
+      title: 'Idiomatic Patterns & Error Handling',
+      status: 'active',
+      modules: [
+        {
+          title: 'Rust by Example & CLI Tool Building',
+          provider: 'Rust Community',
+          hours: 25,
+          free: true,
+          certified: false,
+          url: 'https://doc.rust-lang.org/rust-by-example/',
+        },
+      ],
+    },
+    {
+      title: 'Async Runtimes & Concurrency',
+      status: 'locked',
+      modules: [
+        {
+          title: 'Tokio Async Network Programming',
+          provider: 'Tokio Project',
+          hours: 25,
+          free: true,
+          certified: false,
+          url: 'https://tokio.rs/',
+        },
+      ],
+    },
+  ],
+};
+
+/* =========================================================================
+   2. MAKE TRACK
+   ========================================================================= */
+
 export const ROADMAP_EMBEDDED: RoadmapView = {
   slug: 'embedded-systems-from-zero',
   title: 'Embedded Systems from Zero',
@@ -37,12 +163,20 @@ export const ROADMAP_EMBEDDED: RoadmapView = {
       status: 'active',
       modules: [
         {
-          title: 'Embedded Systems - Shape the World: Microcontroller I/O',
+          title: 'Embedded System Design with ARM Cortex-M',
           provider: 'NPTEL',
-          hours: 30,
+          hours: 20,
           free: true,
           certified: true,
           url: 'https://nptel.ac.in',
+        },
+        {
+          title: 'Virtual Embedded Simulation Lab (ESP32 & RP2040)',
+          provider: 'Wokwi',
+          hours: 10,
+          free: true,
+          certified: false,
+          url: 'https://wokwi.com/',
         },
       ],
     },
@@ -63,60 +197,119 @@ export const ROADMAP_EMBEDDED: RoadmapView = {
   ],
 };
 
-export const ROADMAP_FULL_STACK: RoadmapView = {
-  slug: 'full-stack-web',
-  title: 'Full-Stack Modern Web Engineering',
-  track: 'code',
-  level: 'beginner',
+export const ROADMAP_ROBOTICS_ROS2: RoadmapView = {
+  slug: 'robotics-and-ros2',
+  title: 'Autonomous Robotics with ROS 2',
+  track: 'make',
+  level: 'intermediate',
   summary:
-    'Master modern TypeScript, React, Next.js, and backend web architecture with hands-on open-source projects.',
-  hours: 120,
-  learners: 3410,
+    'Architect distributed robotics systems, sensor fusion filters, URDF kinematic models, and Nav2 SLAM pipelines with ROS 2 Humble.',
+  hours: 90,
+  learners: 1450,
   stages: [
     {
-      title: 'JavaScript Algorithms and Data Structures',
+      title: 'ROS 2 Core Architecture & Nodes',
       status: 'done',
       modules: [
         {
-          title: 'JavaScript Algorithms and Data Structures Certification',
-          provider: 'freeCodeCamp',
-          hours: 40,
+          title: 'ROS 2 Humble Documentation & Tutorials',
+          provider: 'Open Robotics',
+          hours: 30,
           free: true,
-          certified: true,
-          url: 'https://freecodecamp.org',
+          certified: false,
+          url: 'https://docs.ros.org/en/humble/',
         },
       ],
     },
     {
-      title: 'Front End Development Libraries',
+      title: 'Microcontrollers to ROS: micro-ROS',
       status: 'active',
       modules: [
         {
-          title: 'Front End Development Libraries (React & Redux)',
-          provider: 'freeCodeCamp',
-          hours: 40,
+          title: 'micro-ROS on Embedded Microcontrollers',
+          provider: 'micro-ROS Project',
+          hours: 25,
           free: true,
-          certified: true,
-          url: 'https://freecodecamp.org',
+          certified: false,
+          url: 'https://micro.ros.org/',
         },
       ],
     },
     {
-      title: 'Full Stack Architecture & Databases',
+      title: 'Kinematics & Nav2 Navigation Stack',
       status: 'locked',
       modules: [
         {
-          title: 'Back End Development and APIs',
-          provider: 'freeCodeCamp',
-          hours: 40,
+          title: 'Gazebo Physics Simulation & Navigation 2',
+          provider: 'Open Robotics',
+          hours: 35,
           free: true,
-          certified: true,
-          url: 'https://freecodecamp.org',
+          certified: false,
+          url: 'https://gazebosim.org/',
         },
       ],
     },
   ],
 };
+
+export const ROADMAP_KICAD_PCB: RoadmapView = {
+  slug: 'kicad-pcb-design',
+  title: 'KiCad Schematic & Multi-Layer PCB Design',
+  track: 'make',
+  level: 'intermediate',
+  summary:
+    'Design professional 2-to-4 layer PCBs from schematic capture to differential pair routing, ground plane management, and Gerber fabrication outputs.',
+  hours: 65,
+  learners: 980,
+  stages: [
+    {
+      title: 'Schematic Capture & Component Selection',
+      status: 'done',
+      modules: [
+        {
+          title: 'KiCad Getting Started & Schematic Capture Guide',
+          provider: 'KiCad Project',
+          hours: 25,
+          free: true,
+          certified: false,
+          url: 'https://www.kicad.org/',
+        },
+      ],
+    },
+    {
+      title: 'Multi-layer Routing & Design Rules',
+      status: 'active',
+      modules: [
+        {
+          title: 'High-Speed Layout & Impedance Control',
+          provider: "Phil's Lab",
+          hours: 25,
+          free: true,
+          certified: false,
+          url: 'https://www.kicad.org/help/tutorials/',
+        },
+      ],
+    },
+    {
+      title: 'DFM & SMT Assembly Fabrication',
+      status: 'locked',
+      modules: [
+        {
+          title: 'Design for Manufacturing & IPC-2221 Standards',
+          provider: 'NPTEL',
+          hours: 15,
+          free: true,
+          certified: true,
+          url: 'https://nptel.ac.in',
+        },
+      ],
+    },
+  ],
+};
+
+/* =========================================================================
+   3. DESIGN TRACK
+   ========================================================================= */
 
 export const ROADMAP_PRODUCT_DESIGN: RoadmapView = {
   slug: 'product-design-foundations',
@@ -124,7 +317,7 @@ export const ROADMAP_PRODUCT_DESIGN: RoadmapView = {
   track: 'design',
   level: 'intermediate',
   summary:
-    'Human-centred design systems, accessibility standards (WCAG), tactile affordances, and Figma to production handoff.',
+    'Human-centred design systems, accessibility standards (WCAG 2.2), tactile affordances, and Figma to production handoff.',
   hours: 60,
   learners: 890,
   stages: [
@@ -135,10 +328,18 @@ export const ROADMAP_PRODUCT_DESIGN: RoadmapView = {
         {
           title: 'User Interface Design and Implementation',
           provider: 'MIT OpenCourseWare',
-          hours: 30,
+          hours: 20,
           free: true,
           certified: false,
           url: 'https://ocw.mit.edu',
+        },
+        {
+          title: 'Material Design 3 Architecture & Elevation Tokens',
+          provider: 'Google Design',
+          hours: 10,
+          free: true,
+          certified: false,
+          url: 'https://m3.material.io/',
         },
       ],
     },
@@ -147,9 +348,17 @@ export const ROADMAP_PRODUCT_DESIGN: RoadmapView = {
       status: 'active',
       modules: [
         {
+          title: 'Web Content Accessibility Guidelines (WCAG 2.2)',
+          provider: 'W3C / WAI',
+          hours: 15,
+          free: true,
+          certified: false,
+          url: 'https://www.w3.org/WAI/',
+        },
+        {
           title: 'Interaction Design & Accessible Interfaces',
           provider: 'NPTEL',
-          hours: 30,
+          hours: 15,
           free: true,
           certified: true,
           url: 'https://nptel.ac.in',
@@ -158,6 +367,51 @@ export const ROADMAP_PRODUCT_DESIGN: RoadmapView = {
     },
   ],
 };
+
+export const ROADMAP_CAD_ENCLOSURES: RoadmapView = {
+  slug: 'mechanical-cad-and-enclosures',
+  title: 'Parametric 3D CAD & Hardware Enclosures',
+  track: 'design',
+  level: 'beginner',
+  summary:
+    'Design rugged hardware enclosures, snap-fit latches, and custom mounting brackets for 3D printing and CNC milling using open-source FreeCAD.',
+  hours: 50,
+  learners: 720,
+  stages: [
+    {
+      title: 'Sketcher & Parametric Part Design',
+      status: 'done',
+      modules: [
+        {
+          title: 'FreeCAD Part Design & Constrained Sketching',
+          provider: 'FreeCAD Project',
+          hours: 25,
+          free: true,
+          certified: false,
+          url: 'https://wiki.freecad.org/Main_Page',
+        },
+      ],
+    },
+    {
+      title: 'Enclosure Tolerances & 3D Print Preparation',
+      status: 'active',
+      modules: [
+        {
+          title: 'Snap-fits, Tolerances & Rapid Prototyping',
+          provider: 'FreeCAD Project',
+          hours: 25,
+          free: true,
+          certified: false,
+          url: 'https://wiki.freecad.org/Tutorials',
+        },
+      ],
+    },
+  ],
+};
+
+/* =========================================================================
+   4. RESEARCH TRACK
+   ========================================================================= */
 
 export const ROADMAP_CUBESAT: RoadmapView = {
   slug: 'cubesat-engineering',
@@ -200,9 +454,255 @@ export const ROADMAP_CUBESAT: RoadmapView = {
   ],
 };
 
+export const ROADMAP_DEEP_LEARNING_TINYML: RoadmapView = {
+  slug: 'deep-learning-and-tinyml',
+  title: 'Deep Learning, Transformers & Edge TinyML',
+  track: 'research',
+  level: 'intermediate',
+  summary:
+    'Train and fine-tune open-weight deep neural networks, quantize transformer models, and deploy INT8 computer vision on sub-$5 edge microcontrollers.',
+  hours: 110,
+  learners: 2150,
+  stages: [
+    {
+      title: 'Machine Learning Foundations',
+      status: 'done',
+      modules: [
+        {
+          title: 'CS229: Machine Learning Lecture Notes',
+          provider: 'Stanford University',
+          hours: 35,
+          free: true,
+          certified: false,
+          url: 'https://cs229.stanford.edu/',
+        },
+      ],
+    },
+    {
+      title: 'Deep Learning with PyTorch',
+      status: 'active',
+      modules: [
+        {
+          title: 'Practical Deep Learning for Coders',
+          provider: 'Fast.ai',
+          hours: 45,
+          free: true,
+          certified: false,
+          url: 'https://course.fast.ai/',
+        },
+      ],
+    },
+    {
+      title: 'Open Transformers & Edge Quantization',
+      status: 'locked',
+      modules: [
+        {
+          title: 'Hugging Face Open Source LLM & Transformers Course',
+          provider: 'Hugging Face',
+          hours: 30,
+          free: true,
+          certified: true,
+          url: 'https://huggingface.co/learn',
+        },
+      ],
+    },
+  ],
+};
+
+/* =========================================================================
+   5. EARN TRACK
+   ========================================================================= */
+
+export const ROADMAP_OPEN_SOURCE_LEADERSHIP: RoadmapView = {
+  slug: 'open-source-squad-leadership',
+  title: 'Open-Source Squad Leadership & Grants',
+  track: 'earn',
+  level: 'intermediate',
+  summary:
+    'Assemble multi-disciplinary squads, conduct transparent sprint planning, manage RFCs, and secure micro-grants from open-source foundations.',
+  hours: 40,
+  learners: 950,
+  stages: [
+    {
+      title: 'Startup Principles for Open Builders',
+      status: 'done',
+      modules: [
+        {
+          title: 'Startup School for Builders',
+          provider: 'Y Combinator',
+          hours: 25,
+          free: true,
+          certified: true,
+          url: 'https://www.startupschool.org/',
+        },
+      ],
+    },
+    {
+      title: 'Open Source Community Stewardship',
+      status: 'active',
+      modules: [
+        {
+          title: 'Building Welcoming Open Source Communities',
+          provider: 'GitHub Guides',
+          hours: 15,
+          free: true,
+          certified: false,
+          url: 'https://opensource.guide/how-to-contribute/',
+        },
+      ],
+    },
+  ],
+};
+
+export const ROADMAP_BOUNTY_ENGINEERING: RoadmapView = {
+  slug: 'bounty-engineering-and-protocols',
+  title: 'Bounty Engineering & Digital Public Infrastructure',
+  track: 'earn',
+  level: 'intermediate',
+  summary:
+    'Solve funded protocol bounties, build verified adapters on open protocols (ONDC, Beckn), and earn through milestone delivery.',
+  hours: 55,
+  learners: 1320,
+  stages: [
+    {
+      title: 'Decentralized Protocol Specifications',
+      status: 'done',
+      modules: [
+        {
+          title: 'Beckn Protocol Developer Academy',
+          provider: 'Beckn Foundation',
+          hours: 30,
+          free: true,
+          certified: false,
+          url: 'https://becknprotocol.io/',
+        },
+      ],
+    },
+    {
+      title: 'Digital Commerce & India Stack Integrations',
+      status: 'active',
+      modules: [
+        {
+          title: 'ONDC Developer Knowledge Base & Sandbox',
+          provider: 'ONDC India',
+          hours: 25,
+          free: true,
+          certified: false,
+          url: 'https://ondc.org/',
+        },
+      ],
+    },
+  ],
+};
+
+/* =========================================================================
+   6. LEARN TRACK
+   ========================================================================= */
+
+export const ROADMAP_SYSTEMS_ENGINEERING: RoadmapView = {
+  slug: 'systems-engineering-and-architecture',
+  title: 'Systems Engineering & Fault Tolerance',
+  track: 'learn',
+  level: 'advanced',
+  summary:
+    'Master high-reliability architecture, failover state machines, telemetry feedback loops, and root-cause failure analysis across hardware and software.',
+  hours: 60,
+  learners: 780,
+  stages: [
+    {
+      title: 'Systems Architecture & Requirements Modeling',
+      status: 'done',
+      modules: [
+        {
+          title: 'Engineering Systems: Concepts, Principles, and Practice',
+          provider: 'MIT OpenCourseWare',
+          hours: 35,
+          free: true,
+          certified: false,
+          url: 'https://ocw.mit.edu',
+        },
+      ],
+    },
+    {
+      title: 'Fault Tolerance & Reliability Analysis',
+      status: 'active',
+      modules: [
+        {
+          title: 'System Reliability Engineering & FMEA',
+          provider: 'NPTEL',
+          hours: 25,
+          free: true,
+          certified: true,
+          url: 'https://nptel.ac.in',
+        },
+      ],
+    },
+  ],
+};
+
+export const ROADMAP_META_LEARNING: RoadmapView = {
+  slug: 'meta-learning-for-engineers',
+  title: 'Meta-Learning & Cognitive Mastery for Builders',
+  track: 'learn',
+  level: 'beginner',
+  summary:
+    'Learn cognitive models for rapid deep-tech skill acquisition: chunking, deliberate practice, Feynman explanation technique, and debugging psychology.',
+  hours: 30,
+  learners: 1640,
+  stages: [
+    {
+      title: 'Cognitive Science of Technical Mastery',
+      status: 'done',
+      modules: [
+        {
+          title: 'Learning How to Learn: Powerful Mental Tools',
+          provider: 'Deep Teaching Solutions / Coursera',
+          hours: 15,
+          free: true,
+          certified: true,
+          url: 'https://www.coursera.org',
+        },
+      ],
+    },
+    {
+      title: 'Computational Thinking & First Principles',
+      status: 'active',
+      modules: [
+        {
+          title: 'Computing & Information Theory',
+          provider: 'Khan Academy',
+          hours: 15,
+          free: true,
+          certified: false,
+          url: 'https://www.khanacademy.org/',
+        },
+      ],
+    },
+  ],
+};
+
+/* =========================================================================
+   ALL ROADMAPS EXPORT
+   ========================================================================= */
+
 export const ALL_ROADMAPS: RoadmapView[] = [
-  ROADMAP_EMBEDDED,
+  // Code
   ROADMAP_FULL_STACK,
+  ROADMAP_RUST_SYSTEMS,
+  // Make
+  ROADMAP_EMBEDDED,
+  ROADMAP_ROBOTICS_ROS2,
+  ROADMAP_KICAD_PCB,
+  // Design
   ROADMAP_PRODUCT_DESIGN,
+  ROADMAP_CAD_ENCLOSURES,
+  // Research
   ROADMAP_CUBESAT,
+  ROADMAP_DEEP_LEARNING_TINYML,
+  // Earn
+  ROADMAP_OPEN_SOURCE_LEADERSHIP,
+  ROADMAP_BOUNTY_ENGINEERING,
+  // Learn
+  ROADMAP_SYSTEMS_ENGINEERING,
+  ROADMAP_META_LEARNING,
 ];
