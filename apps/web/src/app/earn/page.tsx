@@ -16,6 +16,7 @@ import {
 import { listOpportunities, getPlatformStats } from '@/lib/data/queries';
 import { OpportunityCard } from '@/components/domain/opportunity-card';
 import { Money } from '@/components/domain/money';
+import { ReverseRFCSection } from '@/components/domain/reverse-rfc-section';
 import { PostOpportunityTrigger } from './post-opportunity-trigger';
 
 export const metadata: Metadata = {
@@ -135,6 +136,8 @@ export default async function EarnPage({ searchParams }: EarnPageProps) {
           }
         />
       )}
+
+      <ReverseRFCSection />
 
       <Panel
         title="Sponsor a bounty"
