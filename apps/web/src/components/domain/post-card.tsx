@@ -17,12 +17,13 @@ import {
   type PostKind,
   type Track,
 } from '@hackerland/core';
-import { Heart, MessageSquare } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { FeedPost } from '@/lib/data/types';
 import { ALL_PROJECT_SUMMARIES } from '@/lib/data/fixtures/projects';
 import { PersonChip } from './person-chip';
 import { RoleCard } from './role-card';
+import { PostReactionButton } from '@/app/feed/post-reaction-button';
 
 export interface PostCardProps {
   post: FeedPost;
@@ -207,11 +208,7 @@ export function PostCard({ post, className }: PostCardProps) {
       {/* Footer: Reactions, comments & project link */}
       <CardFooter className="flex flex-wrap items-center justify-between gap-3 text-fg-subtle">
         <div className="flex items-center gap-4 text-body-sm">
-          <span className="inline-flex items-center gap-1.5 tabular-nums">
-            <Heart className="size-4" aria-hidden="true" />
-            <span>{post.reactions}</span>
-            <span className="sr-only">reactions</span>
-          </span>
+          <PostReactionButton postId={post.id} initialReactions={post.reactions} />
           <span className="inline-flex items-center gap-1.5 tabular-nums">
             <MessageSquare className="size-4" aria-hidden="true" />
             <span>{post.comments}</span>

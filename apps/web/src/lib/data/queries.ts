@@ -28,15 +28,102 @@ import type {
 
 /**
  * Returns feed posts, optionally filtered by PostKind.
+ * Queries PostModel when MONGODB_URI is available, merging with fixtures.
  * Ordered newest first (createdAt descending).
  */
 export async function getFeed(kind?: PostKind): Promise<FeedPost[]> {
-  let posts = [...ALL_POSTS];
-  if (kind) {
-    posts = posts.filter((p) => p.kind === kind);
+  let dbPosts: FeedPost[] = [];
+
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDb();
+      const filter = kind ? { kind } : {};
+      const docs = await PostModel.find(filter).sort({ createdAt: -1 }).lean();
+
+      if (docs.length > 0) {
+        const authorIds = Array.from(new Set(docs.map((d) => d.authorId)));
+        const projectIds = Array.from(
+          new Set(docs.map((d) => d.projectId).filter((id): id is string => Boolean(id))),
+        );
+
+        const validObjectIds = projectIds.filter((id) => /^[0-9a-fA-F]{24}$/.test(id));
+        const projectOrFilter = [
+          ...(validObjectIds.length > 0 ? [{ _id: { $in: validObjectIds } }] : []),
+          ...(projectIds.length > 0 ? [{ slug: { $in: projectIds } }] : []),
+        ];
+
+        const [profiles, projects] = await Promise.all([
+          ProfileModel.find({ userId: { $in: authorIds } }).lean(),
+          projectOrFilter.length > 0
+            ? ProjectModel.find({ $or: projectOrFilter }).lean()
+            : Promise.resolve([]),
+        ]);
+
+        const profileMap = new Map(profiles.map((p) => [p.userId, p]));
+        const projectMap = new Map<string, { slug: string; title: string }>();
+        for (const pr of projects) {
+          const entry = { slug: pr.slug, title: pr.title };
+          projectMap.set(pr._id.toString(), entry);
+          projectMap.set(pr.slug, entry);
+        }
+
+        dbPosts = docs.map((d) => {
+          const prof = profileMap.get(d.authorId);
+          const author: PersonRef = prof
+            ? {
+                handle: prof.handle,
+                name: prof.displayName,
+                avatarUrl: prof.avatarUrl,
+                headline: prof.headline,
+                badges: (prof.experienceBadges || []).map((b) => ({
+                  label: b.label,
+                  tone: b.tone as Track | 'neutral',
+                })),
+              }
+            : {
+                handle: `user-${d.authorId.slice(0, 8)}`,
+                name: 'Anonymous Builder',
+                avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+                headline: 'Builder',
+                badges: [{ label: 'Builder', tone: 'neutral' as const }],
+              };
+
+          const matchedProj = d.projectId ? projectMap.get(d.projectId) : undefined;
+          const project = matchedProj
+            ? {
+                slug: matchedProj.slug,
+                title: matchedProj.title,
+              }
+            : undefined;
+
+          return {
+            id: d._id.toString(),
+            kind: d.kind,
+            author,
+            project,
+            title: d.title,
+            body: d.body,
+            tags: d.tags || [],
+            createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : new Date().toISOString(),
+            reactions: d.counts?.reactions ?? 0,
+            comments: d.counts?.comments ?? 0,
+          };
+        });
+      }
+    } catch (err: unknown) {
+      console.warn('MongoDB query failed for getFeed, falling back to fixtures:', err);
+    }
   }
-  return posts.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+
+  const dbIds = new Set(dbPosts.map((p) => p.id));
+  let fixturePosts = ALL_POSTS.filter((p) => !dbIds.has(p.id));
+  if (kind) {
+    fixturePosts = fixturePosts.filter((p) => p.kind === kind);
+  }
+
+  const combined = [...dbPosts, ...fixturePosts];
+  return combined.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 }
 

@@ -13,6 +13,7 @@ import { getFeed, listOpportunities, listProjects } from '@/lib/data/queries';
 import { PostCard } from '@/components/domain/post-card';
 import { OpportunityCard } from '@/components/domain/opportunity-card';
 import { ProjectCard } from '@/components/domain/project-card';
+import { CreatePostTrigger } from './create-post-trigger';
 
 export const metadata: Metadata = {
   title: 'Community Feed',
@@ -61,6 +62,9 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
         title="What the community is building"
         description="Real-time telemetry, build milestones, technical Q&A, and squad recruitment across all tracks."
       />
+
+      {/* Action Bar */}
+      <CreatePostTrigger />
 
       {/* Filter Chips */}
       <nav
