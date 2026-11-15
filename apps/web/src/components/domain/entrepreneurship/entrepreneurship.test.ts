@@ -38,6 +38,9 @@ describe('Open Source Entrepreneurship Data & Academy', () => {
     const ycss = ENTREPRENEUR_COURSES.find((c) => c.id === 'yc-startup-school');
     expect(ycss).toBeDefined();
     expect(ycss?.freeBadge).toBe('100% Free');
+    expect(ycss?.playlistUrl).toBe(
+      'https://www.youtube.com/playlist?list=PLQ-uHSnFig5M9fW16o2l35jrfdsxGknNB'
+    );
     expect(ycss?.syllabus.some((s) => s.title.includes('Talk to Users'))).toBe(true);
   });
 

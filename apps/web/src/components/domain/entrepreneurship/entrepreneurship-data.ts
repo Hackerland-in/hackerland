@@ -120,7 +120,7 @@ export const ENTREPRENEUR_COURSES: EntrepreneurCourse[] = [
     summary:
       'The modern startup curriculum taught by Y Combinator partners. Step-by-step guides on talking to users, setting pricing, launching MVPs, and achieving default alive status.',
     externalUrl: 'https://www.startupschool.org/',
-    playlistUrl: 'https://www.youtube.com/playlist?list=PLQ-uHSnFig5M9fB943y6ph6CEbWnNt0ZE',
+    playlistUrl: 'https://www.youtube.com/playlist?list=PLQ-uHSnFig5M9fW16o2l35jrfdsxGknNB',
     tags: ['Y Combinator', 'User Interviews', 'Pricing', 'Default Alive', 'Pivots'],
     syllabus: [
       {
