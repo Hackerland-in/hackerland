@@ -32,6 +32,18 @@ export const POST_UPDATE_AEROGLIDE: FeedPost = {
     total: 5,
     label: 'Wind Tunnel Foil Test',
   },
+  telemetry: {
+    nodeId: 'AERO-TUNNEL-NODE-04',
+    deviceType: 'IISc Wind Tunnel Pitot Array + ESP32-S3',
+    status: 'streaming',
+    lastPing: '2s ago',
+    metrics: [
+      { label: 'Airspeed', value: 18.2, unit: 'm/s', trend: 'stable' },
+      { label: 'Dynamic Pressure', value: 201.4, unit: 'Pa', trend: 'up' },
+      { label: 'Angle of Attack', value: '4.2°', unit: 'deg', trend: 'stable' },
+      { label: 'Telemetry RSSI', value: -64, unit: 'dBm', trend: 'stable' },
+    ],
+  },
 };
 
 export const POST_QUESTION_I2C: FeedPost = {

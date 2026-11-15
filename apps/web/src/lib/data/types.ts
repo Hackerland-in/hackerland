@@ -71,6 +71,21 @@ export interface ProjectDetail extends ProjectSummary {
   };
 }
 
+export interface TelemetryMetric {
+  label: string;
+  value: string | number;
+  unit: string;
+  trend?: 'up' | 'down' | 'stable';
+}
+
+export interface TelemetryFeed {
+  nodeId: string;
+  deviceType: string;
+  status: 'online' | 'streaming' | 'standby';
+  lastPing: string;
+  metrics: TelemetryMetric[];
+}
+
 export interface FeedPost {
   id: string;
   kind: PostKind;
@@ -109,6 +124,7 @@ export interface FeedPost {
     openRoles: OpenRole[];
     funding?: ProjectSummary['funding'];
   };
+  telemetry?: TelemetryFeed;
 }
 
 export type OpportunityView = Opportunity & {

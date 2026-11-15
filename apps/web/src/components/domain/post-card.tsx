@@ -23,6 +23,7 @@ import type { FeedPost } from '@/lib/data/types';
 import { ALL_PROJECT_SUMMARIES } from '@/lib/data/fixtures/projects';
 import { PersonChip } from './person-chip';
 import { RoleCard } from './role-card';
+import { LiveTelemetryPanel } from './live-telemetry-panel';
 import { PostReactionButton } from '@/app/feed/post-reaction-button';
 import { PostReportButton } from '@/app/feed/post-report-button';
 
@@ -119,6 +120,9 @@ export function PostCard({ post, className }: PostCardProps) {
               />
             </div>
           ) : null}
+
+          {/* In-Feed Live Telemetry Mission Control */}
+          {post.telemetry ? <LiveTelemetryPanel telemetry={post.telemetry} /> : null}
 
           {/* Primary code block if present (e.g. in questions) */}
           {post.code ? (
