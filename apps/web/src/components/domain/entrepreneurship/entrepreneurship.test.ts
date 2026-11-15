@@ -57,6 +57,16 @@ describe('Open Source Entrepreneurship Data & Academy', () => {
     expect(mit?.syllabus.some((s) => s.title.includes('Beachhead'))).toBe(true);
   });
 
+  it('includes Steve Blank Lean LaunchPad with Udacity playlist', () => {
+    const sb = ENTREPRENEUR_COURSES.find((c) => c.id === 'steve-blank-lean-launchpad');
+    expect(sb).toBeDefined();
+    expect(sb?.freeBadge).toBe('100% Free');
+    expect(sb?.playlistUrl).toBe(
+      'https://www.youtube.com/playlist?list=PLAwxTw4SYaPnxzSuovATBMrNowGaaEBmW'
+    );
+    expect(sb?.syllabus.some((s) => s.title.includes('Business Model'))).toBe(true);
+  });
+
   it('contains curated seminal essays with core operating rules', () => {
     expect(CURATED_ESSAYS.length).toBeGreaterThanOrEqual(4);
     for (const essay of CURATED_ESSAYS) {

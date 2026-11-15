@@ -228,7 +228,7 @@ export const ENTREPRENEUR_COURSES: EntrepreneurCourse[] = [
     summary:
       'The foundational course credited with launching the Lean Startup movement. How to rapidly validate business model hypotheses outside the building through customer development.',
     externalUrl: 'https://www.udacity.com/course/how-to-build-a-startup--ep245',
-    playlistUrl: 'https://www.youtube.com/playlist?list=PLvgw_hLq5k9kFm0q9N7k5bQv3Vq4W7rV2',
+    playlistUrl: 'https://www.youtube.com/playlist?list=PLAwxTw4SYaPnxzSuovATBMrNowGaaEBmW',
     tags: ['Steve Blank', 'Lean Startup', 'Business Model Canvas', 'Customer Discovery'],
     syllabus: [
       {
