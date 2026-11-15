@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Badge } from '@hackerland/ui';
+import { Badge, Button } from '@hackerland/ui';
 import {
   Cpu,
   Wrench,
@@ -258,6 +258,33 @@ export function ManufacturingHub() {
                 </Badge>
               ))}
             </div>
+          </div>
+
+          {/* HOW TO START INDUSTRIAL MANUFACTURING BLUEPRINTS BANNER */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border border-hairline bg-gradient-to-r from-surface-1 to-surface-2 shadow-sm">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono text-accent uppercase font-bold">
+                  Factory Blueprints
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-accent/10 text-accent font-bold">
+                  Make In India
+                </span>
+              </div>
+              <h3 className="text-body-md font-display font-bold text-fg">
+                How to Start a Physical Manufacturing Plant
+              </h3>
+              <p className="text-caption text-fg-muted">
+                Step-by-step guides for Semiconductor Fabs, Carbon Fiber Hubs, PCB Plants, Bicycle Assembly, Precision Machine Parts, and Mobile Modules with CapEx calculators & subsidies.
+              </p>
+            </div>
+
+            <Button asChild variant="primary" size="sm" className="shrink-0 gap-1.5 font-mono text-caption">
+              <Link href="/how-to-start">
+                <span>View All 8 Factory Guides</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+            </Button>
           </div>
 
           {/* VIRTUAL HARDWARE & SILICON STUDIO DIRECTORY */}

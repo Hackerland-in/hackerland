@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: '/learn', label: 'Learn' },
   { href: '/entrepreneurship', label: 'Founders' },
   { href: '/manufacturing', label: 'Manufacturing' },
+  { href: '/how-to-start', label: 'How to Start' },
   { href: '/leaderboard', label: 'Leaderboard' },
 ];
 
