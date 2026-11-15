@@ -28,3 +28,9 @@ export async function connectDb(
 
   return globalThis.__hackerlandMongoose;
 }
+
+export function isValidObjectId(id: string): boolean {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
+export { mongoose };

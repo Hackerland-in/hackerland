@@ -1,7 +1,6 @@
 import { getAuth, isAuthConfigured } from '@/lib/auth';
 import { ALL_POSTS } from '@/lib/data/fixtures/posts';
-import { connectDb, PostModel } from '@hackerland/db';
-import mongoose from 'mongoose';
+import { connectDb, PostModel, isValidObjectId } from '@hackerland/db';
 
 export async function POST(
   request: Request,
@@ -29,7 +28,7 @@ export async function POST(
   try {
     await connectDb();
 
-    if (mongoose.Types.ObjectId.isValid(id)) {
+    if (isValidObjectId(id)) {
       const updated = await PostModel.findByIdAndUpdate(
         id,
         { $inc: { 'counts.reactions': 1 } },

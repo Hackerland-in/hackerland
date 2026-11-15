@@ -1,7 +1,6 @@
 import { getAuth, isAuthConfigured } from '@/lib/auth';
 import { ALL_OPPORTUNITIES } from '@/lib/data/fixtures/opportunities';
-import { connectDb, OpportunityModel } from '@hackerland/db';
-import mongoose from 'mongoose';
+import { connectDb, OpportunityModel, isValidObjectId } from '@hackerland/db';
 
 export async function POST(
   request: Request,
@@ -39,7 +38,7 @@ export async function POST(
     await connectDb();
 
     let doc = null;
-    if (mongoose.Types.ObjectId.isValid(id)) {
+    if (isValidObjectId(id)) {
       doc = await OpportunityModel.findById(id);
     }
     if (!doc) {
