@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search } from 'lucide-react';
-import { Button, IconButton, SearchField } from '@hackerland/ui';
+import { Button } from '@hackerland/ui';
 import { MainNav } from './main-nav';
+import { SearchBar } from './search-bar';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { NotificationPopover } from './notification-popover';
 import { UserNav } from './user-nav';
@@ -42,22 +42,8 @@ export function AppHeader() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-          {/* Search field on xl+ */}
-          <div className="hidden xl:block w-48">
-            <SearchField
-              placeholder="Search Hackerland…"
-              className="w-full text-caption"
-            />
-          </div>
-
-          {/* Search icon below xl */}
-          <div className="xl:hidden">
-            <Link href="/feed">
-              <IconButton label="Search">
-                <Search className="h-4 w-4" aria-hidden="true" />
-              </IconButton>
-            </Link>
-          </div>
+          {/* Interactive Global Search (Spotlight ⌘K + input + mobile trigger) */}
+          <SearchBar />
 
           {/* Notifications on md+ */}
           <div className="hidden md:block">

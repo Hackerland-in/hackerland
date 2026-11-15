@@ -54,11 +54,22 @@ export const metadata: Metadata = {
 export default async function ProjectsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ track?: string }>;
+  searchParams: Promise<{ track?: string; q?: string }>;
 }) {
-  const { track } = await searchParams;
+  const { track, q } = await searchParams;
   const selectedTrack = parseEnum(TRACKS, track);
-  const projects = await listProjects(selectedTrack);
+  let projects = await listProjects(selectedTrack);
+
+  if (q && q.trim()) {
+    const term = q.trim().toLowerCase();
+    projects = projects.filter(
+      (p) =>
+        p.title.toLowerCase().includes(term) ||
+        p.summary.toLowerCase().includes(term) ||
+        p.slug.toLowerCase().includes(term) ||
+        p.tracks.some((t) => t.toLowerCase().includes(term))
+    );
+  }
 
   const trackLabel = selectedTrack ? TRACK_META[selectedTrack]?.label ?? selectedTrack : '';
 
