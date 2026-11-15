@@ -38,18 +38,27 @@ import { FalstadSimulator } from './falstad/falstad-simulator';
 import { HdlSimulator } from './hdl/hdl-simulator';
 import { IssSimulator } from './iss/iss-simulator';
 import { OpenEdaStudio } from './eda/open-eda-studio';
+import { PhysicsHub } from './physics/physics-hub';
 
 export function ManufacturingHub() {
   const [selectedPillarId, setSelectedPillarId] = useState<string>('pcb');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeStudioPreview, setActiveStudioPreview] = useState<
-    'bench' | 'circuito' | 'spice' | 'falstad' | 'hdl' | 'iss' | 'eda' | 'tools' | 'none'
-  >('bench');
+    'physics' | 'bench' | 'circuito' | 'spice' | 'falstad' | 'hdl' | 'iss' | 'eda' | 'tools' | 'none'
+  >('physics');
   const [activeIndustrialSim, setActiveIndustrialSim] = useState<
     'injection' | 'sheet_metal' | 'battery_weld' | 'bldc_winding' | 'thermal' | 'cleanroom'
   >('injection');
 
   const STUDIO_LINKS = [
+    {
+      id: 'physics',
+      title: 'Multibody Vehicle Physics',
+      category: 'Vehicle Mechanics',
+      badge: '60 FPS RK4',
+      desc: 'Bicycle, race car, superbike, quadcopter drone, EV battery, and aerospace rocket simulators with custom components.',
+      href: '/manufacturing/physics',
+    },
     {
       id: 'bench',
       title: 'ESP-Labs Hardware Bench',
@@ -352,6 +361,7 @@ export function ManufacturingHub() {
                 </div>
 
                 <div className="pt-2">
+                  {activeStudioPreview === 'physics' && <PhysicsHub />}
                   {activeStudioPreview === 'bench' && <HardwareBenchStudio initialTrackId={selectedPillar.id} />}
                   {activeStudioPreview === 'circuito' && <CircuitoBuilder />}
                   {activeStudioPreview === 'spice' && <ActualHardwareSimulator />}

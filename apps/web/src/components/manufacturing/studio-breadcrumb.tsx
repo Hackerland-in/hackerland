@@ -8,10 +8,32 @@ export interface StudioBreadcrumbProps {
   title: string;
   category: string;
   badge: string;
-  activeId: 'bench' | 'circuito' | 'spice' | 'falstad' | 'hdl' | 'iss' | 'eda' | 'tools';
+  activeId:
+    | 'bench'
+    | 'circuito'
+    | 'spice'
+    | 'falstad'
+    | 'hdl'
+    | 'iss'
+    | 'eda'
+    | 'tools'
+    | 'physics'
+    | 'bicycle'
+    | 'car'
+    | 'motorbike'
+    | 'drone'
+    | 'ev'
+    | 'rocket';
 }
 
 const STUDIOS = [
+  { id: 'physics', label: 'Physics Hub', href: '/manufacturing/physics' },
+  { id: 'bicycle', label: 'Bicycle Engine', href: '/manufacturing/physics/bicycle' },
+  { id: 'car', label: 'Car Dynamics', href: '/manufacturing/physics/car' },
+  { id: 'motorbike', label: 'Superbike Leaning', href: '/manufacturing/physics/motorbike' },
+  { id: 'drone', label: 'Quadcopter 6-DOF', href: '/manufacturing/physics/drone' },
+  { id: 'ev', label: 'EV Powertrain', href: '/manufacturing/physics/ev' },
+  { id: 'rocket', label: 'Rocket Launch', href: '/manufacturing/physics/rocket' },
   { id: 'bench', label: 'ESP-Labs Bench', href: '/manufacturing/bench' },
   { id: 'circuito', label: 'Circuito.io Wiring', href: '/manufacturing/circuito' },
   { id: 'spice', label: 'SPICE Hardware', href: '/manufacturing/spice' },
