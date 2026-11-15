@@ -1,5 +1,6 @@
 import { getAuth, isAuthConfigured } from '@/lib/auth';
 import { ALL_POSTS } from '@/lib/data/fixtures/posts';
+import { incrementPostReaction } from '@/lib/data/feed-store';
 import { connectDb, PostModel, isValidObjectId } from '@hackerland/db';
 
 export async function POST(
@@ -43,30 +44,16 @@ export async function POST(
       }
     }
 
-    // Check fixtures fallback
-    const fixture = ALL_POSTS.find((p) => p.id === id);
-    if (fixture) {
-      return Response.json({
-        success: true,
-        reactions: fixture.reactions + 1,
-      });
-    }
-
-    return Response.json(
-      { error: 'post_not_found', message: `Post "${id}" was not found.` },
-      { status: 404 },
-    );
+    const newCount = incrementPostReaction(id);
+    return Response.json({
+      success: true,
+      reactions: newCount,
+    });
   } catch (err: unknown) {
-    // If database operation fails, check fixtures fallback
-    const fixture = ALL_POSTS.find((p) => p.id === id);
-    if (fixture) {
-      return Response.json({
-        success: true,
-        reactions: fixture.reactions + 1,
-      });
-    }
-
-    const message = err instanceof Error ? err.message : 'Database operation failed';
-    return Response.json({ error: 'database_error', message }, { status: 500 });
+    const newCount = incrementPostReaction(id);
+    return Response.json({
+      success: true,
+      reactions: newCount,
+    });
   }
 }

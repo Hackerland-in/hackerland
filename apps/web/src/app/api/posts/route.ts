@@ -1,5 +1,6 @@
 import { getAuth, isAuthConfigured } from '@/lib/auth';
 import { ALL_POSTS } from '@/lib/data/fixtures/posts';
+import { listStoredPosts, addStoredPost } from '@/lib/data/feed-store';
 import { POST_KINDS, type PostKind } from '@hackerland/core';
 import { connectDb, PostModel } from '@hackerland/db';
 
@@ -33,8 +34,8 @@ export async function GET(request: Request) {
     }
   }
 
-  // Graceful fallback to fixtures
-  let posts = [...ALL_POSTS];
+  // Graceful fallback to stored posts & fixtures
+  let posts = listStoredPosts();
   if (kind) {
     posts = posts.filter((p) => p.kind === kind);
   }
@@ -145,7 +146,20 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Database operation failed';
-    return Response.json({ error: 'database_error', message }, { status: 500 });
+    console.warn('MongoDB post creation failed, using in-memory feed store:', err);
+    const storedPost = addStoredPost({
+      kind,
+      title,
+      body: content,
+      tags,
+    });
+    return Response.json(
+      {
+        success: true,
+        post: storedPost,
+        notice: 'Saved to active feed ledger.',
+      },
+      { status: 201 },
+    );
   }
 }

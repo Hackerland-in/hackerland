@@ -24,6 +24,11 @@ import {
 } from './profile-store';
 import { ALL_POSTS } from './fixtures/posts';
 import {
+  listStoredPosts,
+  addStoredPost,
+  incrementPostReaction,
+} from './feed-store';
+import {
   ALL_PROJECT_SUMMARIES,
   ALL_PROJECTS,
 } from './fixtures/projects';
@@ -141,7 +146,7 @@ export async function getFeed(kind?: PostKind): Promise<FeedPost[]> {
   }
 
   const dbIds = new Set(dbPosts.map((p) => p.id));
-  let fixturePosts = ALL_POSTS.filter((p) => !dbIds.has(p.id));
+  let fixturePosts = listStoredPosts().filter((p) => !dbIds.has(p.id));
   if (kind) {
     fixturePosts = fixturePosts.filter((p) => p.kind === kind);
   }
@@ -472,7 +477,13 @@ export async function getProfile(handle: string): Promise<ProfileView | null> {
   };
 }
 
-export { listAllStoredProfiles, saveStoredProfile };
+export {
+  listAllStoredProfiles,
+  saveStoredProfile,
+  listStoredPosts,
+  addStoredPost,
+  incrementPostReaction,
+};
 
 /**
  * Returns ranked list of innovators ordered by total reputation points descending.
