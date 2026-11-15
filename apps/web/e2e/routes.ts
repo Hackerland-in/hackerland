@@ -11,5 +11,7 @@ export const ROUTES: string[] = [
   '/new',
   '/sign-in',
   '/sign-up',
+  '/onboarding',
+  '/settings',
   '/design-system',
 ];

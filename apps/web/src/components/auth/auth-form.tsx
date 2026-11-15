@@ -53,7 +53,7 @@ export function AuthForm({ mode, configured, providers }: AuthFormProps) {
         }
       }
 
-      router.push('/feed');
+      router.push(isSignUp ? '/onboarding' : '/feed');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
       setError(message);
@@ -67,7 +67,7 @@ export function AuthForm({ mode, configured, providers }: AuthFormProps) {
     try {
       await authClient.signIn.social({
         provider,
-        callbackURL: '/feed',
+        callbackURL: isSignUp ? '/onboarding' : '/feed',
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : `Failed to sign in with ${provider}.`;

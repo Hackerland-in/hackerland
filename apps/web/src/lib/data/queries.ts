@@ -3,6 +3,7 @@ import type {
   PostKind,
   Track,
 } from '@hackerland/core';
+import { connectDb, ProfileModel } from '@hackerland/db';
 import { ALL_OPPORTUNITIES } from './fixtures/opportunities';
 import { PROFILE_KAVYA, PROFILE_MEERA } from './fixtures/people';
 import { ALL_POSTS } from './fixtures/posts';
@@ -65,6 +66,50 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
  */
 export async function getProfile(handle: string): Promise<ProfileView | null> {
   const normalized = handle.toLowerCase();
+
+  // Try DB first if MONGODB_URI is available
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDb();
+      const doc = await ProfileModel.findOne({ handle: normalized }).lean();
+      if (doc) {
+        const userProjects = ALL_PROJECT_SUMMARIES.filter((p) =>
+          p.squad.some((s) => s.handle === normalized)
+        );
+        return {
+          handle: doc.handle,
+          name: doc.displayName,
+          headline: doc.headline || '',
+          bio: doc.bio || '',
+          location: doc.location || '',
+          avatarUrl: doc.avatarUrl,
+          tracks: doc.tracks as Track[],
+          skills: doc.skills,
+          badges: doc.experienceBadges.map((b) => ({
+            label: b.label,
+            tone: b.tone as Track | 'neutral',
+          })),
+          links: doc.links,
+          reputation: doc.reputation,
+          stats: {
+            projects: userProjects.length,
+            endorsements: 0,
+            contributions: userProjects.length,
+            earned: { amount: 0, currency: 'INR' },
+          },
+          projects: userProjects,
+          mentorships: [],
+          credentials: [],
+          endorsements: [],
+          recentReputation: [],
+        };
+      }
+    } catch {
+      // Fallback to fixtures on DB error or failure
+    }
+  }
+
+  // Fallback to fixtures
   let profile: ProfileView | null = null;
   if (normalized === PROFILE_MEERA.handle) {
     profile = PROFILE_MEERA;
