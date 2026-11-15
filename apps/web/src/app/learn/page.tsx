@@ -56,6 +56,33 @@ export default async function LearnPage({ searchParams }: LearnPageProps) {
         description="Master deep tech, hardware, and software through structured open-source roadmaps and peer squads."
       />
 
+      {/* Featured Founder Academy Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border border-hairline bg-gradient-to-r from-surface-1 to-surface-2 shadow-sm">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono text-accent uppercase font-bold">
+              Founder Academy
+            </span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-accent/10 text-accent font-bold">
+              100% Free
+            </span>
+          </div>
+          <h2 className="text-body-md font-display font-bold text-fg">
+            Open-Source Entrepreneurship & Startup Playbooks
+          </h2>
+          <p className="text-caption text-fg-muted">
+            Access complete video playlists from Stanford CS183B, YC Startup School, MIT 15.390, plus interactive Cap Table & Unit Economics calculators.
+          </p>
+        </div>
+
+        <Button asChild variant="primary" size="sm" className="shrink-0 gap-1.5 font-mono text-caption">
+          <Link href="/entrepreneurship">
+            <span>Open Founder Academy</span>
+            <span aria-hidden="true">→</span>
+          </Link>
+        </Button>
+      </div>
+
       <div className="flex flex-wrap items-center gap-2 overflow-x-auto pb-1">
         {filters.map((filter) => {
           const isSelected = filter.value ? selectedTrack === filter.value : !selectedTrack;

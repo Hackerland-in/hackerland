@@ -11,6 +11,7 @@ import {
   ChevronDown,
   Sparkles,
   Award,
+  GraduationCap,
 } from 'lucide-react';
 import { Avatar, Button } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
@@ -194,6 +195,16 @@ export function UserNav() {
               >
                 <Plus className="size-4 text-earn" />
                 <span>Create New Project</span>
+              </Link>
+
+              <Link
+                href="/entrepreneurship"
+                role="menuitem"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
+              >
+                <GraduationCap className="size-4 text-accent" />
+                <span>Founder Academy</span>
               </Link>
 
               {!handle && (
