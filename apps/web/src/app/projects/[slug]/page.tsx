@@ -23,6 +23,8 @@ import { getProject, listProjects } from '@/lib/data/queries';
 import { formatDate } from '@/lib/format';
 import { PersonChip } from '@/components/domain/person-chip';
 import { ProjectCover } from '@/components/domain/project-cover';
+import { KiCanvasViewer } from '@/components/domain/kicanvas-viewer';
+import { WokwiSimulator } from '@/components/domain/wokwi-simulator';
 import {
   InteractiveRoleList,
   PostUpdateAction,
@@ -546,6 +548,16 @@ export default async function ProjectDetailPage({
                     description="This project has no hardware components or procurement items listed."
                   />
                 )}
+              </Panel>
+
+              {/* KiCanvas Multi-Layer PCB & Schematic CAD Preview */}
+              <Panel title="Interactive PCB & Schematic CAD">
+                <KiCanvasViewer boardName={`${project.title} Flight Controller & Telemetry PCB`} />
+              </Panel>
+
+              {/* Wokwi Virtual Microcontroller Twin */}
+              <Panel title="Virtual Microcontroller Twin & Bench Simulator">
+                <WokwiSimulator projectTitle={`${project.title} Telemetry Simulation`} />
               </Panel>
             </TabsContent>
           </Tabs>

@@ -12,9 +12,11 @@ import { ALL_PROJECTS } from './fixtures/projects';
 import { ALL_ROADMAPS } from './fixtures/roadmaps';
 import {
   getFeed,
+  getLab,
   getPlatformStats,
   getProfile,
   getProject,
+  listLabs,
   listOpportunities,
   listProjects,
   listRoadmaps,
@@ -134,5 +136,21 @@ describe('queries', () => {
     const makeRoadmaps = await listRoadmaps('make');
     expect(makeRoadmaps.length).toBeGreaterThanOrEqual(1);
     expect(makeRoadmaps.some((r) => r.slug === 'embedded-systems-from-zero')).toBe(true);
+  });
+
+  it('lists lab nodes and fetches lab by slug', async () => {
+    const allLabs = await listLabs();
+    expect(allLabs.length).toBeGreaterThanOrEqual(5);
+
+    const atlLabs = await listLabs('3D Printers');
+    expect(atlLabs.length).toBeGreaterThanOrEqual(1);
+
+    const vellore = await getLab('atl-vellore-042');
+    expect(vellore).not.toBeNull();
+    expect(vellore?.name).toBe('Atal Tinkering Lab Vellore #042');
+    expect(vellore?.type).toBe('atl');
+
+    const missing = await getLab('does-not-exist');
+    expect(missing).toBeNull();
   });
 });

@@ -181,3 +181,36 @@ export interface PlatformStats {
     currency: Currency;
   };
 }
+
+export type LabNodeType = 'atl' | 'fablab' | 'college' | 'incubator';
+
+export interface LabEquipment {
+  name: string;
+  model?: string;
+  count: number;
+  status: 'available' | 'in-use' | 'maintenance';
+}
+
+export interface LabNodeView {
+  id: string;
+  slug: string;
+  name: string;
+  type: LabNodeType;
+  institution: string;
+  location: {
+    city: string;
+    state: string;
+    pincode: string;
+  };
+  tools: string[];
+  equipmentList: LabEquipment[];
+  isVerified: boolean;
+  contact: {
+    name: string;
+    role: string;
+    email: string;
+  };
+  benchServiceUrl?: string;
+  createdAt?: string;
+}
+

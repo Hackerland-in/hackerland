@@ -3,7 +3,8 @@ import type {
   PostKind,
   Track,
 } from '@hackerland/core';
-import { connectDb, OpportunityModel, PostModel, ProfileModel, ProjectModel } from '@hackerland/db';
+import { connectDb, LabNodeModel, OpportunityModel, PostModel, ProfileModel, ProjectModel } from '@hackerland/db';
+import { ALL_LAB_NODES } from './fixtures/labs';
 import { ALL_OPPORTUNITIES } from './fixtures/opportunities';
 import { PROFILE_KAVYA, PROFILE_MEERA } from './fixtures/people';
 import { ALL_POSTS } from './fixtures/posts';
@@ -15,6 +16,7 @@ import { ALL_ROADMAPS } from './fixtures/roadmaps';
 import { PLATFORM_STATS } from './fixtures/stats';
 import type {
   FeedPost,
+  LabNodeView,
   OpenRole,
   OpportunityView,
   PersonRef,
@@ -500,3 +502,90 @@ export async function listRoadmaps(track?: Track): Promise<RoadmapView[]> {
 export async function getPlatformStats(): Promise<PlatformStats> {
   return PLATFORM_STATS;
 }
+
+/**
+ * Lists Atal Tinkering Labs (ATLs) and makerspaces, optionally filtered by tool.
+ */
+export async function listLabs(tool?: string): Promise<LabNodeView[]> {
+  let dbLabs: LabNodeView[] = [];
+
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDb();
+      const filter = tool ? { tools: { $regex: new RegExp(tool, 'i') } } : {};
+      const docs = await LabNodeModel.find(filter).sort({ isVerified: -1, createdAt: -1 }).lean();
+
+      if (docs.length > 0) {
+        dbLabs = docs.map((d) => ({
+          id: d._id.toString(),
+          slug: d.slug,
+          name: d.name,
+          type: d.type,
+          institution: d.institution,
+          location: d.location,
+          tools: d.tools,
+          equipmentList: (d.equipmentList || []).map((e) => ({
+            name: e.name,
+            model: e.model,
+            count: e.count,
+            status: e.status,
+          })),
+          isVerified: d.isVerified,
+          contact: d.contact,
+          benchServiceUrl: d.benchServiceUrl,
+          createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : undefined,
+        }));
+      }
+    } catch (err: unknown) {
+      console.warn('MongoDB query failed for listLabs, falling back to fixtures:', err);
+    }
+  }
+
+  const dbSlugs = new Set(dbLabs.map((l) => l.slug));
+  let fixtureLabs = ALL_LAB_NODES.filter((l) => !dbSlugs.has(l.slug));
+  if (tool) {
+    const lower = tool.toLowerCase();
+    fixtureLabs = fixtureLabs.filter((l) => l.tools.some((t) => t.toLowerCase().includes(lower)));
+  }
+
+  return [...dbLabs, ...fixtureLabs];
+}
+
+/**
+ * Retrieves a lab node by its slug, or null if not found.
+ */
+export async function getLab(slug: string): Promise<LabNodeView | null> {
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDb();
+      const d = await LabNodeModel.findOne({ slug }).lean();
+      if (d) {
+        return {
+          id: d._id.toString(),
+          slug: d.slug,
+          name: d.name,
+          type: d.type,
+          institution: d.institution,
+          location: d.location,
+          tools: d.tools,
+          equipmentList: (d.equipmentList || []).map((e) => ({
+            name: e.name,
+            model: e.model,
+            count: e.count,
+            status: e.status,
+          })),
+          isVerified: d.isVerified,
+          contact: d.contact,
+          benchServiceUrl: d.benchServiceUrl,
+          createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : undefined,
+        };
+      }
+    } catch (err: unknown) {
+      console.warn('MongoDB query failed for getLab, falling back to fixtures:', err);
+    }
+  }
+
+  const match = ALL_LAB_NODES.find((l) => l.slug === slug);
+  return match || null;
+}
+
