@@ -19,6 +19,8 @@ import { ActualHardwareSimulator } from './hardware-simulator/actual-hardware-si
 import { CIRCUIT_PRESETS, solveCircuitStep } from './hardware-simulator/circuit-engine';
 import { FalstadSimulator } from './falstad/falstad-simulator';
 import { FALSTAD_PRESETS, parseSpiceNetlist, solveCircuitJsStep } from './falstad/circuitjs-engine';
+import { HdlSimulator } from './hdl/hdl-simulator';
+import { HDL_PRESETS, runHdlSimulation, generateVcdFile } from './hdl/hdl-engine';
 
 // @ts-expect-error configure react act environment
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -423,5 +425,88 @@ describe('Manufacturing Hub & Simulation Engines', () => {
     expect(container.textContent).toContain('Dual-Trace Transient Voltage Waveforms');
     expect(container.textContent).toContain('Channel 1: AC Source Input');
     expect(container.textContent).toContain('Channel 2: Rectified / Filtered Output');
+  });
+
+  it('runs HDL simulation engine and verifies register transitions for all 3 topologies', () => {
+    // 1. 4-bit Counter
+    const counterPreset = HDL_PRESETS.find((p) => p.id === 'counter-4bit')!;
+    const counterSignals = runHdlSimulation(counterPreset);
+    expect(counterSignals.length).toBe(5);
+    const qSignal = counterSignals.find((s) => s.name === 'q[3:0]');
+    expect(qSignal).toBeDefined();
+    expect(qSignal!.history.length).toBeGreaterThan(10);
+    // Initial reset state
+    expect(qSignal!.history[0]?.value).toBe('0x0');
+
+    // 2. FSM Traffic Light
+    const fsmPreset = HDL_PRESETS.find((p) => p.id === 'fsm-traffic-light')!;
+    const fsmSignals = runHdlSimulation(fsmPreset);
+    expect(fsmSignals.length).toBe(4);
+    const stateSignal = fsmSignals.find((s) => s.name === 'state[1:0]');
+    expect(stateSignal).toBeDefined();
+    expect(stateSignal!.history.some((h) => h.value === 'GREEN')).toBe(true);
+
+    // 3. 8-bit ALU
+    const aluPreset = HDL_PRESETS.find((p) => p.id === 'alu-8bit')!;
+    const aluSignals = runHdlSimulation(aluPreset);
+    expect(aluSignals.length).toBe(6);
+    const resultSignal = aluSignals.find((s) => s.name === 'result[7:0]');
+    expect(resultSignal).toBeDefined();
+    expect(resultSignal!.history.some((h) => h.value === '0x23')).toBe(true); // 35 = 0x23
+  });
+
+  it('generates valid IEEE 1364 Value Change Dump (VCD) file for GTKWave', () => {
+    const counterPreset = HDL_PRESETS[0]!;
+    const signals = runHdlSimulation(counterPreset);
+    const vcd = generateVcdFile(counterPreset, signals);
+
+    expect(vcd).toContain('$date');
+    expect(vcd).toContain('$timescale 1ns $end');
+    expect(vcd).toContain('$scope module counter-4bit $end');
+    expect(vcd).toContain('$var wire');
+    expect(vcd).toContain('$upscope $end');
+    expect(vcd).toContain('$enddefinitions $end');
+    expect(vcd).toContain('$dumpvars');
+    expect(vcd).toContain('#0');
+  });
+
+  it('renders HdlSimulator with waveform viewer, timing diagram, and Verilog editor', () => {
+    act(() => {
+      root.render(<HdlSimulator />);
+    });
+
+    expect(container.textContent).toContain('Hardware Description Language (HDL) Digital Simulator');
+    expect(container.textContent).toContain('Digital Logic Waveform Viewer (GTKWave / ModelSim Style)');
+    expect(container.textContent).toContain('4-Bit Synchronous Binary Up-Counter');
+    expect(container.textContent).toContain('4 LUT6');
+    expect(container.textContent).toContain('4 D-FFs');
+    expect(container.textContent).toContain('IEEE 1364 Timebase');
+
+    // Test switching preset to FSM
+    const fsmButton = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Finite State Machine')
+    );
+    expect(fsmButton).toBeDefined();
+
+    act(() => {
+      fsmButton?.click();
+    });
+
+    expect(container.textContent).toContain('Finite State Machine (FSM) Traffic Light Controller');
+    expect(container.textContent).toContain('12 LUT6');
+    expect(container.textContent).toContain('6 D-FFs');
+
+    // Test clicking Verilog / VCD tab
+    const codeTab = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === 'Verilog / VCD'
+    );
+    expect(codeTab).toBeDefined();
+
+    act(() => {
+      codeTab?.click();
+    });
+
+    expect(container.textContent).toContain('Design Module (Verilog)');
+    expect(container.textContent).toContain('traffic_light_fsm');
   });
 });

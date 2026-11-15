@@ -32,6 +32,7 @@ import { HardwareBenchStudio } from './bench/hardware-bench-studio';
 import { CircuitoBuilder } from './circuito/circuito-builder';
 import { ActualHardwareSimulator } from './hardware-simulator/actual-hardware-simulator';
 import { FalstadSimulator } from './falstad/falstad-simulator';
+import { HdlSimulator } from './hdl/hdl-simulator';
 
 export function ManufacturingHub() {
   const [selectedPillarId, setSelectedPillarId] = useState<string>('pcb');
@@ -193,6 +194,11 @@ export function ManufacturingHub() {
           {/* FALSTAD & NGSPICE ELECTRONICS CIRCUIT SIMULATOR (Wikipedia Free Circuit Simulators) */}
           <div className="space-y-3">
             <FalstadSimulator />
+          </div>
+
+          {/* DIGITAL LOGIC HDL SIMULATOR (Wikipedia List of HDL Simulators: Verilator, Icarus, ModelSim, GTKWave) */}
+          <div className="space-y-3">
+            <HdlSimulator />
           </div>
 
           {/* SIMULATOR ENGINE (Requirement: Simulation engine for each field) */}
