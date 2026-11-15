@@ -28,6 +28,7 @@ import {
 } from './simulators/advanced-industrial-simulators';
 import { InteractiveLab } from './interactive-lab';
 import { ManufacturingLifecyclePipeline } from './lifecycle-pipeline';
+import { HardwareBenchStudio } from './bench/hardware-bench-studio';
 
 export function ManufacturingHub() {
   const [selectedPillarId, setSelectedPillarId] = useState<string>('pcb');
@@ -169,6 +170,11 @@ export function ManufacturingHub() {
                 </Badge>
               ))}
             </div>
+          </div>
+
+          {/* CYBER-PHYSICAL HARDWARE BENCH STUDIO (Modeled on ESP-Labs Companion Architecture) */}
+          <div className="space-y-3">
+            <HardwareBenchStudio initialTrackId={selectedPillar.id} />
           </div>
 
           {/* SIMULATOR ENGINE (Requirement: Simulation engine for each field) */}

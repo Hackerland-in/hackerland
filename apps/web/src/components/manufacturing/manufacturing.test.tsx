@@ -13,6 +13,7 @@ import {
 } from './simulators/advanced-industrial-simulators';
 import { InteractiveLab } from './interactive-lab';
 import { MANUFACTURING_PILLARS } from './manufacturing-data';
+import { HardwareBenchStudio } from './bench/hardware-bench-studio';
 
 // @ts-expect-error configure react act environment
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -200,5 +201,68 @@ describe('Manufacturing Hub & Simulation Engines', () => {
     expect(container.textContent).toContain('Cleanroom Particle Count & ISO 14644-1 HVAC Sizer');
     expect(container.textContent).toContain('Air Changes / Hour (ACH)');
     expect(container.textContent).toContain('HEPA Filter Units Required');
+  });
+
+  it('renders HardwareBenchStudio and simulates live OLED, pot and serial monitor', () => {
+    act(() => {
+      root.render(<HardwareBenchStudio initialTrackId="pcb" />);
+    });
+
+    // Verify studio header and ESP-labs companion banner
+    expect(container.textContent).toContain('INTERACTIVE BENCH STUDIO');
+    expect(container.textContent).toContain('Inspired by ESP-Labs Companion Architecture');
+    expect(container.textContent).toContain('ESP32-S3-WROOM-1');
+
+    // Verify OLED viewport is rendered
+    expect(container.textContent).toContain('SSD1306 0.96" OLED (128x64 I2C 0x3C)');
+    expect(container.textContent).toContain('ADC1_CH0 (GPIO 1)');
+
+    // Verify Serial Terminal is active
+    expect(container.textContent).toContain('Serial Terminal (UART0)');
+    expect(container.textContent).toContain('115200 baud');
+
+    // Test sending quick command
+    const quickHelpBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === 'HELP'
+    );
+    expect(quickHelpBtn).toBeDefined();
+
+    act(() => {
+      quickHelpBtn?.click();
+    });
+
+    expect(container.textContent).toContain('HACKERLAND FIRMWARE SERIAL COMMANDS');
+  });
+
+  it('navigates across tabs in HardwareBenchStudio (Code Stepper & Pinout)', () => {
+    act(() => {
+      root.render(<HardwareBenchStudio initialTrackId="pcb" />);
+    });
+
+    // Switch to Code Stepper tab
+    const codeTab = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Firmware Code Stepper')
+    );
+    expect(codeTab).toBeDefined();
+
+    act(() => {
+      codeTab?.click();
+    });
+
+    expect(container.textContent).toContain('PlatformIO / Embedded C++');
+    expect(container.textContent).toContain('Adafruit_SSD1306.h');
+
+    // Switch to Pinout tab
+    const pinoutTab = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Pinout & Multiplexing Matrix')
+    );
+    expect(pinoutTab).toBeDefined();
+
+    act(() => {
+      pinoutTab?.click();
+    });
+
+    expect(container.textContent).toContain('Interactive Pinout & Bus Multiplexing Matrix');
+    expect(container.textContent).toContain('Click Pin to Inspect Hardware Multiplexer');
   });
 });
