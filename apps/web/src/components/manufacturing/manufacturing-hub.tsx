@@ -18,8 +18,14 @@ import {
   TrendingUp,
   ArrowRight,
   Eye,
+  Filter,
+  Layers,
+  Factory,
+  Atom,
+  CheckCircle2,
+  SlidersHorizontal,
 } from 'lucide-react';
-import { MANUFACTURING_PILLARS } from './manufacturing-data';
+import { MANUFACTURING_PILLARS, type ManufacturingPillar } from './manufacturing-data';
 import { ManufacturingSimulator } from './simulators/manufacturing-simulators';
 import {
   InjectionMoldingSimulator,
@@ -40,15 +46,234 @@ import { IssSimulator } from './iss/iss-simulator';
 import { OpenEdaStudio } from './eda/open-eda-studio';
 import { PhysicsHub } from './physics/physics-hub';
 
+// Domain Factory Blueprints mapping
+const DOMAIN_BLUEPRINTS: Record<
+  string,
+  {
+    slug: string;
+    title: string;
+    discipline: string;
+    capex: string;
+    facility: string;
+    subsidies: string;
+    standards: string;
+    description: string;
+  }
+> = {
+  pcb: {
+    slug: 'pcb-plant',
+    title: 'Multilayer PCB Fabrication & SMT Assembly Plant',
+    discipline: 'Printed Circuit Boards',
+    capex: '₹2.4 Cr',
+    facility: '18,000 sq ft · Class 10k Cleanroom',
+    subsidies: 'SPECS (25% capex) + PLI for Electronic Components',
+    standards: 'IPC-A-610 Class 3, UL 94V-0',
+    description:
+      'Turnkey blueprint for chemical wet processing, automated high-speed SMT pick-and-place lines, and multi-layer impedance testing.',
+  },
+  drone: {
+    slug: 'drone-aerospace',
+    title: 'Precision Drone & Aerospace Airframe Facility',
+    discipline: 'Autonomous Drones',
+    capex: '₹3.5 Cr',
+    facility: '12,000 sq ft · DGCA Testbay & Airfield',
+    subsidies: 'Drone PLI Scheme (₹120 Cr pool) + Defence Indigenization Grants',
+    standards: 'DGCA Type Certification, ISO 9001:2015',
+    description:
+      'Precision carbon-fiber airframe routing, brushless motor winding, autopilot HIL flight testbenches, and GeM defence portal onboarding.',
+  },
+  car: {
+    slug: 'ev-battery-pack',
+    title: 'Electric Vehicle (EV) Battery Gigafactory & Pack Assembly',
+    discipline: 'Electric Vehicles',
+    capex: '₹4.8 Cr',
+    facility: '25,000 sq ft · Dry Room (-40°C Dew Point)',
+    subsidies: 'National Programme on Advanced Chemistry Cell (ACC) Battery Storage',
+    standards: 'AIS-156 Rev 2, UN 38.3, ARAI Certification',
+    description:
+      'Automated cylindrical/prismatic cell sorting, automated laser busbar welding, active cooling thermal potting, and automated BMS flashing.',
+  },
+  bike: {
+    slug: 'cycle-manufacturing',
+    title: 'Complete Bicycle & E-Bike Manufacturing Plant',
+    discipline: 'Light EV & Bicycles',
+    capex: '₹1.8 Cr',
+    facility: '15,000 sq ft · Electrostatic Paint Line',
+    subsidies: 'MSME Capital Subsidy + State Industrial Infrastructure Scheme',
+    standards: 'BIS IS 10613, EN 15194 (EPAC Pedelecs)',
+    description:
+      'Hydroformed alloy/steel tube precision welding jigs, electrostatic conveyorized powder coating, and automated robotic wheel truing & lacing.',
+  },
+  hardware: {
+    slug: 'precision-mechanical-parts',
+    title: 'Precision Mechanical Parts Manufacturing (Bicycle & Machine Components)',
+    discipline: 'Hardware & Enclosures',
+    capex: '₹2.9 Cr',
+    facility: '10,000 sq ft · Vibration-Isolated Heavy Bed',
+    subsidies: 'CLCSS Capital Subsidy + Zero Defect Zero Effect (ZED)',
+    standards: 'ISO 9001 / IATF 16949, AS9100D',
+    description:
+      '5-Axis CNC machining centers, swiss turn lathes, wire-cut EDM, and CMM coordinate measuring metrology inspection.',
+  },
+  engine: {
+    slug: 'carbon-fiber-hub',
+    title: 'Carbon Fiber & Advanced Composites Manufacturing Hub',
+    discipline: 'Engines & Propulsion',
+    capex: '₹6.5 Cr',
+    facility: '20,000 sq ft · Class 10,000 Layup Cleanroom',
+    subsidies: 'Defence Production Corridor Subsidy + Strategic Aerospace Grants',
+    standards: 'AS9100 Aerospace, FAA/EASA Composite Standards',
+    description:
+      'Autoclave pressure vessel curing up to 200°C / 10 bar, cryogenic prepreg storage, vacuum debulking, and ultrasonic void testing.',
+  },
+  mobile: {
+    slug: 'mobile-parts',
+    title: 'Mobile Phone Parts & Module Assembly Plant',
+    discipline: 'Mobile Devices',
+    capex: '₹5.2 Cr',
+    facility: '22,000 sq ft · Class 100k ESD Cleanroom',
+    subsidies: 'PLI for Large Scale Electronics Manufacturing (4-6% incentive)',
+    standards: 'BIS CRS, CE-RED, RoHS Compliance',
+    description:
+      'Sub-millimeter 0201 SMT lines, camera module 6-axis active optical alignment, RF anechoic chamber testing, and acoustic vibration isolation.',
+  },
+  'future-tech': {
+    slug: 'fab-manufacturing',
+    title: 'Semiconductor Wafer Fab & ATMP/OSAT Packaging Plant',
+    discipline: 'Future Tech & Frontiers',
+    capex: '₹12.0 Cr (Pilot ATMP)',
+    facility: '30,000 sq ft · Class 100/1000 Sub-Micron Cleanroom',
+    subsidies: 'India Semiconductor Mission (ISM) 50% Fiscal Support',
+    standards: 'SEMI Standards, JEDEC Reliability Qualification',
+    description:
+      'Silicon backend packaging, thermo-compression wire bonding, flip-chip BGA assembly, and laser wafer dicing with ultra-pure DI water plant.',
+  },
+};
+
+// Domain recommended studios mapping
+const DOMAIN_RECOMMENDED_STUDIOS: Record<string, string[]> = {
+  pcb: ['eda', 'spice', 'falstad', 'bench'],
+  hardware: ['tools', 'bench', 'eda', 'physics'],
+  drone: ['physics', 'bench', 'falstad', 'tools'],
+  car: ['physics', 'tools', 'bench', 'circuito'],
+  bike: ['physics', 'tools', 'bench', 'circuito'],
+  engine: ['physics', 'tools', 'spice', 'bench'],
+  mobile: ['hdl', 'eda', 'tools', 'bench'],
+  'future-tech': ['iss', 'hdl', 'physics', 'tools'],
+};
+
+// Domain default tooling engine mapping
+const DOMAIN_DEFAULT_TOOL: Record<
+  string,
+  'injection' | 'sheet_metal' | 'battery_weld' | 'bldc_winding' | 'thermal' | 'cleanroom'
+> = {
+  pcb: 'thermal',
+  hardware: 'sheet_metal',
+  drone: 'bldc_winding',
+  car: 'battery_weld',
+  bike: 'sheet_metal',
+  engine: 'thermal',
+  mobile: 'cleanroom',
+  'future-tech': 'cleanroom',
+};
+
+// Domain physical lab equipment mapping
+const DOMAIN_LAB_EQUIPMENT: Record<
+  string,
+  { equipment: string[]; nodes: string; sampleLab: string }
+> = {
+  pcb: {
+    equipment: [
+      'Manual Stencil Printer',
+      'Reflow Oven T-962',
+      'Rigol 100MHz 4-CH Scope',
+      'Desoldering Rework Station',
+    ],
+    nodes: '34 Makerspaces & FabLabs in India',
+    sampleLab: 'Makerspace Bangalore & Maker Village Kochi',
+  },
+  hardware: {
+    equipment: [
+      '3-Axis & 5-Axis CNC Mill',
+      'Industrial FDM 3D Printers',
+      'Formlabs SLA Resin',
+      'Mitutoyo CMM Gauge',
+    ],
+    nodes: '42 ATL & Maker Nodes in India',
+    sampleLab: 'IIT Madras Research Park & Maker Bhavan Pune',
+  },
+  drone: {
+    equipment: [
+      'Aero Wind-Tunnel Testbench',
+      'Carbon Fiber CNC Router',
+      'Thrust Stand Dynamometer',
+      'RF Spectrum Analyzer',
+    ],
+    nodes: '28 Drone Hubs in India',
+    sampleLab: 'Drone Federation Testing Node & IIT Kanpur Lab',
+  },
+  car: {
+    equipment: [
+      'Automated Battery Cycler & Load Cell',
+      'CAN Bus Analyzer / Kvaser',
+      'Spot Welder & Laser Jig',
+      'Thermal Fluke Camera',
+    ],
+    nodes: '19 EV Testing Hubs in India',
+    sampleLab: 'ARAI Mobility Lab Pune & IIT Delhi EV CoE',
+  },
+  bike: {
+    equipment: [
+      'Wheel Truing Stand & Tension Meter',
+      'TIG / MIG Tube Welding Jig',
+      'Frame Alignment Gauge',
+      'Roller Dyno Bench',
+    ],
+    nodes: '25 Micromobility Nodes in India',
+    sampleLab: 'NID Ahmedabad Workshop & Ludhiana Prototyping Center',
+  },
+  engine: {
+    equipment: [
+      'High-Pressure Flow Testbench',
+      'Load Cell Thrust Test Stand',
+      'Autoclave Curing Chamber',
+      'High-Temp Pyrometer',
+    ],
+    nodes: '14 Aerospace Nodes in India',
+    sampleLab: 'VSSC Technology Transfer Cell & Skyroot Prototyping Hub',
+  },
+  mobile: {
+    equipment: [
+      'Stereo Inspection Microscope 40x',
+      'ESD Safe Clean Bench ISO 6',
+      'Rohde & Schwarz CMW500 Radio Tester',
+      'BGA Hot-Air Station',
+    ],
+    nodes: '21 Hardware Nodes in India',
+    sampleLab: 'MeitY Electropreneur Park & C-DAC Hardware Lab',
+  },
+  'future-tech': {
+    equipment: [
+      'Sub-Micron Wire Bonder',
+      'Class 100 Cleanroom Hood',
+      'Thermal Vacuum Chamber (TVAC)',
+      'Semiconductor Parameter Analyzer',
+    ],
+    nodes: '16 DeepTech Centers in India',
+    sampleLab: 'CeNSE IISc Bangalore & IIT Bombay Nano-Fab Lab',
+  },
+};
+
 export function ManufacturingHub() {
   const [selectedPillarId, setSelectedPillarId] = useState<string>('pcb');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showAllStudios, setShowAllStudios] = useState<boolean>(false);
   const [activeStudioPreview, setActiveStudioPreview] = useState<
     'physics' | 'bench' | 'circuito' | 'spice' | 'falstad' | 'hdl' | 'iss' | 'eda' | 'tools' | 'none'
   >('physics');
   const [activeIndustrialSim, setActiveIndustrialSim] = useState<
     'injection' | 'sheet_metal' | 'battery_weld' | 'bldc_winding' | 'thermal' | 'cleanroom'
-  >('injection');
+  >('thermal');
 
   const STUDIO_LINKS = [
     {
@@ -126,7 +351,9 @@ export function ManufacturingHub() {
   ];
 
   const pillars = MANUFACTURING_PILLARS;
-  const selectedPillar = pillars.find((p) => p.id === selectedPillarId) ?? pillars[0];
+  const isAllSelected = selectedPillarId === 'all';
+  const selectedPillar =
+    pillars.find((p) => p.id === selectedPillarId) ?? pillars[0]!;
 
   const filteredPillars = searchQuery.trim()
     ? pillars.filter(
@@ -136,6 +363,23 @@ export function ManufacturingHub() {
           p.popularSearches.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     : pillars;
+
+  const handlePillarSelect = (id: string) => {
+    setSelectedPillarId(id);
+    if (id !== 'all' && DOMAIN_DEFAULT_TOOL[id]) {
+      setActiveIndustrialSim(DOMAIN_DEFAULT_TOOL[id]!);
+    }
+  };
+
+  const currentBlueprint = DOMAIN_BLUEPRINTS[selectedPillar.id] ?? DOMAIN_BLUEPRINTS.pcb!;
+  const currentLabMeta = DOMAIN_LAB_EQUIPMENT[selectedPillar.id] ?? DOMAIN_LAB_EQUIPMENT.pcb!;
+
+  // Studios filtered to active domain or all
+  const domainStudioIds = DOMAIN_RECOMMENDED_STUDIOS[selectedPillar.id] ?? ['physics', 'bench'];
+  const displayedStudios =
+    showAllStudios || isAllSelected
+      ? STUDIO_LINKS
+      : STUDIO_LINKS.filter((s) => domainStudioIds.includes(s.id));
 
   const renderIcon = (name: string, className = 'size-5') => {
     switch (name) {
@@ -162,70 +406,216 @@ export function ManufacturingHub() {
 
   return (
     <div className="space-y-10 min-w-0" data-testid="manufacturing-hub">
-      {/* 8 Pillar Quick Navigator Grid */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-display text-body-sm font-semibold uppercase tracking-wider text-fg-subtle">
-              Select Manufacturing Domain
-            </span>
-            <Badge tone="accent" variant="solid" className="text-caption">
-              8 Pillars Active
-            </Badge>
+      {/* 1. DOMAIN FILTER SECTION */}
+      <div className="space-y-4 rounded-xl border border-hairline bg-surface-1 p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-hairline pb-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Filter className="size-4 text-accent" />
+              <h2 className="font-display text-body-md font-bold uppercase tracking-wider text-fg">
+                Select Manufacturing Domain
+              </h2>
+              <Badge tone="accent" variant="solid" className="text-caption font-mono">
+                8 Pillars Active
+              </Badge>
+            </div>
+            <p className="text-caption text-fg-muted">
+              Select an engineering discipline below to filter all interactive simulators, factory blueprints, hands-on labs, tooling engines, and domestic Indian suppliers.
+            </p>
           </div>
 
           {/* Quick Search */}
-          <div className="relative w-full sm:w-72">
+          <div className="relative w-full sm:w-72 shrink-0">
             <Search className="size-4 text-fg-subtle absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder="Search topics, CAD, BMS, 5G..."
+              placeholder="Search CAD, BMS, 5G, DFM, GaN..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-md border border-hairline bg-surface-1 pl-9 pr-3 py-1.5 text-body-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-accent"
+              className="w-full rounded-md border border-hairline bg-surface-2 pl-9 pr-3 py-1.5 text-body-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-accent"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-          {filteredPillars.map((p) => {
-            const isSelected = p.id === selectedPillarId;
-            return (
+        {/* Filter Controls: All Domains Toggle + 8 Domain Buttons */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <button
-                key={p.id}
                 type="button"
-                onClick={() => setSelectedPillarId(p.id)}
-                className={`flex flex-col items-center justify-center p-3 rounded-lg border text-center transition-all min-h-[96px] ${
-                  isSelected
-                    ? 'border-accent bg-accent/15 text-accent shadow-sm ring-1 ring-accent'
-                    : 'border-hairline bg-surface-1 text-fg-muted hover:text-fg hover:bg-surface-2 hover:border-hairline-strong'
+                onClick={() => handlePillarSelect('all')}
+                className={`px-3 py-1.5 rounded-lg border text-caption font-display font-semibold transition-all flex items-center gap-1.5 ${
+                  isAllSelected
+                    ? 'border-accent bg-accent/20 text-accent ring-1 ring-accent shadow-xs'
+                    : 'border-hairline bg-surface-2 text-fg-muted hover:text-fg hover:border-hairline-strong'
                 }`}
-                data-testid={`pillar-btn-${p.id}`}
+                data-testid="pillar-btn-all"
               >
-                <div className={`p-2 rounded-full mb-1.5 ${isSelected ? 'bg-accent/20 text-accent' : 'bg-surface-2 text-fg-subtle'}`}>
-                  {renderIcon(p.iconName, 'size-4')}
-                </div>
-                <span className="font-display text-caption font-semibold line-clamp-1">
-                  {p.title.split('(')[0]?.trim()}
-                </span>
-                <span className="text-[10px] text-fg-subtle mt-0.5">{p.estTimeToPrototype}</span>
+                <Layers className="size-3.5" />
+                <span>All Domains (8)</span>
               </button>
-            );
-          })}
+              <span className="text-hairline hidden sm:inline">|</span>
+              <span className="text-[11px] font-mono text-fg-subtle hidden sm:inline">
+                Click any domain to focus the entire page:
+              </span>
+            </div>
+
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="text-caption font-mono text-accent hover:underline"
+              >
+                Clear Search ✕
+              </button>
+            )}
+          </div>
+
+          {/* 8 Pillar Buttons Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+            {filteredPillars.map((p) => {
+              const isSelected = p.id === selectedPillarId;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => handlePillarSelect(p.id)}
+                  className={`flex flex-col items-center justify-center p-3 rounded-lg border text-center transition-all min-h-[96px] ${
+                    isSelected
+                      ? 'border-accent bg-accent/15 text-accent shadow-sm ring-1 ring-accent'
+                      : 'border-hairline bg-surface-2/60 text-fg-muted hover:text-fg hover:bg-surface-2 hover:border-hairline-strong'
+                  }`}
+                  data-testid={`pillar-btn-${p.id}`}
+                >
+                  <div
+                    className={`p-2 rounded-full mb-1.5 ${
+                      isSelected ? 'bg-accent/20 text-accent' : 'bg-surface-1 text-fg-subtle'
+                    }`}
+                  >
+                    {renderIcon(p.iconName, 'size-4')}
+                  </div>
+                  <span className="font-display text-caption font-semibold line-clamp-1">
+                    {p.title.split('(')[0]?.trim()}
+                  </span>
+                  <span className="text-[10px] text-fg-subtle mt-0.5">
+                    {p.estTimeToPrototype}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Active Domain Filter Notice Bar */}
+        {!isAllSelected && selectedPillar && (
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg bg-accent/10 border border-accent/20 text-caption font-mono animate-in fade-in duration-150">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="flex size-2 rounded-full bg-accent animate-ping" />
+              <span className="text-fg font-bold">Active Filter:</span>
+              <span className="text-accent font-semibold">{selectedPillar.title}</span>
+              <span className="text-fg-subtle">•</span>
+              <span className="text-fg-muted">Simulators, blueprints, labs & tools are filtered</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handlePillarSelect('all')}
+              className="text-accent hover:underline font-semibold"
+            >
+              Reset to All Domains ✕
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Selected Pillar Detailed View */}
+      {/* 2. ALL DOMAINS OVERVIEW MATRIX (When 'All Domains' is selected) */}
+      {isAllSelected && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="font-display text-caption font-semibold uppercase tracking-wider text-accent">
+                Comparative Matrix
+              </span>
+              <h3 className="font-display text-headline-sm font-semibold text-fg">
+                All 8 Cyber-Physical Manufacturing Disciplines
+              </h3>
+            </div>
+            <Badge tone="accent" variant="solid" className="font-mono text-caption">
+              Overview Mode
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {pillars.map((pillar) => {
+              const bp = DOMAIN_BLUEPRINTS[pillar.id];
+              return (
+                <div
+                  key={pillar.id}
+                  className="rounded-xl border border-hairline bg-surface-1 p-5 flex flex-col justify-between space-y-4 hover:border-accent/50 transition-all group"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="p-2.5 rounded-lg bg-accent/15 text-accent">
+                        {renderIcon(pillar.iconName, 'size-5')}
+                      </div>
+                      <Badge tone="code" variant="solid" className="text-[10px]">
+                        {pillar.difficulty}
+                      </Badge>
+                    </div>
+
+                    <div>
+                      <h4 className="font-display text-body-sm font-bold text-fg group-hover:text-accent transition-colors">
+                        {pillar.title}
+                      </h4>
+                      <p className="text-caption text-fg-muted line-clamp-2 mt-1">
+                        {pillar.tagline}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2 border-t border-hairline/60 text-caption font-mono">
+                      <div className="flex items-center justify-between text-fg-subtle">
+                        <span>Turnaround:</span>
+                        <span className="text-fg font-semibold">{pillar.estTimeToPrototype}</span>
+                      </div>
+                      {bp && (
+                        <div className="flex items-center justify-between text-fg-subtle">
+                          <span>Factory CapEx:</span>
+                          <span className="text-accent font-semibold">{bp.capex}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handlePillarSelect(pillar.id)}
+                    className="w-full py-2 rounded-lg bg-surface-2 hover:bg-accent/15 hover:text-accent text-fg font-display text-caption font-bold border border-hairline transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <span>Filter to This Domain</span>
+                    <ArrowRight className="size-3" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 3. SELECTED PILLAR DETAILED FILTERED VIEW */}
       {selectedPillar && (
         <div className="space-y-8 animate-in fade-in duration-200">
           {/* Header Banner */}
-          <div className="rounded-xl border border-hairline bg-surface-1 p-6 space-y-4">
+          <div className="rounded-xl border border-hairline bg-surface-1 p-6 space-y-4 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex size-12 items-center justify-center rounded-xl bg-accent/20 text-accent border border-accent/30">
+                <div className="flex size-12 items-center justify-center rounded-xl bg-accent/20 text-accent border border-accent/30 shadow-xs">
                   {renderIcon(selectedPillar.iconName, 'size-6')}
                 </div>
                 <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono uppercase font-bold text-accent tracking-wider">
+                      Active Domain Discipline
+                    </span>
+                  </div>
                   <h2 className="font-display text-headline-md font-bold text-fg">
                     {selectedPillar.title}
                   </h2>
@@ -260,34 +650,74 @@ export function ManufacturingHub() {
             </div>
           </div>
 
-          {/* HOW TO START INDUSTRIAL MANUFACTURING BLUEPRINTS BANNER */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border border-hairline bg-gradient-to-r from-surface-1 to-surface-2 shadow-sm">
-            <div className="space-y-1">
+          {/* DYNAMIC DOMAIN-SPECIFIC FACTORY BLUEPRINT BANNER */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 p-6 rounded-xl border border-hairline bg-gradient-to-r from-surface-1 via-surface-1 to-surface-2 shadow-sm">
+            <div className="space-y-2 max-w-3xl">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono text-accent uppercase font-bold">
-                  Factory Blueprints
+                <Factory className="size-4 text-accent" />
+                <span className="text-[11px] font-mono text-accent uppercase font-bold tracking-wider">
+                  Industrial Factory Blueprint for {selectedPillar.title.split('(')[0]?.trim()}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-accent/10 text-accent font-bold">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-accent/15 text-accent font-bold">
                   Make In India
                 </span>
               </div>
-              <h3 className="text-body-md font-display font-bold text-fg">
-                How to Start a Physical Manufacturing Plant
+              <h3 className="text-headline-sm font-display font-bold text-fg">
+                {currentBlueprint.title}
               </h3>
-              <p className="text-caption text-fg-muted">
-                Step-by-step guides for Semiconductor Fabs, Carbon Fiber Hubs, PCB Plants, Bicycle Assembly, Precision Machine Parts, and Mobile Modules with CapEx calculators & subsidies.
+              <p className="text-body-sm text-fg-muted leading-relaxed">
+                {currentBlueprint.description}
               </p>
+
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 text-caption font-mono text-fg-subtle">
+                <div>
+                  <span className="text-fg font-bold">CapEx: </span>
+                  <span className="text-accent font-semibold">{currentBlueprint.capex}</span>
+                </div>
+                <div>
+                  <span className="text-fg font-bold">Facility: </span>
+                  <span>{currentBlueprint.facility}</span>
+                </div>
+                <div>
+                  <span className="text-fg font-bold">Subsidies: </span>
+                  <span className="text-emerald-400 font-semibold">{currentBlueprint.subsidies}</span>
+                </div>
+              </div>
             </div>
 
-            <Button asChild variant="primary" size="sm" className="shrink-0 gap-1.5 font-mono text-caption">
-              <Link href="/how-to-start">
-                <span>View All 8 Factory Guides</span>
+            <Button asChild variant="primary" size="md" className="shrink-0 gap-2 font-mono text-caption self-start lg:self-center">
+              <Link href={`/how-to-start/${currentBlueprint.slug}`}>
+                <span>Open {selectedPillar.title.split('(')[0]?.trim()} Plant Guide</span>
                 <span aria-hidden="true">→</span>
               </Link>
             </Button>
           </div>
 
-          {/* VIRTUAL HARDWARE & SILICON STUDIO DIRECTORY */}
+          {/* DOMAIN-SPECIFIC INTERACTIVE SIMULATION ENGINE */}
+          <div className="space-y-3" id="simulators">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="font-display text-caption font-semibold uppercase tracking-wider text-accent flex items-center gap-1.5">
+                  <SlidersHorizontal className="size-3.5" />
+                  Domain Physics & Feasibility Simulator
+                </span>
+                <h3 className="font-display text-headline-sm font-semibold text-fg">
+                  Real-time Calculations for {selectedPillar.title.split('(')[0]?.trim()}
+                </h3>
+              </div>
+              <Badge tone="accent" variant="solid" className="font-mono text-caption">
+                Live Engine
+              </Badge>
+            </div>
+            <ManufacturingSimulator pillarId={selectedPillar.id} />
+          </div>
+
+          {/* DOMAIN INTERACTIVE LAB CHALLENGE */}
+          <div className="space-y-3" id="interactive-lab">
+            <InteractiveLab pillar={selectedPillar} />
+          </div>
+
+          {/* VIRTUAL HARDWARE & SILICON STUDIO DIRECTORY (Filtered to Domain) */}
           <div className="space-y-4 rounded-xl border border-hairline bg-surface-1 p-6" data-testid="studio-directory">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-hairline pb-4">
               <div>
@@ -298,20 +728,32 @@ export function ManufacturingHub() {
                   </span>
                 </div>
                 <h3 className="font-display text-headline-sm font-semibold text-fg">
-                  Virtual Engineering Studios & Simulators
+                  {showAllStudios
+                    ? 'All Virtual Engineering Studios'
+                    : `Recommended Studios for ${selectedPillar.title.split('(')[0]?.trim()}`}
                 </h3>
                 <p className="text-body-sm text-fg-muted mt-0.5">
-                  Launch dedicated full-screen workbenches or preview interactive simulations directly below.
+                  Launch dedicated full-screen workbenches or test interactive circuit & physics engines directly below.
                 </p>
               </div>
-              <Badge tone="accent" variant="solid" className="shrink-0 self-start sm:self-auto font-mono text-caption">
-                8 Dedicated Studios
-              </Badge>
+
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowAllStudios(!showAllStudios)}
+                  className="px-3 py-1 rounded-md text-caption font-mono border border-hairline bg-surface-2 text-fg-muted hover:text-fg transition-colors"
+                >
+                  {showAllStudios ? 'Show Filtered Only' : 'View All 9 Studios'}
+                </button>
+                <Badge tone="accent" variant="solid" className="font-mono text-caption">
+                  {displayedStudios.length} Active Studios
+                </Badge>
+              </div>
             </div>
 
             {/* Studio Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {STUDIO_LINKS.map((studio) => {
+              {displayedStudios.map((studio) => {
                 const isPreviewing = activeStudioPreview === studio.id;
                 return (
                   <div
@@ -438,24 +880,65 @@ export function ManufacturingHub() {
             )}
           </div>
 
-          {/* SIMULATOR ENGINE (Requirement: Simulation engine for each field) */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="font-display text-caption font-semibold uppercase tracking-wider text-accent">
-                  Interactive Simulation Engine
-                </span>
+          {/* DOMAIN EQUIPPED MAKERSPACES & ATL LABS ACROSS INDIA */}
+          <div className="rounded-xl border border-hairline bg-surface-1 p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-hairline pb-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Atom className="size-4 text-accent" />
+                  <span className="font-display text-caption font-semibold uppercase tracking-wider text-accent">
+                    Physical Hardware Nodes in India
+                  </span>
+                </div>
                 <h3 className="font-display text-headline-sm font-semibold text-fg">
-                  Real-time Physics, Sizing & Feasibility Calculator
+                  Equipped Makerspaces & Labs for {selectedPillar.title.split('(')[0]?.trim()}
                 </h3>
+                <p className="text-body-sm text-fg-muted">
+                  Reserve bench hours, 3D printers, reflow ovens, and oscilloscopes at partner nodes across India.
+                </p>
+              </div>
+
+              <Button asChild variant="secondary" size="sm" className="font-mono text-caption shrink-0">
+                <Link href="/labs">
+                  <span>Explore All {currentLabMeta.nodes}</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-lg border border-hairline bg-surface-2 p-4 space-y-2">
+                <span className="text-caption font-bold text-fg uppercase tracking-wider block">
+                  Available Testbench Equipment at Partner Nodes:
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  {currentLabMeta.equipment.map((eq) => (
+                    <div key={eq} className="flex items-center gap-2 text-caption text-fg-muted">
+                      <CheckCircle2 className="size-3.5 text-accent shrink-0" />
+                      <span>{eq}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-hairline bg-surface-2 p-4 flex flex-col justify-between space-y-3">
+                <div>
+                  <span className="text-caption font-bold text-fg uppercase tracking-wider block">
+                    Regional Node Integration:
+                  </span>
+                  <p className="text-caption text-fg-muted mt-1">
+                    Featured nodes: <strong className="text-fg">{currentLabMeta.sampleLab}</strong>. Verified through the Atal Innovation Mission (AIM) & State Startup Missions.
+                  </p>
+                </div>
+                <Link
+                  href="/labs"
+                  className="text-caption font-mono font-semibold text-accent hover:underline flex items-center gap-1"
+                >
+                  <span>Book a Physical Bench Slot</span>
+                  <ArrowRight className="size-3" />
+                </Link>
               </div>
             </div>
-            <ManufacturingSimulator pillarId={selectedPillar.id} />
-          </div>
-
-          {/* INTERACTIVE LAB CHALLENGE (Requirement: Interactive labs for each) */}
-          <div className="space-y-3">
-            <InteractiveLab pillar={selectedPillar} />
           </div>
 
           {/* 4-Stage Learning-to-Building Roadmap */}
@@ -465,7 +948,7 @@ export function ManufacturingHub() {
                 Curriculum & Milestones
               </span>
               <h3 className="font-display text-headline-sm font-semibold text-fg">
-                Learning to Building: 4-Stage Execution Roadmap
+                Learning to Building: 4-Stage Execution Roadmap for {selectedPillar.title.split('(')[0]?.trim()}
               </h3>
             </div>
 
@@ -488,14 +971,14 @@ export function ManufacturingHub() {
             </div>
           </div>
 
-          {/* Research & Future Tech Knowledge (Requirement 9: Hot topics & popular searches) */}
+          {/* Research & Future Tech Knowledge */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Hot Topics & Future Frontiers */}
             <div className="rounded-lg border border-hairline bg-surface-1 p-5 space-y-3">
               <div className="flex items-center gap-2">
                 <TrendingUp className="size-4 text-accent" />
                 <h4 className="font-display text-body-md font-semibold text-fg">
-                  Hot Topics & Future Frontiers
+                  Hot Topics & Frontiers in {selectedPillar.title.split('(')[0]?.trim()}
                 </h4>
               </div>
               <ul className="space-y-2">
@@ -513,7 +996,7 @@ export function ManufacturingHub() {
               <div className="flex items-center gap-2">
                 <Search className="size-4 text-fg-subtle" />
                 <h4 className="font-display text-body-md font-semibold text-fg">
-                  What Makers & Engineers Frequently Search For
+                  Frequently Searched Questions
                 </h4>
               </div>
               <ul className="space-y-2">
@@ -531,7 +1014,7 @@ export function ManufacturingHub() {
           <div className="rounded-lg border border-hairline bg-surface-1 p-5 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h4 className="font-display text-body-md font-semibold text-fg">
-                Verified Domestic Indian Sourcing & Fabrication Partners
+                Verified Domestic Indian Sourcing & Fabrication Partners for {selectedPillar.title.split('(')[0]?.trim()}
               </h4>
               <Badge tone="neutral" variant="outline">
                 Domestic Ecosystem
@@ -564,7 +1047,7 @@ export function ManufacturingHub() {
         </div>
       )}
 
-      {/* Additional Specialized Workshop & Factory Simulation Engines */}
+      {/* 4. SPECIALIZED INDUSTRIAL TOOLING CALCULATORS (With Domain Recommendation Badge) */}
       <div className="space-y-4 rounded-xl border border-hairline bg-surface-1 p-6" data-testid="advanced-industrial-sim-suite">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-hairline pb-4">
           <div>
@@ -581,9 +1064,16 @@ export function ManufacturingHub() {
               Precision calculators for injection molds, sheet metal bending, battery spot welding, motor windings, and cleanroom HVAC.
             </p>
           </div>
-          <Badge tone="make" variant="solid" className="shrink-0 self-start sm:self-auto">
-            6 Specialized Simulators
-          </Badge>
+          <div className="flex items-center gap-2">
+            {!isAllSelected && selectedPillar && (
+              <Badge tone="code" variant="outline" className="font-mono text-caption">
+                Target: {selectedPillar.title.split('(')[0]?.trim()}
+              </Badge>
+            )}
+            <Badge tone="make" variant="solid" className="shrink-0 font-mono text-caption">
+              6 Specialized Simulators
+            </Badge>
+          </div>
         </div>
 
         {/* Simulator Selector Tabs */}
@@ -595,24 +1085,34 @@ export function ManufacturingHub() {
             { id: 'bldc_winding', label: 'BLDC Stator Motor Winding' },
             { id: 'thermal', label: 'Power Heatsink & Dissipation' },
             { id: 'cleanroom', label: 'Cleanroom Particle & HVAC' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() =>
-                setActiveIndustrialSim(
-                  tab.id as 'injection' | 'sheet_metal' | 'battery_weld' | 'bldc_winding' | 'thermal' | 'cleanroom'
-                )
-              }
-              className={`px-3.5 py-1.5 rounded-lg text-body-xs font-medium whitespace-nowrap transition-all border ${
-                activeIndustrialSim === tab.id
-                  ? 'border-accent bg-accent/15 text-accent font-semibold shadow-sm'
-                  : 'border-hairline bg-surface-2 text-fg-muted hover:text-fg hover:border-hairline-strong'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          ].map((tab) => {
+            const isTargetTool =
+              !isAllSelected &&
+              selectedPillar &&
+              DOMAIN_DEFAULT_TOOL[selectedPillar.id] === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() =>
+                  setActiveIndustrialSim(
+                    tab.id as 'injection' | 'sheet_metal' | 'battery_weld' | 'bldc_winding' | 'thermal' | 'cleanroom'
+                  )
+                }
+                className={`px-3.5 py-1.5 rounded-lg text-body-xs font-medium whitespace-nowrap transition-all border flex items-center gap-1.5 ${
+                  activeIndustrialSim === tab.id
+                    ? 'border-accent bg-accent/15 text-accent font-semibold shadow-sm'
+                    : 'border-hairline bg-surface-2 text-fg-muted hover:text-fg hover:border-hairline-strong'
+                }`}
+              >
+                <span>{tab.label}</span>
+                {isTargetTool && (
+                  <span className="size-1.5 rounded-full bg-accent" />
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Render Selected Industrial Simulator */}
@@ -626,7 +1126,7 @@ export function ManufacturingHub() {
         </div>
       </div>
 
-      {/* Global 7-Stage Lifecycle Pipeline */}
+      {/* 5. GLOBAL 7-STAGE LIFECYCLE PIPELINE */}
       <ManufacturingLifecyclePipeline />
     </div>
   );

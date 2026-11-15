@@ -77,6 +77,25 @@ describe('Manufacturing Hub & Simulation Engines', () => {
 
     expect(container.textContent).toContain('Autonomous Drone Systems');
     expect(container.textContent).toContain('Drone Propulsion & Flight Endurance Simulator');
+    expect(container.textContent).toContain('Precision Drone & Aerospace Airframe Facility');
+    expect(container.textContent).toContain('Drone PLI Scheme');
+    expect(container.textContent).toContain('Equipped Makerspaces & Labs for Autonomous Drone Systems');
+  });
+
+  it('switches to All Domains overview matrix when All Domains button is clicked', () => {
+    act(() => {
+      root.render(<ManufacturingHub />);
+    });
+
+    const allBtn = container.querySelector('[data-testid="pillar-btn-all"]') as HTMLButtonElement;
+    expect(allBtn).toBeDefined();
+
+    act(() => {
+      allBtn.click();
+    });
+
+    expect(container.textContent).toContain('All 8 Cyber-Physical Manufacturing Disciplines');
+    expect(container.textContent).toContain('Comparative Matrix');
   });
 
   it('runs PCB simulator and calculates impedance matching', () => {

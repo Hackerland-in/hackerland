@@ -57,9 +57,10 @@ export function MobileMenu() {
     {
       heading: 'Hardware & Engineering',
       items: [
-        { href: '/manufacturing', label: 'Manufacturing Hub', icon: Cpu },
-        { href: '/manufacturing/physics', label: 'Vehicle Physics Suite', icon: Gauge },
-        { href: '/labs', label: 'Makerspaces & ATL Nodes', icon: Atom },
+        { href: '/manufacturing', label: 'Manufacturing Hub (8 Domains)', icon: Cpu },
+        { href: '/manufacturing/physics', label: 'Virtual Simulators Suite', icon: Gauge },
+        { href: '/labs', label: 'Makerspaces & ATL Labs', icon: Atom },
+        { href: '/how-to-start', label: 'Factory Blueprints & CapEx', icon: Factory },
       ],
     },
     {

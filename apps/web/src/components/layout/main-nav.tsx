@@ -37,34 +37,36 @@ interface NavDropdown {
 
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
-  label: 'Hardware',
+  label: 'Hardware & Labs',
   matchPrefixes: ['/manufacturing', '/labs'],
   items: [
     {
       href: '/manufacturing',
       title: 'Manufacturing Hub',
-      description: 'SPICE solvers, HDL, EDA & web testbenches',
+      description: '8 engineering domains: PCB, Drone, EV, Propulsion & Silicon',
       icon: Cpu,
-      badge: 'Core',
+      badge: 'Hub',
     },
     {
       href: '/manufacturing/physics',
-      title: 'Vehicle Physics Engine',
-      description: 'Bicycle, Car, Motorbike, Drone, EV & Rocket dynamics',
+      title: 'Virtual Simulators Suite',
+      description: 'Vehicle, Quadcopter, Rocket, SPICE & EDA 60 FPS physics engines',
       icon: Gauge,
-      badge: '60 FPS',
+      badge: 'Simulators',
     },
     {
       href: '/labs',
-      title: 'Makerspaces & ATL Nodes',
-      description: '3D printers, oscilloscopes & HIL testbenches across India',
+      title: 'Makerspaces & Labs Across India',
+      description: '3D printers, CNC mills, ATL nodes & HIL testbenches',
       icon: Atom,
+      badge: 'Labs',
     },
     {
       href: '/how-to-start',
       title: 'Factory Blueprints',
       description: 'Semiconductor fab, PCB, carbon fiber, cycle & mobile plants',
       icon: Factory,
+      badge: 'CapEx',
     },
   ],
 };
@@ -386,6 +388,34 @@ export function MainNav() {
 
       {/* 3. Hardware Dropdown (Manufacturing, Physics, Labs, Factory Blueprints) */}
       {renderDropdown(HARDWARE_DROPDOWN)}
+
+      {/* 3a. Direct Simulators link on lg+ */}
+      <Link
+        href="/manufacturing/physics"
+        aria-current={pathname.startsWith('/manufacturing/physics') ? 'page' : undefined}
+        className={cn(
+          'hidden lg:inline-flex px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
+          pathname.startsWith('/manufacturing/physics')
+            ? 'text-accent bg-surface-2 border border-accent/20'
+            : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
+        )}
+      >
+        Simulators
+      </Link>
+
+      {/* 3b. Direct Labs link on lg+ */}
+      <Link
+        href="/labs"
+        aria-current={pathname === '/labs' || pathname.startsWith('/labs/') ? 'page' : undefined}
+        className={cn(
+          'hidden lg:inline-flex px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
+          pathname === '/labs' || pathname.startsWith('/labs/')
+            ? 'text-accent bg-surface-2 border border-accent/20'
+            : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
+        )}
+      >
+        Labs
+      </Link>
 
       {/* 4. Earn */}
       <Link
