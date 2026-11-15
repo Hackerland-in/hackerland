@@ -10,6 +10,7 @@ import {
   Layers,
   Wrench,
   Sparkles,
+  Box,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -30,8 +31,16 @@ export function ManufacturingSubnav() {
       label: 'Simulators Suite',
       shortLabel: 'Simulators',
       icon: Gauge,
-      isActive: pathname.startsWith('/manufacturing/physics'),
+      isActive: pathname === '/manufacturing/physics',
       badge: '60 FPS',
+    },
+    {
+      href: '/manufacturing/physics/3d',
+      label: '3D Simulator Labs',
+      shortLabel: '3D Labs',
+      icon: Box,
+      isActive: pathname === '/manufacturing/physics/3d',
+      badge: '3D WebGL',
     },
     {
       href: '/labs',

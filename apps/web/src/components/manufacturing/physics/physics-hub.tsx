@@ -15,6 +15,7 @@ import {
   Activity,
   Sliders,
   CheckCircle2,
+  Box,
 } from 'lucide-react';
 import { BicyclePhysicsSimulator } from './bicycle-simulator';
 import { CarPhysicsSimulator } from './car-simulator';
@@ -130,12 +131,20 @@ export function PhysicsHub({ initialVehicle = 'bicycle' }: PhysicsHubProps) {
             Viewing {VEHICLES.find((v) => v.id === activeVehicle)?.name} inline simulator.
           </span>
         </div>
-        <Button asChild variant="secondary" size="sm" className="gap-1.5 text-caption font-mono">
-          <Link href={VEHICLES.find((v) => v.id === activeVehicle)?.href || '/manufacturing/physics'}>
-            <span>Open Dedicated Full-Screen Page</span>
-            <ExternalLink className="size-3.5" />
-          </Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="primary" size="sm" className="gap-1.5 text-caption font-mono shadow-glow-accent">
+            <Link href="/manufacturing/physics/3d">
+              <Box className="size-3.5" />
+              <span>Launch 3D WebGL Lab</span>
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" size="sm" className="gap-1.5 text-caption font-mono">
+            <Link href={VEHICLES.find((v) => v.id === activeVehicle)?.href || '/manufacturing/physics'}>
+              <span>Full-Screen Page</span>
+              <ExternalLink className="size-3.5" />
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Engineering Presets & Telemetry Exporter */}

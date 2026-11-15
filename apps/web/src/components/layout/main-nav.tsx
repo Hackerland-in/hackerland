@@ -17,6 +17,7 @@ import {
   Trophy,
   Users,
   ExternalLink,
+  Box,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -47,6 +48,13 @@ const HARDWARE_DROPDOWN: NavDropdown = {
       description: '8 engineering domains: PCB, Drone, EV, Propulsion & Silicon',
       icon: Cpu,
       badge: 'Hub',
+    },
+    {
+      href: '/manufacturing/physics/3d',
+      title: '3D Simulator Labs',
+      description: 'Interactive 3D WebGL physics labs for drones, rockets, EVs, racecars & PCBs',
+      icon: Box,
+      badge: '3D WebGL',
     },
     {
       href: '/manufacturing/physics',
