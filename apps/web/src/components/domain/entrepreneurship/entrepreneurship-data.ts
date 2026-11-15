@@ -54,7 +54,7 @@ export const ENTREPRENEUR_COURSES: EntrepreneurCourse[] = [
     summary:
       'The legendary Stanford course covering ideas, product validation, building great teams, customer acquisition, user engagement, and early venture mechanics.',
     externalUrl: 'https://startupclass.samaltman.com/',
-    playlistUrl: 'https://www.youtube.com/playlist?list=PL5q_lef6zVkaTY_cT1hfbbgComtECmL8J',
+    playlistUrl: 'https://www.youtube.com/playlist?list=PLUdqnrHmtdXRb-uyCBGCk41iJ6iBkwhpH',
     tags: ['Stanford', 'Y Combinator', 'Product Market Fit', 'MVP', 'Fundraising'],
     syllabus: [
       {

@@ -27,7 +27,9 @@ describe('Open Source Entrepreneurship Data & Academy', () => {
   it('includes Stanford CS183B with YouTube playlist link', () => {
     const cs183b = ENTREPRENEUR_COURSES.find((c) => c.id === 'cs183b-how-to-start-a-startup');
     expect(cs183b).toBeDefined();
-    expect(cs183b?.playlistUrl).toContain('youtube.com');
+    expect(cs183b?.playlistUrl).toBe(
+      'https://www.youtube.com/playlist?list=PLUdqnrHmtdXRb-uyCBGCk41iJ6iBkwhpH'
+    );
     expect(cs183b?.syllabus.some((s) => s.speaker?.includes('Sam Altman'))).toBe(true);
     expect(cs183b?.syllabus.some((s) => s.speaker?.includes('Paul Graham'))).toBe(true);
   });
