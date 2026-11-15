@@ -11,6 +11,7 @@ import {
   ProfileModel,
   ProjectModel,
   ReportModel,
+  NotificationModel,
   ReputationEventModel,
 } from '@hackerland/db';
 import { ALL_LAB_NODES } from './fixtures/labs';
@@ -22,6 +23,7 @@ import {
   ALL_PROJECTS,
 } from './fixtures/projects';
 import { FIXTURE_REPORTS } from './fixtures/reports';
+import { FIXTURE_NOTIFICATIONS } from './fixtures/notifications';
 import { ALL_ROADMAPS } from './fixtures/roadmaps';
 import { PLATFORM_STATS } from './fixtures/stats';
 import type {
@@ -29,6 +31,7 @@ import type {
   LabNodeView,
   LeaderboardEntry,
   ModerationReport,
+  NotificationItem,
   OpenRole,
   OpportunityView,
   PersonRef,
@@ -751,5 +754,39 @@ export async function getReport(id: string): Promise<ModerationReport | null> {
   const match = FIXTURE_REPORTS.find((r) => r.id === id);
   return match || null;
 }
+
+/**
+ * Lists notifications for a given user, optionally filtered by read status.
+ */
+export async function listNotifications(userId?: string): Promise<NotificationItem[]> {
+  let dbNotifs: NotificationItem[] = [];
+
+  if (process.env.MONGODB_URI && userId) {
+    try {
+      await connectDb();
+      const docs = await NotificationModel.find({ userId })
+        .sort({ createdAt: -1 })
+        .limit(30)
+        .lean();
+
+      dbNotifs = docs.map((d) => ({
+        id: d._id.toString(),
+        userId: d.userId,
+        actorId: d.actorId,
+        type: d.type as NotificationItem['type'],
+        title: d.title,
+        message: d.message,
+        link: d.link,
+        read: d.read,
+        createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : new Date().toISOString(),
+      }));
+    } catch (err: unknown) {
+      console.warn('MongoDB query failed for listNotifications, falling back to fixtures:', err);
+    }
+  }
+
+  return [...dbNotifs, ...FIXTURE_NOTIFICATIONS];
+}
+
 
 

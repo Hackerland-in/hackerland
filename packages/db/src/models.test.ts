@@ -4,6 +4,7 @@ import {
   ProfileModel,
   ProjectModel,
   ReportModel,
+  NotificationModel,
   ReputationEventModel,
 } from './index';
 
@@ -126,5 +127,31 @@ describe('ReportModel validation', () => {
     expect(err).toBeUndefined();
     expect(doc.status).toBe('pending');
     expect(doc.actionTaken).toBe('none');
+  });
+});
+
+describe('NotificationModel validation', () => {
+  it('rejects missing fields and invalid type', () => {
+    const doc = new NotificationModel({
+      userId: 'u_1',
+      type: 'invalid_type',
+    });
+    const err = doc.validateSync();
+    expect(err?.errors.type).toBeDefined();
+    expect(err?.errors.title).toBeDefined();
+    expect(err?.errors.link).toBeDefined();
+  });
+
+  it('accepts valid notification and defaults read to false', () => {
+    const doc = new NotificationModel({
+      userId: 'u_1',
+      type: 'squad_apply',
+      title: 'Squad Application',
+      message: 'Meera applied for Flight Avionics Lead.',
+      link: '/projects/aeroglide',
+    });
+    const err = doc.validateSync();
+    expect(err).toBeUndefined();
+    expect(doc.read).toBe(false);
   });
 });

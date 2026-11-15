@@ -25,6 +25,7 @@ import { PersonChip } from '@/components/domain/person-chip';
 import { ProjectCover } from '@/components/domain/project-cover';
 import { KiCanvasViewer } from '@/components/domain/kicanvas-viewer';
 import { WokwiSimulator } from '@/components/domain/wokwi-simulator';
+import { ProjectBOM } from '@/components/domain/project-bom';
 import {
   InteractiveRoleList,
   PostUpdateAction,
@@ -490,65 +491,10 @@ export default async function ProjectDetailPage({
 
             {/* Tab: Resources */}
             <TabsContent value="resources" className="space-y-6">
-              <Panel title="Resources & bill of materials">
-                {project.resources.length > 0 ? (
-                  <div className="max-w-full overflow-x-auto">
-                    <table className="w-full min-w-[540px] border-collapse text-left">
-                      <thead>
-                        <tr className="border-b border-hairline font-display text-label-sm uppercase text-fg-subtle">
-                          <th className="px-3 py-2.5">Item</th>
-                          <th className="px-3 py-2.5 text-center">Qty</th>
-                          <th className="px-3 py-2.5">Specification</th>
-                          <th className="px-3 py-2.5 text-right">Est. Cost</th>
-                          <th className="px-3 py-2.5 text-right">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-hairline text-body-sm">
-                        {project.resources.map((item, idx) => (
-                          <tr key={idx} className="transition-colors hover:bg-surface-2/40">
-                            <td className="px-3 py-3 font-medium text-fg break-words">
-                              {item.name}
-                            </td>
-                            <td className="px-3 py-3 text-center font-mono text-fg-muted">
-                              {item.qty}
-                            </td>
-                            <td className="px-3 py-3 font-mono text-xs text-fg-muted break-words">
-                              {item.spec ?? '—'}
-                            </td>
-                            <td className="px-3 py-3 text-right font-mono tabular-nums text-fg">
-                              {item.cost !== undefined && item.currency
-                                ? formatMoney(item.cost, item.currency)
-                                : '—'}
-                            </td>
-                            <td className="px-3 py-3 text-right">
-                              {item.status === 'funded' && (
-                                <Badge tone="success" variant="solid">
-                                  Funded
-                                </Badge>
-                              )}
-                              {item.status === 'sourcing' && (
-                                <Badge tone="warning" variant="outline">
-                                  Sourcing
-                                </Badge>
-                              )}
-                              {item.status === 'needs-funding' && (
-                                <Badge tone="danger" variant="outline">
-                                  Needs funding
-                                </Badge>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <EmptyState
-                    title="No bill of materials recorded"
-                    description="This project has no hardware components or procurement items listed."
-                  />
-                )}
-              </Panel>
+              <ProjectBOM
+                initialResources={project.resources}
+                projectTitle={project.title}
+              />
 
               {/* KiCanvas Multi-Layer PCB & Schematic CAD Preview */}
               <Panel title="Interactive PCB & Schematic CAD">

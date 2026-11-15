@@ -254,3 +254,24 @@ export interface ModerationReport {
   updatedAt: string;
 }
 
+export type NotificationType =
+  | 'squad_apply'
+  | 'bounty_claim'
+  | 'ship_update'
+  | 'reaction'
+  | 'moderation_action'
+  | 'system';
+
+export interface NotificationItem {
+  id: string;
+  userId: string;
+  actorId?: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  link: string;
+  read: boolean;
+  createdAt: string;
+}
+
+

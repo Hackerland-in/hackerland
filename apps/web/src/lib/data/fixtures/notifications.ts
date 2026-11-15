@@ -1,0 +1,48 @@
+import type { NotificationItem } from '../types';
+
+export const FIXTURE_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: 'notif_1',
+    userId: 'me',
+    actorId: 'meera-iyer',
+    type: 'squad_apply',
+    title: 'New Squad Application',
+    message: 'Meera Iyer applied for Flight Avionics Lead on AeroGlide.',
+    link: '/projects/aeroglide',
+    read: false,
+    createdAt: '2026-11-15T04:30:00.000Z',
+  },
+  {
+    id: 'notif_2',
+    userId: 'me',
+    actorId: 'aravind-swaminathan',
+    type: 'bounty_claim',
+    title: 'Bounty Claim Submitted',
+    message: 'Aravind submitted milestone proof for LoRaWAN gateway driver.',
+    link: '/earn',
+    read: false,
+    createdAt: '2026-11-14T18:15:00.000Z',
+  },
+  {
+    id: 'notif_3',
+    userId: 'me',
+    actorId: 'kavya-subramaniam-ramakrishnan',
+    type: 'reaction',
+    title: 'Reaction on Ship Update',
+    message: 'Kavya reacted to your suborbital telemetry benchmark update.',
+    link: '/feed',
+    read: true,
+    createdAt: '2026-11-14T10:00:00.000Z',
+  },
+  {
+    id: 'notif_4',
+    userId: 'me',
+    actorId: 'system',
+    type: 'system',
+    title: 'ATL Node Bench Ready',
+    message: 'Node ATL-Vellore-042 is online with 3D printer and oscilloscope bench.',
+    link: '/labs',
+    read: true,
+    createdAt: '2026-11-13T14:00:00.000Z',
+  },
+];

@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { Bell, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Button, IconButton, SearchField } from '@hackerland/ui';
 import { MainNav } from './main-nav';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { NotificationPopover } from './notification-popover';
 
 export function AppHeader() {
   return (
@@ -61,9 +62,7 @@ export function AppHeader() {
 
           {/* Notifications on md+ */}
           <div className="hidden md:block">
-            <IconButton label="Notifications">
-              <Bell className="h-5 w-5" aria-hidden="true" />
-            </IconButton>
+            <NotificationPopover />
           </div>
 
           {/* Theme toggle (Dark / Day mode) */}
