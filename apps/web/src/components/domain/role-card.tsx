@@ -6,6 +6,7 @@ export interface RoleCardProps {
   role: OpenRole;
   compact?: boolean;
   className?: string;
+  onApply?: (role: OpenRole) => void;
 }
 
 /** Formats compensation into e.g. "₹40,000 / month", "₹25,000", "Volunteer", etc. */
@@ -34,7 +35,7 @@ export function formatRoleCompensation(compensation: OpenRole['compensation']): 
   }
 }
 
-export function RoleCard({ role, compact = false, className }: RoleCardProps) {
+export function RoleCard({ role, compact = false, className, onApply }: RoleCardProps) {
   const compLabel = formatRoleCompensation(role.compensation);
   const isPaid =
     role.compensation.type === 'stipend' ||
@@ -64,16 +65,28 @@ export function RoleCard({ role, compact = false, className }: RoleCardProps) {
           </h3>
         </div>
 
-        <Button
-          size="sm"
-          variant="secondary"
-          disabled
-          title="Applications open with accounts"
-          aria-disabled="true"
-          className="self-start shrink-0"
-        >
-          Apply
-        </Button>
+        {onApply ? (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => onApply(role)}
+            title={`Apply for ${role.title}`}
+            className="self-start shrink-0"
+          >
+            Apply
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled
+            title="Applications open with accounts"
+            aria-disabled="true"
+            className="self-start shrink-0"
+          >
+            Apply
+          </Button>
+        )}
       </div>
 
       {!compact && role.description ? (

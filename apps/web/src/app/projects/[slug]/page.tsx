@@ -8,7 +8,6 @@ import {
 import {
   AvatarGroup,
   Badge,
-  Button,
   Chip,
   EmptyState,
   Panel,
@@ -24,7 +23,11 @@ import { getProject, listProjects } from '@/lib/data/queries';
 import { formatDate } from '@/lib/format';
 import { PersonChip } from '@/components/domain/person-chip';
 import { ProjectCover } from '@/components/domain/project-cover';
-import { RoleCard } from '@/components/domain/role-card';
+import {
+  InteractiveRoleList,
+  PostUpdateAction,
+  ProjectHeroActions,
+} from './project-interactions';
 
 export async function generateStaticParams() {
   const projects = await listProjects();
@@ -105,24 +108,10 @@ export default async function ProjectDetailPage({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex shrink-0 flex-wrap items-center gap-3">
-          <Button
-            variant="secondary"
-            disabled
-            title="Available once accounts launch"
-            aria-disabled="true"
-          >
-            Offer mentorship
-          </Button>
-          <Button
-            variant="primary"
-            disabled
-            title="Available once accounts launch"
-            aria-disabled="true"
-          >
-            Join squad
-          </Button>
-        </div>
+        <ProjectHeroActions
+          slug={project.slug}
+          openRoles={project.openRoles}
+        />
       </div>
 
       {/* Stat Strip of 4 StatTiles */}
@@ -311,9 +300,12 @@ export default async function ProjectDetailPage({
                 <Panel
                   title="Updates"
                   action={
-                    <span className="font-mono text-label-sm text-fg-subtle">
-                      {project.updates.length} posts
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-label-sm text-fg-subtle">
+                        {project.updates.length} posts
+                      </span>
+                      <PostUpdateAction slug={project.slug} />
+                    </div>
                   }
                 >
                   <div className="space-y-4">
@@ -425,7 +417,10 @@ export default async function ProjectDetailPage({
 
             {/* Tab: Updates */}
             <TabsContent value="updates" className="space-y-6">
-              <Panel title="Project updates">
+              <Panel
+                title="Project updates"
+                action={<PostUpdateAction slug={project.slug} />}
+              >
                 {project.updates.length > 0 ? (
                   <div className="space-y-4">
                     {project.updates.map((update) => (
@@ -567,17 +562,7 @@ export default async function ProjectDetailPage({
             }
             className="sticky top-20"
           >
-            {project.openRoles.length > 0 ? (
-              <div className="space-y-4">
-                {project.openRoles.map((role) => (
-                  <RoleCard key={role.id} role={role} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-body-sm text-fg-muted">
-                All squad positions are currently filled. Follow this project to be notified when new roles open.
-              </p>
-            )}
+            <InteractiveRoleList slug={project.slug} roles={project.openRoles} />
           </Panel>
         </div>
       </div>

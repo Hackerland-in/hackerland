@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   COMPENSATION_TYPES,
   CURRENCIES,
@@ -43,6 +44,7 @@ export type WizardState = {
 const STEP_LABELS = ['Idea', 'Tracks & skills', 'Team roles', 'Review & launch'] as const;
 
 export function NewProjectWizard() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [state, setState] = useState<WizardState>({
     title: '',
@@ -52,6 +54,10 @@ export function NewProjectWizard() {
     skills: [],
     roles: [],
   });
+
+  // Step 4 submission state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   // Step 2 skill input
   const [skillInput, setSkillInput] = useState('');
@@ -184,12 +190,65 @@ export function NewProjectWizard() {
     return comp.type;
   };
 
+  const handlePublish = async () => {
+    setIsSubmitting(true);
+    setPublishError(null);
+
+    try {
+      const payload = {
+        title: state.title.trim(),
+        summary: state.tagline.trim() || state.title.trim(),
+        description: state.description.trim(),
+        tracks: state.tracks,
+        stage: 'idea',
+        tags: state.skills,
+        openRoles: state.roles.map((r) => ({
+          title: r.title,
+          track: r.track,
+          compensation: r.compensation,
+          skills: [],
+          description: '',
+        })),
+      };
+
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          throw new Error('Please sign in to publish a project.');
+        }
+        if (res.status === 503) {
+          throw new Error('Database is not configured on this deployment yet.');
+        }
+        throw new Error(data.error || 'Failed to publish project. Please try again.');
+      }
+
+      if (data.slug) {
+        router.push(`/projects/${data.slug}`);
+      } else {
+        router.push('/projects');
+      }
+    } catch (err: unknown) {
+      setPublishError(
+        err instanceof Error ? err.message : 'An unexpected error occurred while publishing.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-3xl space-y-8">
       {/* Progress Header */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-label-md text-fg-muted font-display uppercase">
-          <span>Step {step + 1} of 4: {STEP_LABELS[step]}</span>
+          <span>{`Step ${step + 1} of 4: ${STEP_LABELS[step]}`}</span>
           <span className="tabular-nums">{Math.round(((step + 1) / 4) * 100)}%</span>
         </div>
         <SegmentedProgress
@@ -547,12 +606,28 @@ export function NewProjectWizard() {
               )}
             </div>
 
+            {publishError && (
+              <div
+                role="alert"
+                className="rounded-md border border-danger/40 bg-danger/10 p-3 text-body-sm text-danger-fg"
+              >
+                {publishError}
+              </div>
+            )}
+
             <div className="space-y-2 pt-2">
-              <Button type="button" variant="primary" disabled className="w-full">
-                Publish project
+              <Button
+                type="button"
+                variant="primary"
+                loading={isSubmitting}
+                disabled={isSubmitting || !state.title.trim() || state.tracks.length === 0}
+                onClick={handlePublish}
+                className="w-full"
+              >
+                {isSubmitting ? 'Publishing project...' : 'Publish project'}
               </Button>
               <p className="text-center text-body-sm text-fg-muted">
-                Publishing opens when accounts launch. Your draft stays in this tab.
+                Your project will be published to the Hackerland directory and open for squad applications.
               </p>
             </div>
           </div>

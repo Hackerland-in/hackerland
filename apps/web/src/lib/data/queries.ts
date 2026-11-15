@@ -3,7 +3,7 @@ import type {
   PostKind,
   Track,
 } from '@hackerland/core';
-import { connectDb, ProfileModel } from '@hackerland/db';
+import { connectDb, PostModel, ProfileModel, ProjectModel } from '@hackerland/db';
 import { ALL_OPPORTUNITIES } from './fixtures/opportunities';
 import { PROFILE_KAVYA, PROFILE_MEERA } from './fixtures/people';
 import { ALL_POSTS } from './fixtures/posts';
@@ -15,11 +15,14 @@ import { ALL_ROADMAPS } from './fixtures/roadmaps';
 import { PLATFORM_STATS } from './fixtures/stats';
 import type {
   FeedPost,
+  OpenRole,
   OpportunityView,
+  PersonRef,
   PlatformStats,
   ProfileView,
   ProjectDetail,
   ProjectSummary,
+  Resource,
   RoadmapView,
 } from './types';
 
@@ -39,18 +42,228 @@ export async function getFeed(kind?: PostKind): Promise<FeedPost[]> {
 
 /**
  * Lists projects, optionally filtered by Track.
+ * Queries ProjectModel when MONGODB_URI is available, merging with fixtures.
  */
 export async function listProjects(track?: Track): Promise<ProjectSummary[]> {
-  if (track) {
-    return ALL_PROJECT_SUMMARIES.filter((p) => p.tracks.includes(track));
+  let dbProjects: ProjectSummary[] = [];
+
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDb();
+      const filter = track ? { tracks: track } : {};
+      const docs = await ProjectModel.find(filter).sort({ updatedAt: -1 }).lean();
+
+      if (docs.length > 0) {
+        const userIds = Array.from(
+          new Set(docs.flatMap((d) => d.members?.map((m) => m.userId) || [])),
+        );
+        const profiles = await ProfileModel.find({ userId: { $in: userIds } }).lean();
+        const profileMap = new Map(profiles.map((p) => [p.userId, p]));
+
+        dbProjects = docs.map((d) => {
+          const squad: PersonRef[] = (d.members || []).map((m) => {
+            const prof = profileMap.get(m.userId);
+            if (prof) {
+              return {
+                handle: prof.handle,
+                name: prof.displayName,
+                avatarUrl: prof.avatarUrl,
+                headline: prof.headline,
+                badges: prof.experienceBadges.map((b) => ({
+                  label: b.label,
+                  tone: b.tone as Track | 'neutral',
+                })),
+              };
+            }
+            return {
+              handle: `user-${m.userId.slice(-6)}`,
+              name: m.role || 'Member',
+              badges: [],
+            };
+          });
+
+          return {
+            slug: d.slug,
+            title: d.title,
+            summary: d.summary,
+            tracks: d.tracks as Track[],
+            stage: d.stage,
+            licence: d.licence || 'MIT',
+            squad,
+            squadSize: Math.max(d.members?.length || 1, squad.length),
+            openRoleCount: (d.openRoles || []).filter((r) => r.status === 'open').length,
+            funding: d.funding
+              ? {
+                  goal: d.funding.goal,
+                  raised: d.funding.raised,
+                  currency: d.funding.currency,
+                }
+              : undefined,
+            updatedAt: d.updatedAt ? d.updatedAt.toISOString() : new Date().toISOString(),
+          };
+        });
+      }
+    } catch {
+      // Ignore DB errors, fall back to fixtures
+    }
   }
-  return ALL_PROJECT_SUMMARIES;
+
+  const fixtureProjects = track
+    ? ALL_PROJECT_SUMMARIES.filter((p) => p.tracks.includes(track))
+    : ALL_PROJECT_SUMMARIES;
+
+  if (dbProjects.length === 0) {
+    return fixtureProjects;
+  }
+
+  // Merge DB projects with fixture projects, DB taking precedence on slug collision
+  const dbSlugs = new Set(dbProjects.map((p) => p.slug));
+  const nonDuplicateFixtures = fixtureProjects.filter((p) => !dbSlugs.has(p.slug));
+  return [...dbProjects, ...nonDuplicateFixtures];
 }
 
 /**
  * Returns detailed project information by slug, or null if not found.
+ * Queries ProjectModel when MONGODB_URI is available, with fixture fallback.
  */
 export async function getProject(slug: string): Promise<ProjectDetail | null> {
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDb();
+      const doc = await ProjectModel.findOne({ slug }).lean();
+      if (doc) {
+        const userIds = Array.from(
+          new Set(doc.members?.map((m) => m.userId) || []),
+        );
+        const profiles = await ProfileModel.find({ userId: { $in: userIds } }).lean();
+        const profileMap = new Map(profiles.map((p) => [p.userId, p]));
+
+        const squad: PersonRef[] = (doc.members || []).map((m) => {
+          const prof = profileMap.get(m.userId);
+          if (prof) {
+            return {
+              handle: prof.handle,
+              name: prof.displayName,
+              avatarUrl: prof.avatarUrl,
+              headline: prof.headline,
+              badges: prof.experienceBadges.map((b) => ({
+                label: b.label,
+                tone: b.tone as Track | 'neutral',
+              })),
+            };
+          }
+          return {
+            handle: `user-${m.userId.slice(-6)}`,
+            name: m.role || 'Member',
+            badges: [],
+          };
+        });
+
+        const leads = (doc.members || [])
+          .filter((m) => m.isLead)
+          .map((m) => {
+            const prof = profileMap.get(m.userId);
+            return {
+              handle: prof?.handle || `lead-${m.userId.slice(-6)}`,
+              name: prof?.displayName || 'Project Lead',
+              avatarUrl: prof?.avatarUrl,
+              headline: prof?.headline,
+              role: m.role || 'Project Lead',
+              bio: prof?.bio || '',
+              skills: prof?.skills || [],
+              badges:
+                prof?.experienceBadges?.map((b) => ({
+                  label: b.label,
+                  tone: b.tone as Track | 'neutral',
+                })) || [],
+            };
+          });
+
+        const openRoles: OpenRole[] = (doc.openRoles || []).map((r, idx) => ({
+          id: r.id || `role-${idx}`,
+          title: r.title,
+          track: r.track as Track,
+          skills: r.skills || [],
+          description: r.description || '',
+          compensation: r.compensation,
+        }));
+
+        const resources: Resource[] = (doc.resources || []).map((res) => ({
+          name: res.name,
+          qty: res.qty,
+          spec: res.spec,
+          cost: res.cost,
+          status: res.status,
+        }));
+
+        const posts = await PostModel.find({ projectId: doc._id.toString() })
+          .sort({ createdAt: -1 })
+          .lean();
+
+        const updates: FeedPost[] = posts.map((post) => ({
+          id: post._id.toString(),
+          kind: post.kind,
+          author: leads[0] || {
+            handle: 'lead',
+            name: 'Project Lead',
+            badges: [],
+          },
+          title: post.title,
+          body: post.body,
+          tags: post.tags || [],
+          createdAt: post.createdAt.toISOString(),
+          reactions: post.counts?.reactions || 0,
+          comments: post.counts?.comments || 0,
+        }));
+
+        return {
+          slug: doc.slug,
+          title: doc.title,
+          summary: doc.summary,
+          body: doc.body || doc.summary,
+          tracks: doc.tracks as Track[],
+          stage: doc.stage,
+          licence: doc.licence || 'MIT',
+          squad,
+          squadSize: Math.max(doc.members?.length || 1, squad.length),
+          openRoleCount: openRoles.length,
+          funding: doc.funding
+            ? {
+                goal: doc.funding.goal,
+                raised: doc.funding.raised,
+                currency: doc.funding.currency,
+              }
+            : undefined,
+          updatedAt: doc.updatedAt ? doc.updatedAt.toISOString() : new Date().toISOString(),
+          leads:
+            leads.length > 0
+              ? leads
+              : [
+                  {
+                    handle: 'lead',
+                    name: 'Project Lead',
+                    role: 'Lead',
+                    bio: '',
+                    skills: [],
+                    badges: [],
+                  },
+                ],
+          openRoles,
+          resources,
+          updates,
+          milestone: {
+            current: 1,
+            total: 3,
+            label: 'Alpha Deployment',
+            next: 'Public Beta Testing',
+          },
+        };
+      }
+    } catch {
+      // Fallback to fixtures
+    }
+  }
+
   const match = ALL_PROJECTS.find((p) => p.slug === slug);
   if (!match) return null;
 

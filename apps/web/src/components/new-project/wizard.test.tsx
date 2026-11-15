@@ -1,7 +1,15 @@
 import React, { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NewProjectWizard } from './wizard';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+}));
 
 // @ts-expect-error configure react act environment
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -231,6 +239,6 @@ describe('NewProjectWizard', () => {
 
     const publishBtn = getButtonByText('Publish project');
     expect(publishBtn).toBeDefined();
-    expect(publishBtn?.disabled).toBe(true);
+    expect(publishBtn?.disabled).toBe(false);
   });
 });

@@ -34,6 +34,14 @@ export interface IProjectResource {
   status: 'funded' | 'sourcing' | 'needs-funding';
 }
 
+export interface IProjectApplication {
+  userId: string;
+  roleTitle: string;
+  note?: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: Date;
+}
+
 export interface IProject {
   slug: string;
   title: string;
@@ -47,6 +55,7 @@ export interface IProject {
   ownerId: string;
   members: IProjectMember[];
   openRoles: IOpenRole[];
+  applications?: IProjectApplication[];
   funding?: {
     goal: number;
     raised: number;
@@ -106,6 +115,19 @@ const ProjectSchema = new Schema<IProject>(
           enum: ['open', 'filled', 'closed'],
           default: 'open',
         },
+      },
+    ],
+    applications: [
+      {
+        userId: { type: String, required: true },
+        roleTitle: { type: String, required: true },
+        note: { type: String, default: '' },
+        status: {
+          type: String,
+          enum: ['pending', 'accepted', 'rejected'],
+          default: 'pending',
+        },
+        createdAt: { type: Date, default: Date.now },
       },
     ],
     funding: {
