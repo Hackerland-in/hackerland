@@ -421,4 +421,16 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     badgeTone: 'code',
     keywords: ['learn', 'roadmaps', 'skills', 'embedded', 'robotics', 'software', 'courses'],
   },
+  {
+    id: 'hub-innovators',
+    title: 'Public Innovators & Builders Directory',
+    description:
+      'Explore public profiles of open-source hardware engineers, deep-tech researchers, makers, and squad leads.',
+    category: 'projects',
+    categoryLabel: 'Community',
+    href: '/u',
+    badge: 'Profiles',
+    badgeTone: 'brand-pink',
+    keywords: ['innovators', 'profiles', 'public profile', 'builders', 'makers', 'community', 'directory', 'people', 'users'],
+  },
 ];

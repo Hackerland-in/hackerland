@@ -32,9 +32,35 @@ export function UserNav() {
   const user = session.data?.user;
   const isPending = session.isPending;
 
-  // Fetch user profile from /api/me/profile if logged in
+  // Fetch user profile from /api/me/profile if logged in, with localStorage sync
   useEffect(() => {
-    if (!user?.id) return;
+    function loadLocal() {
+      try {
+        const cached = localStorage.getItem('hackerland_user_profile');
+        if (cached) {
+          const prof = JSON.parse(cached);
+          if (prof?.handle) {
+            setUserProfile((prev) => ({
+              ...prev,
+              handle: prof.handle,
+              displayName: prof.displayName || prof.name || user?.name || 'Innovator',
+              avatarUrl: prof.avatarUrl || user?.image,
+              reputation: prof.reputation || prev?.reputation || 120,
+            }));
+          }
+        }
+      } catch {
+        // Ignore
+      }
+    }
+    loadLocal();
+    window.addEventListener('hackerland:profile-updated', loadLocal);
+
+    if (!user?.id) {
+      return () => {
+        window.removeEventListener('hackerland:profile-updated', loadLocal);
+      };
+    }
 
     let active = true;
     fetch('/api/me/profile')
@@ -55,6 +81,7 @@ export function UserNav() {
 
     return () => {
       active = false;
+      window.removeEventListener('hackerland:profile-updated', loadLocal);
     };
   }, [user?.id, user?.name, user?.image]);
 

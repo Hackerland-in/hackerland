@@ -42,4 +42,10 @@ describe('Global Platform Search Engine', () => {
     expect(results.length).toBeGreaterThan(0);
     expect(results.some((r) => r.category === 'labs')).toBe(true);
   });
+
+  it('searches for innovators or public profiles', async () => {
+    const results = await searchGlobalPlatform('meera');
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.some((r) => r.href.includes('/u/meera-iyer'))).toBe(true);
+  });
 });

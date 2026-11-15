@@ -17,6 +17,11 @@ import {
 import { ALL_LAB_NODES } from './fixtures/labs';
 import { ALL_OPPORTUNITIES } from './fixtures/opportunities';
 import { ALL_PROFILES } from './fixtures/people';
+import {
+  getStoredProfile,
+  listAllStoredProfiles,
+  saveStoredProfile,
+} from './profile-store';
 import { ALL_POSTS } from './fixtures/posts';
 import {
   ALL_PROJECT_SUMMARIES,
@@ -442,6 +447,18 @@ export async function getProfile(handle: string): Promise<ProfileView | null> {
     }
   }
 
+  // Fallback to in-memory store (registered or updated profiles)
+  const stored = getStoredProfile(normalized);
+  if (stored) {
+    const userProjects = ALL_PROJECT_SUMMARIES.filter((p) =>
+      p.squad.some((s) => s.handle === normalized)
+    );
+    return {
+      ...stored,
+      projects: userProjects.length > 0 ? userProjects : stored.projects,
+    };
+  }
+
   // Fallback to fixtures
   const match = ALL_PROFILES.find((p) => p.handle === normalized);
   if (!match) return null;
@@ -454,6 +471,8 @@ export async function getProfile(handle: string): Promise<ProfileView | null> {
     projects: userProjects.length > 0 ? userProjects : match.projects,
   };
 }
+
+export { listAllStoredProfiles, saveStoredProfile };
 
 /**
  * Returns ranked list of innovators ordered by total reputation points descending.
@@ -490,7 +509,7 @@ export async function getLeaderboard(track?: Track): Promise<LeaderboardEntry[]>
     }
   }
 
-  let profiles = [...ALL_PROFILES];
+  let profiles = [...listAllStoredProfiles()];
   if (track) {
     profiles = profiles.filter((p) => p.tracks.includes(track));
   }

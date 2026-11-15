@@ -1,4 +1,4 @@
-import { listProjects, listLabs, listOpportunities } from '@/lib/data/queries';
+import { listProjects, listLabs, listOpportunities, listAllStoredProfiles } from '@/lib/data/queries';
 import {
   STATIC_SEARCH_CATALOG,
   type SearchResultItem,
@@ -25,6 +25,22 @@ export async function searchGlobalPlatform(rawQuery: string): Promise<SearchResu
   ]);
 
   const dynamicItems: SearchResultItem[] = [];
+
+  // Convert profiles
+  const profiles = listAllStoredProfiles();
+  for (const p of profiles) {
+    dynamicItems.push({
+      id: `profile-${p.handle}`,
+      title: `${p.name} (@${p.handle})`,
+      description: p.headline || p.bio || '',
+      category: 'projects',
+      categoryLabel: 'Innovator Profile',
+      href: `/u/${p.handle}`,
+      badge: `${p.reputation} REP`,
+      badgeTone: 'accent',
+      keywords: [p.name, p.handle, p.headline, ...(p.skills || []), p.location],
+    });
+  }
 
   // Convert projects
   for (const proj of projects) {

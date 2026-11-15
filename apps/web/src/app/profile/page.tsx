@@ -46,8 +46,21 @@ export default function ProfileHubPage() {
   const isPending = session.isPending;
 
   useEffect(() => {
-    if (!user?.id) return;
+    // 1. Check localStorage first for instant client hydration
+    try {
+      const cached = localStorage.getItem('hackerland_user_profile');
+      if (cached) {
+        const prof = JSON.parse(cached);
+        if (prof?.handle) {
+          setProfile(prof);
+          setProfileLoaded(true);
+        }
+      }
+    } catch {
+      // Ignore
+    }
 
+    // 2. Query /api/me/profile from server
     let active = true;
     fetch('/api/me/profile')
       .then((res) => (res.ok ? res.json() : null))
@@ -79,8 +92,8 @@ export default function ProfileHubPage() {
     );
   }
 
-  // If user is not signed in
-  if (!user) {
+  // If user is not signed in and has no saved profile
+  if (!user && !profile) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center space-y-6">
         <div className="flex size-14 items-center justify-center rounded-2xl bg-accent/10 text-accent mx-auto">
@@ -92,12 +105,15 @@ export default function ProfileHubPage() {
             Sign in to access your custom profile, portfolio, reputation scores, and squad collaborations.
           </p>
         </div>
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <Button asChild size="md" variant="primary">
             <Link href="/sign-in">Sign in</Link>
           </Button>
           <Button asChild size="md" variant="secondary">
             <Link href="/sign-up">Create account</Link>
+          </Button>
+          <Button asChild size="md" variant="ghost">
+            <Link href="/u">Explore Innovators</Link>
           </Button>
         </div>
       </div>
@@ -116,10 +132,14 @@ export default function ProfileHubPage() {
 
             <div className="space-y-2">
               <h1 className="font-display text-headline-lg text-fg">
-                Welcome, {user.name || 'Builder'}!
+                Welcome, {user?.name || 'Builder'}!
               </h1>
               <p className="text-body-md text-fg-muted max-w-md mx-auto">
-                You are signed in as <span className="font-mono text-fg">{user.email}</span>.
+                {user?.email ? (
+                  <>
+                    You are signed in as <span className="font-mono text-fg">{user.email}</span>.{' '}
+                  </>
+                ) : null}
                 To activate your public innovator portfolio and squad identity, claim your unique handle.
               </p>
             </div>
@@ -148,15 +168,15 @@ export default function ProfileHubPage() {
             {/* Identity */}
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start min-w-0">
               <Avatar
-                name={profile.displayName || user.name || 'User'}
-                src={profile.avatarUrl || user.image || undefined}
+                name={profile.displayName || user?.name || 'User'}
+                src={profile.avatarUrl || user?.image || undefined}
                 size="xl"
                 className="shrink-0 ring-2 ring-accent/30"
               />
               <div className="min-w-0 space-y-2">
                 <div className="flex flex-wrap items-baseline gap-2">
                   <h1 className="font-display text-headline-xl text-fg break-words">
-                    {profile.displayName || user.name}
+                    {profile.displayName || user?.name || 'Innovator'}
                   </h1>
                   <span className="font-mono text-body-md text-accent">
                     @{profile.handle}

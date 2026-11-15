@@ -15,6 +15,7 @@ import {
   Sparkles,
   Newspaper,
   Trophy,
+  Users,
   ExternalLink,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
@@ -102,8 +103,22 @@ const ACADEMY_DROPDOWN: NavDropdown = {
 const COMMUNITY_DROPDOWN: NavDropdown = {
   id: 'community',
   label: 'Community',
-  matchPrefixes: ['/leaderboard'],
+  matchPrefixes: ['/leaderboard', '/u'],
   items: [
+    {
+      href: '/u',
+      title: 'Innovator Profiles',
+      description: 'Explore public profiles of hardware makers, researchers & squad leads',
+      icon: Users,
+      badge: 'Directory',
+    },
+    {
+      href: '/leaderboard',
+      title: 'Top Innovators',
+      description: 'Global leaderboard of top project builders and contributors',
+      icon: Trophy,
+      badge: 'Top 100',
+    },
     {
       href: 'https://ai.hackerland.in/',
       title: 'Join AI Community',
@@ -118,13 +133,6 @@ const COMMUNITY_DROPDOWN: NavDropdown = {
       description: 'Engineering stories, system designs & hardware breakthroughs',
       icon: Newspaper,
       external: true,
-    },
-    {
-      href: '/leaderboard',
-      title: 'Top Innovators',
-      description: 'Global leaderboard of top project builders and contributors',
-      icon: Trophy,
-      badge: 'Top 100',
     },
   ],
 };

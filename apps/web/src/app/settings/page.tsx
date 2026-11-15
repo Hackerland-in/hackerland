@@ -35,6 +35,7 @@ interface SocialLink {
 
 export default function SettingsPage() {
   const [handle, setHandle] = useState('');
+  const [isHandleLocked, setIsHandleLocked] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [headline, setHeadline] = useState('');
   const [bio, setBio] = useState('');
@@ -50,17 +51,43 @@ export default function SettingsPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Try to load current user profile from API if available
+  // Try to load current user profile from API or localStorage
   useEffect(() => {
     let active = true;
     async function loadProfile() {
+      // 1. Check localStorage first for instant hydration
+      try {
+        const cached = localStorage.getItem('hackerland_user_profile');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === 'object') {
+            if (parsed.handle) {
+              setHandle(parsed.handle);
+              setIsHandleLocked(true);
+            }
+            if (parsed.displayName || parsed.name) setDisplayName(parsed.displayName || parsed.name);
+            if (parsed.headline) setHeadline(parsed.headline);
+            if (parsed.bio) setBio(parsed.bio);
+            if (parsed.location) setLocation(parsed.location);
+            if (parsed.tracks?.length) setSelectedTracks(parsed.tracks);
+            if (parsed.links?.length) setLinks(parsed.links);
+          }
+        }
+      } catch {
+        // Ignore localStorage read errors
+      }
+
+      // 2. Fetch from server API
       try {
         const res = await fetch('/api/me/profile');
         if (res.ok) {
           const raw = await res.json();
           const data = raw?.profile || raw;
           if (active && data) {
-            if (data.handle) setHandle(data.handle);
+            if (data.handle) {
+              setHandle(data.handle);
+              setIsHandleLocked(true);
+            }
             if (data.displayName || data.name) setDisplayName(data.displayName || data.name);
             if (data.headline) setHeadline(data.headline);
             if (data.bio) setBio(data.bio);
@@ -111,17 +138,34 @@ export default function SettingsPage() {
     setSaveSuccess(false);
     setSaveError(null);
 
+    const cleanHandle = (handle.trim() || 'innovator')
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '-')
+      .replace(/^-+|-+$/g, '') || 'innovator';
+
+    const cleanName = displayName.trim() || cleanHandle;
+
     const payload = {
-      handle,
-      displayName,
-      headline,
-      bio,
-      location,
+      handle: cleanHandle,
+      displayName: cleanName,
+      headline: headline.trim(),
+      bio: bio.trim(),
+      location: location.trim(),
       tracks: selectedTracks,
       links,
     };
 
     try {
+      // 1. Cache to localStorage for immediate client persistence
+      try {
+        localStorage.setItem('hackerland_user_profile', JSON.stringify(payload));
+        window.dispatchEvent(
+          new CustomEvent('hackerland:profile-updated', { detail: payload })
+        );
+      } catch {
+        // Storage quota / private mode fallback
+      }
+
       const res = await fetch('/api/me/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -129,8 +173,10 @@ export default function SettingsPage() {
       });
 
       if (!res.ok) {
-        // In local or static demo mode, acknowledge save
-        if (res.status === 404 || res.status === 503) {
+        // In local or static demo mode, acknowledge save with stored profile
+        if (res.status === 404 || res.status === 503 || res.status === 401) {
+          setHandle(cleanHandle);
+          setIsHandleLocked(true);
           setSaveSuccess(true);
           setSaving(false);
           return;
@@ -141,9 +187,16 @@ export default function SettingsPage() {
         return;
       }
 
+      const data = await res.json().catch(() => ({}));
+      if (data?.profile?.handle) {
+        setHandle(data.profile.handle);
+        setIsHandleLocked(true);
+      }
       setSaveSuccess(true);
     } catch {
       // Local fallback
+      setHandle(cleanHandle);
+      setIsHandleLocked(true);
       setSaveSuccess(true);
     } finally {
       setSaving(false);
@@ -171,9 +224,9 @@ export default function SettingsPage() {
           description="Manage your public innovator persona, disciplines, and portfolio links."
         />
         <Button asChild variant="secondary" size="sm" className="self-start sm:self-auto">
-          <Link href={`/u/${handle}`}>
+          <Link href={handle ? `/u/${handle}` : '/u'}>
             <User className="size-4" />
-            <span>View Public Profile</span>
+            <span>{handle ? 'View Public Profile' : 'Browse Innovators'}</span>
           </Link>
         </Button>
       </div>
@@ -210,7 +263,7 @@ export default function SettingsPage() {
           </CardHeader>
 
           <CardBody className="space-y-4 pt-2">
-            {/* Handle (immutable) */}
+            {/* Handle */}
             <div className="space-y-2">
               <Label htmlFor="settings-handle">Innovator Handle</Label>
               <div className="relative">
@@ -220,12 +273,25 @@ export default function SettingsPage() {
                 <Input
                   id="settings-handle"
                   value={handle}
-                  disabled
-                  className="pl-8 font-mono text-body-md bg-sunken opacity-80 cursor-not-allowed"
+                  disabled={isHandleLocked}
+                  onChange={(e) =>
+                    setHandle(
+                      e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                    )
+                  }
+                  placeholder="your-handle (e.g. arya-dev)"
+                  className={`pl-8 font-mono text-body-md ${
+                    isHandleLocked
+                      ? 'bg-sunken opacity-80 cursor-not-allowed'
+                      : 'bg-surface-1'
+                  }`}
+                  required
                 />
               </div>
               <p className="text-body-xs text-fg-subtle">
-                Handles are permanently tied to your cryptographic ledger and cannot be changed.
+                {isHandleLocked
+                  ? 'Handles are permanently tied to your cryptographic ledger and cannot be changed.'
+                  : 'Choose your unique innovator handle. Locked once saved.'}
               </p>
             </div>
 
