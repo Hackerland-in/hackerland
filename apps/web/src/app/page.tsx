@@ -37,6 +37,46 @@ const TRACK_ICONS: Record<Track, typeof Code2> = {
   learn: GraduationCap,
 };
 
+const TRACK_ROUTES: Record<
+  Track,
+  {
+    href: string;
+    actionLabel: string;
+    hubBadge: string;
+  }
+> = {
+  code: {
+    href: '/projects?track=code',
+    actionLabel: 'Explore Software Projects',
+    hubBadge: 'Software & AI',
+  },
+  make: {
+    href: '/manufacturing',
+    actionLabel: 'Launch Manufacturing Suite',
+    hubBadge: 'Hardware & Simulators',
+  },
+  design: {
+    href: '/projects?track=design',
+    actionLabel: 'Explore Design Projects',
+    hubBadge: 'UI/UX & Systems',
+  },
+  research: {
+    href: '/labs',
+    actionLabel: 'Explore Research Labs & ATL',
+    hubBadge: 'Deep-Tech & Labs',
+  },
+  earn: {
+    href: '/earn',
+    actionLabel: 'Explore Bounties & Grants',
+    hubBadge: 'Funded Bounties',
+  },
+  learn: {
+    href: '/learn',
+    actionLabel: 'Explore Roadmaps & Courses',
+    hubBadge: 'Curated Roadmaps',
+  },
+};
+
 const HOW_IT_WORKS = [
   {
     step: '01',
@@ -143,6 +183,7 @@ export default async function HomePage() {
           {TRACKS.map((track) => {
             const Icon = TRACK_ICONS[track];
             const meta = TRACK_META[track];
+            const route = TRACK_ROUTES[track];
 
             return (
               <Card
@@ -152,25 +193,32 @@ export default async function HomePage() {
                 asChild
                 className="group relative overflow-hidden"
               >
-                <Link href={`/projects?track=${track}`}>
-                  <CardBody className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div
-                        className="flex h-12 w-12 items-center justify-center rounded-lg border border-line bg-surface-2 transition-transform duration-200 group-hover:scale-105"
-                      >
-                        <Icon className="h-6 w-6" aria-hidden="true" />
+                <Link href={route.href}>
+                  <CardBody className="p-6 flex flex-col justify-between h-full">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <div
+                          className="flex h-12 w-12 items-center justify-center rounded-lg border border-line bg-surface-2 transition-transform duration-200 group-hover:scale-105"
+                        >
+                          <Icon className="h-6 w-6" aria-hidden="true" />
+                        </div>
+                        <span className="font-mono text-[11px] uppercase text-accent font-semibold px-2 py-0.5 rounded bg-accent/10 border border-accent/20">
+                          {route.hubBadge}
+                        </span>
                       </div>
-                      <span className="font-mono text-label-sm uppercase text-fg-subtle">
-                        Track
-                      </span>
+
+                      <h3 className="mt-4 font-display text-headline-sm font-semibold text-fg group-hover:text-accent transition-colors">
+                        {meta.label}
+                      </h3>
+                      <p className="mt-2 text-body-sm text-fg-muted">
+                        {meta.description}
+                      </p>
                     </div>
 
-                    <h3 className="mt-4 font-display text-headline-sm font-semibold text-fg group-hover:text-accent transition-colors">
-                      {meta.label}
-                    </h3>
-                    <p className="mt-2 text-body-sm text-fg-muted">
-                      {meta.description}
-                    </p>
+                    <div className="mt-6 flex items-center gap-1.5 text-caption font-mono font-medium text-accent group-hover:translate-x-1 transition-transform pt-3 border-t border-hairline/60">
+                      <span>{route.actionLabel}</span>
+                      <ArrowRight className="size-3.5" />
+                    </div>
                   </CardBody>
                 </Link>
               </Card>

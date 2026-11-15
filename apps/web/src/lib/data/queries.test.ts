@@ -55,7 +55,10 @@ describe('queries', () => {
     }
 
     const learnProjects = await listProjects('learn');
-    expect(learnProjects).toEqual([]);
+    expect(learnProjects.length).toBeGreaterThan(0);
+    for (const project of learnProjects) {
+      expect(project.tracks).toContain('learn');
+    }
   });
 
   it('filters feed by kind and sorts by createdAt descending', async () => {

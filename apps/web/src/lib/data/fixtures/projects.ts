@@ -17,7 +17,7 @@ export const PROJECT_AEROGLIDE_DETAIL: ProjectDetail = {
   body: `AeroGlide is a lightweight, ultra-efficient autonomous glider intended for endurance monitoring of microclimate shifts, particulate plumes, and seasonal weather patterns.
 
 Designed with an 8-meter carbon fiber wing chord and integrated solar skin, it communicates flight telemetry over dual redundant LoRa and satellite links back to a ground station dashboard.`,
-  tracks: ['make', 'research'],
+  tracks: ['make', 'research', 'earn'],
   stage: 'prototype',
   licence: 'CERN-OHL-P-2.0',
   squad: [
@@ -131,7 +131,7 @@ export const PROJECT_SAATHI_DETAIL: ProjectDetail = {
   summary:
     'On-device open-source voice assistant supporting 14 Indic languages, running entirely on sub-$35 Raspberry Pi and RISC-V SBCs.',
   body: `Saathi brings low-latency, offline voice AI to rural health clinics and public kiosks across India without sending private patient recordings over the internet.`,
-  tracks: ['code'],
+  tracks: ['code', 'research'],
   stage: 'beta',
   licence: 'Apache-2.0',
   squad: [PERSON_ARJUN, PERSON_KABIR],
@@ -190,7 +190,7 @@ export const PROJECT_OPEN_BRAILLE_DETAIL: ProjectDetail = {
   summary:
     'Refreshable 40-cell electromagnetic Braille display engineered for under $75 BOM to replace $3,000 commercial assistive readers.',
   body: `Tactile reading devices are priced out of reach for 99% of blind students in the developing world. OpenBraille uses micro-solenoid latches and recycled 3D printer filament to make literacy universally affordable.`,
-  tracks: ['make', 'design'],
+  tracks: ['make', 'design', 'earn'],
   stage: 'prototype',
   licence: 'GPL-3.0',
   squad: [PERSON_ZOYA, PERSON_LENA, PERSON_KABIR],
@@ -260,7 +260,7 @@ export const PROJECT_KISAN_SENSE_DETAIL: ProjectDetail = {
   summary:
     'Solar-powered sub-soil moisture, NPK and salinity probe network with LoRa mesh telemetry and local crop irrigation advisories.',
   body: `KisanSense delivers high-density soil chemistry telemetry directly to farmers phones via SMS alerts without requiring costly cellular subscriptions for every probe.`,
-  tracks: ['make', 'code'],
+  tracks: ['make', 'code', 'earn'],
   stage: 'beta',
   licence: 'MIT',
   squad: [PERSON_ARJUN, PERSON_LENA],
@@ -320,7 +320,7 @@ export const PROJECT_PIXEL_PATHSHALA_DETAIL: ProjectDetail = {
   summary:
     'A library of 4,000+ culturally authentic, open-access SVG diagrams and science illustrations licensed for free educational remixing across state board curricula.',
   body: `State textbooks frequently suffer from low-res photocopied diagrams and missing visual aids for complex scientific phenomena. Pixel Pathshala produces crisp, modular vector schematics covering physics, biology, mechanics and history adapted for vernacular printing.`,
-  tracks: ['design'],
+  tracks: ['design', 'learn'],
   stage: 'launched',
   licence: 'CC-BY-4.0',
   squad: [PERSON_ZOYA, PERSON_KAVYA, PERSON_MEERA],
