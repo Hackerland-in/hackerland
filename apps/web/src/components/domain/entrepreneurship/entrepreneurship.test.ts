@@ -67,6 +67,16 @@ describe('Open Source Entrepreneurship Data & Academy', () => {
     expect(sb?.syllabus.some((s) => s.title.includes('Business Model'))).toBe(true);
   });
 
+  it('includes Startup India Learning and Development Program', () => {
+    const si = ENTREPRENEUR_COURSES.find((c) => c.id === 'startup-india-learning-program');
+    expect(si).toBeDefined();
+    expect(si?.freeBadge).toBe('Govt Certified');
+    expect(si?.externalUrl).toBe(
+      'https://www.startupindia.gov.in/content/sih/en/learning-and-development_v2.html'
+    );
+    expect(si?.syllabus.some((s) => s.title.includes('DPIIT'))).toBe(true);
+  });
+
   it('contains curated seminal essays with core operating rules', () => {
     expect(CURATED_ESSAYS.length).toBeGreaterThanOrEqual(4);
     for (const essay of CURATED_ESSAYS) {

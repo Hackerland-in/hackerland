@@ -353,7 +353,7 @@ export const ENTREPRENEUR_COURSES: EntrepreneurCourse[] = [
     freeBadge: 'Govt Certified',
     summary:
       'Official Government of India curriculum covering legal incorporation, GST, DPIIT recognition, Section 56(2)(viib) angel tax exemptions, and Startup India Seed Fund Scheme (SISFS).',
-    externalUrl: 'https://www.startupindia.gov.in/',
+    externalUrl: 'https://www.startupindia.gov.in/content/sih/en/learning-and-development_v2.html',
     tags: ['India', 'DPIIT', 'GST', 'Seed Fund Scheme (SISFS)', 'Patents'],
     syllabus: [
       {
