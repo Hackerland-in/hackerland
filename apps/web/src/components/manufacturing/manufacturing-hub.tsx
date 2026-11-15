@@ -30,6 +30,7 @@ import { InteractiveLab } from './interactive-lab';
 import { ManufacturingLifecyclePipeline } from './lifecycle-pipeline';
 import { HardwareBenchStudio } from './bench/hardware-bench-studio';
 import { CircuitoBuilder } from './circuito/circuito-builder';
+import { ActualHardwareSimulator } from './hardware-simulator/actual-hardware-simulator';
 
 export function ManufacturingHub() {
   const [selectedPillarId, setSelectedPillarId] = useState<string>('pcb');
@@ -181,6 +182,11 @@ export function ManufacturingHub() {
           {/* CIRCUITO.IO AUTONOMOUS CIRCUIT BUILDER & WIRING ENGINE */}
           <div className="space-y-3">
             <CircuitoBuilder />
+          </div>
+
+          {/* ACTUAL SPICE HARDWARE CIRCUIT SIMULATOR & DIGITAL OSCILLOSCOPE */}
+          <div className="space-y-3">
+            <ActualHardwareSimulator />
           </div>
 
           {/* SIMULATOR ENGINE (Requirement: Simulation engine for each field) */}

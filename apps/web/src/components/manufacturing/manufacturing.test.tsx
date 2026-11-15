@@ -15,6 +15,8 @@ import { InteractiveLab } from './interactive-lab';
 import { MANUFACTURING_PILLARS } from './manufacturing-data';
 import { HardwareBenchStudio } from './bench/hardware-bench-studio';
 import { CircuitoBuilder } from './circuito/circuito-builder';
+import { ActualHardwareSimulator } from './hardware-simulator/actual-hardware-simulator';
+import { CIRCUIT_PRESETS, solveCircuitStep } from './hardware-simulator/circuit-engine';
 
 // @ts-expect-error configure react act environment
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -322,5 +324,50 @@ describe('Manufacturing Hub & Simulation Engines', () => {
     expect(container.textContent).toContain('Robu.in');
     expect(container.textContent).toContain('Quartzcomponents');
     expect(container.textContent).toContain('ElectronicsComp');
+  });
+
+  it('runs solveCircuitStep and computes Ohm law nodal voltages and LED burnout', () => {
+    const ohmsPreset = CIRCUIT_PRESETS[0]!;
+    
+    // Normal 5V through 220 ohm: (5 - 2) / 220 = 13.6 mA -> Normal conduction
+    const normalResult = solveCircuitStep(ohmsPreset, ohmsPreset.components, 0, 0.05);
+    expect(normalResult.statusMessage).toContain('Normal conduction');
+    expect(normalResult.components.find((c) => c.type === 'led')?.isBurnedOut).toBeFalsy();
+
+    // Overdrive: 12V through 10 ohm: (12 - 2) / 10 = 1000 mA -> Burned out
+    const overdrivenComponents = ohmsPreset.components.map((c) => {
+      if (c.type === 'dc_source') return { ...c, value: 12.0 };
+      if (c.type === 'resistor') return { ...c, value: 10 };
+      return c;
+    });
+
+    const burnedResult = solveCircuitStep(ohmsPreset, overdrivenComponents, 0, 0.05);
+    expect(burnedResult.statusMessage).toContain('OVER-CURRENT WARNING');
+    expect(burnedResult.components.find((c) => c.type === 'led')?.isBurnedOut).toBe(true);
+  });
+
+  it('renders ActualHardwareSimulator with interactive schematic and digital oscilloscope', () => {
+    act(() => {
+      root.render(<ActualHardwareSimulator />);
+    });
+
+    expect(container.textContent).toContain('REAL SPICE HARDWARE SIMULATOR');
+    expect(container.textContent).toContain('Actual Interactive Circuit & Component Physics Simulator');
+    expect(container.textContent).toContain('Interactive Circuit Schematic');
+    expect(container.textContent).toContain('Benchtop Digital Multimeter');
+    expect(container.textContent).toContain('Digital Storage Oscilloscope');
+    expect(container.textContent).toContain('TRUE RMS DC');
+
+    // Switch experiment to 555 Timer
+    const selectEl = container.querySelector('select[aria-label="Select circuit experiment"]') as HTMLSelectElement;
+    expect(selectEl).toBeDefined();
+
+    act(() => {
+      selectEl.value = 'timer-555-astable';
+      selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    expect(container.textContent).toContain('NE555 Precision Timer Astable Multivibrator');
+    expect(container.textContent).toContain('f = \\frac{1.44}{(R_1 + 2R_2) \\cdot C_1}');
   });
 });
