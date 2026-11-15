@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import type { OpportunityView } from '@/lib/data/types';
-import { Badge, Button, Textarea } from '@hackerland/ui';
+import { Badge, Button, Input, Textarea } from '@hackerland/ui';
 import { OPPORTUNITY_KIND_LABEL, TRACK_META } from '@hackerland/core';
 import { Money } from '@/components/domain/money';
 import { EscrowMilestoneStepper } from '@/components/domain/escrow-milestone-stepper';
@@ -22,9 +23,15 @@ export function ClaimBountyModal({
   onSuccess,
 }: ClaimBountyModalProps) {
   const [note, setNote] = useState('');
+  const [proofUrl, setProofUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -36,7 +43,7 @@ export function ClaimBountyModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen || !opportunity) return null;
+  if (!isOpen || !opportunity || !mounted) return null;
 
   const kindLabel = OPPORTUNITY_KIND_LABEL[opportunity.kind] ?? opportunity.kind;
   const isBounty = opportunity.kind === 'bounty';
@@ -47,11 +54,15 @@ export function ClaimBountyModal({
     setError(null);
 
     try {
+      const fullNote = proofUrl.trim()
+        ? `${note.trim()}\n\nProof of Work / Link: ${proofUrl.trim()}`
+        : note.trim();
+
       const res = await fetch(`/api/opportunities/${opportunity.id}/claim`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          note: note.trim(),
+          note: fullNote,
         }),
       });
 
@@ -82,14 +93,17 @@ export function ClaimBountyModal({
     }
   };
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="claim-bounty-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/80 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-canvas/80 backdrop-blur-md animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
-      <div className="w-full max-w-lg rounded-lg border border-hairline bg-surface-2 p-6 shadow-overlay space-y-5">
+      <div className="w-full max-w-lg rounded-2xl border border-hairline bg-surface-1 p-6 shadow-overlay space-y-5 animate-in zoom-in-95 duration-150">
         <div>
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
             <div className="flex flex-wrap items-center gap-1.5">
@@ -103,7 +117,7 @@ export function ClaimBountyModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-fg-subtle hover:text-fg transition-colors"
+              className="p-1 rounded-md text-fg-subtle hover:text-fg hover:bg-surface-2 transition-colors"
               aria-label="Close dialog"
             >
               <X className="size-5" />
@@ -138,61 +152,92 @@ export function ClaimBountyModal({
         {error && (
           <div
             role="alert"
-            className="rounded border border-danger/30 bg-danger/10 p-3 text-body-sm text-danger-fg flex items-start gap-2"
+            className="rounded-lg border border-danger/40 bg-danger/10 p-3 text-body-sm text-danger-fg break-words"
           >
-            <AlertCircle className="size-4 shrink-0 mt-0.5" />
-            <span>{error}</span>
+            {error}
           </div>
         )}
 
         {isSuccess ? (
-          <div className="rounded border border-success/30 bg-success/10 p-4 text-center space-y-3">
-            <div className="flex justify-center text-success">
-              <CheckCircle2 className="size-8" />
+          <div
+            role="status"
+            className="rounded-xl border border-success/40 bg-success/10 p-5 text-body-sm text-success-fg space-y-3"
+          >
+            <div className="flex items-center gap-2 font-display font-bold text-body-md">
+              <CheckCircle2 className="size-5 text-success" />
+              <span>Claim submitted successfully!</span>
             </div>
-            <h3 className="font-display text-body-lg font-semibold text-fg">
-              {isBounty ? 'Bounty Claim Registered!' : 'Application Submitted!'}
-            </h3>
-            <p className="text-body-sm text-fg-muted">
-              The sponsor ({opportunity.sponsor.name}) has been notified. You can track progress in
-              your activity ledger.
+            <p className="text-fg-muted">
+              The sponsor has been notified. You can track milestone progress and escrow lock in your Mission Control dashboard.
             </p>
-            <Button variant="secondary" onClick={onClose} className="mt-2 w-full">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+              className="mt-3 w-full"
+            >
               Done
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="claim-note" className="block text-body-sm font-medium text-fg mb-1">
-                Proposal / Approach Note{' '}
-                <span className="text-fg-subtle font-normal">(optional)</span>
+            <div className="space-y-1.5">
+              <label
+                htmlFor="claim-proof-input"
+                className="block font-display text-label-md text-fg"
+              >
+                PR link, GitHub repo or prototype URL (optional)
+              </label>
+              <Input
+                id="claim-proof-input"
+                type="url"
+                value={proofUrl}
+                onChange={(e) => setProofUrl(e.target.value)}
+                placeholder="https://github.com/... or Figma / Onshape link"
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor="claim-note-input"
+                className="block font-display text-label-md text-fg"
+              >
+                Submission note & milestone timeline
               </label>
               <Textarea
-                id="claim-note"
-                placeholder="Briefly outline your background, ETA, or proposed approach..."
+                id="claim-note-input"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
+                placeholder="Describe your implementation plan, deliverables, and estimated days to milestone 1..."
                 rows={4}
+                required
                 className="w-full text-body-sm"
               />
             </div>
 
-            <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
-              <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
+            <div className="flex justify-end gap-3 pt-2 border-t border-hairline">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={isSubmitting}
+                onClick={onClose}
+              >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                variant={isBounty ? 'earn' : 'primary'}
+                variant="primary"
                 loading={isSubmitting}
+                disabled={isSubmitting || !note.trim()}
               >
-                {isBounty ? 'Submit Claim' : 'Submit Application'}
+                {isSubmitting ? 'Submitting...' : isBounty ? 'Confirm claim' : 'Submit application'}
               </Button>
             </div>
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

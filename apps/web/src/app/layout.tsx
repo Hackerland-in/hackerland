@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import type { ReactNode } from 'react';
 import './globals.css';
@@ -25,8 +25,16 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  themeColor: '#0A0B0E',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://hackerland.in'),
+  applicationName: 'Hackerland',
   title: {
     template: '%s · Hackerland',
     default: 'Hackerland: build together, earn together',
@@ -39,6 +47,11 @@ export const metadata: Metadata = {
       { url: '/favicon.png', type: 'image/png' },
     ],
     apple: '/logo.png',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Hackerland',
   },
 };
 

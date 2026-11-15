@@ -22,6 +22,7 @@ import { MotorbikePhysicsSimulator } from './motorbike-simulator';
 import { DronePhysicsSimulator } from './drone-simulator';
 import { EvPowertrainSimulator } from './ev-simulator';
 import { RocketTrajectorySimulator } from './rocket-simulator';
+import { TelemetryExporter } from './telemetry-exporter';
 
 export type PhysicsVehicleType = 'bicycle' | 'car' | 'motorbike' | 'drone' | 'ev' | 'rocket';
 
@@ -136,6 +137,12 @@ export function PhysicsHub({ initialVehicle = 'bicycle' }: PhysicsHubProps) {
           </Link>
         </Button>
       </div>
+
+      {/* Engineering Presets & Telemetry Exporter */}
+      <TelemetryExporter
+        vehicleType={activeVehicle}
+        vehicleName={VEHICLES.find((v) => v.id === activeVehicle)?.name || 'Simulator'}
+      />
 
       {/* Render Active Simulator */}
       {activeVehicle === 'bicycle' && <BicyclePhysicsSimulator />}

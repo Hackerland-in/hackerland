@@ -26,6 +26,7 @@ import { ProjectCover } from '@/components/domain/project-cover';
 import { KiCanvasViewer } from '@/components/domain/kicanvas-viewer';
 import { WokwiSimulator } from '@/components/domain/wokwi-simulator';
 import { ProjectBOM } from '@/components/domain/project-bom';
+import { ProjectDiscussion } from '@/components/domain/project-discussion';
 import {
   InteractiveRoleList,
   PostUpdateAction,
@@ -194,6 +195,9 @@ export default async function ProjectDetailPage({
               </TabsTrigger>
               <TabsTrigger value="resources">
                 Resources ({project.resources.length})
+              </TabsTrigger>
+              <TabsTrigger value="discussions">
+                Discussion
               </TabsTrigger>
             </TabsList>
 
@@ -505,6 +509,11 @@ export default async function ProjectDetailPage({
               <Panel title="Virtual Microcontroller Twin & Bench Simulator">
                 <WokwiSimulator projectTitle={`${project.title} Telemetry Simulation`} />
               </Panel>
+            </TabsContent>
+
+            {/* Tab: Discussions */}
+            <TabsContent value="discussions" className="space-y-6">
+              <ProjectDiscussion projectSlug={project.slug} projectTitle={project.title} />
             </TabsContent>
           </Tabs>
         </div>
