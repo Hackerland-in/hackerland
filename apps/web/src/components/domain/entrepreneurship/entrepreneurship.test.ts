@@ -48,6 +48,9 @@ describe('Open Source Entrepreneurship Data & Academy', () => {
     const mit = ENTREPRENEUR_COURSES.find((c) => c.id === 'mit-disciplined-entrepreneurship');
     expect(mit).toBeDefined();
     expect(mit?.freeBadge).toBe('OpenCourseWare');
+    expect(mit?.externalUrl).toBe(
+      'https://executive.mit.edu/course/disciplined-entrepreneurship/a056g00000URaagAAD.html'
+    );
     expect(mit?.playlistUrl).toBe(
       'https://www.youtube.com/playlist?list=PLUl4u3cNGP63CLq-GxVm4VSr-0iKAS-07'
     );

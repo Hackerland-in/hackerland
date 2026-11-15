@@ -237,22 +237,42 @@ export function EntrepreneurshipHub() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
-                      <Button
-                        asChild
-                        variant="primary"
-                        size="sm"
-                        className="gap-1.5 text-caption font-mono"
-                      >
-                        <a
-                          href={course.playlistUrl || course.externalUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                      {course.playlistUrl && (
+                        <Button
+                          asChild
+                          variant="primary"
+                          size="sm"
+                          className="gap-1.5 text-caption font-mono"
                         >
-                          <Play className="size-3.5 fill-current" />
-                          <span>Watch Free Playlist</span>
-                          <ExternalLink className="size-3" />
-                        </a>
-                      </Button>
+                          <a
+                            href={course.playlistUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Play className="size-3.5 fill-current" />
+                            <span>Watch Playlist</span>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        </Button>
+                      )}
+
+                      {course.externalUrl && (
+                        <Button
+                          asChild
+                          variant="secondary"
+                          size="sm"
+                          className="gap-1.5 text-caption font-mono"
+                        >
+                          <a
+                            href={course.externalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <span>Course Portal</span>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        </Button>
+                      )}
 
                       <Button
                         variant="secondary"

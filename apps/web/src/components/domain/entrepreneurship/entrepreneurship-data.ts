@@ -173,7 +173,7 @@ export const ENTREPRENEUR_COURSES: EntrepreneurCourse[] = [
     freeBadge: 'OpenCourseWare',
     summary:
       'Rigorous, engineering-backed 24-step roadmap for building innovative ventures from MIT. Learn Beachhead Market sizing, Persona mapping, LTV vs CAC unit economics, and sales cycles.',
-    externalUrl: 'https://ocw.mit.edu/courses/15-390-disciplined-entrepreneurship-fundamentals-spring-2023/',
+    externalUrl: 'https://executive.mit.edu/course/disciplined-entrepreneurship/a056g00000URaagAAD.html',
     playlistUrl: 'https://www.youtube.com/playlist?list=PLUl4u3cNGP63CLq-GxVm4VSr-0iKAS-07',
     tags: ['MIT', 'Beachhead TAM', 'Unit Economics', 'CAC', 'LTV', 'Sales Funnel'],
     syllabus: [
