@@ -4,6 +4,7 @@ import { Button, IconButton, SearchField } from '@hackerland/ui';
 import { MainNav } from './main-nav';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { NotificationPopover } from './notification-popover';
+import { UserNav } from './user-nav';
 
 export function AppHeader() {
   return (
@@ -75,10 +76,8 @@ export function AppHeader() {
             </Button>
           </div>
 
-          {/* Sign in on all viewports */}
-          <Button asChild size="sm" variant="secondary">
-            <Link href="/sign-in">Sign in</Link>
-          </Button>
+          {/* User Nav (Profile / Menu if logged in, Sign in / Sign up if not) */}
+          <UserNav />
         </div>
       </div>
     </header>

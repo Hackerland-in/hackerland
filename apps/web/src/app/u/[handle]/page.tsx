@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import {
   Avatar,
   Badge,
-  Button,
   Card,
   CardBody,
   Chip,
@@ -22,6 +21,7 @@ import { PersonChip } from '@/components/domain/person-chip';
 import { ProjectCard } from '@/components/domain/project-card';
 import { TrackBadge } from '@/components/domain/track-badge';
 import { Money } from '@/components/domain/money';
+import { ProfileActions } from '@/components/domain/profile-actions';
 
 interface ProfilePageProps {
   params: Promise<{
@@ -98,23 +98,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </div>
             </div>
 
-            {/* Actions: Disabled until accounts launch */}
-            <div className="flex flex-wrap gap-3 sm:shrink-0">
-              <Button
-                variant="primary"
-                disabled
-                title="Available once accounts launch"
-              >
-                Request mentorship
-              </Button>
-              <Button
-                variant="secondary"
-                disabled
-                title="Available once accounts launch"
-              >
-                Message
-              </Button>
-            </div>
+            {/* Profile Action Toolbar */}
+            <ProfileActions handle={profile.handle} />
           </div>
 
           {/* Bio & External Links */}

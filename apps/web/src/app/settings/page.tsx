@@ -34,25 +34,18 @@ interface SocialLink {
 }
 
 export default function SettingsPage() {
-  const [handle, setHandle] = useState('meera-iyer');
-  const [displayName, setDisplayName] = useState('Dr. Meera Iyer');
-  const [headline, setHeadline] = useState(
-    'Ex-ISRO Propulsion Scientist · Visiting Professor at IISc'
-  );
-  const [bio, setBio] = useState(
-    'Spent 42 years designing propulsion feeds, cryogenic combustion stages, and satellite thermal envelopes. Now mentoring the next generation of aerospace tinkerers and high-school rocketry clubs across India.'
-  );
-  const [location, setLocation] = useState('Bengaluru, India');
-  const [selectedTracks, setSelectedTracks] = useState<Track[]>(['make', 'research']);
-  const [links, setLinks] = useState<SocialLink[]>([
-    { label: 'ResearchGate', url: 'https://researchgate.net' },
-    { label: 'Google Scholar', url: 'https://scholar.google.com' },
-    { label: 'GitHub', url: 'https://github.com' },
-  ]);
+  const [handle, setHandle] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [headline, setHeadline] = useState('');
+  const [bio, setBio] = useState('');
+  const [location, setLocation] = useState('');
+  const [selectedTracks, setSelectedTracks] = useState<Track[]>(['code']);
+  const [links, setLinks] = useState<SocialLink[]>([]);
 
   const [newLinkLabel, setNewLinkLabel] = useState('');
   const [newLinkUrl, setNewLinkUrl] = useState('');
 
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -64,19 +57,22 @@ export default function SettingsPage() {
       try {
         const res = await fetch('/api/me/profile');
         if (res.ok) {
-          const data = await res.json();
+          const raw = await res.json();
+          const data = raw?.profile || raw;
           if (active && data) {
             if (data.handle) setHandle(data.handle);
             if (data.displayName || data.name) setDisplayName(data.displayName || data.name);
             if (data.headline) setHeadline(data.headline);
             if (data.bio) setBio(data.bio);
             if (data.location) setLocation(data.location);
-            if (data.tracks) setSelectedTracks(data.tracks);
+            if (data.tracks && data.tracks.length > 0) setSelectedTracks(data.tracks);
             if (data.links) setLinks(data.links);
           }
         }
       } catch {
-        // Fall back to sample defaults (Dr. Meera Iyer)
+        // Fall back gracefully
+      } finally {
+        if (active) setLoading(false);
       }
     }
     loadProfile();
@@ -153,6 +149,15 @@ export default function SettingsPage() {
       setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-16 text-center space-y-4">
+        <div className="size-10 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="font-mono text-body-sm text-fg-muted">Loading your settings…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 md:py-12 min-w-0 space-y-8">

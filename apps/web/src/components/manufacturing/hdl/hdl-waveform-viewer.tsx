@@ -83,7 +83,12 @@ export function HdlWaveformViewer({ signals, totalTimeNs }: HdlWaveformViewerPro
       </div>
 
       {/* Main Waveform Grid Viewport */}
-      <div className="rounded-lg border border-hairline-strong bg-canvas p-3 font-mono text-caption overflow-x-auto shadow-inner">
+      <div className="space-y-1">
+        <div className="flex items-center justify-between text-[11px] font-mono text-fg-subtle px-1">
+          <span>↔ Swipe timeline or click axis to move measurement cursor</span>
+          <span className="hidden sm:inline">Resolution: 1ns IEEE 1364</span>
+        </div>
+        <div className="rounded-lg border border-hairline-strong bg-canvas p-3 font-mono text-caption overflow-x-auto shadow-inner">
         <div className="min-w-[640px] space-y-3">
           {/* Time Graduation Axis */}
           <div className="grid grid-cols-12 gap-2 border-b border-hairline/60 pb-1 text-[10px] text-fg-subtle">
@@ -196,5 +201,6 @@ export function HdlWaveformViewer({ signals, totalTimeNs }: HdlWaveformViewerPro
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }

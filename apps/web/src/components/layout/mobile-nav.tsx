@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Compass, FolderKanban, Plus, Coins, BookOpen } from 'lucide-react';
+import { Compass, FolderKanban, Plus, Cpu, User } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
 export function MobileNav() {
@@ -12,14 +12,14 @@ export function MobileNav() {
     { href: '/feed', label: 'Feed', icon: Compass },
     { href: '/projects', label: 'Projects', icon: FolderKanban },
     { href: '/new', label: 'Start', icon: Plus, isAction: true },
-    { href: '/earn', label: 'Earn', icon: Coins },
-    { href: '/learn', label: 'Learn', icon: BookOpen },
+    { href: '/manufacturing', label: 'Hardware', icon: Cpu },
+    { href: '/profile', label: 'Profile', icon: User },
   ];
 
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-hairline bg-canvas/95 backdrop-blur md:hidden px-2 pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 left-0 right-0 z-40 flex h-[calc(4rem+env(safe-area-inset-bottom,0px))] items-center justify-around border-t border-hairline bg-canvas/95 backdrop-blur md:hidden px-2 pb-[env(safe-area-inset-bottom,0px)]"
     >
       {items.map((item) => {
         const Icon = item.icon;

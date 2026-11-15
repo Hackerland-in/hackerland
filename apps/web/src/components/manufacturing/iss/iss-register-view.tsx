@@ -79,7 +79,7 @@ export function IssRegisterView({ cpuState }: IssRegisterViewProps) {
       </div>
 
       {/* 32-Register Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 max-h-[460px] overflow-y-auto pr-1">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 max-h-[460px] overflow-y-auto pr-1">
         {cpuState.registers.map((val, idx) => {
           const abi = ABI_REGISTER_NAMES[idx] ?? `x${idx}`;
           const role = REGISTER_ROLES[abi] ?? 'General register';
