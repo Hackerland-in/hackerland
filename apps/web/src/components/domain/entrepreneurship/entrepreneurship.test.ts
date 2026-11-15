@@ -77,6 +77,17 @@ describe('Open Source Entrepreneurship Data & Academy', () => {
     expect(si?.syllabus.some((s) => s.title.includes('DPIIT'))).toBe(true);
   });
 
+  it('includes Stanford CS183C Blitzscaling with full playlist', () => {
+    const blitz = ENTREPRENEUR_COURSES.find(
+      (c) => c.id === 'cs183c-blitzscaling-reid-hoffman'
+    );
+    expect(blitz).toBeDefined();
+    expect(blitz?.playlistUrl).toBe(
+      'https://www.youtube.com/playlist?list=PLiii966TXyZ-y_RHAcWEp2fw3WkQhpbwo'
+    );
+    expect(blitz?.syllabus.some((s) => s.title.includes('Blitzscaling'))).toBe(true);
+  });
+
   it('contains curated seminal essays with core operating rules', () => {
     expect(CURATED_ESSAYS.length).toBeGreaterThanOrEqual(4);
     for (const essay of CURATED_ESSAYS) {

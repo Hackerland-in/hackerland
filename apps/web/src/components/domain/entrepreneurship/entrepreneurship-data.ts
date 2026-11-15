@@ -318,7 +318,7 @@ export const ENTREPRENEUR_COURSES: EntrepreneurCourse[] = [
     summary:
       'Stanford course featuring founders of Airbnb, LinkedIn, Netflix, and Stripe on managing hypergrowth when speed into the market outweighs operational efficiency.',
     externalUrl: 'https://www.blitzscaling.com/',
-    playlistUrl: 'https://www.youtube.com/playlist?list=PL5q_lef6zVkb6LgYk6F1N7bQ8Kz6Uq1w9',
+    playlistUrl: 'https://www.youtube.com/playlist?list=PLiii966TXyZ-y_RHAcWEp2fw3WkQhpbwo',
     tags: ['Stanford', 'Reid Hoffman', 'Blitzscaling', 'Network Effects', 'Hiring'],
     syllabus: [
       {
