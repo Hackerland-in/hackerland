@@ -18,12 +18,23 @@ import {
 } from 'lucide-react';
 import { MANUFACTURING_PILLARS } from './manufacturing-data';
 import { ManufacturingSimulator } from './simulators/manufacturing-simulators';
+import {
+  InjectionMoldingSimulator,
+  SheetMetalBendSimulator,
+  BatteryWeldingSimulator,
+  BLDCMotorSimulator,
+  ThermalHeatsinkSimulator,
+  CleanroomSimulator,
+} from './simulators/advanced-industrial-simulators';
 import { InteractiveLab } from './interactive-lab';
 import { ManufacturingLifecyclePipeline } from './lifecycle-pipeline';
 
 export function ManufacturingHub() {
   const [selectedPillarId, setSelectedPillarId] = useState<string>('pcb');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeIndustrialSim, setActiveIndustrialSim] = useState<
+    'injection' | 'sheet_metal' | 'battery_weld' | 'bldc_winding' | 'thermal' | 'cleanroom'
+  >('injection');
 
   const pillars = MANUFACTURING_PILLARS;
   const selectedPillar = pillars.find((p) => p.id === selectedPillarId) ?? pillars[0];
@@ -285,6 +296,68 @@ export function ManufacturingHub() {
           </div>
         </div>
       )}
+
+      {/* Additional Specialized Workshop & Factory Simulation Engines */}
+      <div className="space-y-4 rounded-xl border border-hairline bg-surface-1 p-6" data-testid="advanced-industrial-sim-suite">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-hairline pb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Wrench className="size-4 text-accent" />
+              <span className="font-display text-caption font-semibold uppercase tracking-wider text-accent">
+                Advanced Factory & Workshop Tooling Engines
+              </span>
+            </div>
+            <h3 className="font-display text-headline-sm font-semibold text-fg">
+              Specialized Industrial Tooling Calculators
+            </h3>
+            <p className="text-body-sm text-fg-muted mt-0.5">
+              Precision calculators for injection molds, sheet metal bending, battery spot welding, motor windings, and cleanroom HVAC.
+            </p>
+          </div>
+          <Badge tone="make" variant="solid" className="shrink-0 self-start sm:self-auto">
+            6 Specialized Simulators
+          </Badge>
+        </div>
+
+        {/* Simulator Selector Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+          {[
+            { id: 'injection', label: 'Injection Molding Clamp & Cycle' },
+            { id: 'sheet_metal', label: 'Sheet Metal Bend K-Factor' },
+            { id: 'battery_weld', label: 'Battery Spot Weld & Nickel Strip' },
+            { id: 'bldc_winding', label: 'BLDC Stator Motor Winding' },
+            { id: 'thermal', label: 'Power Heatsink & Dissipation' },
+            { id: 'cleanroom', label: 'Cleanroom Particle & HVAC' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() =>
+                setActiveIndustrialSim(
+                  tab.id as 'injection' | 'sheet_metal' | 'battery_weld' | 'bldc_winding' | 'thermal' | 'cleanroom'
+                )
+              }
+              className={`px-3.5 py-1.5 rounded-lg text-body-xs font-medium whitespace-nowrap transition-all border ${
+                activeIndustrialSim === tab.id
+                  ? 'border-accent bg-accent/15 text-accent font-semibold shadow-sm'
+                  : 'border-hairline bg-surface-2 text-fg-muted hover:text-fg hover:border-hairline-strong'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Render Selected Industrial Simulator */}
+        <div className="pt-2">
+          {activeIndustrialSim === 'injection' && <InjectionMoldingSimulator />}
+          {activeIndustrialSim === 'sheet_metal' && <SheetMetalBendSimulator />}
+          {activeIndustrialSim === 'battery_weld' && <BatteryWeldingSimulator />}
+          {activeIndustrialSim === 'bldc_winding' && <BLDCMotorSimulator />}
+          {activeIndustrialSim === 'thermal' && <ThermalHeatsinkSimulator />}
+          {activeIndustrialSim === 'cleanroom' && <CleanroomSimulator />}
+        </div>
+      </div>
 
       {/* Global 7-Stage Lifecycle Pipeline */}
       <ManufacturingLifecyclePipeline />

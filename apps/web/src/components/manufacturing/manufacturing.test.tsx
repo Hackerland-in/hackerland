@@ -3,6 +3,14 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ManufacturingHub } from './manufacturing-hub';
 import { ManufacturingSimulator } from './simulators/manufacturing-simulators';
+import {
+  InjectionMoldingSimulator,
+  SheetMetalBendSimulator,
+  BatteryWeldingSimulator,
+  BLDCMotorSimulator,
+  ThermalHeatsinkSimulator,
+  CleanroomSimulator,
+} from './simulators/advanced-industrial-simulators';
 import { InteractiveLab } from './interactive-lab';
 import { MANUFACTURING_PILLARS } from './manufacturing-data';
 
@@ -138,5 +146,59 @@ describe('Manufacturing Hub & Simulation Engines', () => {
 
     expect(container.textContent).toContain('Lab Certified');
     expect(container.textContent).toContain('Congratulations! You have completed the Printed Circuit Boards (PCB) Lab!');
+  });
+
+  it('runs Injection Molding simulator and calculates clamp tonnage', () => {
+    act(() => {
+      root.render(<InjectionMoldingSimulator />);
+    });
+    expect(container.textContent).toContain('Injection Molding Clamp Tonnage & Cycle Time Engine');
+    expect(container.textContent).toContain('Ton Press Required');
+    expect(container.textContent).toContain('Cooling Phase Time');
+  });
+
+  it('runs Sheet Metal bend simulator and calculates bend allowance', () => {
+    act(() => {
+      root.render(<SheetMetalBendSimulator />);
+    });
+    expect(container.textContent).toContain('Sheet Metal Bend Allowance & K-Factor Flat Pattern Sizer');
+    expect(container.textContent).toContain('Bend Allowance (BA)');
+    expect(container.textContent).toContain('Bend Deduction (BD)');
+  });
+
+  it('runs Battery Spot Welding simulator and calculates ampacity', () => {
+    act(() => {
+      root.render(<BatteryWeldingSimulator />);
+    });
+    expect(container.textContent).toContain('Battery Spot Welding & Nickel Strip Ampacity Sizer');
+    expect(container.textContent).toContain('Continuous Current Rating');
+    expect(container.textContent).toContain('Pure Nickel');
+  });
+
+  it('runs BLDC Motor winding simulator and calculates Kv rating', () => {
+    act(() => {
+      root.render(<BLDCMotorSimulator />);
+    });
+    expect(container.textContent).toContain('BLDC Motor Stator Winding & Kv Rating Designer');
+    expect(container.textContent).toContain('RPM/V (Kv)');
+    expect(container.textContent).toContain('Torque Constant');
+  });
+
+  it('runs Thermal Heatsink simulator and calculates junction temperature', () => {
+    act(() => {
+      root.render(<ThermalHeatsinkSimulator />);
+    });
+    expect(container.textContent).toContain('Power Semiconductor Heatsink & Junction Temp Engine');
+    expect(container.textContent).toContain('Semiconductor Junction Temp');
+    expect(container.textContent).toContain('Total Thermal Resistance');
+  });
+
+  it('runs Cleanroom simulator and calculates air changes and HEPA units', () => {
+    act(() => {
+      root.render(<CleanroomSimulator />);
+    });
+    expect(container.textContent).toContain('Cleanroom Particle Count & ISO 14644-1 HVAC Sizer');
+    expect(container.textContent).toContain('Air Changes / Hour (ACH)');
+    expect(container.textContent).toContain('HEPA Filter Units Required');
   });
 });
