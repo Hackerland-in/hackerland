@@ -14,17 +14,21 @@ export async function AppFooter() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-5 lg:gap-12">
           {/* Brand Info */}
           <div className="col-span-2 space-y-4">
-            <Link href="/" className="inline-flex items-center gap-2.5">
+            <Link href="/" className="inline-flex items-center gap-2.5 transition-opacity hover:opacity-90">
               <Image
-                src="/images/logo/logo.png"
+                src="/logo.png"
                 alt="Hackerland Logo"
                 width={28}
                 height={28}
                 className="h-7 w-7 rounded-sm object-contain"
               />
-              <span className="font-display text-body-lg font-bold text-fg tracking-tight">
-                Hackerland
-              </span>
+              <Image
+                src="/images/logo2.png"
+                alt="Hackerland"
+                width={120}
+                height={24}
+                className="h-6 w-auto object-contain dark:brightness-200 dark:contrast-125"
+              />
             </Link>
             <p className="text-body-sm text-fg-muted max-w-sm">
               The open-source innovation network for hardware tinkerers, deep-tech researchers,

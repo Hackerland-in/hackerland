@@ -12,8 +12,8 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-40 w-full overflow-x-clip border-b border-hairline bg-canvas/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-page items-center justify-between px-3 sm:px-6 lg:px-8">
-        {/* Left: Logo */}
-        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+        {/* Left: Logo (Both Logos side-by-side on mobile & desktop) */}
+        <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
           <Link
             href="/"
             className="flex items-center gap-2 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -21,17 +21,17 @@ export function AppHeader() {
             <Image
               src="/logo.png"
               alt="Hackerland Logo"
-              width={30}
-              height={30}
-              className="h-[30px] w-[30px] rounded object-contain shrink-0 shadow-xs"
+              width={28}
+              height={28}
+              className="h-7 w-7 sm:h-[30px] sm:w-[30px] rounded object-contain shrink-0 shadow-xs"
               priority
             />
             <Image
               src="/images/logo2.png"
               alt="Hackerland"
-              width={130}
-              height={26}
-              className="hidden sm:block h-[26px] w-auto object-contain dark:brightness-200 dark:contrast-125 shrink-0"
+              width={120}
+              height={24}
+              className="h-[22px] sm:h-[26px] w-auto object-contain dark:brightness-200 dark:contrast-125 shrink-0"
               priority
             />
           </Link>

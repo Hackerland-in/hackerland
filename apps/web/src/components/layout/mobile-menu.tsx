@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -33,6 +34,7 @@ import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -45,6 +47,11 @@ export function MobileMenu() {
     avatarUrl?: string;
     reputation?: number;
   } | null>(null);
+
+  // Mount check for client portal
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Sync profile details
   useEffect(() => {
@@ -186,259 +193,266 @@ export function MobileMenu() {
         {isOpen ? <X className="size-5" /> : <Menu className="size-5" />}
       </IconButton>
 
-      {/* Backdrop overlay */}
-      <div
-        className={cn(
-          'fixed inset-0 z-50 bg-canvas/80 backdrop-blur-sm transition-opacity duration-300',
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        )}
-        onClick={() => setIsOpen(false)}
-        aria-hidden="true"
-      />
-
-      {/* Right Side Slider Drawer (Sheet) */}
-      <aside
-        ref={drawerRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Navigation drawer"
-        className={cn(
-          'fixed inset-y-0 right-0 z-50 w-[88vw] max-w-[340px] sm:max-w-sm bg-surface-1 border-l border-hairline shadow-2xl flex flex-col justify-between overflow-y-auto transform transition-transform duration-300 ease-in-out',
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        )}
-      >
-        {/* Drawer Header */}
-        <div className="flex items-center justify-between border-b border-hairline px-5 py-4 shrink-0 bg-surface-1/80 backdrop-blur sticky top-0 z-10">
-          <Link
-            href="/"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
-          >
-            <Image
-              src="/logo.png"
-              alt="Hackerland Logo"
-              width={28}
-              height={28}
-              className="h-7 w-7 rounded object-contain"
-              priority
-            />
-            <div className="flex flex-col">
-              <span className="font-display text-body-sm font-bold tracking-tight text-fg leading-none">
-                Hackerland
-              </span>
-              <span className="font-mono text-[10px] text-accent leading-none mt-1">
-                Open-Source Network
-              </span>
-            </div>
-          </Link>
-
-          <IconButton
-            label="Close menu"
-            onClick={() => setIsOpen(false)}
-            className="text-fg-subtle hover:text-fg min-h-[40px] min-w-[40px] rounded-lg hover:bg-surface-2 transition-colors"
-          >
-            <X className="size-5" />
-          </IconButton>
-        </div>
-
-        {/* Drawer Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6 scrollbar-thin">
-          {/* User Status / Auth Section */}
-          <div className="rounded-xl border border-hairline bg-surface-2/60 p-3.5 space-y-3">
-            {user ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Avatar
-                    name={userProfile?.displayName || user.name || 'Innovator'}
-                    src={userProfile?.avatarUrl || user.image || undefined}
-                    size="sm"
-                    className="ring-1 ring-hairline"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display text-body-sm font-bold text-fg truncate">
-                      {userProfile?.displayName || user.name || 'Innovator'}
-                    </p>
-                    {userProfile?.handle ? (
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="font-mono text-[11px] text-accent truncate">
-                          @{userProfile.handle}
-                        </span>
-                        {userProfile.reputation !== undefined && (
-                          <span className="inline-flex items-center gap-0.5 rounded bg-accent/15 px-1 py-0.2 text-[9px] font-mono font-bold text-accent">
-                            <Award className="size-2.5" />
-                            {userProfile.reputation} REP
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-[11px] text-fg-subtle truncate mt-0.5">
-                        {user.email}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-hairline">
-                  <Link
-                    href={userProfile?.handle ? `/u/${userProfile.handle}` : '/profile'}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-hairline bg-surface-1 text-caption font-display font-medium text-fg hover:border-accent hover:text-accent transition-colors"
-                  >
-                    <User className="size-3.5" />
-                    <span>My Profile</span>
-                  </Link>
-
-                  <Link
-                    href="/settings"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-hairline bg-surface-1 text-caption font-display font-medium text-fg hover:border-accent hover:text-accent transition-colors"
-                  >
-                    <Settings className="size-3.5" />
-                    <span>Settings</span>
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-caption text-fg-muted font-display">
-                  Build together, earn together.
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button asChild size="sm" variant="secondary" className="w-full">
-                    <Link href="/sign-in" onClick={() => setIsOpen(false)}>
-                      Sign in
-                    </Link>
-                  </Button>
-                  <Button asChild size="sm" variant="primary" className="w-full">
-                    <Link href="/sign-up" onClick={() => setIsOpen(false)}>
-                      Sign up
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Start Project CTA Button */}
-          <Button asChild variant="primary" className="w-full shadow-glow-accent">
-            <Link
-              href="/new"
+      {/* Render Backdrop & Drawer in React Portal to document.body to ensure it sits above all body content */}
+      {mounted &&
+        createPortal(
+          <>
+            {/* Backdrop overlay */}
+            <div
+              className={cn(
+                'fixed inset-0 z-[999] bg-canvas/80 backdrop-blur-sm transition-opacity duration-300 lg:hidden',
+                isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+              )}
               onClick={() => setIsOpen(false)}
-              className="flex items-center justify-center gap-2 font-display font-semibold"
+              aria-hidden="true"
+            />
+
+            {/* Right Side Slider Drawer (Sheet) */}
+            <aside
+              ref={drawerRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation drawer"
+              className={cn(
+                'fixed inset-y-0 right-0 z-[1000] w-[88vw] max-w-[340px] sm:max-w-sm bg-surface-1 border-l border-hairline shadow-2xl flex flex-col justify-between overflow-y-auto transform transition-transform duration-300 ease-in-out lg:hidden',
+                isOpen ? 'translate-x-0' : 'translate-x-full'
+              )}
             >
-              <Plus className="size-4" />
-              <span>Start a New Project</span>
-            </Link>
-          </Button>
+              {/* Drawer Header with Both Logos */}
+              <div className="flex items-center justify-between border-b border-hairline px-5 py-4 shrink-0 bg-surface-1/80 backdrop-blur sticky top-0 z-10">
+                <Link
+                  href="/"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 transition-opacity hover:opacity-90"
+                >
+                  <Image
+                    src="/logo.png"
+                    alt="Hackerland Logo"
+                    width={28}
+                    height={28}
+                    className="h-7 w-7 rounded object-contain shrink-0"
+                    priority
+                  />
+                  <Image
+                    src="/images/logo2.png"
+                    alt="Hackerland"
+                    width={120}
+                    height={24}
+                    className="h-[22px] w-auto object-contain dark:brightness-200 dark:contrast-125 shrink-0"
+                    priority
+                  />
+                </Link>
 
-          {/* Navigation Category Groups */}
-          <div className="space-y-5">
-            {SECTIONS.map((section) => (
-              <div key={section.heading} className="space-y-1.5">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-accent font-bold px-1">
-                  {section.heading}
-                </span>
-                <div className="space-y-0.5">
-                  {section.items.map((item) => {
-                    const Icon = item.icon;
-                    const isActive =
-                      pathname === item.href ||
-                      (!('external' in item && item.external) &&
-                        item.href !== '/' &&
-                        pathname.startsWith(item.href));
+                <IconButton
+                  label="Close menu"
+                  onClick={() => setIsOpen(false)}
+                  className="text-fg-subtle hover:text-fg min-h-[40px] min-w-[40px] rounded-lg hover:bg-surface-2 transition-colors"
+                >
+                  <X className="size-5" />
+                </IconButton>
+              </div>
 
-                    if ('external' in item && item.external) {
-                      return (
-                        <a
-                          key={item.href}
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => setIsOpen(false)}
-                          className="flex items-center justify-between px-3 py-2 rounded-lg text-body-sm font-display font-medium text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors group"
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <Icon className="size-4 shrink-0 text-brand-pink group-hover:scale-105 transition-transform" />
-                            <span>{item.label}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            {item.badge && (
-                              <span className="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded bg-brand-pink/15 text-brand-pink border border-brand-pink/30 font-bold">
-                                {item.badge}
+              {/* Drawer Scrollable Content */}
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6 scrollbar-thin">
+                {/* User Status / Auth Section */}
+                <div className="rounded-xl border border-hairline bg-surface-2/60 p-3.5 space-y-3">
+                  {user ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar
+                          name={userProfile?.displayName || user.name || 'Innovator'}
+                          src={userProfile?.avatarUrl || user.image || undefined}
+                          size="sm"
+                          className="ring-1 ring-hairline"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-display text-body-sm font-bold text-fg truncate">
+                            {userProfile?.displayName || user.name || 'Innovator'}
+                          </p>
+                          {userProfile?.handle ? (
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="font-mono text-[11px] text-accent truncate">
+                                @{userProfile.handle}
                               </span>
-                            )}
-                            <ExternalLink className="size-3 text-fg-subtle" />
-                          </div>
-                        </a>
-                      );
-                    }
-
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setIsOpen(false)}
-                        className={cn(
-                          'flex items-center justify-between px-3 py-2 rounded-lg text-body-sm font-display font-medium transition-colors group',
-                          isActive
-                            ? 'text-accent bg-surface-2 border border-accent/20 font-bold'
-                            : 'text-fg-muted hover:text-fg hover:bg-surface-2'
-                        )}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon
-                            className={cn(
-                              'size-4 shrink-0 transition-transform group-hover:scale-105',
-                              isActive ? 'text-accent' : 'text-fg-subtle group-hover:text-fg'
-                            )}
-                          />
-                          <span>{item.label}</span>
+                              {userProfile.reputation !== undefined && (
+                                <span className="inline-flex items-center gap-0.5 rounded bg-accent/15 px-1 py-0.2 text-[9px] font-mono font-bold text-accent">
+                                  <Award className="size-2.5" />
+                                  {userProfile.reputation} REP
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-[11px] text-fg-subtle truncate mt-0.5">
+                              {user.email}
+                            </p>
+                          )}
                         </div>
-                        {item.badge && (
-                          <span
-                            className={cn(
-                              'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded border',
-                              isActive
-                                ? 'bg-accent/15 text-accent border-accent/30 font-bold'
-                                : 'bg-surface-3 text-fg-subtle border-hairline'
-                            )}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </Link>
-                    );
-                  })}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-hairline">
+                        <Link
+                          href={userProfile?.handle ? `/u/${userProfile.handle}` : '/profile'}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-hairline bg-surface-1 text-caption font-display font-medium text-fg hover:border-accent hover:text-accent transition-colors"
+                        >
+                          <User className="size-3.5" />
+                          <span>My Profile</span>
+                        </Link>
+
+                        <Link
+                          href="/settings"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-hairline bg-surface-1 text-caption font-display font-medium text-fg hover:border-accent hover:text-accent transition-colors"
+                        >
+                          <Settings className="size-3.5" />
+                          <span>Settings</span>
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-caption text-fg-muted font-display">
+                        Build together, earn together.
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button asChild size="sm" variant="secondary" className="w-full">
+                          <Link href="/sign-in" onClick={() => setIsOpen(false)}>
+                            Sign in
+                          </Link>
+                        </Button>
+                        <Button asChild size="sm" variant="primary" className="w-full">
+                          <Link href="/sign-up" onClick={() => setIsOpen(false)}>
+                            Sign up
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Start Project CTA Button */}
+                <Button asChild variant="primary" className="w-full shadow-glow-accent">
+                  <Link
+                    href="/new"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center gap-2 font-display font-semibold"
+                  >
+                    <Plus className="size-4" />
+                    <span>Start a New Project</span>
+                  </Link>
+                </Button>
+
+                {/* Navigation Category Groups */}
+                <div className="space-y-5">
+                  {SECTIONS.map((section) => (
+                    <div key={section.heading} className="space-y-1.5">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-accent font-bold px-1">
+                        {section.heading}
+                      </span>
+                      <div className="space-y-0.5">
+                        {section.items.map((item) => {
+                          const Icon = item.icon;
+                          const isActive =
+                            pathname === item.href ||
+                            (!('external' in item && item.external) &&
+                              item.href !== '/' &&
+                              pathname.startsWith(item.href));
+
+                          if ('external' in item && item.external) {
+                            return (
+                              <a
+                                key={item.href}
+                                href={item.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setIsOpen(false)}
+                                className="flex items-center justify-between px-3 py-2 rounded-lg text-body-sm font-display font-medium text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors group"
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <Icon className="size-4 shrink-0 text-brand-pink group-hover:scale-105 transition-transform" />
+                                  <span>{item.label}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  {item.badge && (
+                                    <span className="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded bg-brand-pink/15 text-brand-pink border border-brand-pink/30 font-bold">
+                                      {item.badge}
+                                    </span>
+                                  )}
+                                  <ExternalLink className="size-3 text-fg-subtle" />
+                                </div>
+                              </a>
+                            );
+                          }
+
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={() => setIsOpen(false)}
+                              className={cn(
+                                'flex items-center justify-between px-3 py-2 rounded-lg text-body-sm font-display font-medium transition-colors group',
+                                isActive
+                                  ? 'text-accent bg-surface-2 border border-accent/20 font-bold'
+                                  : 'text-fg-muted hover:text-fg hover:bg-surface-2'
+                              )}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <Icon
+                                  className={cn(
+                                    'size-4 shrink-0 transition-transform group-hover:scale-105',
+                                    isActive ? 'text-accent' : 'text-fg-subtle group-hover:text-fg'
+                                  )}
+                                />
+                                <span>{item.label}</span>
+                              </div>
+                              {item.badge && (
+                                <span
+                                  className={cn(
+                                    'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded border',
+                                    isActive
+                                      ? 'bg-accent/15 text-accent border-accent/30 font-bold'
+                                      : 'bg-surface-3 text-fg-subtle border-hairline'
+                                  )}
+                                >
+                                  {item.badge}
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Sign Out Action if Logged In */}
+                {user && (
+                  <div className="pt-2 border-t border-hairline">
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm font-display text-danger hover:bg-danger/10 transition-colors text-left"
+                    >
+                      <LogOut className="size-4 shrink-0" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Drawer Footer with Theme Toggle & Links */}
+              <div className="border-t border-hairline p-4 space-y-3 shrink-0 bg-surface-2/40">
+                <ThemeToggle variant="labeled" className="w-full justify-center" />
+
+                <div className="flex items-center justify-between text-[10px] font-mono text-fg-subtle px-1">
+                  <span>DPDP India Compliant</span>
+                  <span>v1.0 · Open Source</span>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Sign Out Action if Logged In */}
-          {user && (
-            <div className="pt-2 border-t border-hairline">
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm font-display text-danger hover:bg-danger/10 transition-colors text-left"
-              >
-                <LogOut className="size-4 shrink-0" />
-                <span>Sign Out</span>
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Drawer Footer with Theme Toggle & Links */}
-        <div className="border-t border-hairline p-4 space-y-3 shrink-0 bg-surface-2/40">
-          <ThemeToggle variant="labeled" className="w-full justify-center" />
-
-          <div className="flex items-center justify-between text-[10px] font-mono text-fg-subtle px-1">
-            <span>DPDP India Compliant</span>
-            <span>v1.0 · Open Source</span>
-          </div>
-        </div>
-      </aside>
+            </aside>
+          </>,
+          document.body
+        )}
     </div>
   );
 }
