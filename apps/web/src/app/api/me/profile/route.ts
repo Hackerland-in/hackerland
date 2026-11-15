@@ -135,6 +135,18 @@ export async function POST(request: Request) {
           .map((l) => ({ label: l.label.trim(), url: l.url.trim() }))
       : [];
 
+    const isMinor = typeof body.isMinor === 'boolean' ? body.isMinor : false;
+    const parentalConsentGiven =
+      typeof body.parentalConsentGiven === 'boolean' ? body.parentalConsentGiven : false;
+    const dpdpConsentHash =
+      typeof body.dpdpConsentHash === 'string' && body.dpdpConsentHash.trim()
+        ? body.dpdpConsentHash.trim()
+        : undefined;
+    const dpdpConsentTimestamp =
+      body.dpdpConsentTimestamp
+        ? new Date(body.dpdpConsentTimestamp as string | number | Date)
+        : undefined;
+
     const profile = await ProfileModel.findOneAndUpdate(
       { userId: session.user.id },
       {
@@ -150,6 +162,10 @@ export async function POST(request: Request) {
           skills,
           experienceBadges,
           links,
+          isMinor,
+          parentalConsentGiven,
+          ...(dpdpConsentHash ? { dpdpConsentHash } : {}),
+          ...(dpdpConsentTimestamp ? { dpdpConsentTimestamp } : {}),
         },
       },
       { upsert: true, new: true, setDefaultsOnInsert: true },

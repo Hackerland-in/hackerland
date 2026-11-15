@@ -3,6 +3,7 @@ import {
   OpportunityModel,
   ProfileModel,
   ProjectModel,
+  ReportModel,
   ReputationEventModel,
 } from './index';
 
@@ -98,5 +99,32 @@ describe('ReputationEventModel validation', () => {
     });
     const err = doc.validateSync();
     expect(err?.errors.kind).toBeDefined();
+  });
+});
+
+describe('ReportModel validation', () => {
+  it('rejects missing fields and invalid targetType or reason', () => {
+    const doc = new ReportModel({
+      reporterId: 'user_123',
+      targetType: 'invalid_type',
+      targetId: 'xyz',
+      reason: 'unknown_reason',
+    });
+    const err = doc.validateSync();
+    expect(err?.errors.targetType).toBeDefined();
+    expect(err?.errors.reason).toBeDefined();
+  });
+
+  it('accepts valid report and sets defaults for status and actionTaken', () => {
+    const doc = new ReportModel({
+      reporterId: 'user_123',
+      targetType: 'post',
+      targetId: 'post_999',
+      reason: 'harassment',
+    });
+    const err = doc.validateSync();
+    expect(err).toBeUndefined();
+    expect(doc.status).toBe('pending');
+    expect(doc.actionTaken).toBe('none');
   });
 });

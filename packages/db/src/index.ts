@@ -7,3 +7,4 @@ export * from './models/opportunity';
 export * from './models/reputation-event';
 export * from './models/roadmap';
 export * from './models/lab-node';
+export * from './models/report';

@@ -24,6 +24,7 @@ import { ALL_PROJECT_SUMMARIES } from '@/lib/data/fixtures/projects';
 import { PersonChip } from './person-chip';
 import { RoleCard } from './role-card';
 import { PostReactionButton } from '@/app/feed/post-reaction-button';
+import { PostReportButton } from '@/app/feed/post-report-button';
 
 export interface PostCardProps {
   post: FeedPost;
@@ -214,6 +215,7 @@ export function PostCard({ post, className }: PostCardProps) {
             <span>{post.comments}</span>
             <span className="sr-only">comments</span>
           </span>
+          <PostReportButton postId={post.id} postTitle={post.title} />
         </div>
 
         {post.project ? (

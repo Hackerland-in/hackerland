@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Badge, StatusDot } from '@hackerland/ui';
 import { getPlatformStats } from '@/lib/data/queries';
 
@@ -33,7 +34,13 @@ export async function AppFooter() {
 
         {/* Bottom line: Copyright & license */}
         <div className="flex flex-wrap items-center justify-between gap-2 text-body-xs">
-          <span>Open source · BSD-3-Clause</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span>Open source · BSD-3-Clause</span>
+            <span className="text-line">•</span>
+            <Link href="/moderation" className="hover:text-fg transition-colors">
+              Trust & Safety (DPDP Act)
+            </Link>
+          </div>
           <span>© 2026 Hackerland · hackerland.in</span>
         </div>
       </div>

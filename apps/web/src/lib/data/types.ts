@@ -228,3 +228,29 @@ export interface LabNodeView {
   createdAt?: string;
 }
 
+export type ReportTargetType = 'post' | 'project' | 'profile' | 'opportunity' | 'comment';
+export type ReportReason =
+  | 'spam'
+  | 'malicious_code'
+  | 'harassment'
+  | 'scam'
+  | 'child_safety'
+  | 'other';
+export type ReportStatus = 'pending' | 'reviewed' | 'actioned' | 'dismissed';
+export type ModerationAction = 'none' | 'hidden' | 'banned' | 'warned';
+
+export interface ModerationReport {
+  id: string;
+  reporterId: string;
+  targetType: ReportTargetType;
+  targetId: string;
+  reason: ReportReason;
+  details?: string;
+  status: ReportStatus;
+  actionTaken: ModerationAction;
+  resolvedBy?: string;
+  resolvedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

@@ -10,6 +10,7 @@ import {
   PostModel,
   ProfileModel,
   ProjectModel,
+  ReportModel,
   ReputationEventModel,
 } from '@hackerland/db';
 import { ALL_LAB_NODES } from './fixtures/labs';
@@ -20,12 +21,14 @@ import {
   ALL_PROJECT_SUMMARIES,
   ALL_PROJECTS,
 } from './fixtures/projects';
+import { FIXTURE_REPORTS } from './fixtures/reports';
 import { ALL_ROADMAPS } from './fixtures/roadmaps';
 import { PLATFORM_STATS } from './fixtures/stats';
 import type {
   FeedPost,
   LabNodeView,
   LeaderboardEntry,
+  ModerationReport,
   OpenRole,
   OpportunityView,
   PersonRef,
@@ -33,6 +36,9 @@ import type {
   ProfileView,
   ProjectDetail,
   ProjectSummary,
+  ReportReason,
+  ReportStatus,
+  ReportTargetType,
   Resource,
   RoadmapView,
 } from './types';
@@ -660,4 +666,90 @@ export async function getLab(slug: string): Promise<LabNodeView | null> {
   const match = ALL_LAB_NODES.find((l) => l.slug === slug);
   return match || null;
 }
+
+/**
+ * Retrieves moderation reports, optionally filtered by status, targetType, or reason.
+ */
+export async function listReports(filters?: {
+  status?: ReportStatus;
+  targetType?: ReportTargetType;
+  reason?: ReportReason;
+}): Promise<ModerationReport[]> {
+  let dbReports: ModerationReport[] = [];
+
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDb();
+      const query: Record<string, unknown> = {};
+      if (filters?.status) query.status = filters.status;
+      if (filters?.targetType) query.targetType = filters.targetType;
+      if (filters?.reason) query.reason = filters.reason;
+
+      const docs = await ReportModel.find(query).sort({ createdAt: -1 }).lean();
+      dbReports = docs.map((d) => ({
+        id: d._id.toString(),
+        reporterId: d.reporterId,
+        targetType: d.targetType as ReportTargetType,
+        targetId: d.targetId,
+        reason: d.reason as ReportReason,
+        details: d.details,
+        status: d.status as ReportStatus,
+        actionTaken: d.actionTaken,
+        resolvedBy: d.resolvedBy,
+        resolvedAt: d.resolvedAt ? new Date(d.resolvedAt).toISOString() : undefined,
+        createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : new Date().toISOString(),
+        updatedAt: d.updatedAt ? new Date(d.updatedAt).toISOString() : new Date().toISOString(),
+      }));
+    } catch (err: unknown) {
+      console.warn('MongoDB query failed for listReports, falling back to fixtures:', err);
+    }
+  }
+
+  let fixtureReports = FIXTURE_REPORTS;
+  if (filters?.status) {
+    fixtureReports = fixtureReports.filter((r) => r.status === filters.status);
+  }
+  if (filters?.targetType) {
+    fixtureReports = fixtureReports.filter((r) => r.targetType === filters.targetType);
+  }
+  if (filters?.reason) {
+    fixtureReports = fixtureReports.filter((r) => r.reason === filters.reason);
+  }
+
+  return [...dbReports, ...fixtureReports];
+}
+
+/**
+ * Retrieves a single moderation report by its id.
+ */
+export async function getReport(id: string): Promise<ModerationReport | null> {
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDb();
+      const d = await ReportModel.findById(id).lean();
+      if (d) {
+        return {
+          id: d._id.toString(),
+          reporterId: d.reporterId,
+          targetType: d.targetType as ReportTargetType,
+          targetId: d.targetId,
+          reason: d.reason as ReportReason,
+          details: d.details,
+          status: d.status as ReportStatus,
+          actionTaken: d.actionTaken,
+          resolvedBy: d.resolvedBy,
+          resolvedAt: d.resolvedAt ? new Date(d.resolvedAt).toISOString() : undefined,
+          createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : new Date().toISOString(),
+          updatedAt: d.updatedAt ? new Date(d.updatedAt).toISOString() : new Date().toISOString(),
+        };
+      }
+    } catch (err: unknown) {
+      console.warn('MongoDB query failed for getReport, falling back to fixtures:', err);
+    }
+  }
+
+  const match = FIXTURE_REPORTS.find((r) => r.id === id);
+  return match || null;
+}
+
 

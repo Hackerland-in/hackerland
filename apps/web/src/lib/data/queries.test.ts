@@ -17,9 +17,11 @@ import {
   getPlatformStats,
   getProfile,
   getProject,
+  getReport,
   listLabs,
   listOpportunities,
   listProjects,
+  listReports,
   listRoadmaps,
 } from './queries';
 
@@ -167,5 +169,29 @@ describe('queries', () => {
     for (const entry of makeBoard) {
       expect(entry.tracks).toContain('make');
     }
+  });
+
+  it('lists moderation reports and filters by status and targetType', async () => {
+    const allReports = await listReports();
+    expect(allReports.length).toBeGreaterThanOrEqual(5);
+
+    const pendingReports = await listReports({ status: 'pending' });
+    expect(pendingReports.length).toBeGreaterThanOrEqual(2);
+    for (const r of pendingReports) {
+      expect(r.status).toBe('pending');
+    }
+
+    const postReports = await listReports({ targetType: 'post' });
+    expect(postReports.length).toBeGreaterThanOrEqual(2);
+    for (const r of postReports) {
+      expect(r.targetType).toBe('post');
+    }
+
+    const rep1 = await getReport('rep_001');
+    expect(rep1).not.toBeNull();
+    expect(rep1?.reason).toBe('spam');
+
+    const repNonexistent = await getReport('nonexistent_rep');
+    expect(repNonexistent).toBeNull();
   });
 });

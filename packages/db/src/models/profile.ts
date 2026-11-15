@@ -14,6 +14,10 @@ export interface IProfile {
   experienceBadges: { label: string; tone: Track | 'neutral' }[];
   links: { label: string; url: string }[];
   reputation: number;
+  isMinor?: boolean;
+  parentalConsentGiven?: boolean;
+  dpdpConsentHash?: string;
+  dpdpConsentTimestamp?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +57,10 @@ const ProfileSchema = new Schema<IProfile>(
       },
     ],
     reputation: { type: Number, default: 0 },
+    isMinor: { type: Boolean, default: false },
+    parentalConsentGiven: { type: Boolean, default: false },
+    dpdpConsentHash: { type: String },
+    dpdpConsentTimestamp: { type: Date },
   },
   {
     timestamps: true,
