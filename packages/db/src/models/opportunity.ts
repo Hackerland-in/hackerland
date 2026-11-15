@@ -10,6 +10,13 @@ import {
   type Track,
 } from '@hackerland/core';
 
+export interface IOpportunityClaim {
+  userId: string;
+  note?: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: Date;
+}
+
 export interface IOpportunity {
   kind: OpportunityKind;
   title: string;
@@ -29,6 +36,7 @@ export interface IOpportunity {
   projectId?: string;
   externalUrl?: string;
   createdBy?: string;
+  claims?: IOpportunityClaim[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -69,6 +77,18 @@ const OpportunitySchema = new Schema<IOpportunity>(
     projectId: { type: String },
     externalUrl: { type: String },
     createdBy: { type: String },
+    claims: [
+      {
+        userId: { type: String, required: true },
+        note: { type: String },
+        status: {
+          type: String,
+          enum: ['pending', 'accepted', 'rejected'],
+          default: 'pending',
+        },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,

@@ -3,7 +3,7 @@ import type {
   PostKind,
   Track,
 } from '@hackerland/core';
-import { connectDb, PostModel, ProfileModel, ProjectModel } from '@hackerland/db';
+import { connectDb, OpportunityModel, PostModel, ProfileModel, ProjectModel } from '@hackerland/db';
 import { ALL_OPPORTUNITIES } from './fixtures/opportunities';
 import { PROFILE_KAVYA, PROFILE_MEERA } from './fixtures/people';
 import { ALL_POSTS } from './fixtures/posts';
@@ -429,16 +429,54 @@ export async function getProfile(handle: string): Promise<ProfileView | null> {
 
 /**
  * Lists opportunities, optionally filtered by kind.
+ * Queries OpportunityModel when MONGODB_URI is available, merging with fixtures.
  * Ordered by deadline ascending, with opportunities without a deadline last.
  */
 export async function listOpportunities(
   kind?: OpportunityKind
 ): Promise<OpportunityView[]> {
-  let opps = [...ALL_OPPORTUNITIES];
-  if (kind) {
-    opps = opps.filter((o) => o.kind === kind);
+  let dbOpps: OpportunityView[] = [];
+
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDb();
+      const filter = kind ? { kind } : {};
+      const docs = await OpportunityModel.find(filter).lean();
+
+      if (docs.length > 0) {
+        dbOpps = docs.map((d) => ({
+          id: d._id.toString(),
+          kind: d.kind,
+          title: d.title,
+          summary: d.summary,
+          sponsor: {
+            name: d.sponsor.name,
+            url: d.sponsor.url,
+          },
+          reward: {
+            amount: d.reward.amount,
+            currency: d.reward.currency,
+          },
+          tracks: d.tracks,
+          deadline: d.deadline ? new Date(d.deadline).toISOString().split('T')[0] : undefined,
+          status: d.status,
+          projectSlug: d.projectId,
+          externalUrl: d.externalUrl,
+        }));
+      }
+    } catch (err: unknown) {
+      console.warn('MongoDB query failed for listOpportunities, falling back to fixtures:', err);
+    }
   }
-  return opps.sort((a, b) => {
+
+  const dbIds = new Set(dbOpps.map((o) => o.id));
+  let fixtureOpps = ALL_OPPORTUNITIES.filter((o) => !dbIds.has(o.id));
+  if (kind) {
+    fixtureOpps = fixtureOpps.filter((o) => o.kind === kind);
+  }
+
+  const combined = [...dbOpps, ...fixtureOpps];
+  return combined.sort((a, b) => {
     if (!a.deadline && !b.deadline) return 0;
     if (!a.deadline) return 1;
     if (!b.deadline) return -1;

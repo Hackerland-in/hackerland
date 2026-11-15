@@ -16,6 +16,7 @@ import {
 import { listOpportunities, getPlatformStats } from '@/lib/data/queries';
 import { OpportunityCard } from '@/components/domain/opportunity-card';
 import { Money } from '@/components/domain/money';
+import { PostOpportunityTrigger } from './post-opportunity-trigger';
 
 export const metadata: Metadata = {
   title: 'Earn by Building',
@@ -60,6 +61,7 @@ export default async function EarnPage({ searchParams }: EarnPageProps) {
         eyebrow="GRANTS & CAPITAL"
         title="Earn by building"
         description="The rewards are funded by sponsors, and Hackerland charges contributors nothing."
+        action={<PostOpportunityTrigger />}
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 min-w-0">
@@ -94,20 +96,22 @@ export default async function EarnPage({ searchParams }: EarnPageProps) {
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 overflow-x-auto pb-1">
-        {filters.map((filter) => {
-          const isSelected = filter.value ? selectedKind === filter.value : !selectedKind;
-          return (
-            <FilterChip
-              key={filter.label}
-              asChild
-              selected={isSelected}
-              tone="earn"
-            >
-              <Link href={filter.href}>{filter.label}</Link>
-            </FilterChip>
-          );
-        })}
+      <div className="flex flex-wrap items-center justify-between gap-3 overflow-x-auto pb-1">
+        <div className="flex flex-wrap items-center gap-2">
+          {filters.map((filter) => {
+            const isSelected = filter.value ? selectedKind === filter.value : !selectedKind;
+            return (
+              <FilterChip
+                key={filter.label}
+                asChild
+                selected={isSelected}
+                tone="earn"
+              >
+                <Link href={filter.href}>{filter.label}</Link>
+              </FilterChip>
+            );
+          })}
+        </div>
       </div>
 
       {opportunities.length > 0 ? (
