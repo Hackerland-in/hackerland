@@ -15,4 +15,5 @@ export const ROUTES: string[] = [
   '/settings',
   '/design-system',
   '/labs',
+  '/leaderboard',
 ];

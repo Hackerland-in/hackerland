@@ -13,6 +13,7 @@ import { ALL_ROADMAPS } from './fixtures/roadmaps';
 import {
   getFeed,
   getLab,
+  getLeaderboard,
   getPlatformStats,
   getProfile,
   getProject,
@@ -152,5 +153,19 @@ describe('queries', () => {
 
     const missing = await getLab('does-not-exist');
     expect(missing).toBeNull();
+  });
+
+  it('returns ranked leaderboard and filters by track', async () => {
+    const leaderboard = await getLeaderboard();
+    expect(leaderboard.length).toBeGreaterThanOrEqual(4);
+    for (let i = 0; i < leaderboard.length - 1; i++) {
+      expect(leaderboard[i]!.reputation).toBeGreaterThanOrEqual(leaderboard[i + 1]!.reputation);
+    }
+
+    const makeBoard = await getLeaderboard('make');
+    expect(makeBoard.length).toBeGreaterThanOrEqual(1);
+    for (const entry of makeBoard) {
+      expect(entry.tracks).toContain('make');
+    }
   });
 });

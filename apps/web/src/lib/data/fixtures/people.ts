@@ -208,3 +208,153 @@ export const PROFILE_KAVYA: ProfileView = {
   ],
 };
 
+export const PROFILE_KABIR: ProfileView = {
+  handle: PERSON_KABIR.handle,
+  name: PERSON_KABIR.name,
+  headline: PERSON_KABIR.headline ?? 'Final Year Robotics Student · IIT Bombay',
+  bio: 'Building low-cost autonomous rovers and ROS 2 navigation nodes. Passionate about robotics and embedded systems.',
+  location: 'Mumbai, India',
+  avatarUrl: PERSON_KABIR.avatarUrl,
+  tracks: ['code', 'make'],
+  skills: ['ROS 2', 'C++', 'Python', 'Kinematics', 'Gazebo', 'micro-ROS'],
+  badges: PERSON_KABIR.badges,
+  links: [
+    { label: 'GitHub', url: 'https://github.com' },
+    { label: 'Portfolio', url: 'https://hackerland.in' },
+  ],
+  reputation: 290,
+  stats: {
+    projects: 2,
+    endorsements: 6,
+    contributions: 38,
+    earned: { amount: 35000, currency: 'INR' },
+  },
+  projects: [],
+  mentorships: [],
+  credentials: [{ title: 'B.Tech in Mechanical Engineering', issuer: 'IIT Bombay' }],
+  endorsements: [],
+  recentReputation: [
+    {
+      kind: 'role-filled',
+      points: 15,
+      label: 'Joined AeroGlide UAV as Avionics Lead',
+      at: '2026-11-12T10:00:00Z',
+    },
+    {
+      kind: 'bounty-completed',
+      points: 50,
+      label: 'Implemented ROS 2 Nav2 costmap filter',
+      at: '2026-11-04T15:00:00Z',
+    },
+  ],
+};
+
+export const PROFILE_ZOYA: ProfileView = {
+  handle: PERSON_ZOYA.handle,
+  name: PERSON_ZOYA.name,
+  headline: PERSON_ZOYA.headline ?? 'Accessible Systems & Industrial Product Designer',
+  bio: 'Designing tactile user interfaces, 3D enclosures for rural agritech sensors, and assistive hardware.',
+  location: 'New Delhi, India',
+  avatarUrl: PERSON_ZOYA.avatarUrl,
+  tracks: ['design', 'make'],
+  skills: ['Fusion 360', 'Industrial Design', 'Ergonomics', 'Figma', 'Prototyping'],
+  badges: PERSON_ZOYA.badges,
+  links: [
+    { label: 'Behance', url: 'https://behance.net' },
+    { label: 'Design Log', url: 'https://hackerland.in' },
+  ],
+  reputation: 240,
+  stats: {
+    projects: 3,
+    endorsements: 8,
+    contributions: 42,
+    earned: { amount: 60000, currency: 'INR' },
+  },
+  projects: [],
+  mentorships: [],
+  credentials: [{ title: 'M.Des Industrial Design', issuer: 'NID Ahmedabad' }],
+  endorsements: [],
+  recentReputation: [
+    {
+      kind: 'bounty-completed',
+      points: 50,
+      label: 'Designed snap-fit IP67 enclosure for KisanSense',
+      at: '2026-11-09T14:00:00Z',
+    },
+  ],
+};
+
+export const PROFILE_ARJUN: ProfileView = {
+  handle: PERSON_ARJUN.handle,
+  name: PERSON_ARJUN.name,
+  headline: PERSON_ARJUN.headline ?? 'Edge AI & Embedded Firmware Engineer',
+  bio: 'Optimizing INT8 neural networks for ESP32-S3 and RP2040 microcontrollers. FreeRTOS & Rust enthusiast.',
+  location: 'Kochi, India',
+  avatarUrl: PERSON_ARJUN.avatarUrl,
+  tracks: ['code', 'make'],
+  skills: ['Embedded C', 'Rust', 'FreeRTOS', 'TensorFlow Lite', 'KiCad'],
+  badges: PERSON_ARJUN.badges,
+  links: [{ label: 'GitHub', url: 'https://github.com' }],
+  reputation: 210,
+  stats: {
+    projects: 1,
+    endorsements: 4,
+    contributions: 30,
+    earned: { amount: 25000, currency: 'INR' },
+  },
+  projects: [],
+  mentorships: [],
+  credentials: [{ title: 'B.Tech in Electronics', issuer: 'NIT Calicut' }],
+  endorsements: [],
+  recentReputation: [
+    {
+      kind: 'answer-accepted',
+      points: 15,
+      label: 'Solved DMA buffer overflow in I2S microphone driver',
+      at: '2026-11-08T11:00:00Z',
+    },
+  ],
+};
+
+export const PROFILE_LENA: ProfileView = {
+  handle: PERSON_LENA.handle,
+  name: PERSON_LENA.name,
+  headline: PERSON_LENA.headline ?? 'Additive Manufacturing Specialist · FabLab Berlin',
+  bio: 'High-temperature FDM & SLA printing, parametric generative design, and open laboratory hardware.',
+  location: 'Berlin, Germany',
+  avatarUrl: PERSON_LENA.avatarUrl,
+  tracks: ['make', 'learn'],
+  skills: ['SLA Printing', 'Generative Design', 'OpenSCAD', 'CNC', 'Material Science'],
+  badges: PERSON_LENA.badges,
+  links: [{ label: 'FabLabs', url: 'https://fablabs.io' }],
+  reputation: 195,
+  stats: {
+    projects: 2,
+    endorsements: 5,
+    contributions: 25,
+    earned: { amount: 1200, currency: 'EUR' },
+  },
+  projects: [],
+  mentorships: [],
+  credentials: [{ title: 'Dipl.-Ing. Mechatronics', issuer: 'TU Berlin' }],
+  endorsements: [],
+  recentReputation: [
+    {
+      kind: 'post-helpful',
+      points: 2,
+      label: 'Guide on carbon-fiber nylon print annealing',
+      at: '2026-11-06T18:00:00Z',
+    },
+  ],
+};
+
+export const ALL_PROFILES: ProfileView[] = [
+  PROFILE_MEERA,
+  PROFILE_KAVYA,
+  PROFILE_KABIR,
+  PROFILE_ZOYA,
+  PROFILE_ARJUN,
+  PROFILE_LENA,
+];
+
+

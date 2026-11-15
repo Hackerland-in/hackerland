@@ -3,10 +3,18 @@ import type {
   PostKind,
   Track,
 } from '@hackerland/core';
-import { connectDb, LabNodeModel, OpportunityModel, PostModel, ProfileModel, ProjectModel } from '@hackerland/db';
+import {
+  connectDb,
+  LabNodeModel,
+  OpportunityModel,
+  PostModel,
+  ProfileModel,
+  ProjectModel,
+  ReputationEventModel,
+} from '@hackerland/db';
 import { ALL_LAB_NODES } from './fixtures/labs';
 import { ALL_OPPORTUNITIES } from './fixtures/opportunities';
-import { PROFILE_KAVYA, PROFILE_MEERA } from './fixtures/people';
+import { ALL_PROFILES } from './fixtures/people';
 import { ALL_POSTS } from './fixtures/posts';
 import {
   ALL_PROJECT_SUMMARIES,
@@ -17,6 +25,7 @@ import { PLATFORM_STATS } from './fixtures/stats';
 import type {
   FeedPost,
   LabNodeView,
+  LeaderboardEntry,
   OpenRole,
   OpportunityView,
   PersonRef,
@@ -378,6 +387,19 @@ export async function getProfile(handle: string): Promise<ProfileView | null> {
         const userProjects = ALL_PROJECT_SUMMARIES.filter((p) =>
           p.squad.some((s) => s.handle === normalized)
         );
+
+        const recentEvents = await ReputationEventModel.find({ userId: doc.userId })
+          .sort({ createdAt: -1 })
+          .limit(10)
+          .lean();
+
+        const recentReputation = recentEvents.map((e) => ({
+          kind: e.kind,
+          points: e.points,
+          label: `${e.kind.replace(/-/g, ' ')} (${e.ref?.type || 'item'})`,
+          at: e.createdAt ? new Date(e.createdAt).toISOString() : new Date().toISOString(),
+        }));
+
         return {
           handle: doc.handle,
           name: doc.displayName,
@@ -403,7 +425,7 @@ export async function getProfile(handle: string): Promise<ProfileView | null> {
           mentorships: [],
           credentials: [],
           endorsements: [],
-          recentReputation: [],
+          recentReputation,
         };
       }
     } catch {
@@ -412,21 +434,71 @@ export async function getProfile(handle: string): Promise<ProfileView | null> {
   }
 
   // Fallback to fixtures
-  let profile: ProfileView | null = null;
-  if (normalized === PROFILE_MEERA.handle) {
-    profile = PROFILE_MEERA;
-  } else if (normalized === PROFILE_KAVYA.handle) {
-    profile = PROFILE_KAVYA;
-  }
-  if (!profile) return null;
+  const match = ALL_PROFILES.find((p) => p.handle === normalized);
+  if (!match) return null;
 
   const userProjects = ALL_PROJECT_SUMMARIES.filter((p) =>
     p.squad.some((s) => s.handle === normalized)
   );
   return {
-    ...profile,
-    projects: userProjects.length > 0 ? userProjects : profile.projects,
+    ...match,
+    projects: userProjects.length > 0 ? userProjects : match.projects,
   };
+}
+
+/**
+ * Returns ranked list of innovators ordered by total reputation points descending.
+ */
+export async function getLeaderboard(track?: Track): Promise<LeaderboardEntry[]> {
+  if (process.env.MONGODB_URI) {
+    try {
+      await connectDb();
+      const filter = track ? { tracks: track } : {};
+      const docs = await ProfileModel.find(filter)
+        .sort({ reputation: -1, createdAt: 1 })
+        .limit(50)
+        .lean();
+
+      if (docs.length > 0) {
+        return docs.map((d, index) => ({
+          rank: index + 1,
+          handle: d.handle,
+          name: d.displayName,
+          headline: d.headline,
+          avatarUrl: d.avatarUrl,
+          tracks: d.tracks || [],
+          badges: (d.experienceBadges || []).map((b) => ({
+            label: b.label,
+            tone: b.tone as Track | 'neutral',
+          })),
+          reputation: d.reputation ?? 0,
+          projectsCount: 0,
+          contributionsCount: 0,
+        }));
+      }
+    } catch (err: unknown) {
+      console.warn('MongoDB query failed for getLeaderboard, falling back to fixtures:', err);
+    }
+  }
+
+  let profiles = [...ALL_PROFILES];
+  if (track) {
+    profiles = profiles.filter((p) => p.tracks.includes(track));
+  }
+  profiles.sort((a, b) => b.reputation - a.reputation);
+
+  return profiles.map((p, index) => ({
+    rank: index + 1,
+    handle: p.handle,
+    name: p.name,
+    headline: p.headline,
+    avatarUrl: p.avatarUrl,
+    tracks: p.tracks,
+    badges: p.badges,
+    reputation: p.reputation,
+    projectsCount: p.stats.projects,
+    contributionsCount: p.stats.contributions,
+  }));
 }
 
 /**

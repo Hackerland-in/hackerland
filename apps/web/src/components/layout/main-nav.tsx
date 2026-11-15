@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: '/projects', label: 'Projects' },
   { href: '/earn', label: 'Earn' },
   { href: '/learn', label: 'Learn' },
+  { href: '/leaderboard', label: 'Leaderboard' },
 ];
 
 export function MainNav() {

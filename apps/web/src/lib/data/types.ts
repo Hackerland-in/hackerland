@@ -182,6 +182,20 @@ export interface PlatformStats {
   };
 }
 
+export interface LeaderboardEntry {
+  rank: number;
+  handle: string;
+  name: string;
+  headline?: string;
+  avatarUrl?: string;
+  tracks: Track[];
+  badges: ExperienceBadge[];
+  reputation: number;
+  projectsCount?: number;
+  contributionsCount?: number;
+}
+
+
 export type LabNodeType = 'atl' | 'fablab' | 'college' | 'incubator';
 
 export interface LabEquipment {
