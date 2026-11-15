@@ -17,6 +17,8 @@ import { HardwareBenchStudio } from './bench/hardware-bench-studio';
 import { CircuitoBuilder } from './circuito/circuito-builder';
 import { ActualHardwareSimulator } from './hardware-simulator/actual-hardware-simulator';
 import { CIRCUIT_PRESETS, solveCircuitStep } from './hardware-simulator/circuit-engine';
+import { FalstadSimulator } from './falstad/falstad-simulator';
+import { FALSTAD_PRESETS, parseSpiceNetlist, solveCircuitJsStep } from './falstad/circuitjs-engine';
 
 // @ts-expect-error configure react act environment
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -369,5 +371,57 @@ describe('Manufacturing Hub & Simulation Engines', () => {
 
     expect(container.textContent).toContain('NE555 Precision Timer Astable Multivibrator');
     expect(container.textContent).toContain('f = \\frac{1.44}{(R_1 + 2R_2) \\cdot C_1}');
+  });
+
+  it('parses Berkeley SPICE netlist syntax and executes full bridge rectifier simulation', () => {
+    const preset = FALSTAD_PRESETS[0]!;
+    const elements = parseSpiceNetlist(preset.spiceNetlist);
+    expect(elements.length).toBeGreaterThan(3);
+    expect(elements.some((e) => e.label === 'VAC')).toBe(true);
+    expect(elements.some((e) => e.label === 'C1')).toBe(true);
+
+    const stepResult = solveCircuitJsStep(preset.id, elements, 0.01, 0.0002);
+    expect(stepResult.nodeVoltages['DC_POS']).toBeDefined();
+    expect(stepResult.sourceWaveform).toBeDefined();
+    expect(stepResult.outputWaveform).toBeGreaterThan(0);
+  });
+
+  it('renders FalstadSimulator with moving current canvas and SPICE netlist editor', () => {
+    act(() => {
+      root.render(<FalstadSimulator />);
+    });
+
+    expect(container.textContent).toContain('FALSTAD & NGSPICE ENGINE');
+    expect(container.textContent).toContain('Visual Interactive Electronics & SPICE Circuit Simulator');
+    expect(container.textContent).toContain('Falstad Visual Current & Voltage Animation Canvas');
+    expect(container.textContent).toContain('Full-Wave Bridge Rectifier & Filter Capacitor');
+
+    // Switch to SPICE Deck tab
+    const spiceTab = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('SPICE Netlist Deck')
+    );
+    expect(spiceTab).toBeDefined();
+
+    act(() => {
+      spiceTab?.click();
+    });
+
+    expect(container.textContent).toContain('Berkeley SPICE / ngspice Netlist Deck');
+    expect(container.textContent).toContain('Standard SPICE 3f5');
+    expect(container.textContent).toContain('D1N4007');
+
+    // Switch to Waveform Scope tab
+    const scopeTab = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.includes('Transient Waveform Scope')
+    );
+    expect(scopeTab).toBeDefined();
+
+    act(() => {
+      scopeTab?.click();
+    });
+
+    expect(container.textContent).toContain('Dual-Trace Transient Voltage Waveforms');
+    expect(container.textContent).toContain('Channel 1: AC Source Input');
+    expect(container.textContent).toContain('Channel 2: Rectified / Filtered Output');
   });
 });
