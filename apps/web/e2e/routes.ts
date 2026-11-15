@@ -18,4 +18,5 @@ export const ROUTES: string[] = [
   '/leaderboard',
   '/moderation',
   '/notifications',
+  '/manufacturing',
 ];

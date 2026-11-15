@@ -21,7 +21,9 @@
       "persistent": true
     },
     "lint": {},
-    "typecheck": {},
+    "typecheck": {
+      "dependsOn": ["build"]
+    },
     "test": {},
     "test:e2e": {
       "cache": false
