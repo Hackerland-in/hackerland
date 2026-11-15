@@ -50,6 +50,10 @@ export const COLOR_TOKENS: ColorToken[] = [
   token('earn-fg', '#5CFFBA', 'Earn track text'),
   token('learn', '#4D9FFF', 'Learn track: roadmaps, courses, mentorship'),
   token('learn-fg', '#7DB8FF', 'Learn track text'),
+  token('brand-pink', '#FA1681', 'Authentic Hackerland brand magenta (logo & highlights)'),
+  token('brand-mint', '#64FFDA', 'Authentic Hackerland mint/cyan (action badges & FAB)'),
+  token('brand-green', '#1BA94C', 'Authentic Hackerland track green'),
+  token('brand-blue', '#3A7CED', 'Authentic Hackerland track blue'),
 ];
 
 export const DAY_COLOR_TOKENS: ColorToken[] = [
@@ -85,6 +89,10 @@ export const DAY_COLOR_TOKENS: ColorToken[] = [
   token('earn-fg', '#047857', 'Earn track text'),
   token('learn', '#2563EB', 'Learn track: roadmaps, courses, mentorship'),
   token('learn-fg', '#1D4ED8', 'Learn track text'),
+  token('brand-pink', '#FA1681', 'Authentic Hackerland brand magenta (Solar Day)'),
+  token('brand-mint', '#00BFA5', 'Authentic Hackerland mint/teal (Solar Day)'),
+  token('brand-green', '#1BA94C', 'Authentic Hackerland track green (Solar Day)'),
+  token('brand-blue', '#3A7CED', 'Authentic Hackerland track blue (Solar Day)'),
 ];
 
 export const TRACK_TONES = ['code', 'make', 'design', 'research', 'earn', 'learn'] as const;

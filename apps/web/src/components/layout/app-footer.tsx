@@ -37,6 +37,24 @@ export async function AppFooter() {
           <div className="flex flex-wrap items-center gap-3">
             <span>Open source · BSD-3-Clause</span>
             <span className="text-line">•</span>
+            <a
+              href="https://blog.hackerland.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-fg transition-colors"
+            >
+              Blog
+            </a>
+            <span className="text-line">•</span>
+            <a
+              href="https://ai.hackerland.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-fg transition-colors text-brand-pink"
+            >
+              AI Community
+            </a>
+            <span className="text-line">•</span>
             <Link href="/moderation" className="hover:text-fg transition-colors">
               Trust & Safety (DPDP Act)
             </Link>

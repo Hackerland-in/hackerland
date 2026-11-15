@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search } from 'lucide-react';
 import { Button, IconButton, SearchField } from '@hackerland/ui';
 import { MainNav } from './main-nav';
@@ -17,26 +18,22 @@ export function AppHeader() {
             href="/"
             className="flex items-center gap-2.5 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded border border-accent bg-accent/10 font-display text-headline-sm font-bold text-accent">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M4 4v16" />
-                <path d="M20 4v16" />
-                <path d="M4 12h16" />
-              </svg>
-            </div>
-            <span className="font-display text-headline-sm font-bold tracking-wider text-fg">
-              HACKERLAND
-            </span>
+            <Image
+              src="/logo.png"
+              alt="Hackerland Logo"
+              width={30}
+              height={30}
+              className="h-[30px] w-[30px] rounded object-contain shadow-xs"
+              priority
+            />
+            <Image
+              src="/images/logo2.png"
+              alt="Hackerland"
+              width={140}
+              height={28}
+              className="h-[28px] w-auto object-contain dark:brightness-200 dark:contrast-125"
+              priority
+            />
           </Link>
         </div>
 
@@ -69,6 +66,15 @@ export function AppHeader() {
 
           {/* Theme toggle (Dark / Day mode) */}
           <ThemeToggle />
+
+          {/* Join AI Community on 2xl+ */}
+          <div className="hidden 2xl:block">
+            <Button asChild size="sm" variant="ghost" className="text-brand-pink border border-brand-pink/30 hover:bg-brand-pink/10 hover:text-brand-pink">
+              <a href="https://ai.hackerland.in/" target="_blank" rel="noopener noreferrer">
+                Join AI Community
+              </a>
+            </Button>
+          </div>
 
           {/* Primary CTA (Start project) on lg+ */}
           <div className="hidden lg:block">

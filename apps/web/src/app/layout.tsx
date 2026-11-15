@@ -33,6 +33,13 @@ export const metadata: Metadata = {
   },
   description:
     'Open-source innovation network for students, designers, programmers, makers and innovators to build in the open, find collaborators, and earn through bounties and grants.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    apple: '/logo.png',
+  },
 };
 
 const themeScript = `(function() {

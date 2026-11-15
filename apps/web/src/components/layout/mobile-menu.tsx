@@ -17,6 +17,9 @@ import {
   Factory,
   Trophy,
   Plus,
+  Sparkles,
+  Newspaper,
+  ExternalLink,
 } from 'lucide-react';
 import { Button, IconButton, cn } from '@hackerland/ui';
 
@@ -68,6 +71,13 @@ export function MobileMenu() {
         { href: '/how-to-start', label: 'Factory Blueprints', icon: Factory },
       ],
     },
+    {
+      heading: 'Community & Ecosystem',
+      items: [
+        { href: 'https://ai.hackerland.in/', label: 'Join AI Community (Free)', icon: Sparkles, external: true },
+        { href: 'https://blog.hackerland.in/', label: 'Hackerland Blog', icon: Newspaper, external: true },
+      ],
+    },
   ];
 
   return (
@@ -93,7 +103,28 @@ export function MobileMenu() {
                     const Icon = item.icon;
                     const isActive =
                       pathname === item.href ||
-                      (item.href !== '/' && pathname.startsWith(item.href));
+                      (!('external' in item && item.external) &&
+                        item.href !== '/' &&
+                        pathname.startsWith(item.href));
+
+                    if ('external' in item && item.external) {
+                      return (
+                        <a
+                          key={item.href}
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center justify-between px-3 py-2.5 rounded-lg text-body-sm font-display font-medium text-fg-muted hover:text-fg hover:bg-surface-1 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Icon className="size-4 shrink-0 text-brand-pink" />
+                            <span>{item.label}</span>
+                          </div>
+                          <ExternalLink className="size-3.5 text-fg-subtle" />
+                        </a>
+                      );
+                    }
 
                     return (
                       <Link

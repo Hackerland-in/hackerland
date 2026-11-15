@@ -12,6 +12,10 @@ import {
   GraduationCap,
   BookOpen,
   ArrowRight,
+  Sparkles,
+  Newspaper,
+  Trophy,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -21,6 +25,7 @@ interface NavSubItem {
   description: string;
   icon: typeof Cpu;
   badge?: string;
+  external?: boolean;
 }
 
 interface NavDropdown {
@@ -88,6 +93,36 @@ const ACADEMY_DROPDOWN: NavDropdown = {
       title: 'How to Start a Factory',
       description: 'CapEx budgeting, machinery checklists & Indian subsidies',
       icon: Factory,
+    },
+  ],
+};
+
+const COMMUNITY_DROPDOWN: NavDropdown = {
+  id: 'community',
+  label: 'Community',
+  matchPrefixes: ['/leaderboard'],
+  items: [
+    {
+      href: 'https://ai.hackerland.in/',
+      title: 'Join AI Community',
+      description: 'Global network of 10,000+ AI engineers, researchers & builders',
+      icon: Sparkles,
+      badge: 'Free',
+      external: true,
+    },
+    {
+      href: 'https://blog.hackerland.in/',
+      title: 'Hackerland Blog',
+      description: 'Engineering stories, system designs & hardware breakthroughs',
+      icon: Newspaper,
+      external: true,
+    },
+    {
+      href: '/leaderboard',
+      title: 'Top Innovators',
+      description: 'Global leaderboard of top project builders and contributors',
+      icon: Trophy,
+      badge: 'Top 100',
     },
   ],
 };
@@ -195,25 +230,15 @@ export function MainNav() {
                 const Icon = item.icon;
                 const isItemActive =
                   pathname === item.href ||
-                  (item.href !== '/' && pathname.startsWith(item.href));
+                  (!item.external && item.href !== '/' && pathname.startsWith(item.href));
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    role="menuitem"
-                    onClick={() => setOpenDropdown(null)}
-                    className={cn(
-                      'group flex items-start gap-3 rounded-lg p-2.5 transition-colors',
-                      isItemActive
-                        ? 'bg-accent/10 border border-accent/20'
-                        : 'hover:bg-surface-2 border border-transparent'
-                    )}
-                  >
+                const content = (
+                  <>
                     <div
                       className={cn(
                         'flex size-8 shrink-0 items-center justify-center rounded-md border border-line bg-surface-2 transition-transform group-hover:scale-105',
-                        isItemActive && 'border-accent/40 bg-accent/15 text-accent'
+                        isItemActive && 'border-accent/40 bg-accent/15 text-accent',
+                        item.external && 'text-brand-pink group-hover:bg-brand-pink/10'
                       )}
                     >
                       <Icon className="size-4" />
@@ -231,15 +256,58 @@ export function MainNav() {
                           {item.title}
                         </span>
                         {item.badge && (
-                          <span className="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded bg-surface-3 text-fg-subtle border border-hairline">
+                          <span
+                            className={cn(
+                              'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded border',
+                              item.badge === 'Free'
+                                ? 'bg-brand-pink/15 text-brand-pink border-brand-pink/30 font-bold'
+                                : 'bg-surface-3 text-fg-subtle border-hairline'
+                            )}
+                          >
                             {item.badge}
                           </span>
+                        )}
+                        {item.external && (
+                          <ExternalLink className="size-3 text-fg-subtle ml-auto shrink-0 opacity-60 group-hover:opacity-100" />
                         )}
                       </div>
                       <p className="text-[11px] text-fg-muted line-clamp-1 mt-0.5">
                         {item.description}
                       </p>
                     </div>
+                  </>
+                );
+
+                if (item.external) {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      role="menuitem"
+                      onClick={() => setOpenDropdown(null)}
+                      className="group flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-surface-2 border border-transparent"
+                    >
+                      {content}
+                    </a>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    role="menuitem"
+                    onClick={() => setOpenDropdown(null)}
+                    className={cn(
+                      'group flex items-start gap-3 rounded-lg p-2.5 transition-colors',
+                      isItemActive
+                        ? 'bg-accent/10 border border-accent/20'
+                        : 'hover:bg-surface-2 border border-transparent'
+                    )}
+                  >
+                    {content}
                   </Link>
                 );
               })}
@@ -250,16 +318,31 @@ export function MainNav() {
               <span className="text-[10px] font-mono text-fg-subtle">
                 {dropdown.id === 'hardware'
                   ? 'Open-Source Hardware'
-                  : 'Entrepreneurship & Skills'}
+                  : dropdown.id === 'academy'
+                  ? 'Entrepreneurship & Skills'
+                  : 'Hackerland Network'}
               </span>
-              <Link
-                href={dropdown.items[0]!.href}
-                onClick={() => setOpenDropdown(null)}
-                className="inline-flex items-center gap-1 text-[11px] font-mono font-medium text-accent hover:underline"
-              >
-                <span>Launch Hub</span>
-                <ArrowRight className="size-3" />
-              </Link>
+              {dropdown.items[0]!.external ? (
+                <a
+                  href={dropdown.items[0]!.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOpenDropdown(null)}
+                  className="inline-flex items-center gap-1 text-[11px] font-mono font-medium text-brand-pink hover:underline"
+                >
+                  <span>{dropdown.items[0]!.title}</span>
+                  <ArrowRight className="size-3" />
+                </a>
+              ) : (
+                <Link
+                  href={dropdown.items[0]!.href}
+                  onClick={() => setOpenDropdown(null)}
+                  className="inline-flex items-center gap-1 text-[11px] font-mono font-medium text-accent hover:underline"
+                >
+                  <span>Launch Hub</span>
+                  <ArrowRight className="size-3" />
+                </Link>
+              )}
             </div>
           </div>
         )}
@@ -271,14 +354,14 @@ export function MainNav() {
     <nav
       ref={containerRef}
       aria-label="Main Navigation"
-      className="hidden md:flex items-center gap-1"
+      className="hidden md:flex items-center gap-0.5 lg:gap-1"
     >
       {/* 1. Projects */}
       <Link
         href="/projects"
         aria-current={isProjectsActive ? 'page' : undefined}
         className={cn(
-          'px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
+          'px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
           isProjectsActive
             ? 'text-accent bg-surface-2 border border-accent/20'
             : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
@@ -292,7 +375,7 @@ export function MainNav() {
         href="/feed"
         aria-current={isFeedActive ? 'page' : undefined}
         className={cn(
-          'px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
+          'px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
           isFeedActive
             ? 'text-accent bg-surface-2 border border-accent/20'
             : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
@@ -309,7 +392,7 @@ export function MainNav() {
         href="/earn"
         aria-current={isEarnActive ? 'page' : undefined}
         className={cn(
-          'px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
+          'px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
           isEarnActive
             ? 'text-accent bg-surface-2 border border-accent/20'
             : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
@@ -321,19 +404,18 @@ export function MainNav() {
       {/* 5. Academy Dropdown (Learn by Doing, Founders, How to Start) */}
       {renderDropdown(ACADEMY_DROPDOWN)}
 
-      {/* 6. Leaderboard */}
-      <Link
-        href="/leaderboard"
-        aria-current={isLeaderboardActive ? 'page' : undefined}
-        className={cn(
-          'px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
-          isLeaderboardActive
-            ? 'text-accent bg-surface-2 border border-accent/20'
-            : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
-        )}
+      {/* 6. Community Dropdown (Join AI Community, Blog, Leaderboard) */}
+      {renderDropdown(COMMUNITY_DROPDOWN)}
+
+      {/* 7. Direct Blog link on xl+ */}
+      <a
+        href="https://blog.hackerland.in/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hidden xl:inline-flex px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent transition-colors items-center gap-1"
       >
-        Leaderboard
-      </Link>
+        <span>Blog</span>
+      </a>
     </nav>
   );
 }

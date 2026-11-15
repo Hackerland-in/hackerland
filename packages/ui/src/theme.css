@@ -44,6 +44,10 @@
   --color-earn-fg: #5CFFBA;
   --color-learn: #4D9FFF;
   --color-learn-fg: #7DB8FF;
+  --color-brand-pink: #FA1681;
+  --color-brand-mint: #64FFDA;
+  --color-brand-green: #1BA94C;
+  --color-brand-blue: #3A7CED;
 
   /* ---------- Type scale (Space Grotesk headings/labels, Inter body) ---------- */
   --text-display-hero: 3.5rem;
@@ -155,6 +159,10 @@
     --color-earn-fg: #5CFFBA;
     --color-learn: #4D9FFF;
     --color-learn-fg: #7DB8FF;
+    --color-brand-pink: #FA1681;
+    --color-brand-mint: #64FFDA;
+    --color-brand-green: #1BA94C;
+    --color-brand-blue: #3A7CED;
     --shadow-module: 0 8px 24px -4px rgb(0 0 0 / 0.6);
     --shadow-overlay: 0 16px 40px -8px rgb(0 0 0 / 0.85);
   }
@@ -194,6 +202,10 @@
     --color-earn-fg: #047857;
     --color-learn: #2563EB;
     --color-learn-fg: #1D4ED8;
+    --color-brand-pink: #FA1681;
+    --color-brand-mint: #00BFA5;
+    --color-brand-green: #1BA94C;
+    --color-brand-blue: #3A7CED;
     --shadow-module: 0 4px 16px -2px rgb(15 23 42 / 0.08);
     --shadow-overlay: 0 12px 32px -4px rgb(15 23 42 / 0.16);
   }
@@ -219,9 +231,14 @@
     outline-offset: 2px;
   }
 
+  ::-moz-selection {
+    background-color: #FA1681;
+    color: #FFFFFF;
+  }
+
   ::selection {
-    background-color: var(--color-accent);
-    color: var(--color-on-solid);
+    background-color: #FA1681;
+    color: #FFFFFF;
   }
 }
 
