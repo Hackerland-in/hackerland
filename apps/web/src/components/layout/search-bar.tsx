@@ -160,8 +160,8 @@ export function SearchBar() {
 
   return (
     <>
-      {/* Desktop Search Trigger Field (xl+) */}
-      <div className="hidden xl:block w-48 2xl:w-60">
+      {/* Desktop Search Trigger Field (2xl+) */}
+      <div className="hidden 2xl:block w-52 2xl:w-60">
         <button
           type="button"
           onClick={() => setIsOpen(true)}
@@ -178,8 +178,8 @@ export function SearchBar() {
         </button>
       </div>
 
-      {/* Mobile & Tablet Search Trigger Icon (< xl) */}
-      <div className="xl:hidden">
+      {/* Mobile, Tablet & Laptop Search Trigger Icon (< 2xl) */}
+      <div className="2xl:hidden">
         <IconButton
           label="Search Hackerland"
           onClick={() => setIsOpen(true)}

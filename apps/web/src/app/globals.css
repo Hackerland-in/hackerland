@@ -1,3 +1,9 @@
 @import "tailwindcss";
 @import "@hackerland/ui/theme.css";
 @source "../../../../packages/ui/src";
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}

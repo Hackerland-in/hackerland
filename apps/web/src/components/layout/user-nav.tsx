@@ -276,13 +276,13 @@ export function UserNav() {
     );
   }
 
-  // If user is not logged in
+  // If user is not logged in (on < sm, sign in / sign up are in the mobile slider drawer)
   return (
-    <div className="flex items-center gap-2">
+    <div className="hidden sm:flex items-center gap-2">
       <Button asChild size="sm" variant="secondary">
         <Link href="/sign-in">Sign in</Link>
       </Button>
-      <div className="hidden sm:block">
+      <div className="hidden md:block">
         <Button asChild size="sm" variant="primary">
           <Link href="/sign-up">Sign up</Link>
         </Button>

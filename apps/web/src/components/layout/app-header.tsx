@@ -10,38 +10,38 @@ import { MobileMenu } from './mobile-menu';
 
 export function AppHeader() {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-hairline bg-canvas/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-page items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 w-full overflow-x-clip border-b border-hairline bg-canvas/90 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-page items-center justify-between px-3 sm:px-6 lg:px-8">
         {/* Left: Logo */}
-        <div className="flex items-center gap-4 lg:gap-6 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           <Link
             href="/"
-            className="flex items-center gap-2.5 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex items-center gap-2 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <Image
               src="/logo.png"
               alt="Hackerland Logo"
               width={30}
               height={30}
-              className="h-[30px] w-[30px] rounded object-contain shadow-xs"
+              className="h-[30px] w-[30px] rounded object-contain shrink-0 shadow-xs"
               priority
             />
             <Image
               src="/images/logo2.png"
               alt="Hackerland"
-              width={140}
-              height={28}
-              className="h-[28px] w-auto object-contain dark:brightness-200 dark:contrast-125"
+              width={130}
+              height={26}
+              className="hidden sm:block h-[26px] w-auto object-contain dark:brightness-200 dark:contrast-125 shrink-0"
               priority
             />
           </Link>
         </div>
 
-        {/* Center: Main Nav (md+ only) */}
+        {/* Center: Main Nav (lg+ only) */}
         <MainNav />
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {/* Interactive Global Search (Spotlight ⌘K + input + mobile trigger) */}
           <SearchBar />
 
@@ -62,8 +62,8 @@ export function AppHeader() {
             </Button>
           </div>
 
-          {/* Primary CTA (Start project) on lg+ */}
-          <div className="hidden lg:block">
+          {/* Primary CTA (Start project) on xl+ */}
+          <div className="hidden xl:block">
             <Button asChild size="sm" variant="primary">
               <Link href="/new">Start project</Link>
             </Button>
@@ -72,8 +72,10 @@ export function AppHeader() {
           {/* User Nav (Profile / Menu if logged in, Sign in / Sign up if not) */}
           <UserNav />
 
-          {/* Mobile Menu Hamburger (md:hidden) */}
-          <MobileMenu />
+          {/* Mobile Right Slider Menu Trigger (lg:hidden) */}
+          <div className="lg:hidden">
+            <MobileMenu />
+          </div>
         </div>
       </div>
     </header>

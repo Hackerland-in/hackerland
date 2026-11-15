@@ -364,14 +364,14 @@ export function MainNav() {
     <nav
       ref={containerRef}
       aria-label="Main Navigation"
-      className="hidden md:flex items-center gap-0.5 lg:gap-1"
+      className="hidden lg:flex items-center gap-0.5 xl:gap-1.5"
     >
       {/* 1. Projects */}
       <Link
         href="/projects"
         aria-current={isProjectsActive ? 'page' : undefined}
         className={cn(
-          'px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
+          'px-2.5 xl:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
           isProjectsActive
             ? 'text-accent bg-surface-2 border border-accent/20'
             : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
@@ -385,7 +385,7 @@ export function MainNav() {
         href="/feed"
         aria-current={isFeedActive ? 'page' : undefined}
         className={cn(
-          'px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
+          'px-2.5 xl:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
           isFeedActive
             ? 'text-accent bg-surface-2 border border-accent/20'
             : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
@@ -397,40 +397,12 @@ export function MainNav() {
       {/* 3. Hardware Dropdown (Manufacturing, Physics, Labs, Factory Blueprints) */}
       {renderDropdown(HARDWARE_DROPDOWN)}
 
-      {/* 3a. Direct Simulators link on lg+ */}
-      <Link
-        href="/manufacturing/physics"
-        aria-current={pathname.startsWith('/manufacturing/physics') ? 'page' : undefined}
-        className={cn(
-          'hidden lg:inline-flex px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
-          pathname.startsWith('/manufacturing/physics')
-            ? 'text-accent bg-surface-2 border border-accent/20'
-            : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
-        )}
-      >
-        Simulators
-      </Link>
-
-      {/* 3b. Direct Labs link on lg+ */}
-      <Link
-        href="/labs"
-        aria-current={pathname === '/labs' || pathname.startsWith('/labs/') ? 'page' : undefined}
-        className={cn(
-          'hidden lg:inline-flex px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
-          pathname === '/labs' || pathname.startsWith('/labs/')
-            ? 'text-accent bg-surface-2 border border-accent/20'
-            : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
-        )}
-      >
-        Labs
-      </Link>
-
       {/* 4. Earn */}
       <Link
         href="/earn"
         aria-current={isEarnActive ? 'page' : undefined}
         className={cn(
-          'px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
+          'px-2.5 xl:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
           isEarnActive
             ? 'text-accent bg-surface-2 border border-accent/20'
             : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
@@ -442,18 +414,8 @@ export function MainNav() {
       {/* 5. Academy Dropdown (Learn by Doing, Founders, How to Start) */}
       {renderDropdown(ACADEMY_DROPDOWN)}
 
-      {/* 6. Community Dropdown (Join AI Community, Blog, Leaderboard) */}
+      {/* 6. Community Dropdown (Join AI Community, Blog, Leaderboard, Innovator Profiles) */}
       {renderDropdown(COMMUNITY_DROPDOWN)}
-
-      {/* 7. Direct Blog link on xl+ */}
-      <a
-        href="https://blog.hackerland.in/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hidden xl:inline-flex px-2.5 lg:px-3 py-1.5 text-body-sm font-display font-medium rounded-md text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent transition-colors items-center gap-1"
-      >
-        <span>Blog</span>
-      </a>
     </nav>
   );
 }

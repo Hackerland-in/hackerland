@@ -74,10 +74,10 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="flex min-h-screen flex-col bg-canvas text-fg font-sans text-body-md antialiased selection:bg-accent selection:text-on-solid">
+      <body className="flex min-h-screen flex-col bg-canvas text-fg font-sans text-body-md antialiased selection:bg-accent selection:text-on-solid max-w-full overflow-x-clip">
         <SkipLink />
         <AppHeader />
-        <main id="main" className="flex-1 pb-20 md:pb-0">
+        <main id="main" className="flex-1 pb-20 md:pb-0 max-w-full overflow-x-clip">
           {children}
         </main>
         <AppFooter />

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Menu,
   X,
@@ -16,23 +17,94 @@ import {
   BookOpen,
   Factory,
   Trophy,
+  Users,
   Plus,
   Sparkles,
   Newspaper,
   ExternalLink,
+  User,
+  Settings,
+  LogOut,
+  Award,
 } from 'lucide-react';
-import { Button, IconButton, cn } from '@hackerland/ui';
+import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
+import { authClient } from '@/lib/auth-client';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const drawerRef = useRef<HTMLDivElement>(null);
+
+  const session = authClient.useSession();
+  const user = session.data?.user;
+  const [userProfile, setUserProfile] = useState<{
+    handle?: string;
+    displayName?: string;
+    avatarUrl?: string;
+    reputation?: number;
+  } | null>(null);
+
+  // Sync profile details
+  useEffect(() => {
+    function loadLocal() {
+      try {
+        const cached = localStorage.getItem('hackerland_user_profile');
+        if (cached) {
+          const prof = JSON.parse(cached);
+          if (prof?.handle) {
+            setUserProfile((prev) => ({
+              ...prev,
+              handle: prof.handle,
+              displayName: prof.displayName || prof.name || user?.name || 'Innovator',
+              avatarUrl: prof.avatarUrl || user?.image,
+              reputation: prof.reputation || prev?.reputation || 120,
+            }));
+          }
+        }
+      } catch {
+        // Ignore
+      }
+    }
+    loadLocal();
+    window.addEventListener('hackerland:profile-updated', loadLocal);
+
+    if (!user?.id) {
+      return () => {
+        window.removeEventListener('hackerland:profile-updated', loadLocal);
+      };
+    }
+
+    let active = true;
+    fetch('/api/me/profile')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data) return;
+        const prof = data.profile || data;
+        if (prof?.handle) {
+          setUserProfile({
+            handle: prof.handle,
+            displayName: prof.displayName || prof.name || user.name,
+            avatarUrl: prof.avatarUrl || user.image,
+            reputation: prof.reputation || 0,
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+      window.removeEventListener('hackerland:profile-updated', loadLocal);
+    };
+  }, [user?.id, user?.name, user?.image]);
 
   // Close on route change
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -44,62 +116,229 @@ export function MobileMenu() {
     };
   }, [isOpen]);
 
+  // Close on Escape key
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
+  const handleSignOut = async () => {
+    try {
+      await authClient.signOut();
+      setIsOpen(false);
+      router.push('/');
+      router.refresh();
+    } catch {
+      router.push('/');
+    }
+  };
+
   const SECTIONS = [
     {
       heading: 'Discover & Build',
       items: [
         { href: '/projects', label: 'Explore Projects', icon: FolderKanban },
         { href: '/feed', label: 'Community Feed', icon: Compass },
-        { href: '/new', label: 'Start a Project', icon: Plus },
-        { href: '/leaderboard', label: 'Top Innovators', icon: Trophy },
+        { href: '/leaderboard', label: 'Top Innovators', icon: Trophy, badge: 'Rankings' },
+        { href: '/u', label: 'Innovator Profiles', icon: Users, badge: 'Directory' },
       ],
     },
     {
-      heading: 'Hardware & Engineering',
+      heading: 'Hardware & Manufacturing',
       items: [
-        { href: '/manufacturing', label: 'Manufacturing Hub (8 Domains)', icon: Cpu },
-        { href: '/manufacturing/physics', label: 'Virtual Simulators Suite', icon: Gauge },
-        { href: '/labs', label: 'Makerspaces & ATL Labs', icon: Atom },
-        { href: '/how-to-start', label: 'Factory Blueprints & CapEx', icon: Factory },
+        { href: '/manufacturing', label: 'Manufacturing Hub', icon: Cpu, badge: '8 Domains' },
+        { href: '/manufacturing/physics', label: 'Virtual Simulators Suite', icon: Gauge, badge: '60 FPS' },
+        { href: '/labs', label: 'Makerspaces & ATL Labs', icon: Atom, badge: 'Across India' },
+        { href: '/how-to-start', label: 'Factory Blueprints & CapEx', icon: Factory, badge: 'CapEx' },
       ],
     },
     {
       heading: 'Opportunities & Academy',
       items: [
-        { href: '/earn', label: 'Earn (Bounties & Grants)', icon: Coins },
-        { href: '/learn', label: 'Learn by Doing Roadmaps', icon: GraduationCap },
-        { href: '/entrepreneurship', label: 'Founder Academy', icon: BookOpen },
-        { href: '/how-to-start', label: 'Factory Blueprints', icon: Factory },
+        { href: '/earn', label: 'Earn (Bounties & Grants)', icon: Coins, badge: 'Active' },
+        { href: '/learn', label: 'Learn by Doing Roadmaps', icon: GraduationCap, badge: 'Open-Source' },
+        { href: '/entrepreneurship', label: 'Founder Academy', icon: BookOpen, badge: '100% Free' },
       ],
     },
     {
-      heading: 'Community & Ecosystem',
+      heading: 'Ecosystem & Community',
       items: [
-        { href: 'https://ai.hackerland.in/', label: 'Join AI Community (Free)', icon: Sparkles, external: true },
+        { href: 'https://ai.hackerland.in/', label: 'Join AI Community', icon: Sparkles, badge: 'Free', external: true },
         { href: 'https://blog.hackerland.in/', label: 'Hackerland Blog', icon: Newspaper, external: true },
       ],
     },
   ];
 
   return (
-    <div className="md:hidden">
+    <div>
+      {/* Drawer Toggle Hamburger Button */}
       <IconButton
         label={isOpen ? 'Close menu' : 'Open menu'}
         onClick={() => setIsOpen(!isOpen)}
-        className="text-fg"
+        className="text-fg flex items-center justify-center min-h-[44px] min-w-[44px] rounded-md hover:bg-surface-2 transition-colors"
+        aria-expanded={isOpen}
       >
         {isOpen ? <X className="size-5" /> : <Menu className="size-5" />}
       </IconButton>
 
-      {isOpen && (
-        <div className="fixed inset-0 top-16 z-50 flex flex-col bg-canvas/98 backdrop-blur-xl border-b border-hairline overflow-y-auto px-6 py-6 pb-24 animate-in fade-in duration-150">
-          <div className="space-y-6">
+      {/* Backdrop overlay */}
+      <div
+        className={cn(
+          'fixed inset-0 z-50 bg-canvas/80 backdrop-blur-sm transition-opacity duration-300',
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        )}
+        onClick={() => setIsOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Right Side Slider Drawer (Sheet) */}
+      <aside
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation drawer"
+        className={cn(
+          'fixed inset-y-0 right-0 z-50 w-[88vw] max-w-[340px] sm:max-w-sm bg-surface-1 border-l border-hairline shadow-2xl flex flex-col justify-between overflow-y-auto transform transition-transform duration-300 ease-in-out',
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        )}
+      >
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between border-b border-hairline px-5 py-4 shrink-0 bg-surface-1/80 backdrop-blur sticky top-0 z-10">
+          <Link
+            href="/"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
+          >
+            <Image
+              src="/logo.png"
+              alt="Hackerland Logo"
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded object-contain"
+              priority
+            />
+            <div className="flex flex-col">
+              <span className="font-display text-body-sm font-bold tracking-tight text-fg leading-none">
+                Hackerland
+              </span>
+              <span className="font-mono text-[10px] text-accent leading-none mt-1">
+                Open-Source Network
+              </span>
+            </div>
+          </Link>
+
+          <IconButton
+            label="Close menu"
+            onClick={() => setIsOpen(false)}
+            className="text-fg-subtle hover:text-fg min-h-[40px] min-w-[40px] rounded-lg hover:bg-surface-2 transition-colors"
+          >
+            <X className="size-5" />
+          </IconButton>
+        </div>
+
+        {/* Drawer Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6 scrollbar-thin">
+          {/* User Status / Auth Section */}
+          <div className="rounded-xl border border-hairline bg-surface-2/60 p-3.5 space-y-3">
+            {user ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <Avatar
+                    name={userProfile?.displayName || user.name || 'Innovator'}
+                    src={userProfile?.avatarUrl || user.image || undefined}
+                    size="sm"
+                    className="ring-1 ring-hairline"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display text-body-sm font-bold text-fg truncate">
+                      {userProfile?.displayName || user.name || 'Innovator'}
+                    </p>
+                    {userProfile?.handle ? (
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="font-mono text-[11px] text-accent truncate">
+                          @{userProfile.handle}
+                        </span>
+                        {userProfile.reputation !== undefined && (
+                          <span className="inline-flex items-center gap-0.5 rounded bg-accent/15 px-1 py-0.2 text-[9px] font-mono font-bold text-accent">
+                            <Award className="size-2.5" />
+                            {userProfile.reputation} REP
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-fg-subtle truncate mt-0.5">
+                        {user.email}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-hairline">
+                  <Link
+                    href={userProfile?.handle ? `/u/${userProfile.handle}` : '/profile'}
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-hairline bg-surface-1 text-caption font-display font-medium text-fg hover:border-accent hover:text-accent transition-colors"
+                  >
+                    <User className="size-3.5" />
+                    <span>My Profile</span>
+                  </Link>
+
+                  <Link
+                    href="/settings"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-hairline bg-surface-1 text-caption font-display font-medium text-fg hover:border-accent hover:text-accent transition-colors"
+                  >
+                    <Settings className="size-3.5" />
+                    <span>Settings</span>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-caption text-fg-muted font-display">
+                  Build together, earn together.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button asChild size="sm" variant="secondary" className="w-full">
+                    <Link href="/sign-in" onClick={() => setIsOpen(false)}>
+                      Sign in
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" variant="primary" className="w-full">
+                    <Link href="/sign-up" onClick={() => setIsOpen(false)}>
+                      Sign up
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Start Project CTA Button */}
+          <Button asChild variant="primary" className="w-full shadow-glow-accent">
+            <Link
+              href="/new"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center gap-2 font-display font-semibold"
+            >
+              <Plus className="size-4" />
+              <span>Start a New Project</span>
+            </Link>
+          </Button>
+
+          {/* Navigation Category Groups */}
+          <div className="space-y-5">
             {SECTIONS.map((section) => (
-              <div key={section.heading} className="space-y-2">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-accent font-bold">
+              <div key={section.heading} className="space-y-1.5">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-accent font-bold px-1">
                   {section.heading}
                 </span>
-                <div className="grid grid-cols-1 gap-1">
+                <div className="space-y-0.5">
                   {section.items.map((item) => {
                     const Icon = item.icon;
                     const isActive =
@@ -116,13 +355,20 @@ export function MobileMenu() {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center justify-between px-3 py-2.5 rounded-lg text-body-sm font-display font-medium text-fg-muted hover:text-fg hover:bg-surface-1 transition-colors"
+                          className="flex items-center justify-between px-3 py-2 rounded-lg text-body-sm font-display font-medium text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors group"
                         >
-                          <div className="flex items-center gap-3">
-                            <Icon className="size-4 shrink-0 text-brand-pink" />
+                          <div className="flex items-center gap-2.5">
+                            <Icon className="size-4 shrink-0 text-brand-pink group-hover:scale-105 transition-transform" />
                             <span>{item.label}</span>
                           </div>
-                          <ExternalLink className="size-3.5 text-fg-subtle" />
+                          <div className="flex items-center gap-1.5">
+                            {item.badge && (
+                              <span className="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded bg-brand-pink/15 text-brand-pink border border-brand-pink/30 font-bold">
+                                {item.badge}
+                              </span>
+                            )}
+                            <ExternalLink className="size-3 text-fg-subtle" />
+                          </div>
                         </a>
                       );
                     }
@@ -133,14 +379,33 @@ export function MobileMenu() {
                         href={item.href}
                         onClick={() => setIsOpen(false)}
                         className={cn(
-                          'flex items-center gap-3 px-3 py-2.5 rounded-lg text-body-sm font-display font-medium transition-colors',
+                          'flex items-center justify-between px-3 py-2 rounded-lg text-body-sm font-display font-medium transition-colors group',
                           isActive
-                            ? 'text-accent bg-surface-2 border border-accent/20'
-                            : 'text-fg-muted hover:text-fg hover:bg-surface-1'
+                            ? 'text-accent bg-surface-2 border border-accent/20 font-bold'
+                            : 'text-fg-muted hover:text-fg hover:bg-surface-2'
                         )}
                       >
-                        <Icon className="size-4 shrink-0 text-fg-subtle" />
-                        <span>{item.label}</span>
+                        <div className="flex items-center gap-2.5">
+                          <Icon
+                            className={cn(
+                              'size-4 shrink-0 transition-transform group-hover:scale-105',
+                              isActive ? 'text-accent' : 'text-fg-subtle group-hover:text-fg'
+                            )}
+                          />
+                          <span>{item.label}</span>
+                        </div>
+                        {item.badge && (
+                          <span
+                            className={cn(
+                              'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded border',
+                              isActive
+                                ? 'bg-accent/15 text-accent border-accent/30 font-bold'
+                                : 'bg-surface-3 text-fg-subtle border-hairline'
+                            )}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}
@@ -149,15 +414,31 @@ export function MobileMenu() {
             ))}
           </div>
 
-          <div className="mt-8 pt-6 border-t border-hairline flex flex-col gap-3">
-            <Button asChild variant="primary" className="w-full">
-              <Link href="/new" onClick={() => setIsOpen(false)}>
-                Start a New Project
-              </Link>
-            </Button>
+          {/* Sign Out Action if Logged In */}
+          {user && (
+            <div className="pt-2 border-t border-hairline">
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm font-display text-danger hover:bg-danger/10 transition-colors text-left"
+              >
+                <LogOut className="size-4 shrink-0" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Drawer Footer with Theme Toggle & Links */}
+        <div className="border-t border-hairline p-4 space-y-3 shrink-0 bg-surface-2/40">
+          <ThemeToggle variant="labeled" className="w-full justify-center" />
+
+          <div className="flex items-center justify-between text-[10px] font-mono text-fg-subtle px-1">
+            <span>DPDP India Compliant</span>
+            <span>v1.0 · Open Source</span>
           </div>
         </div>
-      )}
+      </aside>
     </div>
   );
 }
