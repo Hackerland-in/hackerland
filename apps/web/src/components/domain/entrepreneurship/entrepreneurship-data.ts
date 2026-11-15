@@ -53,7 +53,7 @@ export const ENTREPRENEUR_COURSES: EntrepreneurCourse[] = [
     freeBadge: 'Open Source',
     summary:
       'The legendary Stanford course covering ideas, product validation, building great teams, customer acquisition, user engagement, and early venture mechanics.',
-    externalUrl: 'https://startupclass.samaltman.com/',
+    externalUrl: 'https://www.ycombinator.com/library',
     playlistUrl: 'https://www.youtube.com/playlist?list=PLUdqnrHmtdXRb-uyCBGCk41iJ6iBkwhpH',
     tags: ['Stanford', 'Y Combinator', 'Product Market Fit', 'MVP', 'Fundraising'],
     syllabus: [
@@ -275,8 +275,8 @@ export const ENTREPRENEUR_COURSES: EntrepreneurCourse[] = [
     freeBadge: 'Open Source',
     summary:
       'Practical masterclass on turning a breadboard prototype into a manufactured consumer or industrial hardware product. Tooling Capex, BOM targeting, supply chain, and certification.',
-    externalUrl: 'https://bolt.io/blog/',
-    playlistUrl: 'https://www.youtube.com/playlist?list=PL_Xv5gK-9K4zJkX5e2A9r7W6tV1bY8k3Z',
+    externalUrl: 'https://hax.co/',
+    playlistUrl: 'https://www.youtube.com/@HAX_co/videos',
     tags: ['Hardware', 'BOM Cost', 'DFM', 'Injection Tooling', 'Certifications (FCC/CE/BIS)'],
     syllabus: [
       {

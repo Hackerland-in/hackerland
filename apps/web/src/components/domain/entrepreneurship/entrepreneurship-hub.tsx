@@ -250,7 +250,11 @@ export function EntrepreneurshipHub() {
                             rel="noopener noreferrer"
                           >
                             <Play className="size-3.5 fill-current" />
-                            <span>Watch Playlist</span>
+                            <span>
+                              {course.playlistUrl.includes('list=')
+                                ? 'Watch Playlist'
+                                : 'Watch Lectures'}
+                            </span>
                             <ExternalLink className="size-3" />
                           </a>
                         </Button>

@@ -27,6 +27,7 @@ describe('Open Source Entrepreneurship Data & Academy', () => {
   it('includes Stanford CS183B with YouTube playlist link', () => {
     const cs183b = ENTREPRENEUR_COURSES.find((c) => c.id === 'cs183b-how-to-start-a-startup');
     expect(cs183b).toBeDefined();
+    expect(cs183b?.externalUrl).toBe('https://www.ycombinator.com/library');
     expect(cs183b?.playlistUrl).toBe(
       'https://www.youtube.com/playlist?list=PLUdqnrHmtdXRb-uyCBGCk41iJ6iBkwhpH'
     );
@@ -86,6 +87,16 @@ describe('Open Source Entrepreneurship Data & Academy', () => {
       'https://www.youtube.com/playlist?list=PLiii966TXyZ-y_RHAcWEp2fw3WkQhpbwo'
     );
     expect(blitz?.syllabus.some((s) => s.title.includes('Blitzscaling'))).toBe(true);
+  });
+
+  it('includes Hardware & Deep-Tech Venture Engineering with HAX verified links', () => {
+    const hw = ENTREPRENEUR_COURSES.find(
+      (c) => c.id === 'hardware-deep-tech-masterclass'
+    );
+    expect(hw).toBeDefined();
+    expect(hw?.externalUrl).toBe('https://hax.co/');
+    expect(hw?.playlistUrl).toBe('https://www.youtube.com/@HAX_co/videos');
+    expect(hw?.syllabus.some((s) => s.title.includes('BOM Cost'))).toBe(true);
   });
 
   it('contains curated seminal essays with core operating rules', () => {
