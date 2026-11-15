@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Bell, Search } from 'lucide-react';
 import { Button, IconButton, SearchField } from '@hackerland/ui';
 import { MainNav } from './main-nav';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 export function AppHeader() {
   return (
@@ -64,6 +65,9 @@ export function AppHeader() {
               <Bell className="h-5 w-5" aria-hidden="true" />
             </IconButton>
           </div>
+
+          {/* Theme toggle (Dark / Day mode) */}
+          <ThemeToggle />
 
           {/* Primary CTA (Start project) on md+ */}
           <div className="hidden md:block">

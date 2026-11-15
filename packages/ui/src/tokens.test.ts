@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { COLOR_TOKENS, TRACK_TONES } from './tokens';
+import { COLOR_TOKENS, DAY_COLOR_TOKENS, TRACK_TONES } from './tokens';
 
 const css = readFileSync(fileURLToPath(new URL('./theme.css', import.meta.url)), 'utf8');
 const normalized = css.toLowerCase();
@@ -46,4 +46,11 @@ describe('theme.css', () => {
       danger: '#ff334b',
     });
   });
+
+  it.each(DAY_COLOR_TOKENS.map((token) => [token.cssVar, token.value]))(
+    'defines light mode %s as %s in theme.css',
+    (cssVar, value) => {
+      expect(normalized).toContain(`${cssVar}: ${value}`.toLowerCase());
+    },
+  );
 });

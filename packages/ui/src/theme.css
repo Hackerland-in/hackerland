@@ -118,8 +118,87 @@
 }
 
 @layer base {
-  html {
+  :root,
+  html,
+  html[data-theme="dark"],
+  .dark {
     color-scheme: dark;
+    --color-canvas: #0A0E17;
+    --color-surface-1: #101726;
+    --color-surface-2: #182238;
+    --color-surface-3: #1C2842;
+    --color-sunken: #0D131F;
+    --color-hairline: #1E2B45;
+    --color-line: #2A3B5E;
+    --color-fg: #F0F4FC;
+    --color-fg-muted: #A9B6CC;
+    --color-fg-subtle: #7D8DA8;
+    --color-accent: #00E5FF;
+    --color-accent-strong: #5CF0FF;
+    --color-accent-fg: #38E8FF;
+    --color-on-solid: #060B12;
+    --color-success: #00F59B;
+    --color-success-fg: #5CFFBA;
+    --color-warning: #FFD600;
+    --color-warning-fg: #FFE14D;
+    --color-danger: #FF334B;
+    --color-danger-fg: #FF6B7D;
+    --color-code: #00E5FF;
+    --color-code-fg: #38E8FF;
+    --color-make: #FF8A00;
+    --color-make-fg: #FFA033;
+    --color-design: #FF5FA2;
+    --color-design-fg: #FF85B8;
+    --color-research: #A970FF;
+    --color-research-fg: #C29BFF;
+    --color-earn: #00F59B;
+    --color-earn-fg: #5CFFBA;
+    --color-learn: #4D9FFF;
+    --color-learn-fg: #7DB8FF;
+    --shadow-module: 0 8px 24px -4px rgb(0 0 0 / 0.6);
+    --shadow-overlay: 0 16px 40px -8px rgb(0 0 0 / 0.85);
+  }
+
+  html[data-theme="light"],
+  .light {
+    color-scheme: light;
+    --color-canvas: #F4F7FC;
+    --color-surface-1: #FFFFFF;
+    --color-surface-2: #E8EEF8;
+    --color-surface-3: #DCE5F5;
+    --color-sunken: #E7EDF7;
+    --color-hairline: #D0DBEB;
+    --color-line: #B5C6E0;
+    --color-fg: #0A0E17;
+    --color-fg-muted: #384A64;
+    --color-fg-subtle: #5D708E;
+    --color-accent: #008B9E;
+    --color-accent-strong: #006C7B;
+    --color-accent-fg: #007A8A;
+    --color-on-solid: #FFFFFF;
+    --color-success: #059669;
+    --color-success-fg: #047857;
+    --color-warning: #D97706;
+    --color-warning-fg: #B45309;
+    --color-danger: #E11D48;
+    --color-danger-fg: #BE123C;
+    --color-code: #008B9E;
+    --color-code-fg: #007A8A;
+    --color-make: #EA580C;
+    --color-make-fg: #C2410C;
+    --color-design: #DB2777;
+    --color-design-fg: #BE185D;
+    --color-research: #7C3AED;
+    --color-research-fg: #6D28D9;
+    --color-earn: #059669;
+    --color-earn-fg: #047857;
+    --color-learn: #2563EB;
+    --color-learn-fg: #1D4ED8;
+    --shadow-module: 0 4px 16px -2px rgb(15 23 42 / 0.08);
+    --shadow-overlay: 0 12px 32px -4px rgb(15 23 42 / 0.16);
+  }
+
+  html {
     -webkit-text-size-adjust: 100%;
   }
 
@@ -132,6 +211,7 @@
     line-height: var(--text-body-md--line-height);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   :focus-visible {

@@ -38,6 +38,27 @@ All colours are semantic Tailwind utilities, for example `bg-surface-1`, `text-f
 | `line` | `#2A3B5E` | Control borders |
 | `fg` / `fg-muted` / `fg-subtle` | `#F0F4FC` / `#A9B6CC` / `#7D8DA8` | Text: primary, secondary, tertiary |
 
+### Dual Theme Architecture (Dark Mode Default & Solar Day Mode)
+
+Hackerland features a high-performance dual-theme engine:
+- **Mission Control Dark (Default):** Deep space navy `#0A0E17` canvas, cyan telemetry accents (`#00E5FF`), and layered dark elevations.
+- **Solar Day Mode:** Daylight titanium `#F4F7FC` canvas, crisp white `#FFFFFF` surface cards, high-contrast dark navy text (`#0A0E17`, >13:1 contrast), and solar teal (`#008B9E`) accents.
+
+| Token | Dark Mode (Default) | Solar Day Mode | Semantic Usage |
+|---|---|---|---|
+| `canvas` | `#0A0E17` | `#F4F7FC` | Level 0 root backdrop |
+| `surface-1` | `#101726` | `#FFFFFF` | Level 1 standard cards & panels |
+| `surface-2` | `#182238` | `#E8EEF8` | Level 2 raised modules & hover wells |
+| `surface-3` | `#1C2842` | `#DCE5F5` | Level 3 popovers, dialogs & overlays |
+| `sunken` | `#0D131F` | `#E7EDF7` | Inset wells, code blocks & inputs |
+| `hairline` | `#1E2B45` | `#D0DBEB` | Subtle dividers & card borders |
+| `line` | `#2A3B5E` | `#B5C6E0` | Input borders & focus contours |
+| `fg` | `#F0F4FC` | `#0A0E17` | Primary high-contrast text |
+| `fg-muted` | `#A9B6CC` | `#384A64` | Secondary text & subtitles |
+| `fg-subtle` | `#7D8DA8` | `#5D708E` | Metadata & placeholder text |
+| `accent` | `#00E5FF` | `#008B9E` | Primary interactive buttons & focus rings |
+| `on-solid` | `#060B12` | `#FFFFFF` | Text rendered on top of solid accents |
+
 ### Primary
 
 **Ion Cyan `#00E5FF`** (`accent`) is the only primary colour, used for primary actions, focus

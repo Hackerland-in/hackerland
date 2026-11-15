@@ -52,6 +52,41 @@ export const COLOR_TOKENS: ColorToken[] = [
   token('learn-fg', '#7DB8FF', 'Learn track text'),
 ];
 
+export const DAY_COLOR_TOKENS: ColorToken[] = [
+  token('canvas', '#F4F7FC', 'Page background (Solar level 0)'),
+  token('surface-1', '#FFFFFF', 'Cards and panels (Solar level 1)'),
+  token('surface-2', '#E8EEF8', 'Raised modules and hover states (Solar level 2)'),
+  token('surface-3', '#DCE5F5', 'Popovers and overlays (Solar level 3)'),
+  token('sunken', '#E7EDF7', 'Inputs, code and inset wells'),
+  token('hairline', '#D0DBEB', 'Card and divider borders'),
+  token('line', '#B5C6E0', 'Control borders and stronger separators'),
+  token('fg', '#0A0E17', 'Primary text (High contrast)'),
+  token('fg-muted', '#384A64', 'Secondary text'),
+  token('fg-subtle', '#5D708E', 'Tertiary text, placeholders, metadata'),
+  token('accent', '#008B9E', 'Primary actions, focus, links (Solar Teal)'),
+  token('accent-strong', '#006C7B', 'Primary action hover'),
+  token('accent-fg', '#007A8A', 'Accent-coloured text'),
+  token('on-solid', '#FFFFFF', 'Text on bright solid fills'),
+  token('success', '#059669', 'Success, live, ready'),
+  token('success-fg', '#047857', 'Success text'),
+  token('warning', '#D97706', 'Warnings and caution'),
+  token('warning-fg', '#B45309', 'Warning text'),
+  token('danger', '#E11D48', 'Errors and destructive actions'),
+  token('danger-fg', '#BE123C', 'Error text'),
+  token('code', '#008B9E', 'Code track: software, web, AI'),
+  token('code-fg', '#007A8A', 'Code track text'),
+  token('make', '#EA580C', 'Make track: hardware, robotics, fabrication'),
+  token('make-fg', '#C2410C', 'Make track text'),
+  token('design', '#DB2777', 'Design track: UI/UX, product, visual'),
+  token('design-fg', '#BE185D', 'Design track text'),
+  token('research', '#7C3AED', 'Research track: deep-tech, space, bio'),
+  token('research-fg', '#6D28D9', 'Research track text'),
+  token('earn', '#059669', 'Earn track: bounties, paid roles, grants'),
+  token('earn-fg', '#047857', 'Earn track text'),
+  token('learn', '#2563EB', 'Learn track: roadmaps, courses, mentorship'),
+  token('learn-fg', '#1D4ED8', 'Learn track text'),
+];
+
 export const TRACK_TONES = ['code', 'make', 'design', 'research', 'earn', 'learn'] as const;
 export type TrackTone = (typeof TRACK_TONES)[number];
 export type StatusTone = 'success' | 'warning' | 'danger' | 'neutral' | 'accent';

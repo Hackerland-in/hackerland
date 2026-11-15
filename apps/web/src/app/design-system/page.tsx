@@ -1,5 +1,6 @@
 import {
   COLOR_TOKENS,
+  DAY_COLOR_TOKENS,
   TRACK_TONES,
   TYPE_SCALE,
   Avatar,
@@ -33,7 +34,8 @@ import {
   Textarea,
 } from '@hackerland/ui';
 import { TRACK_META, TRACKS, type Track } from '@hackerland/core';
-import { Bell, Flame, Sparkles } from 'lucide-react';
+import { Bell, Flame, Moon, Sparkles, Sun } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 export const metadata = {
   title: 'Mission Control Design System | Hackerland',
@@ -68,16 +70,34 @@ export default function DesignSystemPage() {
           .
         </p>
 
+        {/* Theme Mode Control Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border border-hairline bg-surface-1 shadow-module">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="font-display font-semibold text-fg">Appearance & Theme Engine</span>
+              <Badge tone="accent" variant="outline">Dark Default</Badge>
+            </div>
+            <p className="text-body-sm text-fg-muted">
+              Hackerland defaults to Space Navy Dark (#0A0E17). Toggle to test the high-clarity Solar Day Mode (#F4F7FC) in real time.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle variant="labeled" />
+          </div>
+        </div>
+
         {/* Quick links */}
         <div className="flex flex-wrap gap-2 pt-2 text-body-sm">
           {[
             ['Colours', '#colors'],
+            ['Dual Themes', '#dual-themes'],
             ['Tracks', '#tracks'],
             ['Typography', '#typography'],
             ['Buttons', '#buttons'],
             ['Badges & Chips', '#badges-chips'],
             ['Form Controls', '#forms'],
             ['Data Display', '#data-display'],
+            ['Rules & Guidelines', '#rules'],
             ['Layout', '#layout'],
             ['Navigation', '#navigation'],
             ['Motion & A11y', '#motion-a11y'],
@@ -97,33 +117,71 @@ export default function DesignSystemPage() {
 
       {/* 1. Colours */}
       <div id="colors" className="scroll-mt-20">
-        <Panel title="Colours" headingLevel={2}>
+        <Panel title="Colours & Dual Theme Engine" headingLevel={2}>
           <p className="text-body-md text-fg-muted mb-6">
-            The mission-control palette is dark-first, layered in depth from canvas (level 0) up to
-            surface-3 (overlays), accented with Ion Cyan and discipline track colors.
+            The mission-control palette is dark-first by default (Space Navy #0A0E17), with a calibrated Solar Day Mode (#F4F7FC) for bright environments. All components consume semantic CSS variables, ensuring automatic theme switching with zero hardcoded hex colors.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {COLOR_TOKENS.map((token) => (
-              <div
-                key={token.name}
-                className="flex flex-col rounded-md border border-hairline bg-surface-2 p-3 space-y-2.5"
-              >
-                <div
-                  className="h-14 w-full rounded border border-hairline"
-                  style={{ backgroundColor: token.value }}
-                />
-                <div>
-                  <div className="font-display font-semibold text-fg flex justify-between items-center">
-                    <span>{token.name}</span>
-                    <span className="font-mono text-label-sm text-fg-subtle">{token.value}</span>
+          <Tabs defaultValue="dark">
+            <TabsList label="Theme options" className="mb-6">
+              <TabsTrigger value="dark">
+                <Moon className="size-3.5 mr-1.5" />
+                Mission Control Dark (Default)
+              </TabsTrigger>
+              <TabsTrigger value="day">
+                <Sun className="size-3.5 mr-1.5" />
+                Solar Day Mode
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="dark">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {COLOR_TOKENS.map((token) => (
+                  <div
+                    key={token.name}
+                    className="flex flex-col rounded-md border border-hairline bg-surface-2 p-3 space-y-2.5"
+                  >
+                    <div
+                      className="h-14 w-full rounded border border-hairline"
+                      style={{ backgroundColor: token.value }}
+                    />
+                    <div>
+                      <div className="font-display font-semibold text-fg flex justify-between items-center">
+                        <span>{token.name}</span>
+                        <span className="font-mono text-label-sm text-fg-subtle">{token.value}</span>
+                      </div>
+                      <div className="font-mono text-label-sm text-accent-fg mt-0.5">{token.cssVar}</div>
+                      <p className="text-body-sm text-fg-muted mt-1 leading-snug">{token.usage}</p>
+                    </div>
                   </div>
-                  <div className="font-mono text-label-sm text-accent-fg mt-0.5">{token.cssVar}</div>
-                  <p className="text-body-sm text-fg-muted mt-1 leading-snug">{token.usage}</p>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </TabsContent>
+
+            <TabsContent value="day">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {DAY_COLOR_TOKENS.map((token) => (
+                  <div
+                    key={token.name}
+                    className="flex flex-col rounded-md border border-hairline bg-surface-2 p-3 space-y-2.5"
+                  >
+                    <div
+                      className="h-14 w-full rounded border border-hairline"
+                      style={{ backgroundColor: token.value }}
+                    />
+                    <div>
+                      <div className="font-display font-semibold text-fg flex justify-between items-center">
+                        <span>{token.name}</span>
+                        <span className="font-mono text-label-sm text-fg-subtle">{token.value}</span>
+                      </div>
+                      <div className="font-mono text-label-sm text-accent-fg mt-0.5">{token.cssVar}</div>
+                      <p className="text-body-sm text-fg-muted mt-1 leading-snug">{token.usage}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         </Panel>
       </div>
 
@@ -572,6 +630,71 @@ export default function DesignSystemPage() {
                 </p>
               </TabsContent>
             </Tabs>
+          </div>
+        </Panel>
+      </div>
+
+      {/* 9. Design System Rules & Guidelines */}
+      <div id="rules" className="scroll-mt-20">
+        <Panel title="Design System Governance & Rules for Contributors" headingLevel={2}>
+          <div className="space-y-6 text-body-md text-fg-muted max-w-4xl">
+            <p>
+              To maintain absolute visual cohesion across the Hackerland platform, all engineers, agents, and community contributors must adhere strictly to these architectural contracts:
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-md border border-danger/40 bg-danger/5 p-4 space-y-2">
+                <span className="font-display font-semibold text-danger flex items-center gap-2 text-headline-sm">
+                  ✕ STRICTLY PROHIBITED (DON&apos;T)
+                </span>
+                <ul className="space-y-1.5 text-body-sm text-fg-muted list-disc list-inside">
+                  <li><strong className="text-fg">Zero Raw Hex Values:</strong> Never write raw hex colors like <code className="font-mono text-danger-fg">#0A0E17</code>, <code className="font-mono text-danger-fg">#00E5FF</code>, or hardcoded utility colors like <code className="font-mono text-danger-fg">bg-white</code>, <code className="font-mono text-danger-fg">text-black</code>, <code className="font-mono text-danger-fg">bg-gray-900</code>.</li>
+                  <li><strong className="text-fg">No Arbitrary Fixed Widths:</strong> Avoid hardcoded widths (e.g., <code className="font-mono text-danger-fg">w-[600px]</code>) that induce horizontal scrolling on 390px mobile screens.</li>
+                  <li><strong className="text-fg">No Age Profiling:</strong> Never display numeric age (&quot;Age 16&quot;) anywhere on profiles or posts (statutory violation of India&apos;s DPDP Act 2023).</li>
+                </ul>
+              </div>
+
+              <div className="rounded-md border border-success/40 bg-success/5 p-4 space-y-2">
+                <span className="font-display font-semibold text-success-fg flex items-center gap-2 text-headline-sm">
+                  ✓ MANDATORY PRACTICES (DO)
+                </span>
+                <ul className="space-y-1.5 text-body-sm text-fg-muted list-disc list-inside">
+                  <li><strong className="text-fg">Semantic Color Utilities:</strong> Use <code className="font-mono text-success-fg">bg-canvas</code>, <code className="font-mono text-success-fg">bg-surface-1</code>, <code className="font-mono text-success-fg">text-fg</code>, <code className="font-mono text-success-fg">text-fg-muted</code>, and <code className="font-mono text-success-fg">border-hairline</code>. They adapt between Dark and Day modes automatically.</li>
+                  <li><strong className="text-fg">Responsive Containment:</strong> Always add <code className="font-mono text-success-fg">min-w-0</code> and <code className="font-mono text-success-fg">[overflow-wrap:anywhere]</code> on cards and textual headers.</li>
+                  <li><strong className="text-fg">Opt-in Experience Badges:</strong> Display skills and self-selected badges (&quot;Student&quot;, &quot;Maker&quot;, &quot;Lab Node Lead&quot;).</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <h3 className="font-display text-headline-sm text-fg">Canonical Component Usage</h3>
+              <CodeBlock
+                language="tsx"
+                filename="widget.tsx"
+                code={`import { Card, CardHeader, CardBody, Badge, Button } from '@hackerland/ui';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
+
+export function ExampleWidget() {
+  return (
+    <Card accent="make" className="min-w-0">
+      <CardHeader className="flex justify-between items-center">
+        <h3 className="font-display text-headline-sm text-fg">Avionics Telemetry Node</h3>
+        <Badge tone="make" variant="outline">Hardware</Badge>
+      </CardHeader>
+      <CardBody className="space-y-4">
+        <p className="text-body-md text-fg-muted [overflow-wrap:anywhere]">
+          Fabricating open flight controller with CAN bus telemetry.
+        </p>
+        <div className="flex gap-2">
+          <Button variant="primary">Claim Bounty</Button>
+          <ThemeToggle />
+        </div>
+      </CardBody>
+    </Card>
+  );
+}`}
+              />
+            </div>
           </div>
         </Panel>
       </div>

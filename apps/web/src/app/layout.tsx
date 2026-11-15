@@ -35,6 +35,23 @@ export const metadata: Metadata = {
     'Open-source innovation network for students, designers, programmers, makers and innovators to build in the open, find collaborators, and earn through bounties and grants.',
 };
 
+const themeScript = `(function() {
+  try {
+    var saved = localStorage.getItem('hackerland-theme');
+    var isLight = saved === 'light';
+    var root = document.documentElement;
+    if (isLight) {
+      root.setAttribute('data-theme', 'light');
+      root.classList.remove('dark');
+      root.classList.add('light');
+    } else {
+      root.setAttribute('data-theme', 'dark');
+      root.classList.remove('light');
+      root.classList.add('dark');
+    }
+  } catch (e) {}
+})();`;
+
 export default function RootLayout({
   children,
 }: {
@@ -43,8 +60,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-theme="dark"
+      suppressHydrationWarning
       className={`dark ${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="flex min-h-screen flex-col bg-canvas text-fg font-sans text-body-md antialiased selection:bg-accent selection:text-on-solid">
         <SkipLink />
         <AppHeader />
