@@ -34,6 +34,7 @@ import { ActualHardwareSimulator } from './hardware-simulator/actual-hardware-si
 import { FalstadSimulator } from './falstad/falstad-simulator';
 import { HdlSimulator } from './hdl/hdl-simulator';
 import { IssSimulator } from './iss/iss-simulator';
+import { OpenEdaStudio } from './eda/open-eda-studio';
 
 export function ManufacturingHub() {
   const [selectedPillarId, setSelectedPillarId] = useState<string>('pcb');
@@ -205,6 +206,11 @@ export function ManufacturingHub() {
           {/* INSTRUCTION SET SIMULATOR (ISS) (Wikipedia: Instruction set simulator, gem5, QEMU, Spike, CPU Sim) */}
           <div className="space-y-3">
             <IssSimulator />
+          </div>
+
+          {/* OPEN-SOURCE ELECTRONIC DESIGN AUTOMATION (EDA) ASIC STUDIO (Wikipedia List of free and open-source EDA software: Yosys, OpenROAD, Magic, Netgen, KLayout) */}
+          <div className="space-y-3">
+            <OpenEdaStudio />
           </div>
 
           {/* SIMULATOR ENGINE (Requirement: Simulation engine for each field) */}

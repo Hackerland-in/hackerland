@@ -23,6 +23,8 @@ import { HdlSimulator } from './hdl/hdl-simulator';
 import { HDL_PRESETS, runHdlSimulation, generateVcdFile } from './hdl/hdl-engine';
 import { IssSimulator } from './iss/iss-simulator';
 import { ISS_PRESETS, parseAssembly, initCpuState, stepCpu } from './iss/iss-engine';
+import { OpenEdaStudio } from './eda/open-eda-studio';
+import { EDA_PRESETS, EDA_FLOW_STAGES } from './eda/eda-engine';
 
 // @ts-expect-error configure react act environment
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -602,5 +604,66 @@ describe('Manufacturing Hub & Simulation Engines', () => {
 
     expect(container.textContent).toContain('Array Summation & Memory Load/Store (LW / SW)');
     expect(container.textContent).toContain('0x000000B4');
+  });
+
+  it('validates Open-Source EDA RTL-to-GDSII 7-stage flow and standard cell specifications', () => {
+    expect(EDA_FLOW_STAGES.length).toBe(7);
+    expect(EDA_FLOW_STAGES.map((s) => s.id)).toEqual([
+      'synthesis',
+      'floorplan',
+      'placement',
+      'cts',
+      'routing',
+      'verification',
+      'tapeout',
+    ]);
+
+    const rv32 = EDA_PRESETS.find((p) => p.id === 'pico-rv32')!;
+    expect(rv32).toBeDefined();
+    expect(rv32.targetNode).toContain('SkyWater SKY130');
+    expect(rv32.cellCount).toBe(1840);
+    expect(rv32.cells.length).toBeGreaterThan(10);
+    expect(rv32.wires.length).toBeGreaterThan(10);
+    expect(rv32.stages.synthesis.logSnippet).toContain('Yosys');
+    expect(rv32.stages.verification.logSnippet).toContain('Magic');
+    expect(rv32.stages.tapeout.logSnippet).toContain('KLayout');
+  });
+
+  it('renders OpenEdaStudio with 7-stage flow stepper, KLayout die canvas, and DRC signoff', () => {
+    act(() => {
+      root.render(<OpenEdaStudio />);
+    });
+
+    expect(container.textContent).toContain('Open-Source EDA Silicon & ASIC Flow Studio');
+    expect(container.textContent).toContain('OpenLane / OpenROAD RTL-to-GDSII Automated ASIC Flow');
+    expect(container.textContent).toContain('KLayout Silicon Die & GDSII Mask Viewer');
+    expect(container.textContent).toContain('Physical Signoff Verification: Magic DRC & Netgen LVS');
+    expect(container.textContent).toContain('Yosys + ABC');
+    expect(container.textContent).toContain('PicoRV32 RISC-V 32-Bit Micro-Core ASIC');
+
+    // Click "Execute Next EDA Stage" (advances to floorplan)
+    const nextBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Execute Next EDA Stage')
+    );
+    expect(nextBtn).toBeDefined();
+
+    act(() => {
+      nextBtn?.click();
+    });
+
+    expect(container.textContent).toContain('Floorplanning & Power Grid (PDN)');
+
+    // Switch preset to SHA-256
+    const shaBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Hardware Cryptographic SHA-256 Accelerator')
+    );
+    expect(shaBtn).toBeDefined();
+
+    act(() => {
+      shaBtn?.click();
+    });
+
+    expect(container.textContent).toContain('Hardware Cryptographic SHA-256 Accelerator');
+    expect(container.textContent).toContain('680');
   });
 });
