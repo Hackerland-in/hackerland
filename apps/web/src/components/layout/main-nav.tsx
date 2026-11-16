@@ -214,8 +214,15 @@ const ACADEMY_DROPDOWN: NavDropdown = {
 const COMMUNITY_DROPDOWN: NavDropdown = {
   id: 'community',
   label: 'Community & Proof',
-  matchPrefixes: ['/leaderboard', '/u', '/passport', '/squads'],
+  matchPrefixes: ['/leaderboard', '/u', '/passport', '/squads', '/launchpad'],
   items: [
+    {
+      href: '/launchpad',
+      title: 'Hardware Launchpad & Grants',
+      description: 'Milestone-locked crowdfunding escrow & Indian central govt non-dilutive grant matcher',
+      icon: Rocket,
+      badge: 'Escrow & Grants',
+    },
     {
       href: '/squads',
       title: 'Squad Rooms & Escrow Vault',

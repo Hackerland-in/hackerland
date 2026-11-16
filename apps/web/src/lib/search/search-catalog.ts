@@ -398,6 +398,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['copilot', 'calculator', 'trace width', 'ipc 2152', 'buck converter', 'smps', 'heatsink', 'thermal', 'sourcing', 'bom', 'robu', 'element14', 'mcu', 'mosfet'],
   },
   {
+    id: 'hub-launchpad',
+    title: 'Hardware Launchpad & Indian Govt Grant Matcher',
+    description:
+      'Milestone-locked crowdfunding escrow and automated non-dilutive grant eligibility matcher (iDEX, BIRAC BIG, DST NIDHI-PRAYAS, Semiconductor DLI) with backer quorum governance.',
+    category: 'bounties',
+    categoryLabel: 'Launchpad',
+    href: '/launchpad',
+    badge: 'Escrow & Grants',
+    badgeTone: 'earn',
+    keywords: ['launchpad', 'crowdfunding', 'escrow', 'grant', 'idex', 'birac', 'nidhi prayas', 'tide', 'semiconductor dli', 'funding', 'milestone', 'dpiit', 'kickstarter', 'hardware fund'],
+  },
+  {
     id: 'hub-young-innovators',
     title: 'Young Innovators Track & Safety Sandbox (Ages 8–17)',
     description:

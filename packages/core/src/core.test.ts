@@ -38,6 +38,11 @@ import {
   calculateThermalHeatsink,
   auditBomItems,
   componentSourcingItemSchema,
+  calculateCampaignProgress,
+  calculateMilestonePayout,
+  verifyMilestoneQuorum,
+  matchGrantsForProject,
+  campaignSchema,
 } from './index';
 
 describe('tracks', () => {
@@ -787,6 +792,177 @@ describe('ai hardware copilot engineering calculators and sourcing', () => {
     expect(u3?.riskLevel).toBe('medium');
   });
 });
+
+describe('milestone-locked crowdfunding launchpad and grant matching', () => {
+  it('calculates campaign progress and milestone escrow payouts', () => {
+    const progress = calculateCampaignProgress(850000, 1000000);
+    expect(progress.percent).toBe(85);
+    expect(progress.isFunded).toBe(false);
+    expect(progress.remainingInr).toBe(150000);
+
+    const fundedProgress = calculateCampaignProgress(1200000, 1000000);
+    expect(fundedProgress.percent).toBe(120);
+    expect(fundedProgress.isFunded).toBe(true);
+    expect(fundedProgress.remainingInr).toBe(0);
+
+    const milestone1Payout = calculateMilestonePayout(1000000, 25);
+    expect(milestone1Payout).toBe(250000);
+  });
+
+  it('evaluates milestone backer quorum verification threshold', () => {
+    // 60 votes for out of 100 = 60% -> under 66% threshold -> fail
+    const quorumFail = verifyMilestoneQuorum(60, 100);
+    expect(quorumFail.passed).toBe(false);
+    expect(quorumFail.approvalPercent).toBe(60);
+
+    // 70 votes for out of 100 = 70% -> over 66% -> pass
+    const quorumPass = verifyMilestoneQuorum(70, 100);
+    expect(quorumPass.passed).toBe(true);
+    expect(quorumPass.approvalPercent).toBe(70);
+
+    // 0 votes
+    const zeroVotes = verifyMilestoneQuorum(0, 0);
+    expect(zeroVotes.passed).toBe(false);
+  });
+
+  it('matches hardware projects to Indian Govt non-dilutive grants based on TRL and eligibility', () => {
+    const grants = [
+      {
+        id: 'idex-disc',
+        name: 'iDEX DISC (Defence India Startup Challenge)',
+        agency: 'DIO / Ministry of Defence',
+        maxFundingInr: 15000000,
+        isNonDilutive: true,
+        focusAreas: ['Defence', 'Aerospace', 'Drones', 'Secure Comms'],
+        minTrl: 3,
+        maxTrl: 7,
+        requiresDpiit: true,
+        minIndianOwnershipPercent: 51,
+        applicationWindow: 'Quarterly Rounds',
+        description: 'Grants up to ₹1.5 Cr for prototype development for military use.',
+        portalUrl: 'https://idex.gov.in',
+      },
+      {
+        id: 'nidhi-prayas',
+        name: 'DST NIDHI-PRAYAS',
+        agency: 'Department of Science and Technology',
+        maxFundingInr: 1000000,
+        isNonDilutive: true,
+        focusAreas: ['Agriculture', 'Healthcare', 'Clean Energy', 'IoT', 'Hardware'],
+        minTrl: 2,
+        maxTrl: 5,
+        requiresDpiit: false,
+        minIndianOwnershipPercent: 51,
+        applicationWindow: 'Always Open across 40+ PRAYAS Centres',
+        description: 'Grants up to ₹10 Lakhs for converting ideas into physical proof-of-concept.',
+        portalUrl: 'https://nidhi-prayas.org',
+      },
+    ];
+
+    const defenceProject = {
+      category: 'defence_aerospace' as const,
+      trl: 4,
+      isDpiitRegistered: true,
+      indianOwnershipPercent: 100,
+    };
+
+    const matches = matchGrantsForProject(defenceProject, grants);
+    expect(matches.length).toBe(2);
+
+    const idexMatch = matches.find((m) => m.grant.id === 'idex-disc');
+    expect(idexMatch?.isEligible).toBe(true);
+    expect(idexMatch?.fitScore).toBeGreaterThanOrEqual(80);
+    expect(idexMatch?.missingPrerequisites.length).toBe(0);
+
+    // Non-DPIIT registered project attempting iDEX
+    const nonDpiitProject = {
+      category: 'defence_aerospace' as const,
+      trl: 4,
+      isDpiitRegistered: false,
+      indianOwnershipPercent: 100,
+    };
+    const nonDpiitMatches = matchGrantsForProject(nonDpiitProject, grants);
+    const nonDpiitIdex = nonDpiitMatches.find((m) => m.grant.id === 'idex-disc');
+    expect(nonDpiitIdex?.isEligible).toBe(false);
+    expect(nonDpiitIdex?.missingPrerequisites).toContain('Requires formal DPIIT certificate of recognition');
+  });
+
+  it('validates a complete hardware campaign schema', () => {
+    const validCampaign = {
+      id: 'camp_uav_100',
+      slug: 'sub-100g-recon-drone',
+      title: 'Sub-100g Micro-Recon LoRa Mesh Drone',
+      tagline: 'Ultralight tactical reconnaissance micro-UAV with thermal sensor and encrypted frequency-hopping telemetry.',
+      creator: {
+        name: 'Vikram Joshi',
+        handle: 'vikram_j',
+        avatar: '/avatars/vikram.png',
+        organization: 'Garuda Avionics',
+        dpiitRegistered: true,
+        city: 'Pune',
+        state: 'Maharashtra',
+      },
+      category: 'defence_aerospace' as const,
+      fundingGoalInr: 1200000,
+      raisedInr: 890000,
+      backersCount: 142,
+      daysLeft: 18,
+      deadlineDate: '2026-12-15',
+      status: 'active' as const,
+      trlLevel: 5,
+      milestones: [
+        {
+          id: 'ms-1',
+          title: 'EVT PCB & LoRa RF Telemetry Validation',
+          description: '4-layer rigid-flex PCB fabrication and range test validation over 5km LOS.',
+          percentageOfGoal: 25,
+          targetDate: '2026-12-30',
+          status: 'verified' as const,
+          deliverables: ['Altium Gerbers', 'BOM CSV', 'Flight telemetry logs'],
+          evidenceUrl: 'https://github.com/garuda/recon-drone/releases/tag/v0.1-evt',
+          backerApprovalVotePercent: 94,
+        },
+        {
+          id: 'ms-2',
+          title: 'Carbon Fiber Injection Mold & Flight Controller Alpha',
+          description: 'Custom molded aero frame and custom STM32H7 dual-IMU flight stack testing.',
+          percentageOfGoal: 35,
+          targetDate: '2027-02-15',
+          status: 'submitted_for_review' as const,
+          deliverables: ['STEP cad models', 'High-speed wind tunnel footage', 'Crash tolerance report'],
+          evidenceUrl: 'https://github.com/garuda/recon-drone/releases/tag/v0.2-dvt',
+          backerApprovalVotePercent: 78,
+        },
+      ],
+      backerTiers: [
+        {
+          id: 'tier-early-kit',
+          title: 'Developer Core Kit',
+          amountInr: 8500,
+          amountUsd: 102,
+          description: 'Pre-assembled flight controller PCB, LoRa transceiver module, and SDK.',
+          perks: ['Core PCB', 'SDK Access', 'Hackerland Private Repo Access'],
+          estimatedDelivery: 'March 2027',
+          limitBackers: 100,
+          currentBackers: 86,
+        },
+      ],
+      matchedGrants: ['idex-disc', 'nidhi-prayas'],
+      storyMarkdown: '## Tactical Micro-UAV for Forest and Mountain Surveillance...',
+      risksAndChallenges: 'Supply chain delays on 2mm pitch brushless motors and custom carbon weave...',
+      hardwareSpecs: {
+        'All-Up Weight': '88 grams',
+        'Flight Time': '22 minutes',
+        Telemetry: '868 MHz / 433 MHz LoRa Frequency Hopping',
+        Processor: 'STM32H743VIT6 480 MHz ARM Cortex-M7',
+      },
+    };
+
+    const parsed = campaignSchema.safeParse(validCampaign);
+    expect(parsed.success).toBe(true);
+  });
+});
+
 
 
 

@@ -160,6 +160,7 @@ export function MobileMenu() {
     {
       heading: 'Discover & Build',
       items: [
+        { href: '/launchpad', label: 'Hardware Launchpad & Grants', icon: Rocket, badge: 'Escrow' },
         { href: '/observatory', label: 'Innovation Observatory', icon: Radar, badge: 'Tech Radar' },
         { href: '/projects', label: 'Explore Projects', icon: FolderKanban },
         { href: '/squads', label: 'Squad Rooms & Escrow', icon: Users, badge: 'Vault' },
