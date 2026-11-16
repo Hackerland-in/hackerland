@@ -18,6 +18,7 @@ import {
   Users,
   ExternalLink,
   Box,
+  Layers,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -55,6 +56,13 @@ const HARDWARE_DROPDOWN: NavDropdown = {
       description: 'Interactive 3D WebGL physics labs for drones, rockets, EVs, racecars & PCBs',
       icon: Box,
       badge: '3D WebGL',
+    },
+    {
+      href: '/manufacturing/pcb',
+      title: 'A-Z PCB & Circuit Studio',
+      description: 'Real-time SPICE circuit simulation, Veroboard, Breadboard & Gerber export',
+      icon: Layers,
+      badge: 'Real-Time',
     },
     {
       href: '/manufacturing/physics',

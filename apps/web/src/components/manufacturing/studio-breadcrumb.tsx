@@ -24,10 +24,12 @@ export interface StudioBreadcrumbProps {
     | 'motorbike'
     | 'drone'
     | 'ev'
-    | 'rocket';
+    | 'rocket'
+    | 'pcb';
 }
 
 const STUDIOS = [
+  { id: 'pcb', label: 'A-Z PCB & Circuit Studio', href: '/manufacturing/pcb' },
   { id: '3d', label: '3D Simulator Labs', href: '/manufacturing/physics/3d' },
   { id: 'physics', label: 'Physics Hub', href: '/manufacturing/physics' },
   { id: 'bicycle', label: 'Bicycle Engine', href: '/manufacturing/physics/bicycle' },

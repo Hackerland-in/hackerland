@@ -43,6 +43,14 @@ export function ManufacturingSubnav() {
       badge: '3D WebGL',
     },
     {
+      href: '/manufacturing/pcb',
+      label: 'A-Z PCB & Circuit Studio',
+      shortLabel: 'PCB Studio',
+      icon: Layers,
+      isActive: pathname === '/manufacturing/pcb',
+      badge: 'Real-Time SPICE',
+    },
+    {
       href: '/labs',
       label: 'Makerspaces & Labs',
       shortLabel: 'Labs',
