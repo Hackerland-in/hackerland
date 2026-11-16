@@ -47,6 +47,10 @@ import {
   validatePinoutAnnotation,
   filterTeardownsByCategory,
   teardownSubmissionSchema,
+  formatSalaryRangeInr,
+  calculateHiringMatchScore,
+  filterHardwareJobs,
+  hardwareJobPostingSchema,
 } from './index';
 
 describe('tracks', () => {
@@ -1065,6 +1069,136 @@ describe('hardware teardowns and reverse engineering annotator schema', () => {
     expect(parsed.success).toBe(true);
   });
 });
+
+describe('hardware deep-tech jobs and fellowships schema', () => {
+  it('formats salary ranges with Lakhs and equity properly', () => {
+    expect(formatSalaryRangeInr(28, 45, '0.25% - 0.75%')).toBe('₹28L – ₹45L PA + 0.25% - 0.75% Equity');
+    expect(formatSalaryRangeInr(18, 25)).toBe('₹18L – ₹25L PA');
+  });
+
+  it('calculates candidate proof-of-work skill match score accurately', () => {
+    const candidateSkills = ['FreeRTOS', 'STM32', 'CAN Bus', 'KiCad'];
+    const jobRequirements = [
+      'STM32 or Nordic ARM Cortex-M microcontrollers',
+      'FreeRTOS or Zephyr RTOS',
+      'CAN 2.0B / CAN-FD automotive bus protocol',
+      'High-voltage safety certification (AIS-156)',
+    ];
+
+    const result = calculateHiringMatchScore(candidateSkills, jobRequirements);
+    expect(result.matchPercent).toBe(75); // 3 of 4 match
+    expect(result.matchedSkills.length).toBe(3);
+    expect(result.missingSkills).toContain('High-voltage safety certification (AIS-156)');
+  });
+
+  it('filters hardware jobs by domain and location type', () => {
+    const jobs = [
+      {
+        id: 'job-1',
+        slug: 'lead-bms-firmware',
+        title: 'Lead BMS Firmware Engineer',
+        company: {
+          name: 'Ather Energy',
+          website: 'https://atherenergy.com',
+          city: 'Bengaluru',
+          state: 'Karnataka',
+          foundedYear: 2013,
+          verifiedDpiit: true,
+          stage: 'Series B+' as const,
+        },
+        roleType: 'full_time' as const,
+        hardwareDomain: 'power_electronics_bms' as const,
+        experienceLevel: 'mid_lead' as const,
+        locationType: 'onsite_lab' as const,
+        workLocation: 'Bengaluru, Karnataka (Ather Whitefield Lab)',
+        salaryInr: { minLakhs: 28, maxLakhs: 45, equityPercent: '0.2%' },
+        hardwareBenchesUsed: ['Tektronix 1GHz Scope', 'Chroma Battery Simulator'],
+        responsibilities: ['Write cell balancing algorithms', 'Run HIL automated regression tests'],
+        prerequisites: ['5+ years embedded C', 'CAN-FD bus experience'],
+        proofOfWorkRequirements: ['Link to public GitHub firmware repo or Altium schematics'],
+        applyUrl: 'https://atherenergy.com/careers',
+        featured: true,
+        postedDate: '2026-11-10',
+        descriptionMarkdown: 'Lead the next-gen battery safety stack...',
+      },
+      {
+        id: 'job-2',
+        slug: 'autonomous-uav-fellow',
+        title: 'Autonomous Drone Flight Fellow',
+        company: {
+          name: 'IdeaForge',
+          website: 'https://ideaforge.co.in',
+          city: 'Navi Mumbai',
+          state: 'Maharashtra',
+          foundedYear: 2007,
+          verifiedDpiit: true,
+          stage: 'Public / Defence PSU' as const,
+        },
+        roleType: 'fellowship' as const,
+        hardwareDomain: 'robotics_autonomous' as const,
+        experienceLevel: 'early_career' as const,
+        locationType: 'hybrid_hardware' as const,
+        workLocation: 'Navi Mumbai, Maharashtra',
+        salaryInr: { minLakhs: 18, maxLakhs: 26 },
+        fellowshipGrantStipendInr: 60000,
+        hardwareBenchesUsed: ['Optical Tracking Cage', 'Wind Tunnel'],
+        responsibilities: ['Tune PX4 / ArduPilot EKF3 state estimators', 'Field test tactical micro-UAVs'],
+        prerequisites: ['ROS2', 'C++17', 'Drone flight control theory'],
+        proofOfWorkRequirements: ['Flight telemetry logs or video proof of autonomous navigation'],
+        applyUrl: 'https://ideaforge.co.in/careers',
+        featured: true,
+        postedDate: '2026-11-12',
+        descriptionMarkdown: 'Build tactical micro-recon autonomous UAVs...',
+      },
+    ];
+
+    const bmsJobs = filterHardwareJobs(jobs, { domain: 'power_electronics_bms' });
+    expect(bmsJobs.length).toBe(1);
+    expect(bmsJobs[0]?.slug).toBe('lead-bms-firmware');
+
+    const fellowships = filterHardwareJobs(jobs, { roleType: 'fellowship' });
+    expect(fellowships.length).toBe(1);
+    expect(fellowships[0]?.slug).toBe('autonomous-uav-fellow');
+
+    const searchResult = filterHardwareJobs(jobs, { search: 'Chroma' });
+    expect(searchResult.length).toBe(1);
+  });
+
+  it('validates a complete hardware job posting schema', () => {
+    const validJob = {
+      id: 'job-riscv-1',
+      slug: 'riscv-rtl-design-lead',
+      title: 'RISC-V RTL Silicon Design Lead',
+      company: {
+        name: 'Mindgrove Technologies',
+        website: 'https://mindgrovetech.in',
+        city: 'Chennai',
+        state: 'Tamil Nadu',
+        foundedYear: 2021,
+        verifiedDpiit: true,
+        stage: 'Seed' as const,
+      },
+      roleType: 'full_time' as const,
+      hardwareDomain: 'fpga_silicon' as const,
+      experienceLevel: 'mid_lead' as const,
+      locationType: 'onsite_lab' as const,
+      workLocation: 'IIT Madras Research Park, Chennai',
+      salaryInr: { minLakhs: 22, maxLakhs: 36, equityPercent: '0.5%' },
+      hardwareBenchesUsed: ['Xilinx UltraScale+ FPGA testbench', 'Tektronix Logic Analyzer'],
+      responsibilities: ['Design RISC-V RV32IMAC core extensions', 'Tape-out on SCL 180nm / TSMC 28nm'],
+      prerequisites: ['Verilog / SystemVerilog', 'UVM verification', 'Static Timing Analysis'],
+      proofOfWorkRequirements: ['GitHub Verilog repo or IEEE published silicon tape-out paper'],
+      applyUrl: 'https://mindgrovetech.in/careers',
+      featured: true,
+      postedDate: '2026-11-14',
+      descriptionMarkdown: 'Design indigenous Indian silicon SoCs for edge IoT...',
+    };
+
+    const parsed = hardwareJobPostingSchema.safeParse(validJob);
+    expect(parsed.success).toBe(true);
+  });
+});
+
 
 
 

@@ -29,6 +29,7 @@ import {
   Skull,
   Radar,
   Zap,
+  Briefcase,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -214,8 +215,15 @@ const ACADEMY_DROPDOWN: NavDropdown = {
 const COMMUNITY_DROPDOWN: NavDropdown = {
   id: 'community',
   label: 'Community & Proof',
-  matchPrefixes: ['/leaderboard', '/u', '/passport', '/squads', '/launchpad'],
+  matchPrefixes: ['/leaderboard', '/u', '/passport', '/squads', '/launchpad', '/jobs'],
   items: [
+    {
+      href: '/jobs',
+      title: 'Hardware Jobs & Fellowships',
+      description: 'Proof-of-work hiring for aerospace, robotics, EV & semiconductor engineering',
+      icon: Briefcase,
+      badge: 'Proof-of-Work',
+    },
     {
       href: '/launchpad',
       title: 'Hardware Launchpad & Grants',

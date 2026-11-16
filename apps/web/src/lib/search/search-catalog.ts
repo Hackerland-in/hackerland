@@ -410,6 +410,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['launchpad', 'crowdfunding', 'escrow', 'grant', 'idex', 'birac', 'nidhi prayas', 'tide', 'semiconductor dli', 'funding', 'milestone', 'dpiit', 'kickstarter', 'hardware fund'],
   },
   {
+    id: 'hub-jobs',
+    title: 'Hardware & Deep-Tech Jobs & Fellowships Board',
+    description:
+      'Proof-of-work hiring for aerospace, robotics, EV power electronics, BMS firmware, RISC-V silicon, and defense hardware engineering with lab bench specs and skill matching.',
+    category: 'bounties',
+    categoryLabel: 'Jobs & Fellowships',
+    href: '/jobs',
+    badge: 'Proof-of-Work',
+    badgeTone: 'earn',
+    keywords: ['jobs', 'careers', 'hiring', 'fellowship', 'residency', 'hardware engineer', 'bms', 'firmware', 'robotics', 'riscv', 'avionics', 'sic', 'inverter', 'ather', 'ideaforge'],
+  },
+  {
     id: 'hub-teardowns',
     title: 'Hardware Teardowns & Reverse Engineering Library',
     description:

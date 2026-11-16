@@ -8,6 +8,7 @@ import { SQUADS_DATA } from '@/lib/data/squads-data';
 import { CLUBS_DATA } from '@/lib/data/clubs-data';
 import { IP_DEFENSE_PUBLICATIONS } from '@/lib/data/ip-defense-data';
 import { CAMPAIGN_REGISTRY } from '@/lib/data/launchpad-data';
+import { HARDWARE_JOBS_REGISTRY } from '@/lib/data/jobs-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -38,6 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/network/ip', priority: 0.95, changeFrequency: 'daily' },
     { path: '/copilot', priority: 0.95, changeFrequency: 'daily' },
     { path: '/launchpad', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/jobs', priority: 0.95, changeFrequency: 'daily' },
     { path: '/young-innovators', priority: 0.95, changeFrequency: 'daily' },
     { path: '/squads', priority: 0.95, changeFrequency: 'daily' },
     { path: '/earn', priority: 0.85, changeFrequency: 'daily' },
@@ -149,6 +151,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const camp of CAMPAIGN_REGISTRY) {
     sitemapEntries.push({
       url: `${BASE_URL}/launchpad/${camp.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic Hardware Jobs Routes
+  for (const job of HARDWARE_JOBS_REGISTRY) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/jobs/${job.slug}`,
       lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 0.9,

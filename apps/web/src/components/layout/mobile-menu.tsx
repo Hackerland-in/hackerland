@@ -38,6 +38,7 @@ import {
   Skull,
   Radar,
   Zap,
+  Briefcase,
 } from 'lucide-react';
 import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
@@ -195,6 +196,7 @@ export function MobileMenu() {
     {
       heading: 'Opportunities & Academy',
       items: [
+        { href: '/jobs', label: 'Hardware Jobs & Fellowships', icon: Briefcase, badge: 'Proof' },
         { href: '/young-innovators', label: 'Young Innovators (Ages 8-17)', icon: GraduationCap, badge: 'Ages 8-17' },
         { href: '/earn', label: 'Earn (Bounties & Grants)', icon: Coins, badge: 'Active' },
         { href: '/learn', label: 'Learn by Doing Roadmaps', icon: GraduationCap, badge: 'Open-Source' },

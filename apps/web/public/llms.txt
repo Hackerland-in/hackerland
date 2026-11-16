@@ -23,6 +23,8 @@ Hackerland is a developer and maker platform bridging open-source hardware proto
   - Engineering calculators for IPC-2152 trace sizing, SMPS buck filter design, thermal heatsink rating, BOM supply chain risk scrubbers, and live domestic Indian component pricing (Robu, Element14, KitsnSpares).
 - **Milestone-Locked Hardware Launchpad & Grant Matcher:** https://www.hackerland.in/launchpad
   - Milestone-locked crowdfunding escrow and automated non-dilutive grant matcher for Indian schemes (iDEX DISC, BIRAC BIG, DST NIDHI-PRAYAS, MeitY TIDE 2.0, Semiconductor DLI) with mandatory 66% backer quorum governance.
+- **Hardware & Deep-Tech Jobs & Fellowships:** https://www.hackerland.in/jobs
+  - Proof-of-work hiring for aerospace, robotics, EV power electronics, BMS firmware, RISC-V silicon, and defense hardware engineering with lab bench specs, salary ranges in Lakhs, and skill matching.
 - **Young Innovators Track & Safety Sandbox:** https://www.hackerland.in/young-innovators
   - Supervised K-12 engineering track for makers ages 8–17 with visual block-to-hardware MicroPython/C++ compilation, age-tiered challenges, and DPDP Act parental/educator co-signing.
 - **Open Invention Network & IP Defense Ledger:** https://www.hackerland.in/network/ip

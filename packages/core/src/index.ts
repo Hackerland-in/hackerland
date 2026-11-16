@@ -20,4 +20,5 @@ export * from './young-innovators';
 export * from './copilot';
 export * from './launchpad';
 export * from './teardowns';
+export * from './jobs';
 
