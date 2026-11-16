@@ -36,6 +36,7 @@ import {
   Usb,
   Rocket,
   Skull,
+  Radar,
 } from 'lucide-react';
 import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
@@ -158,6 +159,7 @@ export function MobileMenu() {
     {
       heading: 'Discover & Build',
       items: [
+        { href: '/observatory', label: 'Innovation Observatory', icon: Radar, badge: 'Tech Radar' },
         { href: '/projects', label: 'Explore Projects', icon: FolderKanban },
         { href: '/ideas', label: 'IdeaLab (Stage Zero)', icon: Lightbulb, badge: 'Incubator' },
         { href: '/problems', label: 'Unsolved Problems', icon: Target, badge: 'Challenges' },

@@ -27,6 +27,7 @@ import {
   Compass,
   Rocket,
   Skull,
+  Radar,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -120,8 +121,15 @@ const HARDWARE_DROPDOWN: NavDropdown = {
 const ACADEMY_DROPDOWN: NavDropdown = {
   id: 'academy',
   label: 'Knowledge & Academy',
-  matchPrefixes: ['/stories', '/ideas', '/problems', '/learn', '/entrepreneurship', '/museum'],
+  matchPrefixes: ['/stories', '/ideas', '/problems', '/learn', '/entrepreneurship', '/museum', '/observatory'],
   items: [
+    {
+      href: '/observatory',
+      title: 'Innovation Observatory',
+      description: 'Live radar of expired patents, lab breakthroughs, open silicon & deep-tech grants',
+      icon: Radar,
+      badge: 'Tech Radar',
+    },
     {
       href: '/stories',
       title: 'Build Journey Archive',

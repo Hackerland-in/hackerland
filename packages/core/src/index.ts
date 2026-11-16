@@ -11,4 +11,5 @@ export * from './problems';
 export * from './stories';
 export * from './passports';
 export * from './museum';
+export * from './observatory';
 

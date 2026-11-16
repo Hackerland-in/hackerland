@@ -16,6 +16,7 @@ import {
   buildJourneyStorySchema,
   museumExhibitSchema,
   evaluateHardwareFailureRisk,
+  observatoryItemSchema,
 } from './index';
 
 describe('tracks', () => {
@@ -255,6 +256,30 @@ describe('ecosystem domain schemas', () => {
 
     expect(lowRiskProject.score).toBeLessThan(40);
     expect(lowRiskProject.level).toBe('Low');
+  });
+
+  it('validates an observatory tech radar item', () => {
+    const validObservatoryItem = {
+      id: 'obs_1',
+      title: 'SLS Laser Sintering Core Patent Expiry',
+      slug: 'sls-laser-sintering-patent-expiry',
+      category: 'patent_expiry',
+      quadrant: 'Hardware & Silicon',
+      ring: 'Adopt',
+      summary: 'Foundational selective laser sintering patents expired, enabling $500 desktop nylon 3D printing.',
+      maturityLevel: 'Production Ready',
+      impactScore: 94,
+      source: {
+        name: 'USPTO Patent Database',
+        url: 'https://patents.google.com/patent/US5597589A/en',
+        publishedDate: '2024-02-14',
+      },
+      makerAction: 'Build an open-source diode-laser SLS powder recoater.',
+      commercialPotential: 'Disrupt industrial $50k EOS machines with desktop print farms.',
+      tags: ['3D Printing', 'Sintering', 'Public Domain', 'Additive'],
+      relatedProblemSlugs: ['open-braille'],
+    };
+    expect(observatoryItemSchema.safeParse(validObservatoryItem).success).toBe(true);
   });
 });
 
