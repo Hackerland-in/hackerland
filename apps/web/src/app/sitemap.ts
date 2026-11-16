@@ -3,6 +3,7 @@ import { listProjects } from '@/lib/data/queries';
 import { listBuildStories } from '@/lib/data/stories-data';
 import { listProblems } from '@/lib/data/problems-data';
 import { TEARDOWNS_DATA } from '@/lib/data/teardowns-data';
+import { MUSEUM_EXHIBITS } from '@/lib/data/museum-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -13,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: { path: string; priority: number; changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' }[] = [
     { path: '', priority: 1.0, changeFrequency: 'daily' },
     { path: '/stories', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/museum', priority: 0.95, changeFrequency: 'daily' },
     { path: '/ideas', priority: 0.95, changeFrequency: 'daily' },
     { path: '/problems', priority: 0.95, changeFrequency: 'daily' },
     { path: '/passport', priority: 0.9, changeFrequency: 'weekly' },
@@ -84,6 +86,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const teardown of TEARDOWNS_DATA) {
     sitemapEntries.push({
       url: `${BASE_URL}/teardowns/${teardown.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic Museum Routes
+  for (const exhibit of MUSEUM_EXHIBITS) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/museum/${exhibit.slug}`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.9,

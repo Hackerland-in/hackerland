@@ -35,6 +35,7 @@ import {
   Calculator,
   Usb,
   Rocket,
+  Skull,
 } from 'lucide-react';
 import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
@@ -161,6 +162,7 @@ export function MobileMenu() {
         { href: '/ideas', label: 'IdeaLab (Stage Zero)', icon: Lightbulb, badge: 'Incubator' },
         { href: '/problems', label: 'Unsolved Problems', icon: Target, badge: 'Challenges' },
         { href: '/stories', label: 'Build Journey Archive', icon: BookOpen, badge: 'Histories' },
+        { href: '/museum', label: 'Failed Projects Museum', icon: Skull, badge: 'Autopsies' },
         { href: '/passport', label: 'Innovation Passport', icon: ShieldCheck, badge: 'Proof' },
         { href: '/feed', label: 'Community Feed', icon: Compass },
         { href: '/leaderboard', label: 'Top Innovators', icon: Trophy, badge: 'Rankings' },

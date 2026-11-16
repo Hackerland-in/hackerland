@@ -14,6 +14,8 @@ import {
   ideaSchema,
   problemSchema,
   buildJourneyStorySchema,
+  museumExhibitSchema,
+  evaluateHardwareFailureRisk,
 } from './index';
 
 describe('tracks', () => {
@@ -191,6 +193,68 @@ describe('ecosystem domain schemas', () => {
       updatedAt: new Date().toISOString(),
     };
     expect(buildJourneyStorySchema.safeParse(validStory).success).toBe(true);
+  });
+
+  it('validates a museum failure exhibit schema', () => {
+    const validExhibit = {
+      slug: 'juicero-press',
+      title: 'Juicero Press ($120M Cold Press)',
+      tagline: 'When 4 Tons of Pressure Met Human Hands',
+      category: 'Consumer Electronics',
+      lifespan: '2013 – 2017',
+      capitalBurned: '$118.5 Million',
+      primaryFailureMode: 'Feature Over-Engineering',
+      summary: 'A 4-ton press that could be replicated by hand squeezing.',
+      productSpecs: ['4000 lbs force gearbox', 'Custom extruded aluminum frame'],
+      rootCauseAutopsy: [
+        {
+          stage: 'Manufacturing & BOM',
+          failureTrigger: 'Excessive custom CNC parts',
+          detail: 'Over 11 custom precision machined aluminum parts pushed retail to $699.',
+          warningSigns: ['BOM exceeded retail price without software subsidies.'],
+        },
+      ],
+      salvageableInnovations: [
+        {
+          innovation: 'QR-code freshness scanner & cellular provisioning',
+          utility: 'Zero-touch packaging validation',
+          modernSuccessors: ['IoT Nespresso machines', 'Smart medical supply lockers'],
+        },
+      ],
+      lessonsForBuilders: [
+        {
+          principle: 'Do not automate what hands can do without value-add',
+          advice: 'Validate the physical necessity of every motor and gearbox.',
+          antiPattern: 'Solving non-problems with military-grade engineering.',
+        },
+      ],
+    };
+    expect(museumExhibitSchema.safeParse(validExhibit).success).toBe(true);
+  });
+
+  it('evaluates hardware failure risks accurately', () => {
+    const highRiskProject = evaluateHardwareFailureRisk({
+      retailPriceUsd: 100,
+      bomCostUsd: 80, // Poor margin (only 20% margin)
+      customPartsCount: 12, // High tooling
+      requiresRegulatoryApproval: true,
+      hasMovingMechanicalParts: true,
+    });
+
+    expect(highRiskProject.score).toBeGreaterThanOrEqual(70);
+    expect(highRiskProject.level).toBe('Critical');
+    expect(highRiskProject.identifiedTraps.length).toBeGreaterThanOrEqual(3);
+
+    const lowRiskProject = evaluateHardwareFailureRisk({
+      retailPriceUsd: 120,
+      bomCostUsd: 25, // Good margin (~79%)
+      customPartsCount: 2,
+      requiresRegulatoryApproval: false,
+      hasMovingMechanicalParts: false,
+    });
+
+    expect(lowRiskProject.score).toBeLessThan(40);
+    expect(lowRiskProject.level).toBe('Low');
   });
 });
 

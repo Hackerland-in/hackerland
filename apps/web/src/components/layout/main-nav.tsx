@@ -26,6 +26,7 @@ import {
   Calculator,
   Compass,
   Rocket,
+  Skull,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -119,7 +120,7 @@ const HARDWARE_DROPDOWN: NavDropdown = {
 const ACADEMY_DROPDOWN: NavDropdown = {
   id: 'academy',
   label: 'Knowledge & Academy',
-  matchPrefixes: ['/stories', '/ideas', '/problems', '/learn', '/entrepreneurship'],
+  matchPrefixes: ['/stories', '/ideas', '/problems', '/learn', '/entrepreneurship', '/museum'],
   items: [
     {
       href: '/stories',
@@ -127,6 +128,13 @@ const ACADEMY_DROPDOWN: NavDropdown = {
       description: 'Deep, chapter-by-chapter case studies & decision archaeology of real companies',
       icon: BookOpen,
       badge: 'Deep Histories',
+    },
+    {
+      href: '/museum',
+      title: 'Failed Projects Museum',
+      description: 'Technical root-cause autopsies of Juicero, Theranos, Better Place & hardware traps',
+      icon: Skull,
+      badge: 'Autopsies',
     },
     {
       href: '/ideas',
