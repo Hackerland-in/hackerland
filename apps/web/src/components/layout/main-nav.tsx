@@ -52,8 +52,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds'],
   items: [
+    {
+      href: '/testbeds',
+      title: 'Remote HIL Testbeds & Lab Benches',
+      description: 'Shared 20 GHz analyzers, 1000A battery cyclers & anechoic chambers with remote SCPI',
+      icon: Atom,
+      badge: 'Remote SCPI',
+    },
     {
       href: '/compliance',
       title: 'Statutory Compliance & NABL Wizard',

@@ -27,6 +27,8 @@ Hackerland is a developer and maker platform bridging open-source hardware proto
   - Verified open-source binary repository for ArduPilot Copter, Zephyr RTOS AIS-156 BMS, Meshtastic LoRa, Mindgrove RISC-V bootloader, and MicroPython with one-click in-browser USB flashing.
 - **Indian Hardware Statutory Compliance & NABL Lab Wizard:** https://www.hackerland.in/compliance
   - Automated regulatory roadmap matcher, pre-compliance audit checklists, and laboratory testing CapEx estimators for BIS CRS, WPC ETA, TEC MTCTE, DGCA Drone Rules 2021, and AIS-156 Phase 2.
+- **Remote Hardware-in-the-Loop Testbeds & Lab Benches:** https://www.hackerland.in/testbeds
+  - Shared Keysight 20 GHz spectrum analyzers, Chroma 1000A regenerative battery cyclers, and Rohde & Schwarz anechoic chambers with remote SCPI execution and up to 60% student subsidies.
 - **Milestone-Locked Hardware Launchpad & Grant Matcher:** https://www.hackerland.in/launchpad
   - Milestone-locked crowdfunding escrow and automated non-dilutive grant matcher for Indian schemes (iDEX DISC, BIRAC BIG, DST NIDHI-PRAYAS, MeitY TIDE 2.0, Semiconductor DLI) with mandatory 66% backer quorum governance.
 - **Hardware & Deep-Tech Jobs & Fellowships:** https://www.hackerland.in/jobs

@@ -434,6 +434,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['compliance', 'regulatory', 'bis', 'crs', 'isi', 'wpc', 'eta', 'tec', 'mtcte', 'dgca', 'drone rules', 'ais 156', 'nabl', 'sameer', 'arai', 'icat', 'ertl', 'testing lab', 'certification'],
   },
   {
+    id: 'hub-testbeds',
+    title: 'Remote Hardware-in-the-Loop Testbeds & High-CapEx Lab Benches',
+    description:
+      'Shared Keysight 20 GHz spectrum analyzers, Chroma 1000A regenerative battery cyclers, and semi-anechoic chambers with remote SCPI execution and student subsidies.',
+    category: 'labs',
+    categoryLabel: 'HIL Testbeds',
+    href: '/testbeds',
+    badge: 'Remote SCPI',
+    badgeTone: 'accent',
+    keywords: ['testbed', 'hil', 'scpi', 'pyvisa', 'keysight', 'spectrum analyzer', 'chroma', 'battery cycler', 'anechoic chamber', 'shaker table', 'iit madras', 'arai', 'nal'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

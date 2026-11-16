@@ -11,6 +11,7 @@ import { CAMPAIGN_REGISTRY } from '@/lib/data/launchpad-data';
 import { HARDWARE_JOBS_REGISTRY } from '@/lib/data/jobs-data';
 import { FIRMWARE_REGISTRY } from '@/lib/data/firmware-data';
 import { COMPLIANCE_ROADMAPS } from '@/lib/data/compliance-data';
+import { TESTBED_FACILITIES } from '@/lib/data/testbeds-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -43,6 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/telemetry', priority: 0.95, changeFrequency: 'daily' },
     { path: '/firmware', priority: 0.95, changeFrequency: 'daily' },
     { path: '/compliance', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/testbeds', priority: 0.95, changeFrequency: 'daily' },
     { path: '/launchpad', priority: 0.95, changeFrequency: 'daily' },
     { path: '/jobs', priority: 0.95, changeFrequency: 'daily' },
     { path: '/young-innovators', priority: 0.95, changeFrequency: 'daily' },
@@ -186,6 +188,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const rm of COMPLIANCE_ROADMAPS) {
     sitemapEntries.push({
       url: `${BASE_URL}/compliance/${rm.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic Testbed Facilities Routes
+  for (const tb of TESTBED_FACILITIES) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/testbeds/${tb.slug}`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.9,

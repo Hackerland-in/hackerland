@@ -64,6 +64,10 @@ import {
   evaluatePreComplianceReadiness,
   formatComplianceCost,
   complianceRoadmapItemSchema,
+  validateScpiCommandScript,
+  calculateTestbedBookingCost,
+  filterTestbedFacilities,
+  testbedFacilitySchema,
 } from './index';
 
 describe('tracks', () => {
@@ -1435,6 +1439,106 @@ describe('hardware statutory compliance and regulatory wizard schema', () => {
   it('formats compliance cost into Indian Lakhs or thousands', () => {
     expect(formatComplianceCost(25000)).toBe('₹25,000');
     expect(formatComplianceCost(450000)).toBe('₹4.50 Lakhs');
+  });
+});
+
+describe('remote testbeds and high-capex laboratory equipment schema', () => {
+  it('validates SCPI commands and catches dangerous destructive operations', () => {
+    const validScript = `*IDN?\n*RST\n:SENS:FREQ:CENT 2.45GHz\n:MEAS:POW?`;
+    const validResult = validateScpiCommandScript(validScript);
+    expect(validResult.isValid).toBe(true);
+    expect(validResult.commandCount).toBe(4);
+    expect(validResult.errors.length).toBe(0);
+
+    const destructiveScript = `*IDN?\n:SYST:SEC:ERA\n:MEAS:VOLT?`;
+    const destructiveResult = validateScpiCommandScript(destructiveScript);
+    expect(destructiveResult.isValid).toBe(false);
+    expect(destructiveResult.errors.length).toBeGreaterThan(0);
+  });
+
+  it('calculates testbed booking cost with 50% startup and student subsidy', () => {
+    // 4 hours on Keysight 20 GHz analyzer @ ₹1,200/hr regular, ₹450/hr student
+    const commercialBooking = calculateTestbedBookingCost(4, 1200, 450, false);
+    expect(commercialBooking.totalCostInr).toBe(4800);
+    expect(commercialBooking.savingsInr).toBe(0);
+    expect(commercialBooking.appliedHourlyRate).toBe(1200);
+
+    const subsidizedBooking = calculateTestbedBookingCost(4, 1200, 450, true);
+    expect(subsidizedBooking.totalCostInr).toBe(1800);
+    expect(subsidizedBooking.savingsInr).toBe(3000);
+    expect(subsidizedBooking.appliedHourlyRate).toBe(450);
+  });
+
+  it('filters testbed facilities by city and equipment category', () => {
+    const items = [
+      {
+        id: 'tb-1',
+        slug: 'keysight-rf-analyzer',
+        name: 'Keysight N9020B 20 GHz Spectrum Analyzer',
+        model: 'N9020B MXA',
+        manufacturer: 'Keysight Technologies',
+        category: 'rf_spectrum_analyzer' as const,
+        hostLab: {
+          name: 'IIT Madras 5G Testbed',
+          city: 'Chennai',
+          state: 'Tamil Nadu',
+          institution: 'IIT Madras Research Park',
+          nablAccredited: true,
+        },
+        accessType: 'remote_scpi' as const,
+        specifications: { bandwidth: '10 Hz - 20 GHz' },
+        hourlyRateInr: 1200,
+        studentSubsidyRateInr: 450,
+        safetyInductionRequired: false,
+        activeQueueLength: 2,
+        scriptRunner: {
+          scriptType: 'pyvisa_scpi' as const,
+          sampleScript: '*IDN?\n:MEAS:FREQ?',
+          supportedInterfaces: ['lan_scpi' as const],
+        },
+        description: '20 GHz microwave spectrum analyzer.',
+        rulesAndGuidelines: ['Max input +30 dBm'],
+      },
+      {
+        id: 'tb-2',
+        slug: 'chroma-battery-cycler',
+        name: 'Chroma 17020 Regenerative Battery Pack Cycler',
+        model: '17020-100-1000',
+        manufacturer: 'Chroma ATE',
+        category: 'battery_cycler' as const,
+        hostLab: {
+          name: 'ARAI EV Center of Excellence',
+          city: 'Pune',
+          state: 'Maharashtra',
+          institution: 'Automotive Research Association of India',
+          nablAccredited: true,
+        },
+        accessType: 'physical_onsite' as const,
+        specifications: { maxCurrent: '1000 A' },
+        hourlyRateInr: 2500,
+        studentSubsidyRateInr: 1000,
+        safetyInductionRequired: true,
+        activeQueueLength: 4,
+        scriptRunner: {
+          scriptType: 'json_profile' as const,
+          sampleScript: '{"cycle": "AIS-156"}',
+          supportedInterfaces: ['lan_scpi' as const],
+        },
+        description: 'Regenerative 1000A EV pack test bench.',
+        rulesAndGuidelines: ['Operator mandatory'],
+      },
+    ];
+
+    const chennaiOnly = filterTestbedFacilities(items, { city: 'chennai' });
+    expect(chennaiOnly.length).toBe(1);
+    expect(chennaiOnly[0]?.slug).toBe('keysight-rf-analyzer');
+
+    const batteryCategory = filterTestbedFacilities(items, { category: 'battery_cycler' });
+    expect(batteryCategory.length).toBe(1);
+    expect(batteryCategory[0]?.slug).toBe('chroma-battery-cycler');
+
+    const searchResult = filterTestbedFacilities(items, { search: 'Keysight' });
+    expect(searchResult.length).toBe(1);
   });
 });
 
