@@ -19,6 +19,8 @@ Hackerland is a developer and maker platform bridging open-source hardware proto
   - 60 FPS physics engines with live telemetry streaming and parameter tuning.
 - **Hardware Bounties & Grants:** https://www.hackerland.in/earn
   - Paid bounties and micro-grants for building open-source hardware, firmware, and software.
+- **AI Hardware Co-Pilot & Sourcing Assistant:** https://www.hackerland.in/copilot
+  - Engineering calculators for IPC-2152 trace sizing, SMPS buck filter design, thermal heatsink rating, BOM supply chain risk scrubbers, and live domestic Indian component pricing (Robu, Element14, KitsnSpares).
 - **Young Innovators Track & Safety Sandbox:** https://www.hackerland.in/young-innovators
   - Supervised K-12 engineering track for makers ages 8–17 with visual block-to-hardware MicroPython/C++ compilation, age-tiered challenges, and DPDP Act parental/educator co-signing.
 - **Open Invention Network & IP Defense Ledger:** https://www.hackerland.in/network/ip

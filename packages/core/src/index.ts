@@ -17,4 +17,5 @@ export * from './squads';
 export * from './clubs';
 export * from './ip-defense';
 export * from './young-innovators';
+export * from './copilot';
 

@@ -386,6 +386,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['manufacturing', 'hardware', 'pcb', 'drone', 'ev', 'engine', 'mobile'],
   },
   {
+    id: 'hub-copilot',
+    title: 'AI Hardware Co-Pilot & Component Sourcing Assistant',
+    description:
+      'Engineering calculators for IPC-2152 trace sizing, SMPS buck filter sizing, thermal heatsink resistance, BOM risk scrubber, and domestic Indian distributor pricing.',
+    category: 'simulators',
+    categoryLabel: 'AI Workbench',
+    href: '/copilot',
+    badge: 'AI Co-Pilot',
+    badgeTone: 'accent',
+    keywords: ['copilot', 'calculator', 'trace width', 'ipc 2152', 'buck converter', 'smps', 'heatsink', 'thermal', 'sourcing', 'bom', 'robu', 'element14', 'mcu', 'mosfet'],
+  },
+  {
     id: 'hub-young-innovators',
     title: 'Young Innovators Track & Safety Sandbox (Ages 8–17)',
     description:

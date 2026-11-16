@@ -28,6 +28,7 @@ import {
   Rocket,
   Skull,
   Radar,
+  Zap,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -50,8 +51,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot'],
   items: [
+    {
+      href: '/copilot',
+      title: 'Hardware Co-Pilot & Sourcing',
+      description: 'IPC-2152 trace sizing, SMPS buck filter, thermal heatsink & Indian domestic parts',
+      icon: Zap,
+      badge: 'AI Workbench',
+    },
     {
       href: '/network/ip',
       title: 'Open Invention Network (IP Defense)',

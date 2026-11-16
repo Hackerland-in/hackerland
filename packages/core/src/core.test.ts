@@ -33,6 +33,11 @@ import {
   guardianConsentSchema,
   filterJuniorChallenges,
   generateJuniorPassportCredential,
+  calculateIpc2152Trace,
+  calculateSmpsBuck,
+  calculateThermalHeatsink,
+  auditBomItems,
+  componentSourcingItemSchema,
 } from './index';
 
 describe('tracks', () => {
@@ -691,6 +696,98 @@ describe('young innovators track and safety sandbox schema', () => {
     expect(matchDiff.length).toBe(1);
   });
 });
+
+describe('ai hardware copilot engineering calculators and sourcing', () => {
+  it('calculates IPC-2152 trace width accurately for 5A current on 1oz copper', () => {
+    const result = calculateIpc2152Trace({
+      currentAmps: 5.0,
+      copperWeightOz: 1.0,
+      tempRiseC: 10,
+      isInternalLayer: false,
+    });
+    expect(result.widthMils).toBeGreaterThan(50);
+    expect(result.widthMm).toBeGreaterThan(1.0);
+    expect(result.resistancePerMeterOhms).toBeGreaterThan(0);
+    expect(result.powerLossWattsPerMeter).toBeGreaterThan(0);
+  });
+
+  it('calculates SMPS buck converter inductance and output capacitance', () => {
+    const result = calculateSmpsBuck({
+      vinVolts: 24,
+      voutVolts: 5,
+      ioutAmps: 3,
+      freqKhz: 500,
+      rippleRatio: 0.3,
+    });
+    expect(result.dutyCycle).toBeCloseTo(0.208, 2);
+    expect(result.inductanceUh).toBeGreaterThan(5);
+    expect(result.minOutputCapUf).toBeGreaterThan(1);
+    expect(result.peakCurrentAmps).toBeGreaterThan(3.0);
+  });
+
+  it('calculates thermal heatsink requirements for 10W MOSFET dissipation', () => {
+    const result = calculateThermalHeatsink({
+      powerWatts: 10,
+      maxJunctionTempC: 125,
+      ambientTempC: 45,
+      thetaJc: 2.0,
+    });
+    expect(result.maxTotalTheta).toBe(8.0);
+    expect(result.requiredHeatsinkTheta).toBe(6.0);
+    expect(result.coolingRecommendation).toContain('Extruded Aluminium Heatsink');
+  });
+
+  it('audits BOM items identifying EOL chips and single-source distributor bottlenecks', () => {
+    const catalog = [
+      {
+        mpn: 'LM7805CT',
+        manufacturer: 'Texas Instruments',
+        category: 'Linear Voltage Regulator',
+        description: '5V 1.5A Linear Regulator TO-220',
+        package: 'TO-220',
+        lifecycleStatus: 'active' as const,
+        indianDistributors: [{ name: 'Robu.in', inStock: true, priceInr: 28, minOrderQty: 1 }],
+        globalDistributors: [{ name: 'LCSC', inStock: true, priceUsd: 0.32 }],
+        pinCompatibleAlternates: [
+          { mpn: 'L7805CV', manufacturer: 'STMicroelectronics', priceInr: 26, notes: 'Direct pin drop-in' },
+        ],
+      },
+      {
+        mpn: 'MAX232CPE',
+        manufacturer: 'Maxim Integrated',
+        category: 'RS-232 Transceiver',
+        description: 'Dual RS-232 Driver/Receiver DIP-16',
+        package: 'DIP-16',
+        lifecycleStatus: 'eol' as const,
+        indianDistributors: [{ name: 'KitsnSpares', inStock: false, priceInr: 120, minOrderQty: 1 }],
+        globalDistributors: [{ name: 'DigiKey', inStock: false, priceUsd: 3.5 }],
+        pinCompatibleAlternates: [
+          { mpn: 'SP232EEN', manufacturer: 'MaxLinear', priceInr: 45, notes: 'SOIC-16 drop-in' },
+        ],
+      },
+    ];
+
+    const bom = [
+      { reference: 'U1', mpn: 'LM7805CT' },
+      { reference: 'U2', mpn: 'MAX232CPE' },
+      { reference: 'U3', mpn: 'UNKNOWN_CHIP_99' },
+    ];
+
+    const audit = auditBomItems(bom, catalog);
+    expect(audit.length).toBe(3);
+
+    const u1 = audit.find((a) => a.reference === 'U1');
+    expect(u1?.riskLevel).toBe('low');
+
+    const u2 = audit.find((a) => a.reference === 'U2');
+    expect(u2?.riskLevel).toBe('high');
+    expect(u2?.suggestedReplacement).toBe('SP232EEN');
+
+    const u3 = audit.find((a) => a.reference === 'U3');
+    expect(u3?.riskLevel).toBe('medium');
+  });
+});
+
 
 
 

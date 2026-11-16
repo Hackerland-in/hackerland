@@ -37,6 +37,7 @@ import {
   Rocket,
   Skull,
   Radar,
+  Zap,
 } from 'lucide-react';
 import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
@@ -175,6 +176,7 @@ export function MobileMenu() {
     {
       heading: 'Hardware & Manufacturing',
       items: [
+        { href: '/copilot', label: 'Hardware Co-Pilot & Sourcing', icon: Zap, badge: 'AI Sourcing' },
         { href: '/network/ip', label: 'Open Invention IP Defense', icon: ShieldCheck, badge: 'IP Defense' },
         { href: '/clubs', label: 'Innovation Clubs & ATL Hub', icon: GraduationCap, badge: 'ATL Mesh' },
         { href: '/prototype', label: 'Idea-to-Prototype Simulator', icon: Sparkles, badge: 'AI Architect' },
