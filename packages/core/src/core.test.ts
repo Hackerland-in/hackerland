@@ -86,6 +86,10 @@ import {
   evaluateEmcCompliance,
   calculateCommonModeChoke,
   filterEmcProjects,
+  calculateRfTransmissionLine,
+  synthesizeTraceWidth,
+  calculateLSectionMatch,
+  RF_SUBSTRATES_DATABASE,
 } from './index';
 
 describe('tracks', () => {
@@ -2004,6 +2008,102 @@ describe('emi / emc radiation pre-scan analyzer & near-field probe visualizer', 
 
     const noMatch = filterEmcProjects([sampleEmcProject], { standard: 'mil_std_461g' });
     expect(noMatch.length).toBe(0);
+  });
+});
+
+describe('RF Impedance & Transmission Line Synthesizer', () => {
+  it('calculates microstrip characteristic impedance accurately using Hammerstad Jensen', () => {
+    // 50 ohm microstrip on 1.6mm FR4 (Er=4.4): W is typically around 3.0mm
+    const result = calculateRfTransmissionLine({
+      lineType: 'microstrip',
+      frequencyGHz: 2.4,
+      traceWidthMm: 3.0,
+      substrateHeightMm: 1.6,
+      copperThicknessUm: 35,
+      dielectricConstantEr: 4.4,
+      lossTangent: 0.02,
+    });
+
+    expect(result.characteristicImpedanceZ0).toBeGreaterThan(45);
+    expect(result.characteristicImpedanceZ0).toBeLessThan(55);
+    expect(result.effectiveDielectricConstantEeff).toBeGreaterThan(3.0);
+    expect(result.effectiveDielectricConstantEeff).toBeLessThan(4.4);
+    expect(result.phaseVelocityPercentC).toBeGreaterThan(50);
+    expect(result.skinDepthUm).toBeGreaterThan(1.0);
+    expect(result.skinDepthUm).toBeLessThan(2.0); // ~1.33 um at 2.4 GHz
+    expect(result.totalLossDbPerMm).toBeGreaterThan(0);
+  });
+
+  it('calculates grounded coplanar waveguide (GCPW) impedance', () => {
+    // GCPW on Rogers RO4350B (Er=3.48, H=0.508mm)
+    const result = calculateRfTransmissionLine({
+      lineType: 'gcpw',
+      frequencyGHz: 5.8,
+      traceWidthMm: 1.1,
+      substrateHeightMm: 0.508,
+      groundGapMm: 0.4,
+      copperThicknessUm: 35,
+      dielectricConstantEr: 3.48,
+      lossTangent: 0.0037,
+    });
+
+    expect(result.characteristicImpedanceZ0).toBeGreaterThan(40);
+    expect(result.characteristicImpedanceZ0).toBeLessThan(60);
+    expect(result.totalLossDbPerMm).toBeLessThan(0.05); // low loss ceramic
+  });
+
+  it('calculates differential microstrip impedance', () => {
+    const result = calculateRfTransmissionLine({
+      lineType: 'differential_microstrip',
+      frequencyGHz: 5.0,
+      traceWidthMm: 0.3,
+      substrateHeightMm: 0.2,
+      differentialSpacingMm: 0.25,
+      copperThicknessUm: 18,
+      dielectricConstantEr: 4.04,
+      lossTangent: 0.015,
+    });
+
+    expect(result.differentialImpedanceZdiff).toBeDefined();
+    expect(result.differentialImpedanceZdiff!).toBeGreaterThan(70);
+    expect(result.differentialImpedanceZdiff!).toBeLessThan(120);
+  });
+
+  it('synthesizes trace width for target impedance via binary search', () => {
+    // Target 50 ohms on 0.2mm prepreg FR4 (Er=4.04)
+    const targetZ0 = 50.0;
+    const synthesizedWidthMm = synthesizeTraceWidth('microstrip', targetZ0, 0.2, 4.04, 35);
+    expect(synthesizedWidthMm).toBeGreaterThan(0.3);
+    expect(synthesizedWidthMm).toBeLessThan(0.5);
+
+    // Verify recalculation matches target within 0.1 ohm
+    const verify = calculateRfTransmissionLine({
+      lineType: 'microstrip',
+      frequencyGHz: 1.0,
+      traceWidthMm: synthesizedWidthMm,
+      substrateHeightMm: 0.2,
+      copperThicknessUm: 35,
+      dielectricConstantEr: 4.04,
+      lossTangent: 0.015,
+    });
+    expect(Math.abs(verify.characteristicImpedanceZ0 - targetZ0)).toBeLessThan(0.2);
+  });
+
+  it('synthesizes L-section matching network with valid components and Smith chart points', () => {
+    // Match 25 - j15 load to 50 ohms at 865 MHz (IN865 LoRa)
+    const match = calculateLSectionMatch(865, 50, 25, -15, true);
+
+    expect(match.vswr).toBeGreaterThan(1.0);
+    expect(match.returnLossDb).toBeGreaterThan(0);
+    expect(match.seriesComponent.valuePicoOrNano).toBeGreaterThan(0);
+    expect(match.shuntComponent.valuePicoOrNano).toBeGreaterThan(0);
+    expect(match.smithChartPoints.length).toBe(3);
+  });
+
+  it('provides verified RF substrates database with FR-4, Rogers, and DuPont', () => {
+    expect(RF_SUBSTRATES_DATABASE.rogers_ro4350b.dielectricConstantEr).toBe(3.48);
+    expect(RF_SUBSTRATES_DATABASE.rogers_rt5880.lossTangent).toBe(0.0009);
+    expect(RF_SUBSTRATES_DATABASE.fr4_standard.dielectricConstantEr).toBe(4.4);
   });
 });
 

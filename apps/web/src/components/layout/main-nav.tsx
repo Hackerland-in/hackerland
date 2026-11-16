@@ -52,8 +52,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc'],
   items: [
+    {
+      href: '/rf-calc',
+      title: 'RF & Microwave Transmission Lines',
+      description: '50Ω microstrip, GCPW, 100Ω differential pairs & Smith Chart matching networks',
+      icon: Radar,
+      badge: 'RF Solver',
+    },
     {
       href: '/emc',
       title: 'EMI / EMC Pre-Scan Analyzer',

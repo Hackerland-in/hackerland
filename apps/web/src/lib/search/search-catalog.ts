@@ -494,6 +494,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['emc', 'emi', 'cispr 25', 'cispr 32', 'near field', 'probe', 'sameer', 'arai', 'spectrum', 'conducted emissions', 'radiated emissions', 'choke', 'filter'],
   },
   {
+    id: 'hub-rf-calc',
+    title: 'RF Impedance & Transmission Line Synthesizer',
+    description:
+      'Synthesize 50Ω microstrip, grounded coplanar waveguide (GCPW), and 100Ω differential pairs on Rogers RO4350B, RT/duroid, and Isola 370HR with skin depth, conductor roughness loss, and Smith Chart conjugate matching.',
+    category: 'labs',
+    categoryLabel: 'RF & Microwave',
+    href: '/rf-calc',
+    badge: 'RF Waveguides',
+    badgeTone: 'accent',
+    keywords: ['rf', 'impedance', 'microstrip', 'gcpw', 'coplanar', 'stripline', 'smith chart', 'matching network', 'rogers', 'ro4350b', 'skin depth', 'loss tangent', 'navic', 'lora', '50 ohm'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:
