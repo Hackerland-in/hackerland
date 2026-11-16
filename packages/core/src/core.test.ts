@@ -56,6 +56,10 @@ import {
   calculateBmsCellSpread,
   calculateAttitudeAngles,
   parseCsvTelemetry,
+  calculateFlashPartitionLayout,
+  filterFirmwareRegistry,
+  formatFirmwareBytes,
+  firmwareRegistryItemSchema,
 } from './index';
 
 describe('tracks', () => {
@@ -1280,6 +1284,91 @@ describe('telemetry digital twin analytics and parsing', () => {
     expect(parsed.samples.length).toBe(3);
     expect(parsed.samples[1]?.timestampMs).toBe(100);
     expect(parsed.samples[1]?.values['alt_m']).toBe(14.8);
+  });
+});
+
+describe('firmware registry and flash partition layout schema', () => {
+  it('calculates flash partition layout and detects free headroom', () => {
+    const partitions = [
+      { name: 'bootloader', type: 'data', subType: 'boot', offsetHex: '0x1000', sizeBytes: 32768, color: '#3b82f6' },
+      { name: 'partition_table', type: 'data', subType: 'pt', offsetHex: '0x9000', sizeBytes: 4096, color: '#10b981' },
+      { name: 'app0', type: 'app', subType: 'factory', offsetHex: '0x10000', sizeBytes: 1572864, color: '#f59e0b' },
+    ];
+
+    const layout = calculateFlashPartitionLayout(partitions, 4 * 1024 * 1024);
+    expect(layout.hasOverlap).toBe(false);
+    expect(layout.totalAllocatedBytes).toBe(32768 + 4096 + 1572864);
+    expect(layout.utilizationPercent).toBeLessThan(40);
+    expect(layout.warnings.length).toBe(0);
+  });
+
+  it('detects flash partition memory collision and overlap', () => {
+    const overlappingPartitions = [
+      { name: 'bootloader', type: 'data', subType: 'boot', offsetHex: '0x1000', sizeBytes: 32768, color: '#3b82f6' }, // ends at 0x9000
+      { name: 'app0', type: 'app', subType: 'factory', offsetHex: '0x8000', sizeBytes: 1048576, color: '#f59e0b' }, // starts early at 0x8000!
+    ];
+
+    const layout = calculateFlashPartitionLayout(overlappingPartitions, 4 * 1024 * 1024);
+    expect(layout.hasOverlap).toBe(true);
+    expect(layout.warnings.length).toBeGreaterThan(0);
+  });
+
+  it('filters firmware registry items by target architecture and keywords', () => {
+    const items = [
+      {
+        id: 'fw-1',
+        slug: 'ardupilot-cube-orange',
+        title: 'ArduPilot Copter 4.5.2',
+        tagline: 'Autonomous drone flight control',
+        description: 'Full autonomous mission waypoint flight for quad and hex.',
+        targetArch: 'stm32' as const,
+        supportedBoards: ['Cube Orange+', 'Holybro Kakute H7'],
+        category: 'drone_uav' as const,
+        openSourceLicense: 'GPL-3.0',
+        sourceRepoUrl: 'https://github.com/ArduPilot/ardupilot',
+        author: { name: 'ArduPilot Dev Team', verifiedBadge: true },
+        flashBaudRate: 921600,
+        partitions: [],
+        releases: [],
+        defaultReleaseVersion: 'v4.5.2',
+        instructionsMarkdown: '# Flashing Guide',
+      },
+      {
+        id: 'fw-2',
+        slug: 'zephyr-bms-s32k',
+        title: 'Zephyr AIS-156 BMS Firmware',
+        tagline: 'Automotive battery safety stack',
+        description: 'ISO 26262 ASIL-B battery equalization.',
+        targetArch: 'esp32s3' as const,
+        supportedBoards: ['ESP32-S3-DevKitC', 'Custom AIS-156 Pack'],
+        category: 'ev_bms' as const,
+        openSourceLicense: 'Apache-2.0',
+        sourceRepoUrl: 'https://github.com/zephyrproject-rtos/zephyr',
+        author: { name: 'OpenEV India', verifiedBadge: true },
+        flashBaudRate: 115200,
+        partitions: [],
+        releases: [],
+        defaultReleaseVersion: 'v1.0.4',
+        instructionsMarkdown: '# Flashing Guide',
+      },
+    ];
+
+    const stm32Only = filterFirmwareRegistry(items, { targetArch: 'stm32' });
+    expect(stm32Only.length).toBe(1);
+    expect(stm32Only[0]?.slug).toBe('ardupilot-cube-orange');
+
+    const bmsCategory = filterFirmwareRegistry(items, { category: 'ev_bms' });
+    expect(bmsCategory.length).toBe(1);
+    expect(bmsCategory[0]?.slug).toBe('zephyr-bms-s32k');
+
+    const searchResult = filterFirmwareRegistry(items, { search: 'Kakute' });
+    expect(searchResult.length).toBe(1);
+  });
+
+  it('formats byte sizes cleanly', () => {
+    expect(formatFirmwareBytes(512)).toBe('512 B');
+    expect(formatFirmwareBytes(1024 * 64)).toBe('64.0 KB');
+    expect(formatFirmwareBytes(1024 * 1024 * 2.5)).toBe('2.50 MB');
   });
 });
 

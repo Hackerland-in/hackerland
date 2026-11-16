@@ -9,6 +9,7 @@ import { CLUBS_DATA } from '@/lib/data/clubs-data';
 import { IP_DEFENSE_PUBLICATIONS } from '@/lib/data/ip-defense-data';
 import { CAMPAIGN_REGISTRY } from '@/lib/data/launchpad-data';
 import { HARDWARE_JOBS_REGISTRY } from '@/lib/data/jobs-data';
+import { FIRMWARE_REGISTRY } from '@/lib/data/firmware-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -39,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/network/ip', priority: 0.95, changeFrequency: 'daily' },
     { path: '/copilot', priority: 0.95, changeFrequency: 'daily' },
     { path: '/telemetry', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/firmware', priority: 0.95, changeFrequency: 'daily' },
     { path: '/launchpad', priority: 0.95, changeFrequency: 'daily' },
     { path: '/jobs', priority: 0.95, changeFrequency: 'daily' },
     { path: '/young-innovators', priority: 0.95, changeFrequency: 'daily' },
@@ -164,6 +166,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE_URL}/jobs/${job.slug}`,
       lastModified: currentDate,
       changeFrequency: 'daily',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic Firmware Registry Routes
+  for (const fw of FIRMWARE_REGISTRY) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/firmware/${fw.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
       priority: 0.9,
     });
   }

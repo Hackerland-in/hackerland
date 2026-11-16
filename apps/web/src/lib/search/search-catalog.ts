@@ -410,6 +410,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['telemetry', 'digital twin', 'oscilloscope', 'bms', 'ais 156', 'attitude', 'gyro', 'drone', 'uav', 'cubesat', 'serial', 'webserial', 'csv', 'stream', 'can bus'],
   },
   {
+    id: 'hub-firmware',
+    title: 'Hardware Firmware Registry & WebSerial Flasher',
+    description:
+      'Verified, pre-compiled embedded binaries for drone flight controllers, EV BMS, indigenous RISC-V silicon, and edge TinyML with one-click browser WebSerial flashing.',
+    category: 'simulators',
+    categoryLabel: 'Firmware Hub',
+    href: '/firmware',
+    badge: 'WebSerial Flasher',
+    badgeTone: 'accent',
+    keywords: ['firmware', 'registry', 'bin', 'hex', 'uf2', 'flasher', 'webserial', 'esptool', 'ardupilot', 'zephyr', 'micropython', 'esp32', 'rp2040', 'stm32', 'riscv'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

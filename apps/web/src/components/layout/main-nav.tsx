@@ -52,8 +52,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware'],
   items: [
+    {
+      href: '/firmware',
+      title: 'Firmware Registry & Flasher',
+      description: 'One-click WebSerial flashing for ArduPilot, Zephyr RTOS & MicroPython',
+      icon: Usb,
+      badge: 'WebSerial',
+    },
     {
       href: '/telemetry',
       title: 'Digital Twin & Telemetry Stream',

@@ -22,4 +22,5 @@ export * from './launchpad';
 export * from './teardowns';
 export * from './jobs';
 export * from './telemetry';
+export * from './firmware';
 
