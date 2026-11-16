@@ -410,6 +410,30 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['launchpad', 'crowdfunding', 'escrow', 'grant', 'idex', 'birac', 'nidhi prayas', 'tide', 'semiconductor dli', 'funding', 'milestone', 'dpiit', 'kickstarter', 'hardware fund'],
   },
   {
+    id: 'hub-teardowns',
+    title: 'Hardware Teardowns & Reverse Engineering Library',
+    description:
+      'Chip-level autopsies, interactive PCB pinout hotspot annotator, and component-level Bill of Materials for Ather 450 BMS, DJI drones, and smart meters.',
+    category: 'simulators',
+    categoryLabel: 'Teardowns',
+    href: '/teardowns',
+    badge: 'Autopsies',
+    badgeTone: 'accent',
+    keywords: ['teardown', 'reverse engineering', 'autopsy', 'ather', 'dji', 'meter', 'bms', 'pinout', 'bom', 'silicon', 'schematic'],
+  },
+  {
+    id: 'hub-teardowns-submit',
+    title: 'Submit Hardware Teardown Studio (+150 XP)',
+    description:
+      'Reverse engineer commercial devices, annotate IC pins, calculate gross margins, document subsystems, and publish open-source alternatives.',
+    category: 'projects',
+    categoryLabel: 'Autopsy Studio',
+    href: '/teardowns/submit',
+    badge: '+150 XP',
+    badgeTone: 'brand-pink',
+    keywords: ['submit teardown', 'reverse engineer', 'annotator', 'bom margin', 'markup', 'autopsy studio'],
+  },
+  {
     id: 'hub-young-innovators',
     title: 'Young Innovators Track & Safety Sandbox (Ages 8–17)',
     description:

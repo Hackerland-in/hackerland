@@ -58,11 +58,20 @@ export default function TeardownsPage() {
 
       {/* Directory Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Cpu className="w-5 h-5 text-emerald-400" /> Featured Hardware Teardowns
           </h2>
-          <span className="text-xs text-neutral-500">{TEARDOWNS_DATA.length} Curated Teardowns</span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-neutral-500">{TEARDOWNS_DATA.length} Curated Teardowns</span>
+            <Link
+              href="/teardowns/submit"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500 text-neutral-950 text-xs font-bold hover:bg-emerald-400 transition-colors"
+            >
+              <Sparkles className="size-3.5" />
+              <span>Submit Teardown (+150 XP)</span>
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

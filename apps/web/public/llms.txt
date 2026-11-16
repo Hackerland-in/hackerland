@@ -38,7 +38,9 @@ Hackerland is a developer and maker platform bridging open-source hardware proto
 - **Failed Projects Museum & Risk Evaluator:** https://www.hackerland.in/museum
   - Engineering root-cause failure autopsies and pre-mortem risk evaluation calculators for hardware creators.
 - **Hardware Reverse Engineering Teardowns:** https://www.hackerland.in/teardowns
-  - Component-level autopsies and BOMs of Ather 450 BMS, DJI drones, and smart electricity meters.
+  - Component-level autopsies, interactive PCB pinout hotspot annotator, and open-source drop-in alternatives for Ather 450 BMS, DJI drones, and smart electricity meters.
+- **Teardown Submission Studio:** https://www.hackerland.in/teardowns/submit
+  - Interactive reverse engineering workbench for engineers to map silicon pins, calculate retail vs BOM gross margins, and earn +150 XP credentials.
 - **Makerspaces & ATL Labs:** https://www.hackerland.in/labs
   - Interactive directory of makerspaces, tinkering labs, 3D printing hubs, and CNC facilities across India.
 - **Factory Blueprints (CapEx/OpEx):** https://www.hackerland.in/how-to-start

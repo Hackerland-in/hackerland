@@ -43,6 +43,10 @@ import {
   verifyMilestoneQuorum,
   matchGrantsForProject,
   campaignSchema,
+  calculateBomMarkup,
+  validatePinoutAnnotation,
+  filterTeardownsByCategory,
+  teardownSubmissionSchema,
 } from './index';
 
 describe('tracks', () => {
@@ -962,6 +966,106 @@ describe('milestone-locked crowdfunding launchpad and grant matching', () => {
     expect(parsed.success).toBe(true);
   });
 });
+
+describe('hardware teardowns and reverse engineering annotator schema', () => {
+  it('calculates BOM markup ratio and gross margins accurately', () => {
+    // Ather 450: Retail ₹1,45,000, BOM ₹34,500
+    const margin = calculateBomMarkup(145000, 34500);
+    expect(margin.markupRatio).toBe(4.2);
+    expect(margin.grossMarginPercent).toBe(76);
+
+    const zeroMargin = calculateBomMarkup(1000, 0);
+    expect(zeroMargin.markupRatio).toBe(0);
+    expect(zeroMargin.grossMarginPercent).toBe(0);
+  });
+
+  it('validates interactive PCB pinout annotation coordinate boundaries', () => {
+    const validPin = {
+      id: 'pin-1',
+      xPercent: 42.5,
+      yPercent: 30.0,
+      label: 'Main BMS AFE',
+      subsystem: 'Power / BMS',
+      partNumber: 'BQ76952',
+      manufacturer: 'Texas Instruments',
+      function: 'Monitors 16 series Li-Ion cells with 1mV ADC resolution',
+      package: 'TQFP-48',
+      estimatedCostUsd: 4.2,
+      openSourceAlternative: 'LTC6804 / BQ76940 open breakout',
+    };
+    expect(validatePinoutAnnotation(validPin)).toBe(true);
+
+    const invalidPin = {
+      ...validPin,
+      xPercent: 120.0, // Out of bounds
+    };
+    expect(validatePinoutAnnotation(invalidPin)).toBe(false);
+  });
+
+  it('validates and parses a complete teardown submission schema', () => {
+    const submission = {
+      id: 'td_ather_450',
+      slug: 'ather-450-smart-bms',
+      title: 'Ather 450 Smart EV BMS & Telematics',
+      category: 'ev_automotive' as const,
+      deviceType: 'Electric 2-Wheeler Power Electronics',
+      manufacturer: 'Ather Energy',
+      retailPriceInr: 145000,
+      estimatedBomInr: 34500,
+      currency: 'INR' as const,
+      summary: 'Deep architectural autopsy of Ather 450 battery pack and CAN isolation electronics.',
+      submitter: {
+        name: 'Karthik Raja',
+        handle: 'karthik_r',
+        avatar: '/avatars/karthik.png',
+        organization: 'Bengaluru EV Teardown Collective',
+        role: 'Automotive Power Systems Lead',
+      },
+      highlightSpecs: ['3.7 kWh 21700 Pack', 'Automotive CAN 2.0B dual-bus'],
+      subsystems: [
+        {
+          name: 'Battery Management System',
+          description: 'Monitors 14 series cells with active balancing.',
+          chips: ['BQ76952', 'STM32F405'],
+        },
+      ],
+      bomBreakdown: [
+        {
+          component: 'BMS AFE',
+          partNumber: 'BQ76952',
+          manufacturer: 'TI',
+          function: 'Cell voltage monitoring',
+          package: 'TQFP-48',
+          estCost: '$4.20',
+          openAlternative: 'OpenBMS',
+        },
+      ],
+      pinoutAnnotations: [
+        {
+          id: 'pin-afe-1',
+          xPercent: 45.0,
+          yPercent: 55.0,
+          label: 'TI BQ76952 AFE',
+          subsystem: 'BMS',
+          partNumber: 'BQ76952',
+          manufacturer: 'Texas Instruments',
+          function: 'Monitors cell voltages',
+          package: 'TQFP-48',
+          estimatedCostUsd: 4.2,
+          openSourceAlternative: 'LTC6804',
+        },
+      ],
+      engineeringLessons: ['Conformal coating prevents condensation failures during Indian monsoons'],
+      failureModesObserved: ['Thermal runaway risk if active balancing FET shorts'],
+      verifiedStatus: 'gold_standard' as const,
+      reputationReward: 150,
+    };
+
+    const parsed = teardownSubmissionSchema.safeParse(submission);
+    expect(parsed.success).toBe(true);
+  });
+});
+
 
 
 

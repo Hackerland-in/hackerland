@@ -1,3 +1,5 @@
+import type { TeardownPinoutAnnotation } from '@hackerland/core';
+
 export interface TeardownBOMItem {
   component: string;
   partNumber: string;
@@ -17,7 +19,7 @@ export interface TeardownSubsystem {
 export interface TeardownArticle {
   slug: string;
   title: string;
-  category: 'EV & Automotive' | 'Drones & Robotics' | 'Smart Grid & IoT';
+  category: 'EV & Automotive' | 'Drones & Robotics' | 'Smart Grid & IoT' | 'Medical & Assistive' | 'Consumer & Edge AI';
   deviceType: string;
   manufacturer: string;
   retailPrice: string;
@@ -26,6 +28,7 @@ export interface TeardownArticle {
   highlightSpecs: string[];
   subsystems: TeardownSubsystem[];
   bomBreakdown: TeardownBOMItem[];
+  pinoutAnnotations?: TeardownPinoutAnnotation[];
   engineeringLessons: string[];
 }
 
@@ -115,6 +118,78 @@ export const TEARDOWNS_DATA: TeardownArticle[] = [
       'Galvanic isolation prevents fire: Never tie traction pack ground (0V at -58V) to vehicle frame ground. The ISO1050 prevents transient spikes from blowing the 12V lighting cluster.',
       'Software-defined scooters win: The Quectel LTE modem enables over-the-air firmware upgrades for the BMS algorithm, improving battery longevity 2 years post-purchase.',
     ],
+    pinoutAnnotations: [
+      {
+        id: 'pin-afe',
+        xPercent: 42,
+        yPercent: 35,
+        label: 'TI BQ76952 AFE',
+        subsystem: 'Battery Management',
+        partNumber: 'BQ76952',
+        manufacturer: 'Texas Instruments',
+        function: 'Monitors 16 series Li-Ion cells with 1mV resolution',
+        package: '48-pin TQFP',
+        voltageRating: '80V max',
+        estimatedCostUsd: 4.2,
+        openSourceAlternative: 'LTC6804 / BQ76940 breakout',
+      },
+      {
+        id: 'pin-mcu',
+        xPercent: 65,
+        yPercent: 48,
+        label: 'STM32F405 Safety MCU',
+        subsystem: 'BMS Logic',
+        partNumber: 'STM32F405RGT6',
+        manufacturer: 'STMicroelectronics',
+        function: '168MHz ARM Cortex-M4 with Coulomb counting DSP',
+        package: '64-pin LQFP',
+        voltageRating: '3.3V',
+        estimatedCostUsd: 5.5,
+        openSourceAlternative: 'RP2040 Dual Core / ESP32-S3',
+      },
+      {
+        id: 'pin-can',
+        xPercent: 22,
+        yPercent: 70,
+        label: 'ISO1050 Isolated CAN',
+        subsystem: 'Vehicle Bus',
+        partNumber: 'ISO1050DUB',
+        manufacturer: 'Texas Instruments',
+        function: '5000V galvanic isolation between traction pack and 12V dashboard',
+        package: '8-pin SOIC',
+        voltageRating: '5V isolated',
+        estimatedCostUsd: 1.85,
+        openSourceAlternative: 'MCP2551 + Optocoupler',
+      },
+      {
+        id: 'pin-fets',
+        xPercent: 82,
+        yPercent: 26,
+        label: 'Infineon Power FET Bank',
+        subsystem: 'Power Disconnect',
+        partNumber: 'IPB014N08N5',
+        manufacturer: 'Infineon',
+        function: '6x parallel N-channel FETs for 150A short-circuit cutoff',
+        package: 'TO-263 D2PAK',
+        voltageRating: '80V / 150A',
+        estimatedCostUsd: 8.4,
+        openSourceAlternative: 'Nexperia PSMN1R0-40YLD',
+      },
+      {
+        id: 'pin-modem',
+        xPercent: 28,
+        yPercent: 22,
+        label: 'Quectel 4G LTE Telematics',
+        subsystem: 'Telematics Dashboard',
+        partNumber: 'EC200U-CN',
+        manufacturer: 'Quectel',
+        function: 'Cloud telemetry & OTA firmware over MQTT',
+        package: 'LCC-144',
+        voltageRating: '3.8V',
+        estimatedCostUsd: 9.2,
+        openSourceAlternative: 'SIM7600G-H USB Dongle',
+      },
+    ],
   },
   {
     slug: 'dji-mavic-mini-drone-flight-controller',
@@ -190,6 +265,64 @@ export const TEARDOWNS_DATA: TeardownArticle[] = [
     engineeringLessons: [
       'Gram-saving is structural design: Rather than using discrete wiring harnesses, DJI routed motor ESC phase wires and RF antenna cables directly on flex-PCB ribbons molded into the arm hinges.',
       'Mechanical vibration isolation is mandatory: The IMU is mounted on a tiny suspended silicone sub-board; without this, motor resonance saturates the gyro and crashes the quadcopter.',
+    ],
+    pinoutAnnotations: [
+      {
+        id: 'pin-dji-soc',
+        xPercent: 50,
+        yPercent: 46,
+        label: 'Ambarella H22 Vision SoC',
+        subsystem: 'Flight Computer & Vision',
+        partNumber: 'Ambarella H22',
+        manufacturer: 'Ambarella',
+        function: 'Quad-core ARM Cortex-A53 with 2.7K video pipeline',
+        package: 'BGA-361',
+        voltageRating: '1.2V / 3.3V',
+        estimatedCostUsd: 18.5,
+        openSourceAlternative: 'Raspberry Pi RP2350 or Allwinner V3s',
+      },
+      {
+        id: 'pin-dji-imu',
+        xPercent: 32,
+        yPercent: 62,
+        label: 'InvenSense ICM-20689 IMU',
+        subsystem: 'Inertial Navigation',
+        partNumber: 'ICM-20689',
+        manufacturer: 'TDK InvenSense',
+        function: '6-Axis low-noise gyro & accelerometer on silicone damper',
+        package: 'QFN-24',
+        voltageRating: '1.8V',
+        estimatedCostUsd: 2.1,
+        openSourceAlternative: 'ICM-42688-P or MPU-6050',
+      },
+      {
+        id: 'pin-dji-esc',
+        xPercent: 74,
+        yPercent: 32,
+        label: 'TI DRV8313 ESC Pre-Driver',
+        subsystem: 'Motor Propulsion',
+        partNumber: 'DRV8313PWP',
+        manufacturer: 'Texas Instruments',
+        function: 'Triple half-bridge brushless motor drive with current sensing',
+        package: 'HTSSOP-28',
+        voltageRating: '12V / 2.5A peak',
+        estimatedCostUsd: 1.95,
+        openSourceAlternative: 'TMC6300 or discrete MOSFET H-Bridge',
+      },
+      {
+        id: 'pin-dji-gps',
+        xPercent: 24,
+        yPercent: 28,
+        label: 'u-blox GNSS Satellite Receiver',
+        subsystem: 'Global Positioning',
+        partNumber: 'UBX-M8030-KT',
+        manufacturer: 'u-blox',
+        function: 'Concurrent GPS, GLONASS, and Galileo positioning engine',
+        package: 'QFN-40',
+        voltageRating: '3.3V',
+        estimatedCostUsd: 4.8,
+        openSourceAlternative: 'ATGM336H GPS module',
+      },
     ],
   },
   {
@@ -267,5 +400,72 @@ export const TEARDOWNS_DATA: TeardownArticle[] = [
       'Current shunts beat transformers in India: Current Transformers (CTs) can be blinded by powerful external magnets. Using a 200 µΩ electron-beam welded Manganin shunt makes the meter immune to magnetic tampering.',
       'Power supply resilience against line transients: The Indian grid suffers extreme surges (up to 440V AC when neutral wire is lost). The meter uses a capacitive dropper power supply paired with a 680V Metal Oxide Varistor (MOV) to survive phase faults without burning.',
     ],
+    pinoutAnnotations: [
+      {
+        id: 'pin-ade',
+        xPercent: 44,
+        yPercent: 38,
+        label: 'ADE7953 Metering IC',
+        subsystem: 'Metrology Unit',
+        partNumber: 'ADE7953',
+        manufacturer: 'Analog Devices',
+        function: 'Polyphase 24-bit delta-sigma ADC with active/reactive energy engine',
+        package: '28-pin LFCSP',
+        voltageRating: '3.3V',
+        estimatedCostUsd: 2.1,
+        openSourceAlternative: 'MCP3911 / CS5463',
+      },
+      {
+        id: 'pin-sam',
+        xPercent: 62,
+        yPercent: 52,
+        label: 'Microchip SAM L21 Host MCU',
+        subsystem: 'Application & DLMS Core',
+        partNumber: 'ATSAML21E18B',
+        manufacturer: 'Microchip',
+        function: 'Ultra-low-power 32-bit ARM Cortex-M0+ running DLMS/COSEM OBIS stack',
+        package: '32-pin QFN',
+        voltageRating: '1.62V - 3.63V',
+        estimatedCostUsd: 1.75,
+        openSourceAlternative: 'STM32L031 / ESP32-C3',
+      },
+      {
+        id: 'pin-lora',
+        xPercent: 26,
+        yPercent: 72,
+        label: 'Semtech SX1262 LoRa AMI',
+        subsystem: 'Wireless RF Mesh',
+        partNumber: 'SX1262IMLTRT',
+        manufacturer: 'Semtech',
+        function: 'IN865 (865-867 MHz) LoRa radio with +22dBm output power',
+        package: '24-pin QFN',
+        voltageRating: '3.3V',
+        estimatedCostUsd: 2.3,
+        openSourceAlternative: 'Ai-Thinker Ra-01SH',
+      },
+      {
+        id: 'pin-hall',
+        xPercent: 82,
+        yPercent: 28,
+        label: 'DRV5032 Anti-Tamper Hall',
+        subsystem: 'Tamper Protection',
+        partNumber: 'DRV5032FA',
+        manufacturer: 'Texas Instruments',
+        function: 'Micropower magnetic sensor triggering alarm upon external magnet',
+        package: 'SOT-23',
+        voltageRating: '1.65V - 5.5V',
+        estimatedCostUsd: 0.28,
+        openSourceAlternative: 'A3144 Hall Switch',
+      },
+    ],
   },
 ];
+
+export function getTeardownBySlug(slug: string): TeardownArticle | undefined {
+  return TEARDOWNS_DATA.find((t) => t.slug === slug);
+}
+
+export function getAllTeardownSlugs(): string[] {
+  return TEARDOWNS_DATA.map((t) => t.slug);
+}
+

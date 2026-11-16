@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { TEARDOWNS_DATA, type TeardownArticle } from '@/lib/data/teardowns-data';
+import { PcbPinoutAnnotator } from '@/components/teardowns/pcb-pinout-annotator';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -108,6 +109,17 @@ export default async function TeardownDetailPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {/* Interactive PCB Pinout & Chip Hotspot Explorer */}
+        {item.pinoutAnnotations && item.pinoutAnnotations.length > 0 && (
+          <section className="space-y-4">
+            <PcbPinoutAnnotator
+              initialAnnotations={item.pinoutAnnotations}
+              deviceTitle={item.title}
+              allowEditing={false}
+            />
+          </section>
+        )}
 
         {/* Subsystems Architecture */}
         <section className="space-y-4">

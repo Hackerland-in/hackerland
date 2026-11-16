@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/problems', priority: 0.95, changeFrequency: 'daily' },
     { path: '/passport', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/teardowns', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/teardowns/submit', priority: 0.9, changeFrequency: 'monthly' },
     { path: '/launch', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/prototype', priority: 0.95, changeFrequency: 'daily' },
     { path: '/manufacturing/pcb', priority: 0.95, changeFrequency: 'daily' },
