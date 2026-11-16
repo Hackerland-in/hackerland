@@ -52,8 +52,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing'],
   items: [
+    {
+      href: '/sourcing',
+      title: 'Component Sourcing & Drop-In Alternates',
+      description: 'Pin-compatible IC finder, domestic Indian stock & HSN 8542 landed tariff calculator',
+      icon: Cpu,
+      badge: 'Drop-In ICs',
+    },
     {
       href: '/testbeds',
       title: 'Remote HIL Testbeds & Lab Benches',

@@ -458,6 +458,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['sprint', 'hackathon', '48h', 'hardware hackathon', 'bounty', 'cad milestone', 'firmware', 'kicad', 'demo video', 'csir', 'nal', 'arai', 'iit madras', 't-works'],
   },
   {
+    id: 'hub-sourcing',
+    title: 'Component Sourcing & Drop-In Alternates Recommender',
+    description:
+      'Pin-to-pin drop-in replacement finder for supply-constrained ICs (STM32, TI BMS, Semtech LoRa) with domestic Indian stock (Robu, Evelta, Element14) and landed tariff calculators.',
+    category: 'labs',
+    categoryLabel: 'Sourcing & ICs',
+    href: '/sourcing',
+    badge: 'Drop-In ICs',
+    badgeTone: 'accent',
+    keywords: ['sourcing', 'components', 'ic alternates', 'stm32', 'gigadevice', 'robu', 'evelta', 'element14', 'lcsc', 'mouser', 'customs duty', 'hsn 8542', 'drop-in', 'pin compatible'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

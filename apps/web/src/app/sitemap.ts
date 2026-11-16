@@ -13,6 +13,7 @@ import { FIRMWARE_REGISTRY } from '@/lib/data/firmware-data';
 import { COMPLIANCE_ROADMAPS } from '@/lib/data/compliance-data';
 import { TESTBED_FACILITIES } from '@/lib/data/testbeds-data';
 import { SPRINTS_CATALOG } from '@/lib/data/sprints-data';
+import { COMPONENT_SOURCING_REGISTRY } from '@/lib/data/sourcing-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -47,6 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/compliance', priority: 0.95, changeFrequency: 'daily' },
     { path: '/testbeds', priority: 0.95, changeFrequency: 'daily' },
     { path: '/sprints', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/sourcing', priority: 0.95, changeFrequency: 'daily' },
     { path: '/launchpad', priority: 0.95, changeFrequency: 'daily' },
     { path: '/jobs', priority: 0.95, changeFrequency: 'daily' },
     { path: '/young-innovators', priority: 0.95, changeFrequency: 'daily' },
@@ -210,6 +212,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const sprint of SPRINTS_CATALOG) {
     sitemapEntries.push({
       url: `${BASE_URL}/sprints/${sprint.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic Component Sourcing Routes
+  for (const rec of COMPONENT_SOURCING_REGISTRY) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/sourcing/${rec.mpn}`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.9,

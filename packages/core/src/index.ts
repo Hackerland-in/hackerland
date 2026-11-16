@@ -26,4 +26,5 @@ export * from './firmware';
 export * from './compliance';
 export * from './testbeds';
 export * from './sprints';
+export * from './sourcing';
 

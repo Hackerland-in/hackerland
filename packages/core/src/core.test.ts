@@ -73,6 +73,10 @@ import {
   validateMilestoneSubmission,
   calculatePrizeDistribution,
   filterSprints,
+  componentSourcingRecordSchema,
+  calculateLandedComponentCost,
+  findBestAlternate,
+  filterSourcingRecords,
 } from './index';
 
 describe('tracks', () => {
@@ -1667,6 +1671,125 @@ describe('sprints & rapid hardware hackathons', () => {
     expect(none.length).toBe(0);
   });
 });
+
+describe('component alternate & domestic sourcing recommender', () => {
+  const sampleRecord = {
+    id: 'src_stm32f405',
+    mpn: 'STM32F405RGT6',
+    manufacturer: 'STMicroelectronics',
+    description: 'High-performance ARM Cortex-M4 MCU with 1MB Flash, 168 MHz CPU, USB OTG, CAN 2.0B.',
+    category: 'microcontroller' as const,
+    package: 'LQFP-64 (10x10mm)',
+    lifecycle: 'active' as const,
+    primarySpecs: {
+      Core: 'ARM Cortex-M4 with FPU',
+      'Clock Speed': '168 MHz',
+      Flash: '1024 KB',
+      SRAM: '192 KB',
+      OperatingVoltage: '1.8V to 3.6V',
+    },
+    basePriceINR: 485,
+    suppliers: [
+      {
+        supplierName: 'Robu.in',
+        country: 'IN' as const,
+        unitPriceINR: 520,
+        moq: 1,
+        inStockCount: 140,
+        leadTimeDays: 2,
+      },
+      {
+        supplierName: 'LCSC',
+        country: 'CN' as const,
+        unitPriceINR: 410,
+        moq: 10,
+        inStockCount: 4200,
+        leadTimeDays: 6,
+      },
+    ],
+    alternates: [
+      {
+        mpn: 'GD32F405RGT6',
+        manufacturer: 'GigaDevice',
+        compatibilityLevel: 'pin_compatible' as const,
+        compatibilityScore: 98,
+        keyDifferences: [
+          'Direct drop-in pin-to-pin compatible on LQFP-64',
+          'Faster core clock up to 200 MHz with zero-wait state flash',
+          'Slightly lower current consumption under high load',
+        ],
+        firmwareChangesRequired: [
+          'Flash write wait-state timing adjustment in system_stm32f4xx.c',
+          'Option byte programming structure delta',
+        ],
+        unitPriceINR: 320,
+        availabilityStatus: 'in_stock' as const,
+      },
+      {
+        mpn: 'Mindgrove Secure IoT SoC',
+        manufacturer: 'Mindgrove Technologies',
+        compatibilityLevel: 'requires_pcb_redesign' as const,
+        compatibilityScore: 65,
+        keyDifferences: [
+          'Indigenous Indian RISC-V 130nm ASIC architecture',
+          'On-chip hardware TRNG and cryptographic engine',
+        ],
+        firmwareChangesRequired: [
+          'Port firmware from ARM CMSIS to Zephyr RISC-V HAL',
+        ],
+        unitPriceINR: 280,
+        availabilityStatus: 'in_stock' as const,
+      },
+    ],
+    notes: [
+      'Standard MCU choice for ArduPilot / Betaflight quadcopter flight controllers.',
+    ],
+  };
+
+  it('validates a complete component sourcing record schema', () => {
+    const parseResult = componentSourcingRecordSchema.safeParse(sampleRecord);
+    expect(parseResult.success).toBe(true);
+  });
+
+  it('calculates domestic landed cost with 18% GST and zero customs duty', () => {
+    const domestic = calculateLandedComponentCost(500, 10, 'IN');
+    expect(domestic.subtotalINR).toBe(5000);
+    expect(domestic.customsDutyINR).toBe(0);
+    expect(domestic.socialWelfareSurchargeINR).toBe(0);
+    expect(domestic.gstINR).toBe(900); // 18% of 5000
+    expect(domestic.totalLandedINR).toBe(5900);
+    expect(domestic.effectiveUnitCostINR).toBe(590);
+  });
+
+  it('calculates imported landed cost with 7.5% BCD, 10% SWS, and 18% IGST', () => {
+    const imported = calculateLandedComponentCost(1000, 1, 'CN');
+    expect(imported.subtotalINR).toBe(1000);
+    expect(imported.customsDutyINR).toBe(75); // 7.5% of 1000
+    expect(imported.socialWelfareSurchargeINR).toBe(7.5); // 10% of 75
+    // IGST Base = 1000 + 75 + 7.5 = 1082.5
+    // IGST = 1082.5 * 0.18 = 194.85
+    expect(imported.gstINR).toBe(194.85);
+    expect(imported.totalLandedINR).toBe(1277.35);
+    expect(imported.effectiveUnitCostINR).toBe(1277.35);
+  });
+
+  it('finds the best alternate and filters sourcing records accurately', () => {
+    const best = findBestAlternate(sampleRecord);
+    expect(best).not.toBeNull();
+    expect(best?.mpn).toBe('GD32F405RGT6');
+    expect(best?.compatibilityScore).toBe(98);
+
+    const mcuFiltered = filterSourcingRecords([sampleRecord], { category: 'microcontroller' });
+    expect(mcuFiltered.length).toBe(1);
+
+    const searched = filterSourcingRecords([sampleRecord], { search: 'GigaDevice' });
+    expect(searched.length).toBe(1);
+
+    const noMatch = filterSourcingRecords([sampleRecord], { category: 'rf_transceiver' });
+    expect(noMatch.length).toBe(0);
+  });
+});
+
 
 
 

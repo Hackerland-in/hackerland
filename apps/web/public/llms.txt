@@ -29,6 +29,8 @@ Hackerland is a developer and maker platform bridging open-source hardware proto
   - Automated regulatory roadmap matcher, pre-compliance audit checklists, and laboratory testing CapEx estimators for BIS CRS, WPC ETA, TEC MTCTE, DGCA Drone Rules 2021, and AIS-156 Phase 2.
 - **Remote Hardware-in-the-Loop Testbeds & Lab Benches:** https://www.hackerland.in/testbeds
   - Shared Keysight 20 GHz spectrum analyzers, Chroma 1000A regenerative battery cyclers, and Rohde & Schwarz anechoic chambers with remote SCPI execution and up to 60% student subsidies.
+- **Component Sourcing & Drop-In Alternates Recommender:** https://www.hackerland.in/sourcing
+  - Direct Indian & Asian electronic component cross-reference engine. Pin-to-pin drop-in replacement finder for supply-constrained ICs (STM32, TI BMS, Semtech LoRa) with domestic stock (Robu.in, Evelta, Element14) and HSN 8542 landed tariff & 18% GST calculators.
 - **48-Hour Rapid Hardware Sprints & Bounties:** https://www.hackerland.in/sprints
   - High-intensity 48-hour build sprints with milestone checkpoints (Hour 12 CAD, Hour 24 KiCad Schematic, Hour 36 RTOS Bringup, Hour 48 Physical Video Demo), non-dilutive cash grant escrows, free prototype fabrication credits, and NABL lab perks.
 - **Milestone-Locked Hardware Launchpad & Grant Matcher:** https://www.hackerland.in/launchpad
