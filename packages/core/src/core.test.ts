@@ -90,6 +90,10 @@ import {
   synthesizeTraceWidth,
   calculateLSectionMatch,
   RF_SUBSTRATES_DATABASE,
+  batteryEisProjectSchema,
+  calculateRandlesImpedance,
+  evaluateBatterySoH,
+  filterBatteryEisProjects,
 } from './index';
 
 describe('tracks', () => {
@@ -2104,6 +2108,97 @@ describe('RF Impedance & Transmission Line Synthesizer', () => {
     expect(RF_SUBSTRATES_DATABASE.rogers_ro4350b.dielectricConstantEr).toBe(3.48);
     expect(RF_SUBSTRATES_DATABASE.rogers_rt5880.lossTangent).toBe(0.0009);
     expect(RF_SUBSTRATES_DATABASE.fr4_standard.dielectricConstantEr).toBe(4.4);
+  });
+});
+
+describe('Battery EIS & State-of-Health (SoH) Diagnostics', () => {
+  const sampleEisProject = {
+    id: 'eis-test-1',
+    slug: 'lfp-32700-fresh',
+    title: 'LFP 32700 6.0Ah Baseline Cell',
+    cellModel: 'Gotion High-Tech 32700',
+    chemistry: 'lfp_32700' as const,
+    nominalVoltageV: 3.2,
+    nominalCapacityAh: 6.0,
+    cycleCount: 10,
+    testTemperatureC: 25,
+    stateOfChargeSocPercent: 50,
+    eisSpectrum: [
+      { frequencyHz: 10000, zRealOhm: 0.015, zImagOhm: 0.002, magnitudeOhm: 0.0151, phaseDeg: 7.6 },
+      { frequencyHz: 1000, zRealOhm: 0.016, zImagOhm: -0.0002, magnitudeOhm: 0.016, phaseDeg: -0.7 },
+      { frequencyHz: 100, zRealOhm: 0.022, zImagOhm: -0.004, magnitudeOhm: 0.0224, phaseDeg: -10.3 },
+      { frequencyHz: 10, zRealOhm: 0.028, zImagOhm: -0.007, magnitudeOhm: 0.0289, phaseDeg: -14.0 },
+      { frequencyHz: 1, zRealOhm: 0.034, zImagOhm: -0.005, magnitudeOhm: 0.0344, phaseDeg: -8.4 },
+      { frequencyHz: 0.1, zRealOhm: 0.045, zImagOhm: -0.018, magnitudeOhm: 0.0485, phaseDeg: -21.8 },
+    ],
+    fittedEcm: {
+      rBulkOhm: 0.016,
+      rSeiOhm: 0.005,
+      cSeiFarad: 0.15,
+      rCtOhm: 0.018,
+      cDlFarad: 1.2,
+      warburgSigma: 0.008,
+    },
+    diagnostics: {
+      sohPercent: 99.2,
+      capacityAh: 5.95,
+      nominalCapacityAh: 6.0,
+      internalResistanceIncreasePercent: 2.1,
+      seiLayerGrowthWarning: false,
+      lithiumPlatingRisk: 'none' as const,
+      estimatedCycleLifeRemaining: 1440,
+      ais156SafetyVerdict: 'certified_safe' as const,
+    },
+    testFacility: 'ARAI Pune - Centre of Excellence for Electric Vehicles',
+    testingNotes: 'Pristine baseline cell after 10 formation cycles.',
+  };
+
+  it('validates a complete battery EIS project schema', () => {
+    const parsed = batteryEisProjectSchema.parse(sampleEisProject);
+    expect(parsed.chemistry).toBe('lfp_32700');
+    expect(parsed.eisSpectrum.length).toBe(6);
+    expect(parsed.diagnostics.sohPercent).toBe(99.2);
+  });
+
+  it('calculates analytical Randles complex impedance', () => {
+    const point1kHz = calculateRandlesImpedance(sampleEisProject.fittedEcm, 1000);
+    expect(point1kHz.zReal).toBeGreaterThan(0.015);
+    expect(point1kHz.magnitude).toBeGreaterThan(0.015);
+    expect(point1kHz.phaseDeg).toBeDefined();
+
+    const point01Hz = calculateRandlesImpedance(sampleEisProject.fittedEcm, 0.1);
+    expect(point01Hz.zReal).toBeGreaterThan(point1kHz.zReal); // Warburg tail increases real impedance
+  });
+
+  it('evaluates battery SoH and triggers AIS-156 derate or quarantine upon severe degradation', () => {
+    // Fresh cell
+    const freshEval = evaluateBatterySoH(sampleEisProject.eisSpectrum, 6.0, 0.016);
+    expect(freshEval.sohPercent).toBeGreaterThan(90);
+    expect(freshEval.ais156SafetyVerdict).toBe('certified_safe');
+    expect(freshEval.lithiumPlatingRisk).toBe('none');
+
+    // Heavily degraded cell with 2.5x resistance increase (e.g. after 45C Indian heatwave cycling)
+    const degradedSpectrum = [
+      { frequencyHz: 1000, zRealOhm: 0.038, zImagOhm: 0.0001, magnitudeOhm: 0.038, phaseDeg: 0.1 },
+      { frequencyHz: 10, zRealOhm: 0.085, zImagOhm: -0.025, magnitudeOhm: 0.0886, phaseDeg: -16.4 },
+      { frequencyHz: 0.1, zRealOhm: 0.145, zImagOhm: -0.065, magnitudeOhm: 0.159, phaseDeg: -24.1 },
+    ];
+    const degradedEval = evaluateBatterySoH(degradedSpectrum, 6.0, 0.016);
+    expect(degradedEval.internalResistanceIncreasePercent).toBeGreaterThan(80);
+    expect(degradedEval.sohPercent).toBeLessThan(80);
+    expect(degradedEval.ais156SafetyVerdict).toBe('quarantine_isolate');
+    expect(degradedEval.seiLayerGrowthWarning).toBe(true);
+  });
+
+  it('filters battery EIS projects by chemistry, safety verdict and keyword', () => {
+    const matchedChem = filterBatteryEisProjects([sampleEisProject], { chemistry: 'lfp_32700' });
+    expect(matchedChem.length).toBe(1);
+
+    const noMatchChem = filterBatteryEisProjects([sampleEisProject], { chemistry: 'nmc_21700' });
+    expect(noMatchChem.length).toBe(0);
+
+    const searchMatch = filterBatteryEisProjects([sampleEisProject], { search: 'ARAI' });
+    expect(searchMatch.length).toBe(1);
   });
 });
 

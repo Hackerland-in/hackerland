@@ -37,6 +37,8 @@ Hackerland is a developer and maker platform bridging open-source hardware proto
   - Interactive conducted and radiated emission spectrum analyzer comparing measurements against CISPR 25 Class 5, CISPR 32 Class B, and MIL-STD-461G limits with 2D PCB near-field magnetic probe radiation heatmap diagnostics from SAMEER Chennai and ARAI Pune test chambers.
 - **RF Impedance & Transmission Line Synthesizer:** https://www.hackerland.in/rf-calc
   - Closed-form electromagnetic waveguide solver synthesizing 50Ω single-ended, grounded coplanar waveguide (GCPW), and 100Ω differential pairs on Rogers RO4350B, RT/duroid 5880, Isola 370HR, and standard FR-4 laminates. Features conductor skin depth, copper surface roughness attenuation, and interactive Smith Chart conjugate matching networks.
+- **Battery State-of-Health (SoH) & EIS Analyzer:** https://www.hackerland.in/battery-eis
+  - Electrochemical Impedance Spectroscopy (EIS) analyzer evaluating complex impedance spectra (0.01 Hz - 100 kHz) for EV battery cells (LFP 32700, NMC 21700, 4680, Sodium-Ion). Features Nyquist semicircles, Bode magnitude/phase plots, Randles Equivalent Circuit Model (ECM) extraction, SEI layer growth tracking, and AIS-156 Amendment 3 low-temperature lithium plating diagnostics from ARAI Pune and ICAT Manesar.
 - **48-Hour Rapid Hardware Sprints & Bounties:** https://www.hackerland.in/sprints
   - High-intensity 48-hour build sprints with milestone checkpoints (Hour 12 CAD, Hour 24 KiCad Schematic, Hour 36 RTOS Bringup, Hour 48 Physical Video Demo), non-dilutive cash grant escrows, free prototype fabrication credits, and NABL lab perks.
 - **Milestone-Locked Hardware Launchpad & Grant Matcher:** https://www.hackerland.in/launchpad

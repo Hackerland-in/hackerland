@@ -30,6 +30,7 @@ import {
   Radar,
   Zap,
   Briefcase,
+  BatteryCharging,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -52,8 +53,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis'],
   items: [
+    {
+      href: '/battery-eis',
+      title: 'Battery EIS & State-of-Health',
+      description: 'Nyquist spectra, Bode plots, Randles ECM fitting & AIS-156 Amendment 3 compliance',
+      icon: BatteryCharging,
+      badge: 'Battery EIS',
+    },
     {
       href: '/rf-calc',
       title: 'RF & Microwave Transmission Lines',

@@ -17,6 +17,7 @@ import { COMPONENT_SOURCING_REGISTRY } from '@/lib/data/sourcing-data';
 import { PCBA_ASSEMBLY_CATALOG } from '@/lib/data/assembly-data';
 import { EMC_SCAN_REGISTRY } from '@/lib/data/emc-data';
 import { RF_PRESETS } from '@/lib/data/rf-data';
+import { BATTERY_EIS_REGISTRY } from '@/lib/data/battery-eis-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -55,6 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/assembly', priority: 0.95, changeFrequency: 'daily' },
     { path: '/emc', priority: 0.95, changeFrequency: 'daily' },
     { path: '/rf-calc', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/battery-eis', priority: 0.95, changeFrequency: 'daily' },
     { path: '/launchpad', priority: 0.95, changeFrequency: 'daily' },
     { path: '/jobs', priority: 0.95, changeFrequency: 'daily' },
     { path: '/young-innovators', priority: 0.95, changeFrequency: 'daily' },
@@ -258,6 +260,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const preset of RF_PRESETS) {
     sitemapEntries.push({
       url: `${BASE_URL}/rf-calc/${preset.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic Battery EIS & SoH Routes
+  for (const proj of BATTERY_EIS_REGISTRY) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/battery-eis/${proj.slug}`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.9,

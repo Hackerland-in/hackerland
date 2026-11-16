@@ -506,6 +506,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['rf', 'impedance', 'microstrip', 'gcpw', 'coplanar', 'stripline', 'smith chart', 'matching network', 'rogers', 'ro4350b', 'skin depth', 'loss tangent', 'navic', 'lora', '50 ohm'],
   },
   {
+    id: 'hub-battery-eis',
+    title: 'Battery State-of-Health (SoH) & EIS Analyzer',
+    description:
+      'Electrochemical Impedance Spectroscopy (EIS) analyzer for EV battery cells. Nyquist semicircles, Bode frequency sweeps, Randles Equivalent Circuit Models, and AIS-156 Amendment 3 lithium plating diagnostics.',
+    category: 'labs',
+    categoryLabel: 'Battery EIS',
+    href: '/battery-eis',
+    badge: 'SoH EIS',
+    badgeTone: 'accent',
+    keywords: ['battery', 'eis', 'nyquist', 'bode', 'soh', 'state of health', 'randles', 'ecm', 'lfp', 'nmc', 'sodium ion', 'lithium plating', 'ais 156', 'arai', 'icat', 'sei layer'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

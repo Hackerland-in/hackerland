@@ -39,6 +39,7 @@ import {
   Radar,
   Zap,
   Briefcase,
+  BatteryCharging,
 } from 'lucide-react';
 import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
@@ -178,6 +179,7 @@ export function MobileMenu() {
     {
       heading: 'Hardware & Manufacturing',
       items: [
+        { href: '/battery-eis', label: 'Battery EIS & State-of-Health', icon: BatteryCharging, badge: 'SoH EIS' },
         { href: '/rf-calc', label: 'RF Transmission Line Synthesizer', icon: Radar, badge: 'RF 50Ω' },
         { href: '/emc', label: 'EMI/EMC Pre-Scan Analyzer', icon: Gauge, badge: 'EMC' },
         { href: '/assembly', label: 'PCBA Assembly & Stencil', icon: Factory, badge: 'SMT' },
