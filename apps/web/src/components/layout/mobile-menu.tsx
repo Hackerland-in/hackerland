@@ -192,6 +192,7 @@ export function MobileMenu() {
     {
       heading: 'Opportunities & Academy',
       items: [
+        { href: '/young-innovators', label: 'Young Innovators (Ages 8-17)', icon: GraduationCap, badge: 'Ages 8-17' },
         { href: '/earn', label: 'Earn (Bounties & Grants)', icon: Coins, badge: 'Active' },
         { href: '/learn', label: 'Learn by Doing Roadmaps', icon: GraduationCap, badge: 'Open-Source' },
         { href: '/entrepreneurship', label: 'Founder Academy', icon: BookOpen, badge: '100% Free' },

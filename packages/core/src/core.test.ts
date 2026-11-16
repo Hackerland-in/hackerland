@@ -28,6 +28,11 @@ import {
   verifyInventionIntegrity,
   generatePriorArtAffidavitText,
   filterDefensiveLedger,
+  juniorChallengeSchema,
+  juniorShowcaseProjectSchema,
+  guardianConsentSchema,
+  filterJuniorChallenges,
+  generateJuniorPassportCredential,
 } from './index';
 
 describe('tracks', () => {
@@ -603,6 +608,90 @@ describe('open invention network and ip defense ledger schema', () => {
     expect(matchSearch.length).toBe(1);
   });
 });
+
+describe('young innovators track and safety sandbox schema', () => {
+  const sampleJuniorChallenge = {
+    id: 'chal_soil_moisture_bot',
+    title: 'Smart Plant Hydration Alert Buddy',
+    ageBracket: 'junior_8_11',
+    difficulty: 'starter',
+    hardwareKit: ['BBC Micro:bit v2', 'Soil Moisture Nails', 'Submersible 5V Pump', 'Alligator Clips'],
+    learningOutcomes: ['Understanding analog resistivity', 'Conditional if-else block coding', 'Relay safety'],
+    prizeOrBadge: 'Eco-Maker Junior Badge + Plant Kit',
+    safetySupervisionRequired: true,
+    summary: 'Build a plant pot monitor that displays a sad face LED on the micro:bit when soil is parched.',
+    estimatedTimeHours: 3.5,
+  };
+
+  const sampleJuniorProject = {
+    id: 'proj_aditya_water',
+    slug: 'aditya-auto-cattle-trough',
+    title: 'Automated Solar Cattle Water Dispenser',
+    builderName: 'Aditya Sharma',
+    builderAge: 12,
+    city: 'Jaipur',
+    schoolOrAtl: 'Govt Model Sr Sec School ATL Lab',
+    ageBracket: 'intermediate_12_14',
+    summary:
+      'Created an ultrasonic water level regulator powered by a 10W solar panel and 18650 cell that keeps cattle troughs full in rural Rajasthan without overflowing.',
+    materialsUsed: ['Raspberry Pi Pico', 'HC-SR04 Ultrasonic Sensor', '12V DC Solenoid Valve', '10W Solar Panel'],
+    mentorName: 'Er. Rajesh Gurjar (AIM ATL Mentor)',
+    verifiedGuardianCoSigned: true,
+    unlockedBadge: 'Rural Impact Tinkerer',
+    demoVideoOrDocUrl: 'https://hackerland.in/proof/aditya-trough.mp4',
+  };
+
+  it('validates a complete junior challenge schema', () => {
+    expect(juniorChallengeSchema.safeParse(sampleJuniorChallenge).success).toBe(true);
+  });
+
+  it('validates a junior showcase project and generates passport credential text', () => {
+    const result = juniorShowcaseProjectSchema.safeParse(sampleJuniorProject);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      const cred = generateJuniorPassportCredential(result.data);
+      expect(cred).toContain('Aditya Sharma (Age 12)');
+      expect(cred).toContain('DPDP) ACT 2023');
+      expect(cred).toContain('Rural Impact Tinkerer');
+    }
+  });
+
+  it('enforces explicit DPDP Act guardian consent and physical lab supervision agreement', () => {
+    const validConsent = {
+      id: 'gcons_9821',
+      studentName: 'Meera Nair',
+      studentAge: 14,
+      guardianName: 'Suresh Nair',
+      guardianEmail: 'suresh@family.in',
+      guardianRelationship: 'parent',
+      schoolName: 'Kendriya Vidyalaya No. 1 Kochi',
+      city: 'Kochi',
+      dpdpConsentGranted: true,
+      safetySupervisionAgreed: true,
+      consentTimestamp: '2026-11-16T12:00:00Z',
+    };
+    expect(guardianConsentSchema.safeParse(validConsent).success).toBe(true);
+
+    const missingConsent = {
+      ...validConsent,
+      dpdpConsentGranted: false,
+    };
+    expect(guardianConsentSchema.safeParse(missingConsent).success).toBe(false);
+  });
+
+  it('filters junior challenges by age bracket and difficulty', () => {
+    const challenges = [sampleJuniorChallenge as any];
+    const matchAge = filterJuniorChallenges(challenges, { ageBracket: 'junior_8_11' });
+    expect(matchAge.length).toBe(1);
+
+    const nonMatchAge = filterJuniorChallenges(challenges, { ageBracket: 'senior_15_17' });
+    expect(nonMatchAge.length).toBe(0);
+
+    const matchDiff = filterJuniorChallenges(challenges, { difficulty: 'starter' });
+    expect(matchDiff.length).toBe(1);
+  });
+});
+
 
 
 

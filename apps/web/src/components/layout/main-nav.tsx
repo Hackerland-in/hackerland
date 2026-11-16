@@ -142,8 +142,15 @@ const HARDWARE_DROPDOWN: NavDropdown = {
 const ACADEMY_DROPDOWN: NavDropdown = {
   id: 'academy',
   label: 'Knowledge & Academy',
-  matchPrefixes: ['/stories', '/ideas', '/problems', '/learn', '/entrepreneurship', '/museum', '/observatory'],
+  matchPrefixes: ['/stories', '/ideas', '/problems', '/learn', '/entrepreneurship', '/museum', '/observatory', '/young-innovators'],
   items: [
+    {
+      href: '/young-innovators',
+      title: 'Young Innovators Track',
+      description: 'Supervised K-12 maker track (Ages 8-17), block-to-hardware coding & ATL lab projects',
+      icon: GraduationCap,
+      badge: 'Ages 8-17',
+    },
     {
       href: '/observatory',
       title: 'Innovation Observatory',

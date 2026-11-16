@@ -16,4 +16,5 @@ export * from './prototype-architect';
 export * from './squads';
 export * from './clubs';
 export * from './ip-defense';
+export * from './young-innovators';
 

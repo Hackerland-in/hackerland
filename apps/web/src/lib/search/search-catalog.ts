@@ -386,6 +386,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['manufacturing', 'hardware', 'pcb', 'drone', 'ev', 'engine', 'mobile'],
   },
   {
+    id: 'hub-young-innovators',
+    title: 'Young Innovators Track & Safety Sandbox (Ages 8–17)',
+    description:
+      'Supervised K-12 maker track with visual block-to-hardware coding, age-tiered hardware challenges, and DPDP-compliant educator mentorship.',
+    category: 'roadmaps',
+    categoryLabel: 'Junior Track',
+    href: '/young-innovators',
+    badge: 'Ages 8-17',
+    badgeTone: 'code',
+    keywords: ['young innovators', 'kids', 'k12', 'school', 'stem', 'microbit', 'pico', 'blockly', 'dpdp', 'atl', 'teen', 'junior'],
+  },
+  {
     id: 'hub-ip-defense',
     title: 'Open Invention Network & IP Defense Ledger',
     description:
