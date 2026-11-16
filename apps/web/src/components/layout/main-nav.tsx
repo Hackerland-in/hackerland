@@ -50,8 +50,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network'],
   items: [
+    {
+      href: '/network/ip',
+      title: 'Open Invention Network (IP Defense)',
+      description: 'Cryptographic prior-art timestamping & defensive patent pool for indie makers',
+      icon: ShieldCheck,
+      badge: 'IP Defense',
+    },
     {
       href: '/clubs',
       title: 'Innovation Clubs & ATL Hub',

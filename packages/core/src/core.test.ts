@@ -23,6 +23,11 @@ import {
   equipmentReservationSchema,
   calculateClubReadinessScore,
   filterClubs,
+  defensivePublicationSchema,
+  submitInventionDefenseSchema,
+  verifyInventionIntegrity,
+  generatePriorArtAffidavitText,
+  filterDefensiveLedger,
 } from './index';
 
 describe('tracks', () => {
@@ -489,5 +494,115 @@ describe('clubs and equipment sharing schema', () => {
     expect(filteredCategory.length).toBe(0);
   });
 });
+
+describe('open invention network and ip defense ledger schema', () => {
+  const samplePublication = {
+    id: 'ip-led-2026-0814',
+    title: 'Decentralized CAN-FD Active Cell Balancing BMS Architecture',
+    inventor: {
+      name: 'Dr. Anand Srinivas',
+      handle: 'anand_s',
+      organization: 'RVCE Team Chimera EV Garage',
+      verifiedKycOrEmail: true,
+    },
+    category: 'clean_mobility_bms',
+    hardwareLicense: 'CERN-OHL-P-2.0',
+    firstPublicDisclosureDate: '2026-08-14T10:30:00Z',
+    timestampProof: {
+      sha256Hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      merkleRoot: '7d793037a0760186574b0282f2f435e7b1e516b9cfba8feda31f1f9d486f06cf',
+      gitCommitHash: '9a3b8f2d1e04',
+      blockHeight: 894120,
+      rfc3161TimestampToken: 'MIIB/AYJKoZIhvcNAQcCoIIB7TCCAekCAQMxDzANBglghkgBZQMEAgEFADCB',
+      publicNotaryService: 'Hackerland IP Defense Notary & Bitcoin OP_RETURN Anchor',
+    },
+    ipcClasses: ['H01M 10/44', 'G01R 31/36', 'B60L 58/10'],
+    abstractSummary:
+      'A decentralized battery management architecture utilizing inductive energy transfer to shuttle charge across arbitrary 21700 cell pairs without resistive dissipation, coordinated via isolated CAN-FD bus packets.',
+    novelMechanisms: [
+      'Bidirectional flyback transformer matrix enabling cell-to-cell direct charge equalization without intermediate pack bus step-up.',
+      'Sub-microsecond current polarity switching synchronized to CAN-FD frame synchronization bit.',
+    ],
+    priorArtCitations: [
+      {
+        title: 'Passive resistor bleed balancing circuits in EV packs',
+        patentOrPaperId: 'US8921500B2',
+        jurisdiction: 'uspto',
+        distinctionSummary:
+          'Unlike US8921500B2 which dissipates excess cell energy as heat through 33-ohm power resistors, this invention captures and transfers >92% of excess energy to the weakest cell.',
+      },
+    ],
+    openArtifacts: [
+      {
+        id: 'art_schematic',
+        artifactType: 'schematic_pdf',
+        fileName: 'rvce-chimera-bms-schematic-v2.1.pdf',
+        fileSizeBytes: 2489120,
+        sha256Hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        downloadUrl: 'https://cdn.hackerland.in/ip/rvce-bms-v2.1.pdf',
+      },
+    ],
+    nonAggressionPledgeSigned: true,
+  };
+
+  it('validates a complete defensive publication schema', () => {
+    const result = defensivePublicationSchema.safeParse(samplePublication);
+    expect(result.success).toBe(true);
+  });
+
+  it('verifies candidate sha256 hash matches publication integrity', () => {
+    const validHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+    const fakeHash = '0000000000000000000000000000000000000000000000000000000000000000';
+
+    expect(verifyInventionIntegrity(samplePublication as any, validHash)).toBe(true);
+    expect(verifyInventionIntegrity(samplePublication as any, fakeHash)).toBe(false);
+  });
+
+  it('generates statutory legal affidavit with 35 USC 102 and Indian Patents Act Sec 29 citations', () => {
+    const affidavit = generatePriorArtAffidavitText(samplePublication as any);
+    expect(affidavit).toContain('CERTIFICATE OF DEFENSIVE PUBLICATION');
+    expect(affidavit).toContain('ip-led-2026-0814');
+    expect(affidavit).toContain('35 § 102(a)(1)');
+    expect(affidavit).toContain('The Patents Act, 1970 (India) § 29');
+    expect(affidavit).toContain('CERN-OHL-P-2.0');
+  });
+
+  it('validates submission form and checks non-aggression pledge agreement', () => {
+    const validSubmission = {
+      title: 'Peristaltic Syringe Infusion Pump Linear Actuator',
+      inventorName: 'Priya Sundaram',
+      inventorHandle: 'priya_medtech',
+      organization: 'AIIMS Innovation Cell',
+      category: 'biomedical_diagnostics',
+      hardwareLicense: 'CERN-OHL-S-2.0',
+      ipcClasses: ['A61M 5/142'],
+      abstractSummary:
+        'A micro-stepper motor driven lead screw actuator with optical linear encoder feedback providing 0.05 ml/hr flow precision for neonatal syringe delivery.',
+      novelMechanisms: ['Dual-wavelength optical end-stop trigger with fail-safe hardware interrupt.'],
+      primaryArtifactSha256: 'a'.repeat(64),
+      agreeToNonAggressionPledge: true,
+    };
+    expect(submitInventionDefenseSchema.safeParse(validSubmission).success).toBe(true);
+
+    const unsignedSubmission = {
+      ...validSubmission,
+      agreeToNonAggressionPledge: false,
+    };
+    expect(submitInventionDefenseSchema.safeParse(unsignedSubmission).success).toBe(false);
+  });
+
+  it('filters defensive ledger by category and search keyword', () => {
+    const ledger = [samplePublication as any];
+    const matchCategory = filterDefensiveLedger(ledger, { category: 'clean_mobility_bms' });
+    expect(matchCategory.length).toBe(1);
+
+    const nonMatchCategory = filterDefensiveLedger(ledger, { category: 'avionics_aerospace' });
+    expect(nonMatchCategory.length).toBe(0);
+
+    const matchSearch = filterDefensiveLedger(ledger, { search: 'CAN-FD' });
+    expect(matchSearch.length).toBe(1);
+  });
+});
+
 
 

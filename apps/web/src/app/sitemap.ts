@@ -6,6 +6,7 @@ import { TEARDOWNS_DATA } from '@/lib/data/teardowns-data';
 import { MUSEUM_EXHIBITS } from '@/lib/data/museum-data';
 import { SQUADS_DATA } from '@/lib/data/squads-data';
 import { CLUBS_DATA } from '@/lib/data/clubs-data';
+import { IP_DEFENSE_PUBLICATIONS } from '@/lib/data/ip-defense-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -32,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/manufacturing/physics', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/projects', priority: 0.9, changeFrequency: 'daily' },
     { path: '/clubs', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/network/ip', priority: 0.95, changeFrequency: 'daily' },
     { path: '/squads', priority: 0.95, changeFrequency: 'daily' },
     { path: '/earn', priority: 0.85, changeFrequency: 'daily' },
     { path: '/feed', priority: 0.85, changeFrequency: 'daily' },
@@ -122,6 +124,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const club of CLUBS_DATA) {
     sitemapEntries.push({
       url: `${BASE_URL}/clubs/${club.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic IP Defense Ledger Routes
+  for (const pub of IP_DEFENSE_PUBLICATIONS) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/network/ip/${pub.id}`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.9,

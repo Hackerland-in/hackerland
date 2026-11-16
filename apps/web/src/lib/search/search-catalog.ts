@@ -386,6 +386,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['manufacturing', 'hardware', 'pcb', 'drone', 'ev', 'engine', 'mobile'],
   },
   {
+    id: 'hub-ip-defense',
+    title: 'Open Invention Network & IP Defense Ledger',
+    description:
+      'Cryptographic prior-art timestamping for open hardware schematics, Gerber archives, and CAD models to invalidate predatory patent claims under USPTO § 102 & India § 29.',
+    category: 'projects',
+    categoryLabel: 'IP Defense',
+    href: '/network/ip',
+    badge: 'Prior Art',
+    badgeTone: 'accent',
+    keywords: ['ip', 'patent', 'prior art', 'defense ledger', 'uspto', 'inpass', 'schematic', 'troll', 'non-aggression', 'cern-ohl', 'timestamp', 'sha256'],
+  },
+  {
     id: 'hub-clubs',
     title: 'Innovation Clubs & ATL Hub (Pan-India Tinkering Mesh)',
     description:
