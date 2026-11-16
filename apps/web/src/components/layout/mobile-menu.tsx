@@ -200,6 +200,7 @@ export function MobileMenu() {
     {
       heading: 'Opportunities & Academy',
       items: [
+        { href: '/sprints', label: '48H Hardware Sprints', icon: Zap, badge: '48H' },
         { href: '/jobs', label: 'Hardware Jobs & Fellowships', icon: Briefcase, badge: 'Proof' },
         { href: '/young-innovators', label: 'Young Innovators (Ages 8-17)', icon: GraduationCap, badge: 'Ages 8-17' },
         { href: '/earn', label: 'Earn (Bounties & Grants)', icon: Coins, badge: 'Active' },

@@ -446,6 +446,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['testbed', 'hil', 'scpi', 'pyvisa', 'keysight', 'spectrum analyzer', 'chroma', 'battery cycler', 'anechoic chamber', 'shaker table', 'iit madras', 'arai', 'nal'],
   },
   {
+    id: 'hub-sprints',
+    title: '48-Hour Hardware Sprints & Rapid Build Hackathons',
+    description:
+      'Time-boxed 48H rapid builds with milestone checkpoints (Hour 12 CAD, Hour 24 Schematic, Hour 36 Firmware, Hour 48 Video Demo), cash escrow disbursements, and free prototype lab perks.',
+    category: 'bounties',
+    categoryLabel: '48H Sprints',
+    href: '/sprints',
+    badge: '48H Build',
+    badgeTone: 'earn',
+    keywords: ['sprint', 'hackathon', '48h', 'hardware hackathon', 'bounty', 'cad milestone', 'firmware', 'kicad', 'demo video', 'csir', 'nal', 'arai', 'iit madras', 't-works'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

@@ -68,6 +68,11 @@ import {
   calculateTestbedBookingCost,
   filterTestbedFacilities,
   testbedFacilitySchema,
+  sprintEntrySchema,
+  calculateSprintProgress,
+  validateMilestoneSubmission,
+  calculatePrizeDistribution,
+  filterSprints,
 } from './index';
 
 describe('tracks', () => {
@@ -1541,6 +1546,128 @@ describe('remote testbeds and high-capex laboratory equipment schema', () => {
     expect(searchResult.length).toBe(1);
   });
 });
+
+describe('sprints & rapid hardware hackathons', () => {
+  const sampleSprint = {
+    id: 'sprint_48h_autopilot',
+    slug: '48h-indigenous-autopilot-sprint',
+    title: '48H Indigenous Autopilot & Gimbal Sprint',
+    tagline: 'Design and bring up a flight-ready dual-IMU autopilot board in 48 hours.',
+    track: 'robotics_uav' as const,
+    sponsor: {
+      name: 'CSIR-NAL & iDEX Defence Innovation',
+      grantAmount: 500000,
+      grantCurrency: 'INR' as const,
+      type: 'gov_grant' as const,
+    },
+    totalPrizePoolINR: 500000,
+    startDate: '2026-11-20T09:00:00Z',
+    endDate: '2026-11-22T09:00:00Z',
+    durationHours: 48,
+    currentStatus: 'active' as const,
+    registeredTeamsCount: 24,
+    maxTeams: 32,
+    milestones: [
+      {
+        id: 'm1',
+        hour: 12,
+        title: 'Hour 12: Mechanical CAD & BOM Release',
+        deliverables: ['STEP 3D model', 'BOM with LCSC part numbers'],
+        reviewCriteria: ['Dual IMU vibration damping mount', 'Under 45g weight'],
+        points: 25,
+      },
+      {
+        id: 'm2',
+        hour: 24,
+        title: 'Hour 24: KiCad PCB Schematic & DRC Pass',
+        deliverables: ['KiCad 8 schematic', 'Gerber layout zip'],
+        reviewCriteria: ['4-layer stackup with controlled 50 ohm trace impedance'],
+        points: 25,
+      },
+      {
+        id: 'm3',
+        hour: 36,
+        title: 'Hour 36: Firmware Bringup & UART Telemetry',
+        deliverables: ['Git repository with Zephyr RTOS or ArduPilot driver'],
+        reviewCriteria: ['AHRS 400Hz telemetry loop over MAVLink'],
+        points: 25,
+      },
+      {
+        id: 'm4',
+        hour: 48,
+        title: 'Hour 48: Integrated Physical Demo Video',
+        deliverables: ['Loom / YouTube prototype demo video showing gyro response'],
+        reviewCriteria: ['Hardware-in-the-loop validation without sensor clipping'],
+        points: 25,
+      },
+    ],
+    eligibilityCriteria: ['Indian engineering students or DPIIT startups'],
+    hardwarePerks: ['Free PCB fabrication credit', 'SAMEER vibration shaker slot voucher'],
+    juryPanel: [
+      {
+        name: 'Dr. K. Sivanathan',
+        role: 'Chief UAV Flight Controls Scientist',
+        organization: 'CSIR National Aerospace Laboratories',
+      },
+    ],
+    rules: ['All code and hardware designs must be open-source under CERN-OHL-P or Apache 2.0.'],
+  };
+
+  it('validates a complete sprint schema', () => {
+    const parseResult = sprintEntrySchema.safeParse(sampleSprint);
+    expect(parseResult.success).toBe(true);
+  });
+
+  it('computes sprint progress correctly before, during, and after sprint duration', () => {
+    // Before start
+    const before = calculateSprintProgress(sampleSprint, '2026-11-19T09:00:00Z');
+    expect(before.currentHour).toBe(0);
+    expect(before.progressPercent).toBe(0);
+    expect(before.isCompleted).toBe(false);
+
+    // Midway: 24 hours in
+    const midway = calculateSprintProgress(sampleSprint, '2026-11-21T09:00:00Z');
+    expect(midway.currentHour).toBe(24);
+    expect(midway.progressPercent).toBe(50);
+    expect(midway.activeMilestoneIndex).toBe(1);
+
+    // Completed
+    const after = calculateSprintProgress(sampleSprint, '2026-11-23T09:00:00Z');
+    expect(after.currentHour).toBe(48);
+    expect(after.progressPercent).toBe(100);
+    expect(after.isCompleted).toBe(true);
+    expect(after.timeRemainingMinutes).toBe(0);
+  });
+
+  it('validates milestone submission deliverables according to milestone type', () => {
+    const cadMilestone = sampleSprint.milestones[0]!;
+    const invalidSub = validateMilestoneSubmission(cadMilestone, { notes: 'hello' });
+    expect(invalidSub.valid).toBe(false);
+    expect(invalidSub.errors.some((e) => e.includes('CAD'))).toBe(true);
+
+    const validSub = validateMilestoneSubmission(cadMilestone, {
+      cadUrl: 'https://cad.onshape.com/documents/abc123',
+    });
+    expect(validSub.valid).toBe(true);
+    expect(validSub.errors.length).toBe(0);
+  });
+
+  it('calculates prize distribution and filters sprints accurately', () => {
+    const prizes = calculatePrizeDistribution(500000);
+    expect(prizes.firstPlaceINR).toBe(250000);
+    expect(prizes.secondPlaceINR).toBe(150000);
+    expect(prizes.thirdPlaceINR).toBe(75000);
+    expect(prizes.runnerUpsINR).toBe(25000);
+    expect(prizes.firstPlaceINR + prizes.secondPlaceINR + prizes.thirdPlaceINR + prizes.runnerUpsINR).toBe(500000);
+
+    const filtered = filterSprints([sampleSprint], { track: 'robotics_uav', search: 'Autopilot' });
+    expect(filtered.length).toBe(1);
+
+    const none = filterSprints([sampleSprint], { track: 'clean_energy' });
+    expect(none.length).toBe(0);
+  });
+});
+
 
 
 

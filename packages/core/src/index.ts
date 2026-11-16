@@ -25,4 +25,5 @@ export * from './telemetry';
 export * from './firmware';
 export * from './compliance';
 export * from './testbeds';
+export * from './sprints';
 

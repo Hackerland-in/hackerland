@@ -243,8 +243,15 @@ const ACADEMY_DROPDOWN: NavDropdown = {
 const COMMUNITY_DROPDOWN: NavDropdown = {
   id: 'community',
   label: 'Community & Proof',
-  matchPrefixes: ['/leaderboard', '/u', '/passport', '/squads', '/launchpad', '/jobs'],
+  matchPrefixes: ['/leaderboard', '/u', '/passport', '/squads', '/launchpad', '/jobs', '/sprints'],
   items: [
+    {
+      href: '/sprints',
+      title: '48H Hardware Sprints & Bounties',
+      description: 'Time-boxed 48H rapid builds with milestone gates, escrow cash prizes & lab perks',
+      icon: Zap,
+      badge: '48H Sprints',
+    },
     {
       href: '/jobs',
       title: 'Hardware Jobs & Fellowships',
