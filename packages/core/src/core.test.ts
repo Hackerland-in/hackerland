@@ -19,6 +19,10 @@ import {
   observatoryItemSchema,
   prototypeArchitecturePlanSchema,
   projectSquadRoomSchema,
+  clubChapterSchema,
+  equipmentReservationSchema,
+  calculateClubReadinessScore,
+  filterClubs,
 } from './index';
 
 describe('tracks', () => {
@@ -387,4 +391,103 @@ describe('ecosystem domain schemas', () => {
     expect(projectSquadRoomSchema.safeParse(validSquadRoom).success).toBe(true);
   });
 });
+
+describe('clubs and equipment sharing schema', () => {
+  const sampleClub = {
+    id: 'club_kochi_maker',
+    slug: 'kochi-maker-village-atl',
+    name: 'Maker Village Kochi ATL & FabLab Hub',
+    category: 'community_makerspace',
+    institution: 'Digital University Kerala',
+    city: 'Kochi',
+    state: 'Kerala',
+    address: 'KINFRA Hi-Tech Park, Kalamassery',
+    foundedYear: 2017,
+    memberCount: 380,
+    activeProjectsCount: 16,
+    mentorCount: 22,
+    verifiedAtl: true,
+    contactEmail: 'makers@makervillagekochi.in',
+    summary: 'Kerala nodal hub for hardware prototyping and school ATL mentorship.',
+    focusAreas: ['Embedded IoT', 'Drones', 'Biomedical Sensors'],
+    equipment: [
+      {
+        id: 'eq_voltera',
+        name: 'Voltera V-One PCB Printer',
+        category: 'rapid_prototyping',
+        model: 'V-One Direct Ink Dispenser',
+        status: 'available',
+        specs: '0.2mm trace pitch, FR4 & glass substrate',
+        hourlyRate: 'Free for student ATL squads / ₹200/hr',
+        safetyCertificationRequired: true,
+      },
+    ],
+    leadMentor: {
+      name: 'Dr. Ramesh Nair',
+      role: 'Chief FabLab Technologist',
+      organization: 'Digital University Kerala',
+      bio: '20+ years in electronics manufacturing and community maker mentorship.',
+      verifiedAtlMentor: true,
+    },
+    activeChallenges: [
+      {
+        id: 'chal_agri',
+        title: 'Monsoon Flood Sensing Mesh Challenge',
+        description: 'Deploy solar-backed LoRa nodes along Periyar river basin.',
+        deadline: '2026-12-15',
+        prizePool: '₹1,50,000',
+        organizer: 'Maker Village & KSDMA',
+        teamSize: '2-4 members',
+        domain: 'Climatetech & Disaster Preparedness',
+        status: 'active',
+      },
+    ],
+    establishedPrototypesCount: 42,
+  };
+
+  it('validates a complete club chapter and calculates readiness score', () => {
+    const parseResult = clubChapterSchema.safeParse(sampleClub);
+    expect(parseResult.success).toBe(true);
+    if (parseResult.success) {
+      const score = calculateClubReadinessScore(parseResult.data);
+      expect(score).toBeGreaterThanOrEqual(70);
+    }
+  });
+
+  it('validates equipment reservation schema with safety induction check', () => {
+    const validReservation = {
+      id: 'res_123',
+      clubSlug: 'kochi-maker-village-atl',
+      equipmentId: 'eq_voltera',
+      applicantName: 'Ananya Sharma',
+      applicantEmail: 'ananya@school.edu',
+      applicantRole: 'student_k12',
+      projectTitle: 'CanSat Water Vapor Telemetry Module',
+      requestedDate: '2026-11-20',
+      timeSlot: '14:00 - 17:00 IST',
+      safetyInductionAgreed: true,
+      parentOrMentorCoSign: 'Teacher Mentor: Sunita Rao',
+    };
+    expect(equipmentReservationSchema.safeParse(validReservation).success).toBe(true);
+
+    const missingSafety = {
+      ...validReservation,
+      safetyInductionAgreed: false,
+    };
+    expect(equipmentReservationSchema.safeParse(missingSafety).success).toBe(false);
+  });
+
+  it('filters clubs by state and category properly', () => {
+    const clubs = [sampleClub as any];
+    const filteredKerala = filterClubs(clubs, { state: 'Kerala' });
+    expect(filteredKerala.length).toBe(1);
+
+    const filteredDelhi = filterClubs(clubs, { state: 'Delhi' });
+    expect(filteredDelhi.length).toBe(0);
+
+    const filteredCategory = filterClubs(clubs, { category: 'school_atl' });
+    expect(filteredCategory.length).toBe(0);
+  });
+});
+
 

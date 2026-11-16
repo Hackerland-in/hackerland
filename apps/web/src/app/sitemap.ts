@@ -5,6 +5,7 @@ import { listProblems } from '@/lib/data/problems-data';
 import { TEARDOWNS_DATA } from '@/lib/data/teardowns-data';
 import { MUSEUM_EXHIBITS } from '@/lib/data/museum-data';
 import { SQUADS_DATA } from '@/lib/data/squads-data';
+import { CLUBS_DATA } from '@/lib/data/clubs-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -30,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/manufacturing', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/manufacturing/physics', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/projects', priority: 0.9, changeFrequency: 'daily' },
+    { path: '/clubs', priority: 0.95, changeFrequency: 'daily' },
     { path: '/squads', priority: 0.95, changeFrequency: 'daily' },
     { path: '/earn', priority: 0.85, changeFrequency: 'daily' },
     { path: '/feed', priority: 0.85, changeFrequency: 'daily' },
@@ -112,6 +114,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE_URL}/projects/${squad.projectSlug}/squad`,
       lastModified: currentDate,
       changeFrequency: 'daily',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic Club Chapter Routes
+  for (const club of CLUBS_DATA) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/clubs/${club.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
       priority: 0.9,
     });
   }

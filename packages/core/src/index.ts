@@ -14,4 +14,5 @@ export * from './museum';
 export * from './observatory';
 export * from './prototype-architect';
 export * from './squads';
+export * from './clubs';
 

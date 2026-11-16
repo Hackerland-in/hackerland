@@ -175,6 +175,7 @@ export function MobileMenu() {
     {
       heading: 'Hardware & Manufacturing',
       items: [
+        { href: '/clubs', label: 'Innovation Clubs & ATL Hub', icon: GraduationCap, badge: 'ATL Mesh' },
         { href: '/prototype', label: 'Idea-to-Prototype Simulator', icon: Sparkles, badge: 'AI Architect' },
         { href: '/manufacturing', label: 'Manufacturing Hub', icon: Cpu, badge: '8 Domains' },
         { href: '/manufacturing/pcb', label: 'A-Z PCB & Circuit Studio', icon: Layers, badge: 'Real-Time' },

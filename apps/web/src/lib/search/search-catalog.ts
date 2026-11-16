@@ -386,6 +386,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['manufacturing', 'hardware', 'pcb', 'drone', 'ev', 'engine', 'mobile'],
   },
   {
+    id: 'hub-clubs',
+    title: 'Innovation Clubs & ATL Hub (Pan-India Tinkering Mesh)',
+    description:
+      'School Atal Tinkering Labs (ATLs), collegiate robotics clubs, and community FabLabs with shared equipment booking and intra-club build challenges.',
+    category: 'labs',
+    categoryLabel: 'ATL & Clubs',
+    href: '/clubs',
+    badge: 'ATL Mesh',
+    badgeTone: 'accent',
+    keywords: ['clubs', 'atl', 'tinkering', 'robotics club', 'equipment', '3d printer', 'cnc', 'k12', 'school', 'mentor', 'challenge', 'fablab'],
+  },
+  {
     id: 'hub-labs',
     title: 'Makerspaces, FabLabs & ATL Nodes Across India',
     description:

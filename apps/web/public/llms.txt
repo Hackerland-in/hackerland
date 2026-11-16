@@ -19,6 +19,18 @@ Hackerland is a developer and maker platform bridging open-source hardware proto
   - 60 FPS physics engines with live telemetry streaming and parameter tuning.
 - **Hardware Bounties & Grants:** https://www.hackerland.in/earn
   - Paid bounties and micro-grants for building open-source hardware, firmware, and software.
+- **Innovation Clubs & ATL Hub:** https://www.hackerland.in/clubs
+  - Pan-India network of Atal Tinkering Labs (ATLs), collegiate robotics clubs, and community FabLabs with shared machine booking (3D printers, CNCs, scopes, rework) and intra-club build challenges.
+- **Collaborative Squad Rooms & Escrow Vault:** https://www.hackerland.in/squads
+  - Real-time squad rooms, milestone escrow vaults with proof-of-work release, and task kanban boards.
+- **Idea-to-Prototype Hardware Architect:** https://www.hackerland.in/prototype
+  - Interactive AI architecture synthesizer translating plain text ideas into block topologies, MCU pinouts, and BOMs.
+- **Global Innovation Observatory:** https://www.hackerland.in/observatory
+  - Real-time radar of expired public-domain patents, lab-to-market breakthroughs, open silicon shuttles, and non-dilutive deep-tech defense grants.
+- **Failed Projects Museum & Risk Evaluator:** https://www.hackerland.in/museum
+  - Engineering root-cause failure autopsies and pre-mortem risk evaluation calculators for hardware creators.
+- **Hardware Reverse Engineering Teardowns:** https://www.hackerland.in/teardowns
+  - Component-level autopsies and BOMs of Ather 450 BMS, DJI drones, and smart electricity meters.
 - **Makerspaces & ATL Labs:** https://www.hackerland.in/labs
   - Interactive directory of makerspaces, tinkering labs, 3D printing hubs, and CNC facilities across India.
 - **Factory Blueprints (CapEx/OpEx):** https://www.hackerland.in/how-to-start

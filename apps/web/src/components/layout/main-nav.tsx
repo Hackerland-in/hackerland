@@ -50,8 +50,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs'],
   items: [
+    {
+      href: '/clubs',
+      title: 'Innovation Clubs & ATL Hub',
+      description: 'Atal Tinkering Labs & robotics clubs mesh, machine sharing & intra-club challenges',
+      icon: GraduationCap,
+      badge: 'ATL Mesh',
+    },
     {
       href: '/prototype',
       title: 'Idea-to-Prototype Simulator',
