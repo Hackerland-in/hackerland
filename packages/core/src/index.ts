@@ -23,4 +23,5 @@ export * from './teardowns';
 export * from './jobs';
 export * from './telemetry';
 export * from './firmware';
+export * from './compliance';
 

@@ -422,6 +422,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['firmware', 'registry', 'bin', 'hex', 'uf2', 'flasher', 'webserial', 'esptool', 'ardupilot', 'zephyr', 'micropython', 'esp32', 'rp2040', 'stm32', 'riscv'],
   },
   {
+    id: 'hub-compliance',
+    title: 'Indian Hardware Statutory Compliance & NABL Lab Wizard',
+    description:
+      'Calculate BIS CRS, WPC ETA, TEC MTCTE, DGCA Type Certification, and AIS-156 statutory testing fees in ₹, sample requirements, and lead times from authorized Indian NABL laboratories.',
+    category: 'simulators',
+    categoryLabel: 'Compliance Hub',
+    href: '/compliance',
+    badge: 'NABL Labs',
+    badgeTone: 'code',
+    keywords: ['compliance', 'regulatory', 'bis', 'crs', 'isi', 'wpc', 'eta', 'tec', 'mtcte', 'dgca', 'drone rules', 'ais 156', 'nabl', 'sameer', 'arai', 'icat', 'ertl', 'testing lab', 'certification'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

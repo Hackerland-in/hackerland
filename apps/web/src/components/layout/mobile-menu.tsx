@@ -178,6 +178,7 @@ export function MobileMenu() {
     {
       heading: 'Hardware & Manufacturing',
       items: [
+        { href: '/compliance', label: 'Statutory Compliance Wizard', icon: ShieldCheck, badge: 'NABL Labs' },
         { href: '/firmware', label: 'Firmware Registry & Flasher', icon: Usb, badge: 'WebSerial' },
         { href: '/telemetry', label: 'Digital Twin & Telemetry Stream', icon: Gauge, badge: 'Digital Twin' },
         { href: '/copilot', label: 'Hardware Co-Pilot & Sourcing', icon: Zap, badge: 'AI Sourcing' },

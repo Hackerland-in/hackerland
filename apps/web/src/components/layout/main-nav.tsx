@@ -52,8 +52,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance'],
   items: [
+    {
+      href: '/compliance',
+      title: 'Statutory Compliance & NABL Wizard',
+      description: 'BIS CRS, WPC ETA, TEC MTCTE, DGCA & AIS-156 testing fee benchmarks',
+      icon: ShieldCheck,
+      badge: 'NABL Labs',
+    },
     {
       href: '/firmware',
       title: 'Firmware Registry & Flasher',

@@ -60,6 +60,10 @@ import {
   filterFirmwareRegistry,
   formatFirmwareBytes,
   firmwareRegistryItemSchema,
+  matchComplianceRequirements,
+  evaluatePreComplianceReadiness,
+  formatComplianceCost,
+  complianceRoadmapItemSchema,
 } from './index';
 
 describe('tracks', () => {
@@ -1369,6 +1373,68 @@ describe('firmware registry and flash partition layout schema', () => {
     expect(formatFirmwareBytes(512)).toBe('512 B');
     expect(formatFirmwareBytes(1024 * 64)).toBe('64.0 KB');
     expect(formatFirmwareBytes(1024 * 1024 * 2.5)).toBe('2.50 MB');
+  });
+});
+
+describe('hardware statutory compliance and regulatory wizard schema', () => {
+  it('matches statutory compliance requirements for EV battery packs with wireless telematics', () => {
+    const matched = matchComplianceRequirements({
+      hasWirelessRf: true, // triggers WPC ETA
+      hasLiIonBattery: true, // triggers AIS-156
+      isAutomotiveEv: true,
+      isDroneUav: false,
+      hasMainsAcSmps: false,
+      isTelecomModem: false,
+      isMedicalBio: false,
+    });
+
+    expect(matched.bodiesTriggered).toContain('wpc_eta');
+    expect(matched.bodiesTriggered).toContain('ais_automotive');
+    expect(matched.primaryStandards.some((s) => s.includes('AIS-156 Phase 2'))).toBe(true);
+    expect(matched.estimatedBaseCostInr).toBeGreaterThan(350000);
+    expect(matched.estimatedTotalWeeks).toBeGreaterThanOrEqual(10);
+  });
+
+  it('matches DGCA drone rules for commercial UAV sprayers', () => {
+    const droneMatch = matchComplianceRequirements({
+      hasWirelessRf: true,
+      hasLiIonBattery: true,
+      isAutomotiveEv: false,
+      isDroneUav: true, // triggers DGCA
+      hasMainsAcSmps: false,
+      isTelecomModem: false,
+      isMedicalBio: false,
+    });
+
+    expect(droneMatch.bodiesTriggered).toContain('dgca_type');
+    expect(droneMatch.bodiesTriggered).toContain('wpc_eta');
+    expect(droneMatch.bodiesTriggered).toContain('bis_crs');
+    expect(droneMatch.estimatedBaseCostInr).toBeGreaterThanOrEqual(500000);
+  });
+
+  it('evaluates pre-compliance checklist readiness and identifies missing critical tests', () => {
+    const tasks = [
+      { id: 'task-1', task: 'Radiated emissions 3m chamber pre-scan', critical: true, tip: 'Check near-field probes' },
+      { id: 'task-2', task: 'BMS overcharge 4.35V cutoff test', critical: true, tip: 'Ensure dual hardware MOSFET trip' },
+      { id: 'task-3', task: 'Label font height >= 2mm per BIS rules', critical: false, tip: 'Check laser marking stencil' },
+    ];
+
+    // Only non-critical task completed -> high risk
+    const failCheck = evaluatePreComplianceReadiness(['task-3'], tasks);
+    expect(failCheck.readinessScore).toBe(33);
+    expect(failCheck.status).toBe('high_risk_of_failure');
+    expect(failCheck.criticalMissing.length).toBe(2);
+
+    // All critical tasks completed
+    const passCheck = evaluatePreComplianceReadiness(['task-1', 'task-2', 'task-3'], tasks);
+    expect(passCheck.readinessScore).toBe(100);
+    expect(passCheck.status).toBe('lab_ready');
+    expect(passCheck.criticalMissing.length).toBe(0);
+  });
+
+  it('formats compliance cost into Indian Lakhs or thousands', () => {
+    expect(formatComplianceCost(25000)).toBe('₹25,000');
+    expect(formatComplianceCost(450000)).toBe('₹4.50 Lakhs');
   });
 });
 
