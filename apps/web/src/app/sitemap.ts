@@ -15,6 +15,7 @@ import { TESTBED_FACILITIES } from '@/lib/data/testbeds-data';
 import { SPRINTS_CATALOG } from '@/lib/data/sprints-data';
 import { COMPONENT_SOURCING_REGISTRY } from '@/lib/data/sourcing-data';
 import { PCBA_ASSEMBLY_CATALOG } from '@/lib/data/assembly-data';
+import { EMC_SCAN_REGISTRY } from '@/lib/data/emc-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -51,6 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/sprints', priority: 0.95, changeFrequency: 'daily' },
     { path: '/sourcing', priority: 0.95, changeFrequency: 'daily' },
     { path: '/assembly', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/emc', priority: 0.95, changeFrequency: 'daily' },
     { path: '/launchpad', priority: 0.95, changeFrequency: 'daily' },
     { path: '/jobs', priority: 0.95, changeFrequency: 'daily' },
     { path: '/young-innovators', priority: 0.95, changeFrequency: 'daily' },
@@ -234,6 +236,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const proj of PCBA_ASSEMBLY_CATALOG) {
     sitemapEntries.push({
       url: `${BASE_URL}/assembly/${proj.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic EMI/EMC Scan Routes
+  for (const proj of EMC_SCAN_REGISTRY) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/emc/${proj.slug}`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.9,

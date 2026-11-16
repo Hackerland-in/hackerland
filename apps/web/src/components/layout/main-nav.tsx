@@ -52,8 +52,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc'],
   items: [
+    {
+      href: '/emc',
+      title: 'EMI / EMC Pre-Scan Analyzer',
+      description: 'Conducted & radiated emissions vs CISPR 25/32 limits with near-field probe hotspots',
+      icon: Gauge,
+      badge: 'EMC Pre-Scan',
+    },
     {
       href: '/assembly',
       title: 'Assembly Line & SMT Visualizer',

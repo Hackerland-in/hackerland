@@ -33,6 +33,8 @@ Hackerland is a developer and maker platform bridging open-source hardware proto
   - Direct Indian & Asian electronic component cross-reference engine. Pin-to-pin drop-in replacement finder for supply-constrained ICs (STM32, TI BMS, Semtech LoRa) with domestic stock (Robu.in, Evelta, Element14) and HSN 8542 landed tariff & 18% GST calculators.
 - **PCBA Assembly Line & SMT Stencil Visualizer:** https://www.hackerland.in/assembly
   - Interactive Pick-and-Place (PnP) 2D centroid visualizer, feeder tape loading planner, solder stencil aperture optimizer (0.10mm - 0.15mm foil), and turnkey assembly cost modeling across Indian tier-1 EMS plants (Kaynes, Syrma SGS, Centum, Dixon).
+- **EMI / EMC Radiation Pre-Scan Analyzer & Near-Field Probe Visualizer:** https://www.hackerland.in/emc
+  - Interactive conducted and radiated emission spectrum analyzer comparing measurements against CISPR 25 Class 5, CISPR 32 Class B, and MIL-STD-461G limits with 2D PCB near-field magnetic probe radiation heatmap diagnostics from SAMEER Chennai and ARAI Pune test chambers.
 - **48-Hour Rapid Hardware Sprints & Bounties:** https://www.hackerland.in/sprints
   - High-intensity 48-hour build sprints with milestone checkpoints (Hour 12 CAD, Hour 24 KiCad Schematic, Hour 36 RTOS Bringup, Hour 48 Physical Video Demo), non-dilutive cash grant escrows, free prototype fabrication credits, and NABL lab perks.
 - **Milestone-Locked Hardware Launchpad & Grant Matcher:** https://www.hackerland.in/launchpad

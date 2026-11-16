@@ -82,6 +82,10 @@ import {
   calculatePcbaTurnkeyCost,
   validatePnpCentroidCsv,
   filterAssemblyProjects,
+  emcScanProjectSchema,
+  evaluateEmcCompliance,
+  calculateCommonModeChoke,
+  filterEmcProjects,
 } from './index';
 
 describe('tracks', () => {
@@ -1911,6 +1915,98 @@ R1,10k,0402,14.2,15.5,180,bottom
     expect(invalidRes.errors.length).toBeGreaterThan(0);
   });
 });
+
+describe('emi / emc radiation pre-scan analyzer & near-field probe visualizer', () => {
+  const sampleEmcProject = {
+    id: 'emc_ev_bms_can',
+    slug: 'ev-bms-isolated-can-cispr25',
+    title: 'AIS-156 EV BMS Isolated CAN & Buck Conducted Emissions (CISPR 25)',
+    deviceUnderTesting: 'Ather 450 Compatible 16S Smart BMS (HW Rev 3.2)',
+    standard: 'cispr_25_class5' as const,
+    scanType: 'conducted_emissions' as const,
+    spectralTrace: [
+      { frequencyMHz: 0.15, amplitudeDbuV: 48, limitDbuV: 66 },
+      { frequencyMHz: 0.50, amplitudeDbuV: 52, limitDbuV: 56 },
+      { frequencyMHz: 2.10, amplitudeDbuV: 42, limitDbuV: 46 },
+      { frequencyMHz: 10.5, amplitudeDbuV: 31, limitDbuV: 40 },
+      { frequencyMHz: 30.0, amplitudeDbuV: 22, limitDbuV: 34 },
+    ],
+    hotspots: [
+      {
+        id: 'hs1',
+        nodeName: 'SW_NODE_LM5164',
+        posX: 25.0,
+        posY: 60.0,
+        peakEmissionMHz: 2.1,
+        peakDbuV: 52.4,
+        noiseSource: 'switching_dv_dt' as const,
+        mitigation: 'Add RC snubber (10R + 470pF) and shield inductor ground loop.',
+      },
+      {
+        id: 'hs2',
+        nodeName: 'CAN_DIFF_CHOKE',
+        posX: 95.0,
+        posY: 40.0,
+        peakEmissionMHz: 10.5,
+        peakDbuV: 34.0,
+        noiseSource: 'clock_harmonic' as const,
+        mitigation: 'Place 51uH common mode choke adjacent to CAN connector.',
+      },
+    ],
+    testLabFacility: 'SAMEER Centre for Electromagnetics (Chennai)',
+    overallStatus: 'compliant' as const,
+    filterRecommendations: [
+      'Install 100uH common-mode choke on high-voltage DC input rails.',
+      'Reduce buck switching gate resistance from 4.7R to 10R to curb dv/dt rise time.',
+    ],
+    notes: [
+      'Pre-scan verified using Rohde & Schwarz ESR26 receiver and LISN under CISPR 25 Class 5 limits.',
+    ],
+  };
+
+  it('validates a complete emc scan project schema', () => {
+    const parseResult = emcScanProjectSchema.safeParse(sampleEmcProject);
+    expect(parseResult.success).toBe(true);
+  });
+
+  it('evaluates emc compliance margin correctly for compliant and non-compliant traces', () => {
+    const compliantEval = evaluateEmcCompliance(sampleEmcProject.spectralTrace);
+    expect(compliantEval.isCompliant).toBe(true);
+    expect(compliantEval.violationCount).toBe(0);
+    // 0.50 MHz: limit 56 - amplitude 52 = 4.0 dB worst margin
+    expect(compliantEval.worstMarginDb).toBe(4.0);
+    expect(compliantEval.maxPeakDbuV).toBe(52);
+
+    const failingTrace = [
+      { frequencyMHz: 1.2, amplitudeDbuV: 62, limitDbuV: 56 }, // +6 dB violation
+      { frequencyMHz: 2.4, amplitudeDbuV: 40, limitDbuV: 46 },
+    ];
+    const failingEval = evaluateEmcCompliance(failingTrace);
+    expect(failingEval.isCompliant).toBe(false);
+    expect(failingEval.violationCount).toBe(1);
+    expect(failingEval.worstMarginDb).toBe(-6.0);
+    expect(failingEval.peakViolationFrequencyMHz).toBe(1.2);
+  });
+
+  it('calculates common-mode choke inductance and insertion loss attenuation', () => {
+    const filter = calculateCommonModeChoke(10.0, 1000); // 10 MHz target
+    expect(filter.requiredInductanceUh).toBeGreaterThan(10);
+    expect(filter.recommendedCapacitanceNf).toBe(2.2);
+    expect(filter.attenuationAtTargetDb).toBeGreaterThan(15);
+  });
+
+  it('filters emc projects by standard and search keyword', () => {
+    const matched = filterEmcProjects([sampleEmcProject], { standard: 'cispr_25_class5' });
+    expect(matched.length).toBe(1);
+
+    const searched = filterEmcProjects([sampleEmcProject], { search: 'SAMEER' });
+    expect(searched.length).toBe(1);
+
+    const noMatch = filterEmcProjects([sampleEmcProject], { standard: 'mil_std_461g' });
+    expect(noMatch.length).toBe(0);
+  });
+});
+
 
 
 

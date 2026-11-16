@@ -482,6 +482,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['assembly', 'pcba', 'pnp', 'centroid', 'pick and place', 'smt', 'feeder', 'stencil', 'kaynes', 'syrma', 'dixon', 'centum', 'xray', 'aoi', 'turnkey'],
   },
   {
+    id: 'hub-emc',
+    title: 'EMI / EMC Radiation Pre-Scan Analyzer & Near-Field Probe Visualizer',
+    description:
+      'Conducted and radiated emissions spectrum analyzer evaluating CISPR 25 Class 5, CISPR 32, and MIL-STD limits with near-field PCB probe radiation heatmap diagnostics.',
+    category: 'labs',
+    categoryLabel: 'EMC Pre-Scan',
+    href: '/emc',
+    badge: 'EMC Pre-Scan',
+    badgeTone: 'accent',
+    keywords: ['emc', 'emi', 'cispr 25', 'cispr 32', 'near field', 'probe', 'sameer', 'arai', 'spectrum', 'conducted emissions', 'radiated emissions', 'choke', 'filter'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:
