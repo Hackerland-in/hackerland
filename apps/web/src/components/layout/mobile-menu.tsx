@@ -32,6 +32,9 @@ import {
   Lightbulb,
   Target,
   ShieldCheck,
+  Calculator,
+  Usb,
+  Rocket,
 } from 'lucide-react';
 import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
@@ -168,8 +171,11 @@ export function MobileMenu() {
       heading: 'Hardware & Manufacturing',
       items: [
         { href: '/manufacturing', label: 'Manufacturing Hub', icon: Cpu, badge: '8 Domains' },
-        { href: '/manufacturing/physics/3d', label: '3D Simulator Labs', icon: Box, badge: 'WebGL 3D' },
         { href: '/manufacturing/pcb', label: 'A-Z PCB & Circuit Studio', icon: Layers, badge: 'Real-Time' },
+        { href: '/manufacturing/rfq', label: 'Instant PCB RFQ Quoting', icon: Calculator, badge: 'RFQ' },
+        { href: '/manufacturing/flasher', label: 'WebSerial Firmware Flasher', icon: Usb, badge: 'WebSerial' },
+        { href: '/teardowns', label: 'Hardware Teardowns Library', icon: Compass, badge: 'Autopsies' },
+        { href: '/manufacturing/physics/3d', label: '3D Simulator Labs', icon: Box, badge: 'WebGL 3D' },
         { href: '/manufacturing/physics', label: 'Virtual Simulators Suite', icon: Gauge, badge: '60 FPS' },
         { href: '/labs', label: 'Makerspaces & ATL Labs', icon: Atom, badge: 'Across India' },
         { href: '/how-to-start', label: 'Factory Blueprints & CapEx', icon: Factory, badge: 'CapEx' },
@@ -186,6 +192,7 @@ export function MobileMenu() {
     {
       heading: 'Ecosystem & Community',
       items: [
+        { href: '/launch', label: 'Community Launch Kit', icon: Rocket, badge: 'Launch' },
         { href: 'https://ai.hackerland.in/', label: 'Join AI Community', icon: Sparkles, badge: 'Free', external: true },
         { href: 'https://blog.hackerland.in/', label: 'Hackerland Blog', icon: Newspaper, external: true },
       ],

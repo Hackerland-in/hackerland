@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { listProjects } from '@/lib/data/queries';
 import { listBuildStories } from '@/lib/data/stories-data';
 import { listProblems } from '@/lib/data/problems-data';
+import { TEARDOWNS_DATA } from '@/lib/data/teardowns-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -15,7 +16,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/ideas', priority: 0.95, changeFrequency: 'daily' },
     { path: '/problems', priority: 0.95, changeFrequency: 'daily' },
     { path: '/passport', priority: 0.9, changeFrequency: 'weekly' },
+    { path: '/teardowns', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/launch', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/manufacturing/pcb', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/manufacturing/rfq', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/manufacturing/flasher', priority: 0.95, changeFrequency: 'daily' },
     { path: '/manufacturing/physics/3d', priority: 0.95, changeFrequency: 'daily' },
     { path: '/manufacturing', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/manufacturing/physics', priority: 0.9, changeFrequency: 'weekly' },
@@ -74,6 +79,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
   } catch {}
+
+  // Dynamic Teardowns Routes
+  for (const teardown of TEARDOWNS_DATA) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/teardowns/${teardown.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    });
+  }
 
   // Dynamic Project Routes
   try {

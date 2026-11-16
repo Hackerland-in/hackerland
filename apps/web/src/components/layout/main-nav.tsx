@@ -22,6 +22,10 @@ import {
   Lightbulb,
   Target,
   ShieldCheck,
+  Usb,
+  Calculator,
+  Compass,
+  Rocket,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -44,7 +48,7 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns'],
   items: [
     {
       href: '/manufacturing',
@@ -54,18 +58,39 @@ const HARDWARE_DROPDOWN: NavDropdown = {
       badge: 'Hub',
     },
     {
-      href: '/manufacturing/physics/3d',
-      title: '3D Simulator Labs',
-      description: 'Interactive 3D WebGL physics labs for drones, rockets, EVs, racecars & PCBs',
-      icon: Box,
-      badge: '3D WebGL',
-    },
-    {
       href: '/manufacturing/pcb',
       title: 'A-Z PCB & Circuit Studio',
       description: 'Real-time SPICE circuit simulation, Veroboard, Breadboard & Gerber export',
       icon: Layers,
       badge: 'Real-Time',
+    },
+    {
+      href: '/manufacturing/rfq',
+      title: 'Instant PCB RFQ Quoting',
+      description: 'Compare LionCircuits, PCB Power & global fab costs with true landed tax',
+      icon: Calculator,
+      badge: 'Instant RFQ',
+    },
+    {
+      href: '/manufacturing/flasher',
+      title: 'WebSerial Firmware Flasher',
+      description: 'Flash ESP32, RP2040, Arduino over USB directly from browser',
+      icon: Usb,
+      badge: 'WebSerial',
+    },
+    {
+      href: '/teardowns',
+      title: 'Hardware Teardowns Library',
+      description: 'Chip-level schematics & BOMs of Ather 450, DJI drones & meters',
+      icon: Compass,
+      badge: 'Autopsies',
+    },
+    {
+      href: '/manufacturing/physics/3d',
+      title: '3D Simulator Labs',
+      description: 'Interactive 3D WebGL physics labs for drones, rockets, EVs, racecars & PCBs',
+      icon: Box,
+      badge: '3D WebGL',
     },
     {
       href: '/manufacturing/physics',
@@ -159,6 +184,13 @@ const COMMUNITY_DROPDOWN: NavDropdown = {
       description: 'Global leaderboard of top project builders and contributors',
       icon: Trophy,
       badge: 'Top 100',
+    },
+    {
+      href: '/launch',
+      title: 'Community Launch Kit',
+      description: 'Ready-to-post announcement kits for Product Hunt, Hacker News & X',
+      icon: Rocket,
+      badge: 'Launch',
     },
     {
       href: 'https://ai.hackerland.in/',
