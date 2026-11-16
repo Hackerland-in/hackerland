@@ -27,4 +27,5 @@ export * from './compliance';
 export * from './testbeds';
 export * from './sprints';
 export * from './sourcing';
+export * from './assembly';
 

@@ -470,6 +470,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['sourcing', 'components', 'ic alternates', 'stm32', 'gigadevice', 'robu', 'evelta', 'element14', 'lcsc', 'mouser', 'customs duty', 'hsn 8542', 'drop-in', 'pin compatible'],
   },
   {
+    id: 'hub-assembly',
+    title: 'PCBA Assembly Line & SMT Stencil Visualizer',
+    description:
+      'Interactive 2D Pick-and-Place (PnP) centroid visualizer, feeder tape loading planner, solder stencil thickness optimizer, and turnkey assembly cost modeling across Indian EMS plants.',
+    category: 'labs',
+    categoryLabel: 'PCBA SMT',
+    href: '/assembly',
+    badge: 'SMT Centroids',
+    badgeTone: 'accent',
+    keywords: ['assembly', 'pcba', 'pnp', 'centroid', 'pick and place', 'smt', 'feeder', 'stencil', 'kaynes', 'syrma', 'dixon', 'centum', 'xray', 'aoi', 'turnkey'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

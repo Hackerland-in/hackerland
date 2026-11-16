@@ -52,8 +52,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly'],
   items: [
+    {
+      href: '/assembly',
+      title: 'Assembly Line & SMT Visualizer',
+      description: 'Pick-and-place centroid visualizer, feeder tape planner & Indian EMS turnkey quotes',
+      icon: Factory,
+      badge: 'SMT Centroids',
+    },
     {
       href: '/sourcing',
       title: 'Component Sourcing & Drop-In Alternates',

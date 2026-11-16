@@ -178,6 +178,7 @@ export function MobileMenu() {
     {
       heading: 'Hardware & Manufacturing',
       items: [
+        { href: '/assembly', label: 'PCBA Assembly & Stencil', icon: Factory, badge: 'SMT' },
         { href: '/sourcing', label: 'Component Sourcing & Alternates', icon: Cpu, badge: 'Alternates' },
         { href: '/testbeds', label: 'Remote HIL Testbeds', icon: Atom, badge: 'Remote SCPI' },
         { href: '/compliance', label: 'Statutory Compliance Wizard', icon: ShieldCheck, badge: 'NABL Labs' },

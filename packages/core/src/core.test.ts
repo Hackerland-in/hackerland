@@ -77,6 +77,11 @@ import {
   calculateLandedComponentCost,
   findBestAlternate,
   filterSourcingRecords,
+  pcbaAssemblyProjectSchema,
+  calculatePnpFeederSetup,
+  calculatePcbaTurnkeyCost,
+  validatePnpCentroidCsv,
+  filterAssemblyProjects,
 } from './index';
 
 describe('tracks', () => {
@@ -1789,6 +1794,124 @@ describe('component alternate & domestic sourcing recommender', () => {
     expect(noMatch.length).toBe(0);
   });
 });
+
+describe('assembly line & smt stencil visualizer', () => {
+  const sampleProject = {
+    id: 'pcba_drone_autopilot',
+    slug: 'drone-autopilot-v4-pcba',
+    name: 'ArduPilot Autopilot Flight Controller PCBA',
+    boardDimensions: { widthMm: 65, heightMm: 65 },
+    layerCount: 4,
+    placements: [
+      {
+        designator: 'U1',
+        val: 'STM32F405RGT6',
+        pkg: 'qfp' as const,
+        posX: 32.5,
+        posY: 32.5,
+        rotation: 0,
+        side: 'top' as const,
+      },
+      {
+        designator: 'U2',
+        val: 'ICM-42688-P',
+        pkg: 'qfn' as const,
+        posX: 20.0,
+        posY: 45.0,
+        rotation: 90,
+        side: 'top' as const,
+      },
+      {
+        designator: 'C1',
+        val: '100nF',
+        pkg: '0402' as const,
+        posX: 30.0,
+        posY: 38.0,
+        rotation: 0,
+        side: 'top' as const,
+      },
+      {
+        designator: 'C2',
+        val: '100nF',
+        pkg: '0402' as const,
+        posX: 35.0,
+        posY: 38.0,
+        rotation: 0,
+        side: 'top' as const,
+      },
+      {
+        designator: 'J1',
+        val: 'GH-6P',
+        pkg: 'connector' as const,
+        posX: 10.0,
+        posY: 5.0,
+        rotation: 180,
+        side: 'bottom' as const,
+      },
+    ],
+    recommendedFoilThickness: '0.12mm' as const,
+    hasBgaOrQfn: true,
+    hasConformalCoating: true,
+    description: 'High-density 4-layer UAV flight controller board.',
+    recommendedEmsPartner: {
+      name: 'Kaynes Technology India Ltd',
+      city: 'Mysore',
+      state: 'Karnataka',
+      certifications: ['ISO 9001', 'AS 9100D', 'IPC-A-610 Class 3'],
+    },
+  };
+
+  it('validates a complete PCBA assembly project schema', () => {
+    const parseResult = pcbaAssemblyProjectSchema.safeParse(sampleProject);
+    expect(parseResult.success).toBe(true);
+  });
+
+  it('calculates feeder setup requirements and package breakdown', () => {
+    const setup = calculatePnpFeederSetup(sampleProject.placements);
+    expect(setup.totalParts).toBe(5);
+    expect(setup.smdPartsCount).toBe(4);
+    expect(setup.thtPartsCount).toBe(1); // J1 connector
+    expect(setup.sideDistribution.top).toBe(4);
+    expect(setup.sideDistribution.bottom).toBe(1);
+    // Unique parts: STM32_qfp, ICM_qfn, 100nF_0402 (shared by C1 and C2), GH-6P_connector = 4 feeders
+    expect(setup.feederSlotsRequired).toBe(4);
+    expect(setup.packageBreakdown['0402']).toBe(2);
+    expect(setup.packageBreakdown['qfp']).toBe(1);
+  });
+
+  it('calculates turnkey assembly costs across prototype and high-reliability tiers', () => {
+    const protoCost = calculatePcbaTurnkeyCost(sampleProject, 10, 'standard_prototyping');
+    expect(protoCost.totalAssemblyINR).toBeGreaterThan(5000);
+    // Double-sided placement includes 4500 stencil fee
+    expect(protoCost.stencilFeeINR).toBe(4500);
+    expect(protoCost.unitAssemblyCostINR).toBe(Math.round((protoCost.totalAssemblyINR / 10) * 100) / 100);
+
+    const aeroCost = calculatePcbaTurnkeyCost(sampleProject, 10, 'aerospace_class3');
+    // Aerospace Class 3 has higher setup and inspection fees
+    expect(aeroCost.totalAssemblyINR).toBeGreaterThan(protoCost.totalAssemblyINR);
+  });
+
+  it('validates and parses centroid CSV files correctly', () => {
+    const csvData = `
+Designator,Val,Package,PosX,PosY,Rot,Side
+U1,STM32F405RGT6,LQFP-64,32.5,32.5,0,top
+C1,100nF,0402,12.0,15.5,90,top
+R1,10k,0402,14.2,15.5,180,bottom
+`;
+    const res = validatePnpCentroidCsv(csvData);
+    expect(res.valid).toBe(true);
+    expect(res.placements.length).toBe(3);
+    expect(res.placements[0]?.pkg).toBe('qfp');
+    expect(res.placements[1]?.pkg).toBe('0402');
+    expect(res.placements[2]?.side).toBe('bottom');
+
+    const invalidCsv = `Invalid single line`;
+    const invalidRes = validatePnpCentroidCsv(invalidCsv);
+    expect(invalidRes.valid).toBe(false);
+    expect(invalidRes.errors.length).toBeGreaterThan(0);
+  });
+});
+
 
 
 
