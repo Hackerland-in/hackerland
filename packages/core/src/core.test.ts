@@ -18,6 +18,7 @@ import {
   evaluateHardwareFailureRisk,
   observatoryItemSchema,
   prototypeArchitecturePlanSchema,
+  projectSquadRoomSchema,
 } from './index';
 
 describe('tracks', () => {
@@ -337,6 +338,53 @@ describe('ecosystem domain schemas', () => {
       },
     };
     expect(prototypeArchitecturePlanSchema.safeParse(validPlan).success).toBe(true);
+  });
+
+  it('validates a project squad room schema with milestone escrow', () => {
+    const validSquadRoom = {
+      projectSlug: 'aeroglide',
+      projectTitle: 'AeroGlide Long-Endurance UAV',
+      tagline: 'Solar-assisted 4-hour fixed-wing mapping drone',
+      escrowPoolTotalInr: 80000,
+      escrowPoolTotalUsd: 950,
+      squadMembers: [
+        {
+          id: 'role_1',
+          roleTitle: 'Avionics & Flight Hardware Lead',
+          track: 'hardware',
+          status: 'filled',
+          stipend: '₹35,000 / milestone',
+          skills: ['STM32', 'ArduPilot', 'CAN bus'],
+          assignee: {
+            handle: 'arjun_v',
+            name: 'Arjun Varma',
+            reputationScore: 340,
+          },
+        },
+      ],
+      milestones: [
+        {
+          id: 'ms_1',
+          title: 'Milestone 1: Sub-15W Cruise Power Bench Test',
+          description: 'Demonstrate motor and propeller combo pulling <15W at 12 m/s airspeed.',
+          escrowAmountInr: 25000,
+          escrowAmountUsd: 300,
+          status: 'released',
+          proofRequirements: ['Wind tunnel telemetry CSV', 'Video of thrust bench run'],
+          unlockedPassportBadge: 'AeroDynamics Benchmark Pioneer',
+        },
+      ],
+      tasks: [
+        {
+          id: 'task_1',
+          title: 'Mill carbon-fiber wing spar mounts',
+          status: 'in_progress',
+          priority: 'high',
+          tags: ['CNC', 'CarbonFiber'],
+        },
+      ],
+    };
+    expect(projectSquadRoomSchema.safeParse(validSquadRoom).success).toBe(true);
   });
 });
 

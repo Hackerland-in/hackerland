@@ -161,6 +161,7 @@ export function MobileMenu() {
       items: [
         { href: '/observatory', label: 'Innovation Observatory', icon: Radar, badge: 'Tech Radar' },
         { href: '/projects', label: 'Explore Projects', icon: FolderKanban },
+        { href: '/squads', label: 'Squad Rooms & Escrow', icon: Users, badge: 'Vault' },
         { href: '/ideas', label: 'IdeaLab (Stage Zero)', icon: Lightbulb, badge: 'Incubator' },
         { href: '/problems', label: 'Unsolved Problems', icon: Target, badge: 'Challenges' },
         { href: '/stories', label: 'Build Journey Archive', icon: BookOpen, badge: 'Histories' },

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Lock } from 'lucide-react';
 import {
   PROJECT_STAGE_LABEL,
   TRACK_META,
@@ -112,10 +114,19 @@ export default async function ProjectDetailPage({
         </div>
 
         {/* Action Buttons */}
-        <ProjectHeroActions
-          slug={project.slug}
-          openRoles={project.openRoles}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <ProjectHeroActions
+            slug={project.slug}
+            openRoles={project.openRoles}
+          />
+          <Link
+            href={`/projects/${project.slug}/squad`}
+            className="inline-flex items-center gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/40 px-4 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition shadow-sm"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span>Enter Squad Room & Escrow</span>
+          </Link>
+        </div>
       </div>
 
       {/* Stat Strip of 4 StatTiles */}

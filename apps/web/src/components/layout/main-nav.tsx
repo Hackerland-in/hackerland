@@ -185,8 +185,15 @@ const ACADEMY_DROPDOWN: NavDropdown = {
 const COMMUNITY_DROPDOWN: NavDropdown = {
   id: 'community',
   label: 'Community & Proof',
-  matchPrefixes: ['/leaderboard', '/u', '/passport'],
+  matchPrefixes: ['/leaderboard', '/u', '/passport', '/squads'],
   items: [
+    {
+      href: '/squads',
+      title: 'Squad Rooms & Escrow Vault',
+      description: 'Active project squads, verified milestone escrows & task boards',
+      icon: Users,
+      badge: 'Escrows',
+    },
     {
       href: '/passport',
       title: 'Innovation Passport',
