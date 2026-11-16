@@ -50,8 +50,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype'],
   items: [
+    {
+      href: '/prototype',
+      title: 'Idea-to-Prototype Simulator',
+      description: 'Synthesize full system architecture, MCU pinouts, BOM & squad skills from any idea',
+      icon: Sparkles,
+      badge: 'AI Architect',
+    },
     {
       href: '/manufacturing',
       title: 'Manufacturing Hub',

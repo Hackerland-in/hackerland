@@ -17,6 +17,7 @@ import {
   museumExhibitSchema,
   evaluateHardwareFailureRisk,
   observatoryItemSchema,
+  prototypeArchitecturePlanSchema,
 } from './index';
 
 describe('tracks', () => {
@@ -280,6 +281,62 @@ describe('ecosystem domain schemas', () => {
       relatedProblemSlugs: ['open-braille'],
     };
     expect(observatoryItemSchema.safeParse(validObservatoryItem).success).toBe(true);
+  });
+
+  it('validates a prototype architecture plan schema', () => {
+    const validPlan = {
+      id: 'proto_1',
+      ideaTitle: 'Solar LoRa Soil Probe',
+      slug: 'solar-lora-soil-probe',
+      domain: 'AgTech & IoT',
+      targetFormFactor: 'Cylindrical Stake 25x150mm',
+      summary: 'Low-power outdoor soil moisture & temperature probe.',
+      systemBlocks: [
+        {
+          name: 'Core MCU & Radio',
+          category: 'Compute',
+          icChoice: 'ESP32-C3',
+          function: 'RISC-V core with 2.4GHz Wi-Fi/BLE & sleep timer',
+        },
+      ],
+      pinoutMapping: [
+        {
+          pin: 'GPIO 4',
+          label: 'I2C_SDA',
+          protocol: 'I2C',
+          connectedTo: 'BME280',
+        },
+      ],
+      bom: [
+        {
+          component: 'Microcontroller',
+          partNumber: 'ESP32-C3-WROOM-02',
+          footprint: 'Module SMD',
+          estCostUsd: 1.8,
+          estCostInr: 155,
+          distributor: 'Robu.in / LCSC',
+        },
+      ],
+      requiredSkills: [
+        {
+          role: 'Embedded Firmware Developer',
+          skills: ['ESP-IDF', 'C++', 'FreeRTOS'],
+          estimatedHours: 25,
+        },
+      ],
+      milestones: [
+        {
+          phase: 'Phase 1: Breadboard Proof',
+          durationWeeks: 2,
+          deliverables: ['Working LoRa ping to gateway'],
+        },
+      ],
+      estimatedTotalProtoCost: {
+        usd: 14.5,
+        inr: 1250,
+      },
+    };
+    expect(prototypeArchitecturePlanSchema.safeParse(validPlan).success).toBe(true);
   });
 });
 

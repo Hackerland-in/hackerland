@@ -12,4 +12,5 @@ export * from './stories';
 export * from './passports';
 export * from './museum';
 export * from './observatory';
+export * from './prototype-architect';
 
