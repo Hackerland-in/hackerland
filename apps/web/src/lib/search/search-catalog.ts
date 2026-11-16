@@ -398,6 +398,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['copilot', 'calculator', 'trace width', 'ipc 2152', 'buck converter', 'smps', 'heatsink', 'thermal', 'sourcing', 'bom', 'robu', 'element14', 'mcu', 'mosfet'],
   },
   {
+    id: 'hub-telemetry',
+    title: 'Digital Twin & Hardware Telemetry Stream Visualizer',
+    description:
+      'Real-time digital twin oscilloscope, 3D attitude gyro, AIS-156 16S BMS cell balancing, and live WebSerial physical hardware UART debugging.',
+    category: 'simulators',
+    categoryLabel: 'Digital Twin',
+    href: '/telemetry',
+    badge: 'Digital Twin',
+    badgeTone: 'code',
+    keywords: ['telemetry', 'digital twin', 'oscilloscope', 'bms', 'ais 156', 'attitude', 'gyro', 'drone', 'uav', 'cubesat', 'serial', 'webserial', 'csv', 'stream', 'can bus'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

@@ -38,6 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/clubs', priority: 0.95, changeFrequency: 'daily' },
     { path: '/network/ip', priority: 0.95, changeFrequency: 'daily' },
     { path: '/copilot', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/telemetry', priority: 0.95, changeFrequency: 'daily' },
     { path: '/launchpad', priority: 0.95, changeFrequency: 'daily' },
     { path: '/jobs', priority: 0.95, changeFrequency: 'daily' },
     { path: '/young-innovators', priority: 0.95, changeFrequency: 'daily' },

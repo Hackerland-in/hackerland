@@ -51,6 +51,11 @@ import {
   calculateHiringMatchScore,
   filterHardwareJobs,
   hardwareJobPostingSchema,
+  computeTelemetryStats,
+  detectTelemetryAnomalies,
+  calculateBmsCellSpread,
+  calculateAttitudeAngles,
+  parseCsvTelemetry,
 } from './index';
 
 describe('tracks', () => {
@@ -1196,6 +1201,85 @@ describe('hardware deep-tech jobs and fellowships schema', () => {
 
     const parsed = hardwareJobPostingSchema.safeParse(validJob);
     expect(parsed.success).toBe(true);
+  });
+});
+
+describe('telemetry digital twin analytics and parsing', () => {
+  it('computes channel statistics accurately', () => {
+    const samples = [
+      { timestampMs: 0, values: { v_bat: 12.0 } },
+      { timestampMs: 100, values: { v_bat: 12.2 } },
+      { timestampMs: 200, values: { v_bat: 12.4 } },
+      { timestampMs: 300, values: { v_bat: 11.8 } },
+    ];
+    const stats = computeTelemetryStats(samples, 'v_bat');
+    expect(stats.min).toBe(11.8);
+    expect(stats.max).toBe(12.4);
+    expect(stats.mean).toBe(12.1);
+    expect(stats.current).toBe(11.8);
+    expect(stats.count).toBe(4);
+  });
+
+  it('detects nominal warnings and critical anomalies', () => {
+    const channels = [
+      {
+        id: 'cell_temp',
+        name: 'Cell Temp',
+        unit: '°C',
+        type: 'temperature' as const,
+        minNominal: 20,
+        maxNominal: 45,
+        criticalMin: 0,
+        criticalMax: 60,
+        color: '#ef4444',
+      },
+    ];
+    const samples = [
+      { timestampMs: 100, values: { cell_temp: 32 } }, // nominal
+      { timestampMs: 200, values: { cell_temp: 48 } }, // warning > 45
+      { timestampMs: 300, values: { cell_temp: 65 } }, // critical > 60
+    ];
+
+    const anomalies = detectTelemetryAnomalies(samples, channels);
+    expect(anomalies.length).toBe(2);
+    expect(anomalies[0]?.severity).toBe('warning');
+    expect(anomalies[1]?.severity).toBe('critical');
+    expect(anomalies[1]?.threshold).toBe(60);
+  });
+
+  it('evaluates AIS-156 battery pack cell spread and balancing needs', () => {
+    // Balanced pack
+    const balanced = calculateBmsCellSpread([3.65, 3.66, 3.64, 3.65]);
+    expect(balanced.deltaMv).toBe(20);
+    expect(balanced.isBalancingNeeded).toBe(false);
+    expect(balanced.isHazardous).toBe(false);
+
+    // Spread pack requiring balancing (>40mV)
+    const needsBalance = calculateBmsCellSpread([3.68, 3.62, 3.65, 3.61]);
+    expect(needsBalance.deltaMv).toBe(70);
+    expect(needsBalance.isBalancingNeeded).toBe(true);
+    expect(needsBalance.isHazardous).toBe(false);
+
+    // Dangerous delta (>150mV)
+    const dangerous = calculateBmsCellSpread([3.70, 3.52, 3.65, 3.60]);
+    expect(dangerous.deltaMv).toBe(180);
+    expect(dangerous.isBalancingNeeded).toBe(true);
+    expect(dangerous.isHazardous).toBe(true);
+  });
+
+  it('computes attitude angles and parses CSV logs correctly', () => {
+    // 1G pointing down Z axis -> 0 deg pitch, 0 deg roll
+    const levelAttitude = calculateAttitudeAngles(0, 0, 1.0);
+    expect(levelAttitude.pitchDeg).toBe(0);
+    expect(levelAttitude.rollDeg).toBe(0);
+
+    const csvData = `time_ms,alt_m,airspeed_mps\n0,12.5,4.2\n100,14.8,6.5\n200,18.2,8.1`;
+    const parsed = parseCsvTelemetry(csvData);
+    expect(parsed.parseError).toBeUndefined();
+    expect(parsed.channels).toEqual(['alt_m', 'airspeed_mps']);
+    expect(parsed.samples.length).toBe(3);
+    expect(parsed.samples[1]?.timestampMs).toBe(100);
+    expect(parsed.samples[1]?.values['alt_m']).toBe(14.8);
   });
 });
 

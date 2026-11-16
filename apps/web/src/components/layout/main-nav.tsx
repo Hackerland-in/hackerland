@@ -52,8 +52,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry'],
   items: [
+    {
+      href: '/telemetry',
+      title: 'Digital Twin & Telemetry Stream',
+      description: 'Real-time oscilloscope, 3D attitude gyro, AIS-156 BMS & WebSerial debugging',
+      icon: Gauge,
+      badge: 'Digital Twin',
+    },
     {
       href: '/copilot',
       title: 'Hardware Co-Pilot & Sourcing',

@@ -178,6 +178,7 @@ export function MobileMenu() {
     {
       heading: 'Hardware & Manufacturing',
       items: [
+        { href: '/telemetry', label: 'Digital Twin & Telemetry Stream', icon: Gauge, badge: 'Digital Twin' },
         { href: '/copilot', label: 'Hardware Co-Pilot & Sourcing', icon: Zap, badge: 'AI Sourcing' },
         { href: '/network/ip', label: 'Open Invention IP Defense', icon: ShieldCheck, badge: 'IP Defense' },
         { href: '/clubs', label: 'Innovation Clubs & ATL Hub', icon: GraduationCap, badge: 'ATL Mesh' },

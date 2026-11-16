@@ -21,6 +21,8 @@ Hackerland is a developer and maker platform bridging open-source hardware proto
   - Paid bounties and micro-grants for building open-source hardware, firmware, and software.
 - **AI Hardware Co-Pilot & Sourcing Assistant:** https://www.hackerland.in/copilot
   - Engineering calculators for IPC-2152 trace sizing, SMPS buck filter design, thermal heatsink rating, BOM supply chain risk scrubbers, and live domestic Indian component pricing (Robu, Element14, KitsnSpares).
+- **Digital Twin & Hardware Telemetry Stream Visualizer:** https://www.hackerland.in/telemetry
+  - Real-time digital twin oscilloscope, 3D attitude gyro, AIS-156 16S battery pack balancer, and live WebSerial physical hardware UART debugging for drones, EVs, and CubeSats.
 - **Milestone-Locked Hardware Launchpad & Grant Matcher:** https://www.hackerland.in/launchpad
   - Milestone-locked crowdfunding escrow and automated non-dilutive grant matcher for Indian schemes (iDEX DISC, BIRAC BIG, DST NIDHI-PRAYAS, MeitY TIDE 2.0, Semiconductor DLI) with mandatory 66% backer quorum governance.
 - **Hardware & Deep-Tech Jobs & Fellowships:** https://www.hackerland.in/jobs
