@@ -94,6 +94,9 @@ import {
   calculateRandlesImpedance,
   evaluateBatterySoH,
   filterBatteryEisProjects,
+  calculateThermalDissipation,
+  filterThermalProjects,
+  TIM_DATABASE,
 } from './index';
 
 describe('tracks', () => {
@@ -2199,6 +2202,101 @@ describe('Battery EIS & State-of-Health (SoH) Diagnostics', () => {
 
     const searchMatch = filterBatteryEisProjects([sampleEisProject], { search: 'ARAI' });
     expect(searchMatch.length).toBe(1);
+  });
+});
+
+describe('Thermal Management & Computational Heat Sink Profiler', () => {
+  const sampleParams = {
+    powerDissipationWatts: 35, // 35W MOSFET dissipation
+    ambientTemperatureC: 45, // 45C Indian summer ambient
+    maxJunctionTemperatureC: 150,
+    junctionToCaseResistanceCPerW: 0.8,
+    timMaterial: 'phase_change_ptm7950' as const,
+    timContactAreaCm2: 4.5,
+    heatsinkMaterial: 'aluminum_6063_t5' as const,
+    coolingMethod: 'forced_convection_low_cfm' as const,
+    heatsinkWidthMm: 80,
+    heatsinkLengthMm: 100,
+    baseThicknessMm: 6,
+    finHeightMm: 30,
+    finThicknessMm: 1.5,
+    numberOfFins: 14,
+  };
+
+  it('calculates 1D thermal resistor network accurately', () => {
+    const result = calculateThermalDissipation(sampleParams);
+
+    expect(result.thetaJc).toBe(0.8);
+    expect(result.thetaCs).toBeGreaterThan(0);
+    expect(result.thetaCs).toBeLessThan(0.05); // PTM7950 is high performance
+    expect(result.thetaSa).toBeGreaterThan(0.5);
+    expect(result.thetaSa).toBeLessThan(3.0);
+    expect(result.junctionTemperatureC).toBeGreaterThan(sampleParams.ambientTemperatureC);
+    expect(result.junctionTemperatureC).toBeLessThan(sampleParams.maxJunctionTemperatureC);
+    expect(result.thermalHeadroomC).toBeGreaterThan(0);
+    expect(result.isThermalRunawayRisk).toBe(false);
+    expect(result.finEfficiencyPercent).toBeGreaterThan(70);
+  });
+
+  it('detects thermal throttling and runaway risk when dissipation exceeds cooling capacity', () => {
+    // 120W on tiny natural convection heatsink
+    const overloaded = calculateThermalDissipation({
+      ...sampleParams,
+      powerDissipationWatts: 120,
+      coolingMethod: 'natural_convection',
+      numberOfFins: 6,
+      finHeightMm: 15,
+    });
+
+    expect(overloaded.junctionTemperatureC).toBeGreaterThan(150);
+    expect(overloaded.thermalHeadroomC).toBeLessThanOrEqual(0);
+    expect(overloaded.isThermalRunawayRisk).toBe(true);
+  });
+
+  it('provides verified TIM database with Honeywell PTM7950 and Bergquist Sil-Pad', () => {
+    expect(TIM_DATABASE.phase_change_ptm7950.thermalConductivityWmk).toBe(8.5);
+    expect(TIM_DATABASE.sil_pad_elastomeric.dielectricIsolationKv).toBe(4.5);
+    expect(TIM_DATABASE.ceramic_alumina_wafer.dielectricIsolationKv).toBe(10.0);
+  });
+
+  it('filters thermal profile projects by cooling method and search query', () => {
+    const sampleProject = {
+      id: 'thm-1',
+      slug: 'sic-traction-inverter-10kw',
+      title: '10 kW SiC Traction Inverter Heat Sink',
+      application: 'Electric Bus Powertrain',
+      deviceType: 'Wolfspeed 1200V SiC Half-Bridge',
+      powerDissipationWatts: 350,
+      operatingAmbientTemperatureC: 50,
+      coolingMethod: 'forced_convection_high_cfm' as const,
+      heatsinkMaterial: 'copper_c11000' as const,
+      timMaterial: 'ceramic_alumina_wafer' as const,
+      params: {
+        heatsinkWidthMm: 160,
+        heatsinkLengthMm: 220,
+        baseThicknessMm: 12,
+        finHeightMm: 45,
+        finThicknessMm: 2.0,
+        numberOfFins: 28,
+        timContactAreaCm2: 24,
+        junctionToCaseResistanceCPerW: 0.25,
+        maxJunctionTemperatureC: 175,
+      },
+      designNotes: ['Skived copper fin design', 'Air duct velocity 4.5 m/s'],
+      indianTestFacility: 'ARAI Pune - Powertrain Climate & Thermal Chamber',
+      regulatoryStandard: 'AIS-041 / AIS-156',
+    };
+
+    const filtered = filterThermalProjects([sampleProject], {
+      coolingMethod: 'forced_convection_high_cfm',
+      search: 'Wolfspeed',
+    });
+    expect(filtered.length).toBe(1);
+
+    const noMatch = filterThermalProjects([sampleProject], {
+      coolingMethod: 'natural_convection',
+    });
+    expect(noMatch.length).toBe(0);
   });
 });
 

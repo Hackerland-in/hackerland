@@ -518,6 +518,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['battery', 'eis', 'nyquist', 'bode', 'soh', 'state of health', 'randles', 'ecm', 'lfp', 'nmc', 'sodium ion', 'lithium plating', 'ais 156', 'arai', 'icat', 'sei layer'],
   },
   {
+    id: 'hub-thermal',
+    title: 'Thermal Management & Computational Heat Sink Profiler',
+    description:
+      '1D lumped-parameter thermal resistance network (θ_jc, θ_cs, θ_sa) and convective fin efficiency calculator for SiC traction inverters, GaN microinverters, and edge computing enclosures.',
+    category: 'labs',
+    categoryLabel: 'Thermal Engineering',
+    href: '/thermal',
+    badge: 'Thermal R_θ',
+    badgeTone: 'accent',
+    keywords: ['thermal', 'heatsink', 'fin efficiency', 'convection', 'sic', 'gan', 'ptm7950', 'sil pad', 'junction temperature', 'theta jc', 'theta sa', 'heat transfer', 'arai'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

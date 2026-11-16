@@ -31,6 +31,7 @@ import {
   Zap,
   Briefcase,
   BatteryCharging,
+  Thermometer,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -53,8 +54,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis', '/thermal'],
   items: [
+    {
+      href: '/thermal',
+      title: 'Thermal Profiler & Heat Sink Sizer',
+      description: '1D thermal resistor network (θ_jc, θ_cs, θ_sa), fin efficiency & SiC/GaN cooling',
+      icon: Thermometer,
+      badge: 'Thermal Resistors',
+    },
     {
       href: '/battery-eis',
       title: 'Battery EIS & State-of-Health',

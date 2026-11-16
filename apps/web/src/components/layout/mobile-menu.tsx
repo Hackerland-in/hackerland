@@ -40,6 +40,7 @@ import {
   Zap,
   Briefcase,
   BatteryCharging,
+  Thermometer,
 } from 'lucide-react';
 import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
@@ -179,6 +180,7 @@ export function MobileMenu() {
     {
       heading: 'Hardware & Manufacturing',
       items: [
+        { href: '/thermal', label: 'Thermal Profiler & Heat Sinks', icon: Thermometer, badge: 'Thermal R_θ' },
         { href: '/battery-eis', label: 'Battery EIS & State-of-Health', icon: BatteryCharging, badge: 'SoH EIS' },
         { href: '/rf-calc', label: 'RF Transmission Line Synthesizer', icon: Radar, badge: 'RF 50Ω' },
         { href: '/emc', label: 'EMI/EMC Pre-Scan Analyzer', icon: Gauge, badge: 'EMC' },
