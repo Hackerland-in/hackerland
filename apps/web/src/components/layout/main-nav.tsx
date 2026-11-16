@@ -19,6 +19,9 @@ import {
   ExternalLink,
   Box,
   Layers,
+  Lightbulb,
+  Target,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -90,12 +93,33 @@ const HARDWARE_DROPDOWN: NavDropdown = {
 
 const ACADEMY_DROPDOWN: NavDropdown = {
   id: 'academy',
-  label: 'Academy',
-  matchPrefixes: ['/learn', '/entrepreneurship'],
+  label: 'Knowledge & Academy',
+  matchPrefixes: ['/stories', '/ideas', '/problems', '/learn', '/entrepreneurship'],
   items: [
     {
+      href: '/stories',
+      title: 'Build Journey Archive',
+      description: 'Deep, chapter-by-chapter case studies & decision archaeology of real companies',
+      icon: BookOpen,
+      badge: 'Deep Histories',
+    },
+    {
+      href: '/ideas',
+      title: 'IdeaLab (Stage Zero)',
+      description: '7-stage guided incubator from vague idea to customer discovery & squad',
+      icon: Lightbulb,
+      badge: 'Incubator',
+    },
+    {
+      href: '/problems',
+      title: 'Unsolved Problems Library',
+      description: 'Real-world challenges in health, water, agriculture & space seeking solutions',
+      icon: Target,
+      badge: 'Bounties',
+    },
+    {
       href: '/learn',
-      title: 'Learn by Doing',
+      title: 'Learn by Doing Roadmaps',
       description: 'Curated open-source engineering skill roadmaps & squads',
       icon: GraduationCap,
       badge: 'Roadmaps',
@@ -107,20 +131,21 @@ const ACADEMY_DROPDOWN: NavDropdown = {
       icon: BookOpen,
       badge: '100% Free',
     },
-    {
-      href: '/how-to-start',
-      title: 'How to Start a Factory',
-      description: 'CapEx budgeting, machinery checklists & Indian subsidies',
-      icon: Factory,
-    },
   ],
 };
 
 const COMMUNITY_DROPDOWN: NavDropdown = {
   id: 'community',
-  label: 'Community',
-  matchPrefixes: ['/leaderboard', '/u'],
+  label: 'Community & Proof',
+  matchPrefixes: ['/leaderboard', '/u', '/passport'],
   items: [
+    {
+      href: '/passport',
+      title: 'Innovation Passport',
+      description: 'Verified proof-of-work, hardware fabrications & contributor credentials',
+      icon: ShieldCheck,
+      badge: 'Proof-of-Work',
+    },
     {
       href: '/u',
       title: 'Innovator Profiles',

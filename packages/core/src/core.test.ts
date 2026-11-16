@@ -11,6 +11,9 @@ import {
   REPUTATION_POINTS,
   reputationTotal,
   trackSchema,
+  ideaSchema,
+  problemSchema,
+  buildJourneyStorySchema,
 } from './index';
 
 describe('tracks', () => {
@@ -114,3 +117,80 @@ describe('parseEnum', () => {
     expect(parseEnum(TRACKS, ['make'])).toBeUndefined();
   });
 });
+
+describe('ecosystem domain schemas', () => {
+  it('validates a stage zero idea', () => {
+    const validIdea = {
+      id: 'idea_1',
+      creatorId: 'u_1',
+      creatorHandle: 'builder',
+      creatorName: 'Builder',
+      title: 'Solar Water Condenser',
+      slug: 'solar-water-condenser',
+      summary: 'Extracting drinking water from desert air using solar power.',
+      problemStatement: 'Saline groundwater in arid Rajasthan causes fluorosis and health crisis.',
+      targetAudience: 'Villages in Jaisalmer',
+      currentStage: 'notice',
+      status: 'exploring',
+      domains: ['Clean Water', 'Solar'],
+      neededRoles: ['Mechanical Engineer'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    expect(ideaSchema.safeParse(validIdea).success).toBe(true);
+  });
+
+  it('validates an unsolved problem', () => {
+    const validProblem = {
+      id: 'prob_1',
+      title: 'Affordable Non-Invasive Hemoglobin Sensor',
+      slug: 'affordable-non-invasive-hemoglobin-sensor',
+      description: 'Over 50% of rural women in India suffer from anemia without access to phlebotomy.',
+      domain: 'healthcare',
+      impactTarget: 'Primary Healthcare Centers',
+      keyConstraints: ['Cost < ₹3000', 'Accuracy ±0.8 g/dL'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    expect(problemSchema.safeParse(validProblem).success).toBe(true);
+  });
+
+  it('validates a build journey story with decision archaeology', () => {
+    const validStory = {
+      id: 'story_1',
+      slug: 'spacex-falcon',
+      title: 'SpaceX Falcon 9 Build Journey',
+      subjectName: 'SpaceX',
+      tagline: 'From Kwajalein Atoll to Reusable Orbit',
+      storyType: 'company',
+      category: 'Aerospace',
+      summary: 'How SpaceX mastered vertical supersonic retropropulsion.',
+      foundingYear: 2002,
+      headquarters: 'Hawthorne, CA',
+      decisionRecords: [
+        {
+          id: 'dec_1',
+          decisionPoint: 'In-house manufacturing vs ICBM procurement',
+          optionsAvailable: ['Buy ICBM', 'Build in-house'],
+          chosenOption: 'Build in-house',
+          rationale: 'Raw materials were only 2% of price.',
+          consequences: 'Enormous early risk but ultimate cost reduction.',
+          hindsightRating: 'game_changer',
+        },
+      ],
+      chapters: [
+        {
+          number: 1,
+          title: '01. The Spark',
+          summary: 'The Russian desert trip.',
+          contentMarkdown: 'Musk went to Moscow...',
+          keyTakeaway: 'First-principles reasoning.',
+        },
+      ],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    expect(buildJourneyStorySchema.safeParse(validStory).success).toBe(true);
+  });
+});
+

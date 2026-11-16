@@ -29,6 +29,9 @@ import {
   Award,
   Box,
   Layers,
+  Lightbulb,
+  Target,
+  ShieldCheck,
 } from 'lucide-react';
 import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
@@ -152,6 +155,10 @@ export function MobileMenu() {
       heading: 'Discover & Build',
       items: [
         { href: '/projects', label: 'Explore Projects', icon: FolderKanban },
+        { href: '/ideas', label: 'IdeaLab (Stage Zero)', icon: Lightbulb, badge: 'Incubator' },
+        { href: '/problems', label: 'Unsolved Problems', icon: Target, badge: 'Challenges' },
+        { href: '/stories', label: 'Build Journey Archive', icon: BookOpen, badge: 'Histories' },
+        { href: '/passport', label: 'Innovation Passport', icon: ShieldCheck, badge: 'Proof' },
         { href: '/feed', label: 'Community Feed', icon: Compass },
         { href: '/leaderboard', label: 'Top Innovators', icon: Trophy, badge: 'Rankings' },
         { href: '/u', label: 'Innovator Profiles', icon: Users, badge: 'Directory' },

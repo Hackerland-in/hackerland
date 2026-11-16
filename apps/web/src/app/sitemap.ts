@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { listProjects } from '@/lib/data/queries';
+import { listBuildStories } from '@/lib/data/stories-data';
+import { listProblems } from '@/lib/data/problems-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -9,6 +11,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Core Static Routes
   const staticRoutes: { path: string; priority: number; changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' }[] = [
     { path: '', priority: 1.0, changeFrequency: 'daily' },
+    { path: '/stories', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/ideas', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/problems', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/passport', priority: 0.9, changeFrequency: 'weekly' },
     { path: '/manufacturing/pcb', priority: 0.95, changeFrequency: 'daily' },
     { path: '/manufacturing/physics/3d', priority: 0.95, changeFrequency: 'daily' },
     { path: '/manufacturing', priority: 0.9, changeFrequency: 'weekly' },
@@ -55,6 +61,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
+
+  // Dynamic Stories Routes
+  try {
+    const stories = await listBuildStories();
+    for (const story of stories) {
+      sitemapEntries.push({
+        url: `${BASE_URL}/stories/${story.slug}`,
+        lastModified: story.updatedAt ? new Date(story.updatedAt) : currentDate,
+        changeFrequency: 'weekly',
+        priority: 0.9,
+      });
+    }
+  } catch {}
 
   // Dynamic Project Routes
   try {
