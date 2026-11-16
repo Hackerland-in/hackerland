@@ -22,7 +22,10 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/settings', '/me', '/moderation'],
       },
     ],
-    sitemap: 'https://www.hackerland.in/sitemap.xml',
+    sitemap: [
+      'https://www.hackerland.in/sitemap.xml',
+      'https://www.hackerland.in/feed.xml',
+    ],
     host: 'https://www.hackerland.in',
   };
 }

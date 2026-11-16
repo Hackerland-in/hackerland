@@ -1,0 +1,33 @@
+# Hackerland
+> Open-Source Hardware, PCB Design Studio, and Innovation Network
+> Website: https://www.hackerland.in/
+
+## Overview
+Hackerland is a developer and maker platform bridging open-source hardware prototyping and industrial manufacturing. It features an in-browser electronic design automation (EDA) studio with real-time SPICE circuit simulation, multi-layer FR4 PCB trace routing, Veroboard/Stripboard modeling with interactive track cuts, solderless breadboard simulation, and 3D WebGL photorealistic board visualization.
+
+## Key Modules & URLs
+- **A-Z PCB & Circuit Studio:** https://www.hackerland.in/manufacturing/pcb
+  - Real-time transient SPICE circuit simulation (555 timer, transistors, op-amps, glowing LEDs, interactive switches and potentiometers).
+  - Multi-substrate support: FR4 Multi-Layer PCB (Top/Bottom copper), Veroboard / Stripboard with track breaks, and Breadboard.
+  - Automated Design Rule Checking (DRC) for clearance and trace width.
+  - One-click industrial exports: RS-274X Gerber layers (GTL, GBL, GTO, GKO), Excellon NC Drill (DRL), BOM CSV, and KiCad PCB netlists.
+- **3D Simulator Labs:** https://www.hackerland.in/manufacturing/physics/3d
+  - Interactive 3D WebGL physics simulators for 7 engineering domains: Quadcopter Drones (6-DOF), Aerospace Rockets, Electric Vehicles, Formula Racecars, Superbikes, Bicycles, and MCU Embedded PCBs.
+- **Manufacturing Hub:** https://www.hackerland.in/manufacturing
+  - 8 engineering domains: PCB & Electronics, Drones & UAVs, Electric Vehicles, Aerospace & Propulsion, Robotics & Automation, Medical Devices, Renewable Energy, and Advanced Silicon.
+- **Physics Simulators Suite:** https://www.hackerland.in/manufacturing/physics
+  - 60 FPS physics engines with live telemetry streaming and parameter tuning.
+- **Hardware Bounties & Grants:** https://www.hackerland.in/earn
+  - Paid bounties and micro-grants for building open-source hardware, firmware, and software.
+- **Makerspaces & ATL Labs:** https://www.hackerland.in/labs
+  - Interactive directory of makerspaces, tinkering labs, 3D printing hubs, and CNC facilities across India.
+- **Factory Blueprints (CapEx/OpEx):** https://www.hackerland.in/how-to-start
+  - Complete industrial setup plans, equipment procurement lists, and financial models for manufacturing plants.
+- **Explore Community Projects:** https://www.hackerland.in/projects
+  - Open hardware projects with squad recruitment, portfolio work proofs, and discussion forums.
+
+## Contact & Community
+- GitHub: https://github.com/Hackerland-in
+- Official URL: https://www.hackerland.in/
+- RSS Feed: https://www.hackerland.in/feed.xml
+- Sitemap: https://www.hackerland.in/sitemap.xml
