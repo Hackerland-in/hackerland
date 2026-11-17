@@ -32,4 +32,5 @@ export * from './emc';
 export * from './rf';
 export * from './eis';
 export * from './thermal';
+export * from './solar';
 

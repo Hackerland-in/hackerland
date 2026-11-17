@@ -32,6 +32,7 @@ import {
   Briefcase,
   BatteryCharging,
   Thermometer,
+  Sun,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -54,8 +55,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis', '/thermal'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis', '/thermal', '/solar-mppt'],
   items: [
+    {
+      href: '/solar-mppt',
+      title: 'Solar PV & MPPT Simulator',
+      description: 'Single-diode IV/PV curves, MPPT tracking (INC/P&O) & buck converter sizing',
+      icon: Sun,
+      badge: 'Solar MPPT',
+    },
     {
       href: '/thermal',
       title: 'Thermal Profiler & Heat Sink Sizer',

@@ -530,6 +530,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['thermal', 'heatsink', 'fin efficiency', 'convection', 'sic', 'gan', 'ptm7950', 'sil pad', 'junction temperature', 'theta jc', 'theta sa', 'heat transfer', 'arai'],
   },
   {
+    id: 'hub-solar-mppt',
+    title: 'Solar PV & MPPT Battery Charge Controller Simulator',
+    description:
+      'Single-diode photovoltaic IV & PV curves, MPPT algorithm convergence (Incremental Conductance, P&O, Global Sweep) and synchronous buck converter component sizing under Indian climatic extremes.',
+    category: 'labs',
+    categoryLabel: 'Solar Engineering',
+    href: '/solar-mppt',
+    badge: 'Solar MPPT',
+    badgeTone: 'accent',
+    keywords: ['solar', 'pv', 'mppt', 'photovoltaic', 'iv curve', 'pv curve', 'incremental conductance', 'perturb and observe', 'buck converter', 'pm kusum', 'nise', 'canal top', 'bifacial', 'ladakh', 'rajasthan', 'lfp'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

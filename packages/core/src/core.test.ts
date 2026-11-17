@@ -97,6 +97,9 @@ import {
   calculateThermalDissipation,
   filterThermalProjects,
   TIM_DATABASE,
+  simulateSolarMppt,
+  filterSolarMpptProjects,
+  solarMpptProjectSchema,
 } from './index';
 
 describe('tracks', () => {
@@ -2295,6 +2298,121 @@ describe('Thermal Management & Computational Heat Sink Profiler', () => {
 
     const noMatch = filterThermalProjects([sampleProject], {
       coolingMethod: 'natural_convection',
+    });
+    expect(noMatch.length).toBe(0);
+  });
+});
+
+describe('Solar PV & MPPT Battery Charge Controller Simulator', () => {
+  const samplePanel = {
+    panelModel: 'Waaree Bi-55-540W Mono PERC',
+    technology: 'mono_perc' as const,
+    nominalPmaxW: 540,
+    nominalVmpV: 41.8,
+    nominalImpA: 12.92,
+    nominalVocV: 49.6,
+    nominalIscA: 13.68,
+    tempCoeffVocPercentPerC: -0.27,
+    tempCoeffIscPercentPerC: 0.048,
+    tempCoeffPmaxPercentPerC: -0.35,
+    seriesCells: 72,
+  };
+
+  it('calculates IV & PV curves and dynamic MPPT tracking under Standard Test Conditions (STC)', () => {
+    const result = simulateSolarMppt({
+      irradianceWPerM2: 1000,
+      cellTemperatureC: 25,
+      panelSpecs: samplePanel,
+      algorithm: 'incremental_conductance',
+      targetBatteryType: 'lfp_48v',
+      converterSwitchingFreqKhz: 150,
+    });
+
+    expect(result.vocActualV).toBeCloseTo(49.6, 0);
+    expect(result.iscActualA).toBeCloseTo(13.68, 0);
+    expect(result.pmppActualW).toBeGreaterThan(500);
+    expect(result.trackingEfficiencyPercent).toBeGreaterThan(99);
+    expect(result.converterDutyCycle).toBeGreaterThan(0.5);
+    expect(result.converterInductanceMicroH).toBeGreaterThan(5);
+    expect(result.ivCurve.length).toBeGreaterThan(20);
+    expect(result.batteryCurrentA).toBeGreaterThan(9.0);
+  });
+
+  it('models thermal voltage drop and power loss in extreme 65C Rajasthan desert heat', () => {
+    const hotResult = simulateSolarMppt({
+      irradianceWPerM2: 1000,
+      cellTemperatureC: 65, // +40C over STC
+      panelSpecs: samplePanel,
+      algorithm: 'incremental_conductance',
+      targetBatteryType: 'lfp_48v',
+    });
+
+    // At +40C, Voc drops by ~ -0.27% * 40 = -10.8% (~ -5.3V)
+    expect(hotResult.vocActualV).toBeLessThan(46.0);
+    // Pmax drops by ~ -0.35% * 40 = -14%
+    expect(hotResult.pmppActualW).toBeLessThan(480);
+    expect(hotResult.pmppActualW).toBeGreaterThan(430);
+  });
+
+  it('simulates partial shading and evaluates global MPPT vs standard P&O efficiency', () => {
+    const poResult = simulateSolarMppt({
+      irradianceWPerM2: 1000,
+      cellTemperatureC: 25,
+      panelSpecs: samplePanel,
+      algorithm: 'perturb_and_observe',
+      partialShadingRatio: 0.4, // 40% shaded
+    });
+
+    const gmppResult = simulateSolarMppt({
+      irradianceWPerM2: 1000,
+      cellTemperatureC: 25,
+      panelSpecs: samplePanel,
+      algorithm: 'global_sweep_partial_shading',
+      partialShadingRatio: 0.4,
+    });
+
+    expect(gmppResult.trackingEfficiencyPercent).toBeGreaterThan(poResult.trackingEfficiencyPercent);
+    expect(gmppResult.mpptTrackedPowerW).toBeGreaterThan(poResult.mpptTrackedPowerW);
+  });
+
+  it('validates a complete solar MPPT project schema and filters projects', () => {
+    const sampleProject = {
+      id: 'sol-1',
+      slug: 'rajasthan-canal-top-solar-500w',
+      title: '500W High-Efficiency Monocrystalline Bifacial Panel',
+      application: 'Canal-Top Solar Grid',
+      systemCapacityWatts: 540,
+      panelSpecs: samplePanel,
+      targetBattery: 'lfp_48v' as const,
+      mpptAlgorithm: 'incremental_conductance' as const,
+      operatingConditions: {
+        designIrradianceWPerM2: 1000,
+        designTemperatureC: 60,
+        ambientEnvironment: 'Thar Desert / Indira Gandhi Canal',
+      },
+      converterSpecs: {
+        topology: 'Synchronous 4-Switch Buck-Boost',
+        switchingFrequencyKhz: 150,
+        peakEfficiencyPercent: 98.4,
+        inductorValueUh: 47,
+        outputCapacitanceUf: 220,
+      },
+      designDirectives: ['Bifacial albedo reflection gain of +12% from water surface'],
+      indianContextFacility: 'National Institute of Solar Energy (NISE), Gurugram',
+      standardsCompliance: 'IS 14286 / IEC 61215 Terrestrial PV Modules',
+    };
+
+    const parsed = solarMpptProjectSchema.parse(sampleProject);
+    expect(parsed.systemCapacityWatts).toBe(540);
+
+    const filtered = filterSolarMpptProjects([sampleProject], {
+      algorithm: 'incremental_conductance',
+      search: 'Indira Gandhi',
+    });
+    expect(filtered.length).toBe(1);
+
+    const noMatch = filterSolarMpptProjects([sampleProject], {
+      batteryType: 'lead_acid_12v',
     });
     expect(noMatch.length).toBe(0);
   });
