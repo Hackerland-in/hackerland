@@ -55,8 +55,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis', '/thermal', '/solar-mppt'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis', '/thermal', '/solar-mppt', '/motor-foc'],
   items: [
+    {
+      href: '/motor-foc',
+      title: 'BLDC & PMSM FOC Simulator',
+      description: 'Clarke/Park transforms, Space Vector PWM (SVPWM) sectors & IPM reluctance torque',
+      icon: Gauge,
+      badge: 'Motor FOC',
+    },
     {
       href: '/solar-mppt',
       title: 'Solar PV & MPPT Simulator',

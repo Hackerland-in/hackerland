@@ -100,6 +100,11 @@ import {
   simulateSolarMppt,
   filterSolarMpptProjects,
   solarMpptProjectSchema,
+  simulateMotorFoc,
+  filterMotorFocProjects,
+  motorFocProjectSchema,
+  type MotorParameters,
+  type MotorFocProject,
 } from './index';
 
 describe('tracks', () => {
@@ -2417,6 +2422,121 @@ describe('Solar PV & MPPT Battery Charge Controller Simulator', () => {
     expect(noMatch.length).toBe(0);
   });
 });
+
+describe('BLDC & PMSM Field-Oriented Control (FOC) Simulator', () => {
+  const sampleIpmMotor: MotorParameters = {
+    motorModel: 'Ather 450X 6kW IPM Traction Motor',
+    topology: 'interior_pmsm',
+    polePairs: 4,
+    statorResistanceOhm: 0.038,
+    dAxisInductanceMilliH: 0.22,
+    qAxisInductanceMilliH: 0.36,
+    permanentMagnetFluxWb: 0.032,
+    ratedSpeedRpm: 4500,
+    maxSpeedRpm: 8000,
+    ratedTorqueNm: 26,
+    peakTorqueNm: 40,
+    dcBusVoltageV: 51.2,
+    maxInverterCurrentA: 160,
+  };
+
+  it('calculates Clarke/Park transforms, torque generation, and SVPWM dwell times for Interior PMSM', () => {
+    const result = simulateMotorFoc({
+      targetSpeedRpm: 3200,
+      loadTorqueNm: 15,
+      motor: sampleIpmMotor,
+      pwmFrequencyKhz: 20,
+      dcBusVoltageV: 51.2,
+      enableFieldWeakening: false,
+      currentLoopBandwidthHz: 1200,
+    });
+
+    expect(result.electricalRpm).toBe(12800); // 3200 * 4
+    expect(result.iqCurrentA).toBeGreaterThan(50);
+    expect(result.reluctanceTorqueNm).toBeGreaterThan(0.5); // IPM reluctance torque boost
+    expect(result.totalTorqueNm).toBeGreaterThan(14.5);
+    expect(result.mechanicalPowerWatts).toBeGreaterThan(4800);
+    expect(result.inverterEfficiencyPercent).toBeGreaterThan(90);
+    expect(result.currentSector).toBeGreaterThanOrEqual(1);
+    expect(result.currentSector).toBeLessThanOrEqual(6);
+    // At 20 kHz, T_pwm = 50 us. Dwell times T1 + T2 + T0 should equal ~50 us
+    expect(result.dwellTimeT1Us + result.dwellTimeT2Us + result.dwellTimeT0Us).toBeCloseTo(50, 0);
+    expect(result.waveforms.length).toBeGreaterThanOrEqual(30);
+  });
+
+  it('triggers field weakening when back-EMF approaches DC bus limit at high speed', () => {
+    const highSpeedResult = simulateMotorFoc({
+      targetSpeedRpm: 7500, // High speed near max
+      loadTorqueNm: 8,
+      motor: sampleIpmMotor,
+      pwmFrequencyKhz: 20,
+      dcBusVoltageV: 51.2,
+      enableFieldWeakening: true,
+    });
+
+    // In high-speed field weakening, Id is forced negative to counteract PM back-EMF
+    expect(highSpeedResult.idCurrentA).toBeLessThan(0);
+    expect(highSpeedResult.backEmfPeakV).toBeGreaterThan(90);
+    expect(highSpeedResult.mechanicalRpm).toBe(7500);
+  });
+
+  it('synthesizes PI current loop gains (Kp, Ki) based on specified loop bandwidth', () => {
+    const result = simulateMotorFoc({
+      targetSpeedRpm: 2000,
+      loadTorqueNm: 10,
+      motor: sampleIpmMotor,
+      currentLoopBandwidthHz: 1000, // 1 kHz current loop
+    });
+
+    // Kp = Lq * 2 * pi * f_bw = 0.00036 * 6283.18 ~ 2.26
+    expect(result.kpGain).toBeGreaterThan(2.0);
+    expect(result.kpGain).toBeLessThan(2.5);
+    // Ki = Rs * 2 * pi * f_bw = 0.038 * 6283.18 ~ 238.7
+    expect(result.kiGain).toBeGreaterThan(200);
+  });
+
+  it('validates a complete motor FOC project schema and filters projects', () => {
+    const sampleProject: MotorFocProject = {
+      id: 'foc-proj-1',
+      slug: 'ather-450x-pmsm-traction',
+      title: 'Ather 450X 6 kW IPM PMSM Mid-Drive Traction Controller',
+      vehicleApplication: 'Electric 2-wheeler scooter powertrain operating in urban stop-and-go Bengaluru traffic',
+      peakPowerWatts: 6000,
+      motorParams: sampleIpmMotor,
+      defaultOperatingSpeedRpm: 3500,
+      defaultLoadTorqueNm: 18,
+      recommendedPwmKhz: 20,
+      feedbackSensor: 'absolute_magnetic_as5047',
+      inverterSpecs: {
+        topology: '3-Phase Full-Bridge Synchronous Inverter',
+        switchTechnology: 'silicon_mosfet',
+        deadTimeNanoseconds: 450,
+        currentShuntTopology: 'low_side_three_shunt',
+      },
+      designDirectives: [
+        'MTPA algorithm utilizes 36% IPM reluctance saliency torque (Lq > Ld) reducing RMS phase current by 12%.',
+        'Field weakening injects up to -45A Id above 55 km/h to reach 90 km/h top speed.',
+      ],
+      indianContextFacility: 'ARAI Pune - Centre of Excellence for Electric Vehicles',
+      standardsCompliance: 'ARAI AIS-041 (Electric Powertrain Measurement) & AIS-156',
+    };
+
+    const parsed = motorFocProjectSchema.parse(sampleProject);
+    expect(parsed.peakPowerWatts).toBe(6000);
+
+    const filtered = filterMotorFocProjects([sampleProject], {
+      topology: 'interior_pmsm',
+      search: 'Ather',
+    });
+    expect(filtered.length).toBe(1);
+
+    const noMatch = filterMotorFocProjects([sampleProject], {
+      sensorType: 'hall_sensors_120deg',
+    });
+    expect(noMatch.length).toBe(0);
+  });
+});
+
 
 
 

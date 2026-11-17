@@ -33,4 +33,6 @@ export * from './rf';
 export * from './eis';
 export * from './thermal';
 export * from './solar';
+export * from './motor-foc';
+
 

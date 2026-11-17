@@ -181,6 +181,7 @@ export function MobileMenu() {
     {
       heading: 'Hardware & Manufacturing',
       items: [
+        { href: '/motor-foc', label: 'Motor FOC & SVPWM Simulator', icon: Gauge, badge: 'Motor FOC' },
         { href: '/solar-mppt', label: 'Solar PV & MPPT Simulator', icon: Sun, badge: 'Solar MPPT' },
         { href: '/thermal', label: 'Thermal Profiler & Heat Sinks', icon: Thermometer, badge: 'Thermal R_θ' },
         { href: '/battery-eis', label: 'Battery EIS & State-of-Health', icon: BatteryCharging, badge: 'SoH EIS' },

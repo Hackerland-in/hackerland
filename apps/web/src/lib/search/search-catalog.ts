@@ -542,6 +542,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['solar', 'pv', 'mppt', 'photovoltaic', 'iv curve', 'pv curve', 'incremental conductance', 'perturb and observe', 'buck converter', 'pm kusum', 'nise', 'canal top', 'bifacial', 'ladakh', 'rajasthan', 'lfp'],
   },
   {
+    id: 'hub-motor-foc',
+    title: 'BLDC & PMSM Field-Oriented Control (FOC) Simulator',
+    description:
+      'Rotor-flux aligned Field-Oriented Control with Clarke/Park transforms, Space Vector PWM (SVPWM) 8-state switching hexagons, MTPA reluctance torque, and high-speed field weakening.',
+    category: 'labs',
+    categoryLabel: 'Motor Control',
+    href: '/motor-foc',
+    badge: 'Motor FOC',
+    badgeTone: 'accent',
+    keywords: ['foc', 'bldc', 'pmsm', 'motor', 'svpwm', 'space vector', 'clarke', 'park', 'inverter', 'ather', 'ola', 'euler', 'pm kusum', 'reluctance torque', 'field weakening', 'arai', 'icat'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:
