@@ -33,6 +33,7 @@ import {
   BatteryCharging,
   Thermometer,
   Sun,
+  Network,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -55,8 +56,15 @@ interface NavDropdown {
 const HARDWARE_DROPDOWN: NavDropdown = {
   id: 'hardware',
   label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis', '/thermal', '/solar-mppt', '/motor-foc'],
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis', '/thermal', '/solar-mppt', '/motor-foc', '/can-bus'],
   items: [
+    {
+      href: '/can-bus',
+      title: 'Automotive CAN Bus & ISO 11898',
+      description: 'Bit timing quanta, sample points, arbitration priority & bus bandwidth load',
+      icon: Network,
+      badge: 'CAN Bus',
+    },
     {
       href: '/motor-foc',
       title: 'BLDC & PMSM FOC Simulator',

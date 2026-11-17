@@ -554,6 +554,18 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['foc', 'bldc', 'pmsm', 'motor', 'svpwm', 'space vector', 'clarke', 'park', 'inverter', 'ather', 'ola', 'euler', 'pm kusum', 'reluctance torque', 'field weakening', 'arai', 'icat'],
   },
   {
+    id: 'hub-can-bus',
+    title: 'Automotive CAN Bus & ISO 11898 Network Protocol Simulator',
+    description:
+      'Controller Area Network bit timing quanta, sample point validation, non-destructive bitwise arbitration priority (CSMA/CD + NBA), and bus bandwidth load simulator.',
+    category: 'labs',
+    categoryLabel: 'Vehicle Networking',
+    href: '/can-bus',
+    badge: 'CAN Bus',
+    badgeTone: 'accent',
+    keywords: ['can', 'can bus', 'iso 11898', 'can fd', 'bit timing', 'sample point', 'arbitration', 'csma cd', 'split termination', 'ather', 'tata nexon', 'uavcan', 'dronecan', 'telecom bms', 'arai', 'ais 004', 'ais 156'],
+  },
+  {
     id: 'hub-launchpad',
     title: 'Hardware Launchpad & Indian Govt Grant Matcher',
     description:

@@ -42,6 +42,7 @@ import {
   BatteryCharging,
   Thermometer,
   Sun,
+  Network,
 } from 'lucide-react';
 import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
@@ -181,6 +182,7 @@ export function MobileMenu() {
     {
       heading: 'Hardware & Manufacturing',
       items: [
+        { href: '/can-bus', label: 'Automotive CAN Bus Simulator', icon: Network, badge: 'CAN Bus' },
         { href: '/motor-foc', label: 'Motor FOC & SVPWM Simulator', icon: Gauge, badge: 'Motor FOC' },
         { href: '/solar-mppt', label: 'Solar PV & MPPT Simulator', icon: Sun, badge: 'Solar MPPT' },
         { href: '/thermal', label: 'Thermal Profiler & Heat Sinks', icon: Thermometer, badge: 'Thermal R_θ' },

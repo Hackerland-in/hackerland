@@ -21,6 +21,7 @@ import { BATTERY_EIS_REGISTRY } from '@/lib/data/battery-eis-data';
 import { THERMAL_PROFILES_REGISTRY } from '@/lib/data/thermal-data';
 import { SOLAR_MPPT_PROJECTS_REGISTRY } from '@/lib/data/solar-mppt-data';
 import { MOTOR_FOC_PROJECTS_REGISTRY } from '@/lib/data/motor-foc-data';
+import { CAN_BUS_PROJECTS_REGISTRY } from '@/lib/data/can-bus-data';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -63,6 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/thermal', priority: 0.95, changeFrequency: 'daily' },
     { path: '/solar-mppt', priority: 0.95, changeFrequency: 'daily' },
     { path: '/motor-foc', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/can-bus', priority: 0.95, changeFrequency: 'daily' },
     { path: '/launchpad', priority: 0.95, changeFrequency: 'daily' },
     { path: '/jobs', priority: 0.95, changeFrequency: 'daily' },
     { path: '/young-innovators', priority: 0.95, changeFrequency: 'daily' },
@@ -306,6 +308,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const proj of MOTOR_FOC_PROJECTS_REGISTRY) {
     sitemapEntries.push({
       url: `${BASE_URL}/motor-foc/${proj.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic Automotive CAN Bus & ISO 11898 Simulator Routes
+  for (const proj of CAN_BUS_PROJECTS_REGISTRY) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/can-bus/${proj.slug}`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.9,

@@ -105,6 +105,10 @@ import {
   motorFocProjectSchema,
   type MotorParameters,
   type MotorFocProject,
+  simulateCanBus,
+  filterCanBusProjects,
+  canBusProjectSchema,
+  type CanBusProject,
 } from './index';
 
 describe('tracks', () => {
@@ -2536,6 +2540,108 @@ describe('BLDC & PMSM Field-Oriented Control (FOC) Simulator', () => {
     expect(noMatch.length).toBe(0);
   });
 });
+
+describe('Automotive CAN Bus & ISO 11898 Network Simulator', () => {
+  it('calculates nominal bit time, sample point percentage, and CiA compliance at 500 kbps', () => {
+    const result = simulateCanBus({
+      standard: 'can_2_0b_standard',
+      baudRateKbps: 500,
+      clockFrequencyMhz: 40, // 40 MHz CAN controller peripheral clock
+      busLengthMeters: 15,
+      numberOfNodes: 8,
+      averagePayloadBytes: 8,
+      totalMessageFrequencyHz: 400,
+      termination: 'split_termination_filtered',
+    });
+
+    expect(result.actualBaudRateKbps).toBe(500);
+    expect(result.nominalBitTimeNs).toBe(2000); // 1 / 500k = 2000 ns
+    expect(result.samplePointPercent).toBeGreaterThanOrEqual(75.0);
+    expect(result.samplePointPercent).toBeLessThanOrEqual(88.0);
+    expect(result.samplePointStatus).toBe('optimal_cia');
+    expect(result.busLoadPercent).toBeGreaterThan(5);
+    expect(result.busLoadPercent).toBeLessThan(65);
+    expect(result.busUtilizationHealth).toBe('optimal_safe');
+  });
+
+  it('evaluates propagation delay and maximum cable length for physical bus arbitration', () => {
+    const result = simulateCanBus({
+      standard: 'can_2_0b_standard',
+      baudRateKbps: 250, // 250 kbps allows longer bus runs
+      clockFrequencyMhz: 40,
+      busLengthMeters: 40,
+      cableSpecificDelayNsPerMeter: 5,
+      transceiverLoopDelayNs: 150,
+    });
+
+    expect(result.nominalBitTimeNs).toBe(4000);
+    expect(result.oneWayPropDelayNs).toBeGreaterThan(200);
+    expect(result.roundTripDelayNs).toBeGreaterThan(500);
+    expect(result.maxAllowableBusLengthMeters).toBeGreaterThan(30);
+  });
+
+  it('models differential oscilloscope voltage levels (CAN_H, CAN_L, Vdiff) during dominant and recessive states', () => {
+    const result = simulateCanBus({
+      standard: 'can_2_0b_standard',
+      baudRateKbps: 500,
+    });
+
+    expect(result.waveforms.length).toBeGreaterThanOrEqual(50);
+
+    // Dominant bit (logic 0): CAN_H ~3.5V, CAN_L ~1.5V, V_diff ~2.0V
+    const dominantSample = result.waveforms.find((w) => w.bitLogicState === 'dominant_0');
+    expect(dominantSample).toBeDefined();
+    expect(dominantSample!.vCanH).toBeGreaterThan(3.3);
+    expect(dominantSample!.vCanL).toBeLessThan(1.7);
+    expect(dominantSample!.vDiff).toBeGreaterThan(1.8);
+
+    // Recessive bit (logic 1): CAN_H ~2.5V, CAN_L ~2.5V, V_diff ~0.0V
+    const recessiveSample = result.waveforms.find((w) => w.bitLogicState === 'recessive_1');
+    expect(recessiveSample).toBeDefined();
+    expect(recessiveSample!.vCanH).toBeCloseTo(2.5, 1);
+    expect(recessiveSample!.vCanL).toBeCloseTo(2.5, 1);
+    expect(recessiveSample!.vDiff).toBeLessThan(0.2);
+  });
+
+  it('validates a complete CAN bus project schema and filters projects', () => {
+    const sampleProject: CanBusProject = {
+      id: 'can-proj-1',
+      slug: 'ather-450x-powertrain-can',
+      title: 'Ather 450X ISO 11898-2 Powertrain & Telematics CAN Bus',
+      automotiveDomain: 'Electric 2-wheeler intra-vehicle communication network',
+      protocolStandard: 'can_2_0b_standard',
+      nominalBaudRateKbps: 500,
+      busTopology: {
+        busLengthMeters: 4.2,
+        nodeCount: 6,
+        cableType: 'Shielded Twisted Pair (STP) Automotive Grade 0.35mm²',
+        terminationMethod: 'split_termination_filtered',
+        isolationType: 'capacitive_digital_isolator',
+      },
+      designDirectives: [
+        'Split termination with 2x 60Ω resistors and 4.7nF ceramic cap filters common-mode RF noise without shifting differential DC bias.',
+        'Sample point set at 80% to absorb 150ns transceiver propagation loop delay.',
+      ],
+      indianContextFacility: 'ARAI Pune - Centre of Excellence for Electric Vehicles',
+      standardsCompliance: 'ARAI AIS-004 Part 3 (Automotive EMC) & ISO 11898-2:2016',
+    };
+
+    const parsed = canBusProjectSchema.parse(sampleProject);
+    expect(parsed.nominalBaudRateKbps).toBe(500);
+
+    const filtered = filterCanBusProjects([sampleProject], {
+      standard: 'can_2_0b_standard',
+      search: 'Ather',
+    });
+    expect(filtered.length).toBe(1);
+
+    const noMatch = filterCanBusProjects([sampleProject], {
+      termination: 'single_end_high_z_unterminated',
+    });
+    expect(noMatch.length).toBe(0);
+  });
+});
+
 
 
 
