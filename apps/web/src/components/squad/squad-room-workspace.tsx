@@ -44,13 +44,11 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
     .filter((m) => m.status === 'released')
     .reduce((acc, m) => acc + m.escrowAmountInr, 0);
 
-  const lockedEscrowInr = squadRoom.escrowPoolTotalInr - releasedEscrowInr;
 
   const releasedEscrowUsd = milestones
     .filter((m) => m.status === 'released')
     .reduce((acc, m) => acc + m.escrowAmountUsd, 0);
 
-  const lockedEscrowUsd = squadRoom.escrowPoolTotalUsd - releasedEscrowUsd;
 
   const handleSubmitProof = (e: React.FormEvent) => {
     e.preventDefault();

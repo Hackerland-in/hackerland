@@ -98,19 +98,19 @@ export function BicyclePhysicsSimulator() {
   // ------------------------------------------
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [speedKmh, setSpeedKmh] = useState<number>(32.5); // Initial speed
-  const [distanceMeters, setDistanceMeters] = useState<number>(0);
-  const [elapsedTimeSec, setElapsedTimeSec] = useState<number>(0);
+  const [, setDistanceMeters] = useState<number>(0);
+  const [, setElapsedTimeSec] = useState<number>(0);
 
   // Rider inputs
-  const [riderMassKg, setRiderMassKg] = useState<number>(72);
+  const [riderMassKg] = useState<number>(72);
   const [riderPowerWatts, setRiderPowerWatts] = useState<number>(240); // FTP cruise
   const [riderPosture, setRiderPosture] = useState<'hoods' | 'drops' | 'aero_tt' | 'upright'>('hoods');
-  const [targetCadenceRpm, setTargetCadenceRpm] = useState<number>(88);
+  const [targetCadenceRpm] = useState<number>(88);
 
   // Environmental conditions
   const [gradientPercent, setGradientPercent] = useState<number>(2.5); // 2.5% climb
   const [windSpeedMps, setWindSpeedMps] = useState<number>(0); // Headwind (+) or Tailwind (-)
-  const [elevationMeters, setElevationMeters] = useState<number>(200);
+  const [elevationMeters] = useState<number>(200);
 
   // Drivetrain & Gearing
   const [chainring, setChainring] = useState<number>(50);
@@ -121,12 +121,12 @@ export function BicyclePhysicsSimulator() {
   const [frameMaterial, setFrameMaterial] = useState<'Carbon Fiber' | 'Aluminum 6061' | 'Titanium 3Al-2.5V' | '4130 Chromoly'>('Carbon Fiber');
   const [rimProfile, setRimProfile] = useState<30 | 50 | 80>(50);
   const [tireWidth, setTireWidth] = useState<25 | 28 | 32>(28);
-  const [tirePressurePsi, setTirePressurePsi] = useState<number>(85);
+  const [tirePressurePsi] = useState<number>(85);
 
   // Custom Components
   const [customComponents, setCustomComponents] = useState<CustomBicycleComponent[]>(DEFAULT_CUSTOM_COMPONENTS);
   const [newCompName, setNewCompName] = useState<string>('');
-  const [newCompCategory, setNewCompCategory] = useState<'Aero' | 'Drivetrain' | 'Powertrain Assist' | 'Chassis'>('Aero');
+  const [newCompCategory] = useState<'Aero' | 'Drivetrain' | 'Powertrain Assist' | 'Chassis'>('Aero');
   const [newCompMass, setNewCompMass] = useState<number>(0.2);
   const [newCompCda, setNewCompCda] = useState<number>(-0.01);
   const [newCompAssist, setNewCompAssist] = useState<number>(0);

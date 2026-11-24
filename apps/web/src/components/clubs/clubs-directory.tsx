@@ -70,9 +70,6 @@ export function ClubsDirectory({ initialClubs }: ClubsDirectoryProps) {
     return initialClubs.reduce((sum, c) => sum + c.equipment.length, 0);
   }, [initialClubs]);
 
-  const totalChallenges = useMemo(() => {
-    return initialClubs.reduce((sum, c) => sum + c.activeChallenges.length, 0);
-  }, [initialClubs]);
 
   return (
     <div className="space-y-8 min-w-0">

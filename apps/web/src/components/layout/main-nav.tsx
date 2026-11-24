@@ -441,8 +441,6 @@ export function MainNav() {
 
   const isFeedActive = pathname === '/feed' || pathname.startsWith('/feed/');
   const isEarnActive = pathname === '/earn' || pathname.startsWith('/earn/');
-  const isLeaderboardActive =
-    pathname === '/leaderboard' || pathname.startsWith('/leaderboard/');
 
   const renderDropdown = (dropdown: NavDropdown) => {
     const isOpen = openDropdown === dropdown.id;

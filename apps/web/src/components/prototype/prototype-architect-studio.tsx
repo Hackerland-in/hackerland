@@ -363,7 +363,7 @@ Synthesized by Hackerland Prototype Simulator: https://www.hackerland.in/prototy
           </h3>
 
           <div className="space-y-3">
-            {currentPlan.milestones.map((m, idx) => (
+            {currentPlan.milestones.map((m) => (
               <div key={m.phase} className="rounded-xl bg-neutral-950 p-3.5 border border-neutral-800 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-white text-xs">{m.phase}</span>

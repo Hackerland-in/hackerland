@@ -56,9 +56,9 @@ export function ThermalCalculatorWorkbench({
   // Heatsink dimensions
   const [widthMm, setWidthMm] = useState(initialWidthMm);
   const [lengthMm, setLengthMm] = useState(initialLengthMm);
-  const [baseThicknessMm, setBaseThicknessMm] = useState(initialBaseThicknessMm);
+  const [baseThicknessMm] = useState(initialBaseThicknessMm);
   const [finHeightMm, setFinHeightMm] = useState(initialFinHeightMm);
-  const [finThicknessMm, setFinThicknessMm] = useState(initialFinThicknessMm);
+  const [finThicknessMm] = useState(initialFinThicknessMm);
   const [numberOfFins, setNumberOfFins] = useState(initialNumberOfFins);
 
   const result = calculateThermalDissipation({

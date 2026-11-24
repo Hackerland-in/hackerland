@@ -37,7 +37,6 @@ export function Simulator3DLab({
   pitchDeg = 0,
   rollDeg = 0,
   yawDeg = 0,
-  rpm = 4500,
   className,
   height = 420,
 }: Simulator3DLabProps) {

@@ -113,7 +113,7 @@ export function WebSerialFlasher() {
     try {
       // Real Web Serial API request
       const nav = navigator as unknown as { serial: { requestPort: () => Promise<unknown> } };
-      const port = await nav.serial.requestPort();
+      await nav.serial.requestPort();
       setIsConnected(true);
       addLog(`Connected to hardware USB port at ${baudRate} baud.`, 'system');
     } catch (err: unknown) {

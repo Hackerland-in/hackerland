@@ -77,8 +77,8 @@ export function generateGerberTopCopper(
   components: PlacedComponent[],
   traces: CopperTraceSegment[],
   vias: PcbVia[],
-  boardWidth = 100,
-  boardHeight = 80
+  _boardWidth = 100,
+  _boardHeight = 80
 ): string {
   const lines: string[] = [
     'G04 Standard RS-274X Top Copper Layer*',
@@ -125,7 +125,7 @@ export function generateGerberTopCopper(
 export function generateGerberBottomCopper(
   traces: CopperTraceSegment[],
   components: PlacedComponent[],
-  vias: PcbVia[]
+  _vias: PcbVia[]
 ): string {
   const lines: string[] = [
     'G04 Standard RS-274X Bottom Copper Layer*',
@@ -251,7 +251,7 @@ export function generateExcellonDrill(components: PlacedComponent[], vias: PcbVi
   return lines.join('\n');
 }
 
-export function generateKiCadNetlist(components: PlacedComponent[], traces: CopperTraceSegment[]): string {
+export function generateKiCadNetlist(components: PlacedComponent[], _traces: CopperTraceSegment[]): string {
   const lines: string[] = [
     '(export (version D)',
     '  (design',

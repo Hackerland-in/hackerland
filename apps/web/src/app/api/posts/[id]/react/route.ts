@@ -48,7 +48,7 @@ export async function POST(
       success: true,
       reactions: newCount,
     });
-  } catch (err: unknown) {
+  } catch {
     const newCount = incrementPostReaction(id);
     return Response.json({
       success: true,

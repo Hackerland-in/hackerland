@@ -21,7 +21,6 @@ export function HeatsinkFinVisualizer({
   lengthMm,
   baseThicknessMm,
   finHeightMm,
-  finThicknessMm,
   numberOfFins,
   material,
   coolingMethod,

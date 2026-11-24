@@ -140,7 +140,6 @@ export function resolveCircuitNets(
   } else if (substrate === 'breadboard') {
     // Breadboard: 5-pin vertical terminal strips (columns X) separated into Top and Bottom banks by center divider (y=30mm)
     // Plus horizontal power rails (+ / -) along top and bottom
-    const GRID = 2.54;
     for (let i = 0; i < pinList.length; i++) {
       for (let j = i + 1; j < pinList.length; j++) {
         const p1 = pinList[i];

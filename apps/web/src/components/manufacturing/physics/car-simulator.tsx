@@ -103,10 +103,9 @@ export function CarPhysicsSimulator() {
   const [tireCompound, setTireCompound] = useState<'Racing Slick' | 'Summer Sport' | 'All-Season' | 'Wet Track'>('Summer Sport');
 
   // Chassis Specs
-  const [curbWeightKg, setCurbWeightKg] = useState<number>(1420);
-  const [frontWeightDistPercent, setFrontWeightDistPercent] = useState<number>(51); // 51% front / 49% rear
-  const [wheelbaseM, setWheelbaseM] = useState<number>(2.55);
-  const [cgHeightM, setCgHeightM] = useState<number>(0.48);
+  const [curbWeightKg] = useState<number>(1420);
+  const [frontWeightDistPercent] = useState<number>(51); // 51% front / 49% rear
+  const [wheelbaseM] = useState<number>(2.55);
 
   // Dynamic States
   const [speedKmh, setSpeedKmh] = useState<number>(0);
@@ -118,13 +117,13 @@ export function CarPhysicsSimulator() {
 
   // Performance Benchmarks
   const [zeroTo100Time, setZeroTo100Time] = useState<number | null>(null);
-  const [quarterMileTime, setQuarterMileTime] = useState<number | null>(null);
+  const [, setQuarterMileTime] = useState<number | null>(null);
   const [runStartTime, setRunStartTime] = useState<number | null>(null);
 
   // Custom Components
   const [customComponents, setCustomComponents] = useState<CustomCarComponent[]>(DEFAULT_CUSTOM_CAR_COMPONENTS);
   const [newCompName, setNewCompName] = useState<string>('');
-  const [newCompCategory, setNewCompCategory] = useState<'Powertrain' | 'Aero & Body' | 'Suspension' | 'Braking & Tires'>('Powertrain');
+  const [newCompCategory] = useState<'Powertrain' | 'Aero & Body' | 'Suspension' | 'Braking & Tires'>('Powertrain');
   const [newCompHp, setNewCompHp] = useState<number>(50);
   const [newCompMass, setNewCompMass] = useState<number>(-5);
 
@@ -247,7 +246,6 @@ export function CarPhysicsSimulator() {
 
           // Normal force and load transfer
           const normalGravityTotal = totalMassKg * 9.80665 + aeroDownforce;
-          const staticFront = normalGravityTotal * (frontWeightDistPercent / 100);
           const staticRear = normalGravityTotal * (1 - frontWeightDistPercent / 100);
 
           // Max traction limit (Pacejka tire grip on drive wheels - RWD / AWD)
@@ -367,7 +365,7 @@ export function CarPhysicsSimulator() {
       const wheelY = 48;
       const wheelRadius = 32;
 
-      const drawCarWheel = (x: number, y: number, isBraking: boolean) => {
+      const drawCarWheel = (x: number, y: number, _isBraking: boolean) => {
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(wheelAngle);

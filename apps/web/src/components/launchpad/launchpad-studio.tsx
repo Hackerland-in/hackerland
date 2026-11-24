@@ -64,7 +64,7 @@ export function LaunchpadStudio() {
   const [simGoalInr, setSimGoalInr] = useState<number>(1000000);
   const [simTranchePercent, setSimTranchePercent] = useState<number>(35);
   const [simVotesFor, setSimVotesFor] = useState<number>(72);
-  const [simTotalVotes, setSimTotalVotes] = useState<number>(100);
+  const [simTotalVotes] = useState<number>(100);
 
   // Filtered Campaigns
   const filteredCampaigns = useMemo(() => {
@@ -452,7 +452,7 @@ export function LaunchpadStudio() {
             </div>
 
             <div className="space-y-4">
-              {grantMatches.map(({ grant, fitScore, isEligible, reasons, missingPrerequisites }) => (
+              {grantMatches.map(({ grant, isEligible, reasons, missingPrerequisites }) => (
                 <div
                   key={grant.id}
                   className={`rounded-xl border p-5 transition-all ${

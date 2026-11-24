@@ -40,7 +40,6 @@ export function PcbDesignerCanvas({
   traces,
   vias,
   trackCuts,
-  nets,
   selectedComponentId,
   boardWidthMm = 140,
   boardHeightMm = 90,

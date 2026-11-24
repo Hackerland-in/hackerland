@@ -25,7 +25,7 @@ export function SearchBar() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

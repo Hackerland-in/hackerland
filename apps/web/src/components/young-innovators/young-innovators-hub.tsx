@@ -30,7 +30,7 @@ export function YoungInnovatorsHub() {
 
   // Modal
   const [showConsentModal, setShowConsentModal] = useState(false);
-  const [verifiedConsentTokens, setVerifiedConsentTokens] = useState<string[]>([]);
+  const [, setVerifiedConsentTokens] = useState<string[]>([]);
 
   const filteredChallenges = useMemo(() => {
     if (selectedAge === 'all') return JUNIOR_CHALLENGES;

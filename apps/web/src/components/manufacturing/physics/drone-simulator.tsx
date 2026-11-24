@@ -58,14 +58,11 @@ export function DronePhysicsSimulator() {
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [throttlePercent, setThrottlePercent] = useState<number>(55);
   const [pitchInputDeg, setPitchInputDeg] = useState<number>(10); // Forward flight tilt
-  const [rollInputDeg, setRollInputDeg] = useState<number>(0);
+  const [rollInputDeg] = useState<number>(0);
   const [windDisturbanceMps, setWindDisturbanceMps] = useState<number>(0);
 
   // Drone specs
-  const [baseFrameWeightGrams, setBaseFrameWeightGrams] = useState<number>(380); // 5-inch freestyle quad
-  const [pidP, setPidP] = useState<number>(45);
-  const [pidI, setPidI] = useState<number>(60);
-  const [pidD, setPidD] = useState<number>(32);
+  const [baseFrameWeightGrams] = useState<number>(380); // 5-inch freestyle quad
 
   // Dynamic States
   const [altitudeMeters, setAltitudeMeters] = useState<number>(12);
@@ -77,7 +74,7 @@ export function DronePhysicsSimulator() {
   // Custom Components
   const [customComponents, setCustomComponents] = useState<CustomDroneComponent[]>(DEFAULT_DRONE_MODS);
   const [newCompName, setNewCompName] = useState<string>('');
-  const [newCompCategory, setNewCompCategory] = useState<'Motors' | 'Propellers' | 'Battery' | 'Frame'>('Motors');
+  const [newCompCategory] = useState<'Motors' | 'Propellers' | 'Battery' | 'Frame'>('Motors');
   const [newCompThrust, setNewCompThrust] = useState<number>(150);
   const [newCompWeight, setNewCompWeight] = useState<number>(15);
 
@@ -161,7 +158,7 @@ export function DronePhysicsSimulator() {
         // Current draw & battery sag
         const amps = 8 + Math.pow(thrustFraction, 2.5) * 85;
         setTotalCurrentAmps(amps);
-        setBatteryVoltage((v) => Math.max(19.2, 24.8 - (amps * 0.035)));
+        setBatteryVoltage(() => Math.max(19.2, 24.8 - (amps * 0.035)));
       }
 
       animFrameId.current = requestAnimationFrame(loop);
@@ -193,7 +190,6 @@ export function DronePhysicsSimulator() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let propSpin = 0;
     let animId: number;
 
     const render = () => {
@@ -201,7 +197,6 @@ export function DronePhysicsSimulator() {
       const w = canvas.width;
       const h = canvas.height;
 
-      propSpin += (throttlePercent / 100) * 1.2;
 
       ctx.save();
       ctx.translate(w / 2, h / 2 + 10);

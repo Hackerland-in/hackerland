@@ -14,7 +14,7 @@ import {
   ChevronLeft,
   ArrowRight,
 } from 'lucide-react';
-import type { TeardownCategory, TeardownPinoutAnnotation, TeardownSubsystem, TeardownBOMItem } from '@hackerland/core';
+import type { TeardownCategory, TeardownPinoutAnnotation, TeardownSubsystem } from '@hackerland/core';
 import { calculateBomMarkup } from '@hackerland/core';
 import { PcbPinoutAnnotator } from './pcb-pinout-annotator';
 
@@ -47,7 +47,7 @@ export function TeardownSubmitStudio() {
   ]);
 
   // Pinout Annotations
-  const [annotations, setAnnotations] = useState<TeardownPinoutAnnotation[]>([
+  const [annotations] = useState<TeardownPinoutAnnotation[]>([
     {
       id: 'pin-1',
       xPercent: 45,
@@ -79,17 +79,6 @@ export function TeardownSubmitStudio() {
   ]);
 
   // BOM items
-  const [bomItems, setBomItems] = useState<TeardownBOMItem[]>([
-    {
-      component: 'Battery Stack Monitor',
-      partNumber: 'ADBMS6815',
-      manufacturer: 'Analog Devices',
-      function: 'Monitors up to 18 cells with <1.5mV error',
-      package: 'eTQFP-64',
-      estCost: '$8.50 (₹730)',
-      openAlternative: 'LTC6811',
-    },
-  ]);
 
   // Lessons & Failure modes
   const [lessons, setLessons] = useState<string[]>([

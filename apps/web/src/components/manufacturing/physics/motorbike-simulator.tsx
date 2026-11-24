@@ -95,10 +95,9 @@ export function MotorbikePhysicsSimulator() {
   const [tcsLevel, setTcsLevel] = useState<number>(2); // Traction control 0 (off) to 5 (max)
 
   // Motorcycle Specs
-  const [bikeMassKg, setBikeMassKg] = useState<number>(185); // Wet weight
-  const [riderMassKg, setRiderMassKg] = useState<number>(75);
-  const [wheelbaseM, setWheelbaseM] = useState<number>(1.43); // 1430mm typical superbike
-  const [rakeAngleDeg, setRakeAngleDeg] = useState<number>(24.0); // 24° rake
+  const [bikeMassKg] = useState<number>(185); // Wet weight
+  const [riderMassKg] = useState<number>(75);
+  const [rakeAngleDeg] = useState<number>(24.0); // 24° rake
 
   // Dynamic States
   const [speedKmh, setSpeedKmh] = useState<number>(85);
@@ -111,7 +110,7 @@ export function MotorbikePhysicsSimulator() {
   // Custom Components
   const [customComponents, setCustomComponents] = useState<CustomBikeComponent[]>(DEFAULT_CUSTOM_BIKE_COMPONENTS);
   const [newCompName, setNewCompName] = useState<string>('');
-  const [newCompCategory, setNewCompCategory] = useState<'Powertrain' | 'Aero & Fairings' | 'Suspension' | 'Braking & Chassis'>('Powertrain');
+  const [newCompCategory] = useState<'Powertrain' | 'Aero & Fairings' | 'Suspension' | 'Braking & Chassis'>('Powertrain');
   const [newCompHp, setNewCompHp] = useState<number>(10);
   const [newCompMass, setNewCompMass] = useState<number>(-2);
 
@@ -374,7 +373,6 @@ export function MotorbikePhysicsSimulator() {
 
         // Front Wheel (Lofted in air during wheelie)
         const frontWheelX = 180;
-        const frontWheelY = 0;
         ctx.beginPath();
         ctx.arc(frontWheelX, -26, 26, 0, Math.PI * 2);
         ctx.stroke();
