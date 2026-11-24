@@ -71,9 +71,9 @@ export async function POST(req: Request) {
       },
       sitemapUrl: SITEMAP_URL,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to submit search engine indexing ping' },
+      { success: false, error: (error instanceof Error && error.message) || 'Failed to submit search engine indexing ping' },
       { status: 500 }
     );
   }

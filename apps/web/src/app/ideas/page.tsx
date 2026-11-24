@@ -109,8 +109,8 @@ export default function IdeasPage() {
             IdeaLab: From Spark to Squad
           </h1>
           <p className="text-fg-subtle text-base sm:text-lg leading-relaxed">
-            Don't have a full project yet? You don't need one. IdeaLab is a structured 7-stage incubator
-            for anyone who says: <em>"I have a vague spark"</em> or even <em>"I want to build something but don't know what."</em>
+            Don&apos;t have a full project yet? You don&apos;t need one. IdeaLab is a structured 7-stage incubator
+            for anyone who says: <em>&quot;I have a vague spark&quot;</em> or even <em>&quot;I want to build something but don&apos;t know what.&quot;</em>
           </p>
           <div className="pt-2 flex justify-center gap-3">
             <Button onClick={() => setShowWorkbookModal(true)} variant="primary" className="shadow-lg">

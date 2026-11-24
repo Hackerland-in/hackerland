@@ -92,7 +92,7 @@ export default function MuseumPage() {
                       {exhibit.title}
                     </h3>
                     <p className="text-xs font-medium text-amber-300/80 italic">
-                      "{exhibit.tagline}"
+                      &quot;{exhibit.tagline}&quot;
                     </p>
                     <p className="text-xs text-neutral-400 line-clamp-3 leading-relaxed pt-1">
                       {exhibit.summary}

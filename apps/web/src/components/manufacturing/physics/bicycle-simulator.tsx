@@ -804,7 +804,7 @@ export function BicyclePhysicsSimulator() {
                 <span className="text-[11px] font-mono text-fg-muted uppercase block mb-1">Rider Posture</span>
                 <select
                   value={riderPosture}
-                  onChange={(e) => setRiderPosture(e.target.value as any)}
+                  onChange={(e) => setRiderPosture(e.target.value as typeof riderPosture)}
                   className="w-full px-2.5 py-1.5 rounded-lg bg-surface-2 border border-hairline text-caption font-medium text-fg"
                 >
                   <option value="hoods">Hoods (CdA 0.33 m²)</option>
@@ -906,7 +906,7 @@ export function BicyclePhysicsSimulator() {
                   <label className="text-[11px] font-mono text-fg-muted uppercase block">Rim Depth</label>
                   <select
                     value={rimProfile}
-                    onChange={(e) => setRimProfile(Number(e.target.value) as any)}
+                    onChange={(e) => setRimProfile(Number(e.target.value) as typeof rimProfile)}
                     className="w-full mt-1 px-2 py-1 rounded bg-surface-2 border border-hairline text-caption"
                   >
                     <option value={30}>30mm Climbing</option>
@@ -919,7 +919,7 @@ export function BicyclePhysicsSimulator() {
                   <label className="text-[11px] font-mono text-fg-muted uppercase block">Tire Width</label>
                   <select
                     value={tireWidth}
-                    onChange={(e) => setTireWidth(Number(e.target.value) as any)}
+                    onChange={(e) => setTireWidth(Number(e.target.value) as typeof tireWidth)}
                     className="w-full mt-1 px-2 py-1 rounded bg-surface-2 border border-hairline text-caption"
                   >
                     <option value={25}>25mm (High Press)</option>

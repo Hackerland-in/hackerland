@@ -46,7 +46,7 @@ export default function PcbStudioPage() {
             </div>
             <h3 className="font-display font-bold text-base text-fg">Live Circuit Simulation Engine</h3>
             <p className="text-xs text-fg-subtle leading-relaxed">
-              Components aren't just passive graphics—they work! Push buttons close switches, potentiometers divide voltages,
+              Components aren&apos;t just passive graphics—they work! Push buttons close switches, potentiometers divide voltages,
               NE555 timers oscillate square waves, LEDs glow with radial light gradients proportional to forward current,
               and our live 2-channel oscilloscope graphs real-time waveforms.
             </p>

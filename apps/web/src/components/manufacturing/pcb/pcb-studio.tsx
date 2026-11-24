@@ -258,7 +258,7 @@ export function PcbStudio() {
   const [showDrcModal, setShowDrcModal] = useState(false);
   const [drcViolations, setDrcViolations] = useState<DrcViolation[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [exportPackage, setExportPackage] = useState<any>(null);
+  const [exportPackage, setExportPackage] = useState<ReturnType<typeof buildCompleteManufacturingExport> | null>(null);
 
   const scopeCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -466,7 +466,7 @@ export function PcbStudio() {
 
           {/* Presets */}
           <select
-            onChange={(e) => e.target.value && loadPreset(e.target.value as any)}
+            onChange={(e) => e.target.value && loadPreset(e.target.value as Parameters<typeof loadPreset>[0])}
             className="text-xs bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none"
             defaultValue="ne555_flasher"
           >

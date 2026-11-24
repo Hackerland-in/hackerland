@@ -775,7 +775,7 @@ export function CarPhysicsSimulator() {
                 <span className="text-[11px] font-mono text-fg-muted uppercase block mb-1">Engine Type</span>
                 <select
                   value={engineType}
-                  onChange={(e) => setEngineType(e.target.value as any)}
+                  onChange={(e) => setEngineType(e.target.value as typeof engineType)}
                   className="w-full px-2.5 py-1.5 rounded-lg bg-surface-2 border border-hairline text-caption font-medium text-fg"
                 >
                   <option value="Turbo I4">2.0L Turbo I4 (310 HP)</option>
@@ -789,7 +789,7 @@ export function CarPhysicsSimulator() {
                 <span className="text-[11px] font-mono text-fg-muted uppercase block mb-1">Tire Compound</span>
                 <select
                   value={tireCompound}
-                  onChange={(e) => setTireCompound(e.target.value as any)}
+                  onChange={(e) => setTireCompound(e.target.value as typeof tireCompound)}
                   className="w-full px-2.5 py-1.5 rounded-lg bg-surface-2 border border-hairline text-caption font-medium text-fg"
                 >
                   <option value="Racing Slick">Racing Slick (μ ≈ 1.45)</option>

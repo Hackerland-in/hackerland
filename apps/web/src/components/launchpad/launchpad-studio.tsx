@@ -607,7 +607,7 @@ export function LaunchpadStudio() {
               {/* Backer Votes */}
               <div className="space-y-2">
                 <div className="flex justify-between items-baseline">
-                  <label className="text-xs font-medium text-neutral-300">Backers Voting "Approve Release":</label>
+                  <label className="text-xs font-medium text-neutral-300">Backers Voting &quot;Approve Release&quot;:</label>
                   <span className="text-xs font-mono font-bold text-white">
                     {simVotesFor} of {simTotalVotes} Backers ({Math.round((simVotesFor / simTotalVotes) * 100)}%)
                   </span>

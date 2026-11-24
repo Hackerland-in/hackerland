@@ -29,7 +29,7 @@ interface PcbDesignerCanvasProps {
   onAddTrace: (trace: CopperTraceSegment) => void;
   onToggleTrackCut: (x: number, y: number) => void;
   onAddVia: (x: number, y: number) => void;
-  onToggleComponentParam?: (id: string, paramKey: string, value: any) => void;
+  onToggleComponentParam?: (id: string, paramKey: string, value: number | boolean | string) => void;
 }
 
 export function PcbDesignerCanvas({

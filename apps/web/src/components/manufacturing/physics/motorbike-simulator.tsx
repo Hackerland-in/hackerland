@@ -636,7 +636,7 @@ export function MotorbikePhysicsSimulator() {
                 <span className="text-[11px] font-mono text-fg-muted uppercase block mb-1">Engine Archetype</span>
                 <select
                   value={engineType}
-                  onChange={(e) => setEngineType(e.target.value as any)}
+                  onChange={(e) => setEngineType(e.target.value as typeof engineType)}
                   className="w-full px-2.5 py-1.5 rounded-lg bg-surface-2 border border-hairline text-caption font-medium text-fg"
                 >
                   <option value="Inline-4 1000cc">Inline-4 1000cc (215 HP)</option>

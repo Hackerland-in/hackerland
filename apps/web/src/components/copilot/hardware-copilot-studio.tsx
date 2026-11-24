@@ -256,7 +256,7 @@ export function HardwareCopilotStudio() {
                     <label className="block text-xs font-mono text-neutral-400 mb-1">Copper Foil Weight</label>
                     <select
                       value={copperWeight}
-                      onChange={(e) => setCopperWeight(parseFloat(e.target.value) as any)}
+                      onChange={(e) => setCopperWeight(parseFloat(e.target.value) as typeof copperWeight)}
                       className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
                     >
                       <option value="0.5">0.5 oz (18 µm)</option>

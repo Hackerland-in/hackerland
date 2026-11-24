@@ -229,7 +229,7 @@ export function WebSerialFlasherModal({
         <div className="h-44 overflow-y-auto rounded-xl border border-stone-900 bg-black p-3 font-mono text-[11px] text-emerald-400 space-y-1">
           {terminalLogs.length === 0 ? (
             <span className="text-stone-600">
-              // Plug in your board over USB and click &apos;Connect &amp; Flash Firmware&apos; below.
+              {'//'} Plug in your board over USB and click &apos;Connect &amp; Flash Firmware&apos; below.
             </span>
           ) : (
             terminalLogs.map((log, idx) => <div key={`log-${idx}`}>{log}</div>)

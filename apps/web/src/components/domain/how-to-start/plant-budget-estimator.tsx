@@ -112,7 +112,7 @@ export function PlantBudgetEstimator() {
           </label>
           <select
             value={scaleTier}
-            onChange={(e) => setScaleTier(e.target.value as any)}
+            onChange={(e) => setScaleTier(e.target.value as typeof scaleTier)}
             className="w-full px-2.5 py-1.5 rounded-lg bg-surface-2 border border-hairline text-caption font-medium text-fg"
           >
             <option value="pilot">Pilot Micro-Unit (Fast Bring-up)</option>
@@ -127,7 +127,7 @@ export function PlantBudgetEstimator() {
           </label>
           <select
             value={machineryTier}
-            onChange={(e) => setMachineryTier(e.target.value as any)}
+            onChange={(e) => setMachineryTier(e.target.value as typeof machineryTier)}
             className="w-full px-2.5 py-1.5 rounded-lg bg-surface-2 border border-hairline text-caption font-medium text-fg"
           >
             <option value="domestic">Domestic Indian Machinery</option>
@@ -142,7 +142,7 @@ export function PlantBudgetEstimator() {
           </label>
           <select
             value={shiftCount}
-            onChange={(e) => setShiftCount(Number(e.target.value) as any)}
+            onChange={(e) => setShiftCount(Number(e.target.value) as typeof shiftCount)}
             className="w-full px-2.5 py-1.5 rounded-lg bg-surface-2 border border-hairline text-caption font-medium text-fg"
           >
             <option value={1}>1 Shift (8 Hours / Day)</option>

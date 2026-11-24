@@ -61,7 +61,7 @@ export function TestbedDetailView({ testbed }: TestbedDetailViewProps) {
             {testbed.name}
           </h1>
           <p className="mt-2 text-sm text-stone-300 font-mono">
-            Host: <strong className="text-white">{testbed.hostLab.name}</strong> //{' '}
+            Host: <strong className="text-white">{testbed.hostLab.name}</strong> {'//'}{' '}
             {testbed.hostLab.institution} ({testbed.hostLab.city}, {testbed.hostLab.state})
           </p>
           <p className="mt-3 text-sm text-stone-400 leading-relaxed max-w-4xl">

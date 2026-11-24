@@ -27,7 +27,7 @@ export interface PinDefinition {
 export interface ComponentFootprint {
   id: string;
   name: string;
-  packageType: 'DIP' | 'AXIAL' | 'RADIAL' | 'SMD_0805' | 'SMD_SOIC' | 'TO-220' | 'TO-92' | 'MODULE' | 'TEST';
+  packageType: 'DIP' | 'AXIAL' | 'RADIAL' | 'SMD_0805' | 'SMD_SOIC' | 'TO-220' | 'TO-92' | 'MODULE' | 'TEST' | 'THT';
   widthMm: number;
   heightMm: number;
   pins: PinDefinition[];
