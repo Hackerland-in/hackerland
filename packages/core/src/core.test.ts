@@ -37,7 +37,6 @@ import {
   calculateSmpsBuck,
   calculateThermalHeatsink,
   auditBomItems,
-  componentSourcingItemSchema,
   calculateCampaignProgress,
   calculateMilestonePayout,
   verifyMilestoneQuorum,
@@ -45,7 +44,6 @@ import {
   campaignSchema,
   calculateBomMarkup,
   validatePinoutAnnotation,
-  filterTeardownsByCategory,
   teardownSubmissionSchema,
   formatSalaryRangeInr,
   calculateHiringMatchScore,
@@ -59,15 +57,12 @@ import {
   calculateFlashPartitionLayout,
   filterFirmwareRegistry,
   formatFirmwareBytes,
-  firmwareRegistryItemSchema,
   matchComplianceRequirements,
   evaluatePreComplianceReadiness,
   formatComplianceCost,
-  complianceRoadmapItemSchema,
   validateScpiCommandScript,
   calculateTestbedBookingCost,
   filterTestbedFacilities,
-  testbedFacilitySchema,
   sprintEntrySchema,
   calculateSprintProgress,
   validateMilestoneSubmission,
@@ -81,7 +76,6 @@ import {
   calculatePnpFeederSetup,
   calculatePcbaTurnkeyCost,
   validatePnpCentroidCsv,
-  filterAssemblyProjects,
   emcScanProjectSchema,
   evaluateEmcCompliance,
   calculateCommonModeChoke,
@@ -109,6 +103,10 @@ import {
   filterCanBusProjects,
   canBusProjectSchema,
   type CanBusProject,
+  type ClubChapter,
+  type DefensivePublication,
+  type JuniorChallenge,
+  type TestbedFacility,
 } from './index';
 
 describe('tracks', () => {
@@ -479,7 +477,7 @@ describe('ecosystem domain schemas', () => {
 });
 
 describe('clubs and equipment sharing schema', () => {
-  const sampleClub = {
+  const sampleClub: ClubChapter = {
     id: 'club_kochi_maker',
     slug: 'kochi-maker-village-atl',
     name: 'Maker Village Kochi ATL & FabLab Hub',
@@ -564,7 +562,7 @@ describe('clubs and equipment sharing schema', () => {
   });
 
   it('filters clubs by state and category properly', () => {
-    const clubs = [sampleClub as any];
+    const clubs = [sampleClub];
     const filteredKerala = filterClubs(clubs, { state: 'Kerala' });
     expect(filteredKerala.length).toBe(1);
 
@@ -577,7 +575,7 @@ describe('clubs and equipment sharing schema', () => {
 });
 
 describe('open invention network and ip defense ledger schema', () => {
-  const samplePublication = {
+  const samplePublication: DefensivePublication = {
     id: 'ip-led-2026-0814',
     title: 'Decentralized CAN-FD Active Cell Balancing BMS Architecture',
     inventor: {
@@ -635,12 +633,12 @@ describe('open invention network and ip defense ledger schema', () => {
     const validHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
     const fakeHash = '0000000000000000000000000000000000000000000000000000000000000000';
 
-    expect(verifyInventionIntegrity(samplePublication as any, validHash)).toBe(true);
-    expect(verifyInventionIntegrity(samplePublication as any, fakeHash)).toBe(false);
+    expect(verifyInventionIntegrity(samplePublication, validHash)).toBe(true);
+    expect(verifyInventionIntegrity(samplePublication, fakeHash)).toBe(false);
   });
 
   it('generates statutory legal affidavit with 35 USC 102 and Indian Patents Act Sec 29 citations', () => {
-    const affidavit = generatePriorArtAffidavitText(samplePublication as any);
+    const affidavit = generatePriorArtAffidavitText(samplePublication);
     expect(affidavit).toContain('CERTIFICATE OF DEFENSIVE PUBLICATION');
     expect(affidavit).toContain('ip-led-2026-0814');
     expect(affidavit).toContain('35 § 102(a)(1)');
@@ -673,7 +671,7 @@ describe('open invention network and ip defense ledger schema', () => {
   });
 
   it('filters defensive ledger by category and search keyword', () => {
-    const ledger = [samplePublication as any];
+    const ledger = [samplePublication];
     const matchCategory = filterDefensiveLedger(ledger, { category: 'clean_mobility_bms' });
     expect(matchCategory.length).toBe(1);
 
@@ -686,7 +684,7 @@ describe('open invention network and ip defense ledger schema', () => {
 });
 
 describe('young innovators track and safety sandbox schema', () => {
-  const sampleJuniorChallenge = {
+  const sampleJuniorChallenge: JuniorChallenge = {
     id: 'chal_soil_moisture_bot',
     title: 'Smart Plant Hydration Alert Buddy',
     ageBracket: 'junior_8_11',
@@ -756,7 +754,7 @@ describe('young innovators track and safety sandbox schema', () => {
   });
 
   it('filters junior challenges by age bracket and difficulty', () => {
-    const challenges = [sampleJuniorChallenge as any];
+    const challenges = [sampleJuniorChallenge];
     const matchAge = filterJuniorChallenges(challenges, { ageBracket: 'junior_8_11' });
     expect(matchAge.length).toBe(1);
 
@@ -1511,7 +1509,7 @@ describe('remote testbeds and high-capex laboratory equipment schema', () => {
   });
 
   it('filters testbed facilities by city and equipment category', () => {
-    const items = [
+    const items: TestbedFacility[] = [
       {
         id: 'tb-1',
         slug: 'keysight-rf-analyzer',

@@ -293,7 +293,7 @@ export function calculateRfTransmissionLine(
   const rs = 1 / (5.8e7 * skinDepthM);
   // Conductor loss approx: alpha_c = (8.686 * Rs) / (w_m * z0) dB/m
   const wm = w / 1000;
-  let rawAlphaC_DbPerM = (8.686 * rs) / (wm * Math.max(10, z0));
+  const rawAlphaC_DbPerM = (8.686 * rs) / (wm * Math.max(10, z0));
   // Roughness correction factor: K_sr = 1 + (2/pi) * arctan(1.4 * (Rq / skinDepth)^2)
   const rq_m = copperRoughnessUm * 1e-6;
   const roughnessFactor = 1 + (2 / Math.PI) * Math.atan(1.4 * Math.pow(rq_m / skinDepthM, 2));

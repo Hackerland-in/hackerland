@@ -111,7 +111,6 @@ export function simulateCanBus(rawParams: CanSimulationParams): CanSimulationRes
     baudRateKbps,
     clockFrequencyMhz,
     busLengthMeters,
-    numberOfNodes,
     averagePayloadBytes,
     totalMessageFrequencyHz,
     termination,

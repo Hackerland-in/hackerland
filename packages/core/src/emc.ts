@@ -141,7 +141,6 @@ export function calculateCommonModeChoke(
   // Size Y-capacitors (line-to-chassis ground) to keep leakage current safe (sub-0.5mA at 230V AC)
   // Recommended Cy for typical SMPS: 2.2nF to 4.7nF
   const cNf = 2.2;
-  const cFarads = cNf * 1e-9;
 
   // Insertion loss attenuation calculation:
   // Attenuation = 20 * log10(1 + (2 * pi * f * L) / (2 * 50))

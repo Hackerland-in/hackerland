@@ -163,19 +163,10 @@ export function simulateSolarMppt(
 
   // 3. Battery Bank Matching & Synchronous Buck Converter Sizing
   let nominalBatteryVoltage = 48.0;
-  let absorptionVoltage = 56.8; // for 16S LFP (3.55V/cell)
   if (targetBatteryType === 'lfp_24v') {
     nominalBatteryVoltage = 24.0;
-    absorptionVoltage = 28.4;
-  } else if (targetBatteryType === 'lfp_12v') {
+  } else if (targetBatteryType === 'lfp_12v' || targetBatteryType === 'lead_acid_12v') {
     nominalBatteryVoltage = 12.0;
-    absorptionVoltage = 14.2;
-  } else if (targetBatteryType === 'lead_acid_48v') {
-    nominalBatteryVoltage = 48.0;
-    absorptionVoltage = 57.6;
-  } else if (targetBatteryType === 'lead_acid_12v') {
-    nominalBatteryVoltage = 12.0;
-    absorptionVoltage = 14.4;
   }
 
   // Buck converter duty cycle: D = V_out / V_in
