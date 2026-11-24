@@ -2,15 +2,10 @@
 
 import { useState, useRef } from 'react';
 import {
-  Cpu,
-  Layers,
   Sparkles,
-  ExternalLink,
   Plus,
   Trash2,
   Download,
-  Info,
-  CheckCircle2,
   X,
   Crosshair,
 } from 'lucide-react';

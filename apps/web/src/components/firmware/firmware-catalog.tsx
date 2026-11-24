@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import type { FirmwareRegistryItem, FirmwareTargetArch, FirmwareCategory } from '@hackerland/core';
-import { filterFirmwareRegistry, formatFirmwareBytes } from '@hackerland/core';
+import type { FirmwareRegistryItem } from '@hackerland/core';
+import { filterFirmwareRegistry } from '@hackerland/core';
 import { WebSerialFlasherModal } from './webserial-flasher-modal';
 
 interface FirmwareCatalogProps {

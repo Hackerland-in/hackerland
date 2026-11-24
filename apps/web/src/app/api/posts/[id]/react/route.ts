@@ -1,5 +1,4 @@
 import { getAuth, isAuthConfigured } from '@/lib/auth';
-import { ALL_POSTS } from '@/lib/data/fixtures/posts';
 import { incrementPostReaction } from '@/lib/data/feed-store';
 import { connectDb, PostModel, isValidObjectId } from '@hackerland/db';
 

@@ -11,11 +11,8 @@ import {
   Copy,
   Check,
   ArrowLeft,
-  ExternalLink,
   Cpu,
   Layers,
-  Code,
-  Box,
 } from 'lucide-react';
 import { Button } from '@hackerland/ui';
 import { PriorArtCertificateModal } from './prior-art-certificate-modal';

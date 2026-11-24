@@ -6,8 +6,6 @@ import {
   X,
   ShieldCheck,
   CheckCircle2,
-  FileCode,
-  Lock,
   Sparkles,
 } from 'lucide-react';
 import { Button } from '@hackerland/ui';

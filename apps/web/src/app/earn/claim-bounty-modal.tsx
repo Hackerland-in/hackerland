@@ -7,7 +7,7 @@ import { Badge, Button, Input, Textarea } from '@hackerland/ui';
 import { OPPORTUNITY_KIND_LABEL, TRACK_META } from '@hackerland/core';
 import { Money } from '@/components/domain/money';
 import { EscrowMilestoneStepper } from '@/components/domain/escrow-milestone-stepper';
-import { X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
 
 export interface ClaimBountyModalProps {
   opportunity: OpportunityView | null;

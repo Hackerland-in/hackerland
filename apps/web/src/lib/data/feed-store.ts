@@ -3,7 +3,6 @@ import { ALL_POSTS } from './fixtures/posts';
 import { PERSON_MEERA } from './fixtures/people';
 
 declare global {
-  // eslint-disable-next-line no-var
   var __hackerlandPostsRegistry: FeedPost[] | undefined;
 }
 

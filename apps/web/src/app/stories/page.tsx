@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { listBuildStories } from '@/lib/data/stories-data';
 import { Badge, Button, Card } from '@hackerland/ui';
-import { BookOpen, Sparkles, Compass, ArrowRight, ShieldCheck, Cpu, Flame, Layers } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export const metadata = {
   title: 'Build Journey Archive & Founder Histories',

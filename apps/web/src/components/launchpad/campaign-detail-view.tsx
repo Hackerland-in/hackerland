@@ -4,14 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
-  Rocket,
-  CheckCircle2,
   AlertCircle,
   ExternalLink,
   ChevronLeft,
   Vote,
   Cpu,
-  Clock,
   Layers,
   Sparkles,
   Lock,

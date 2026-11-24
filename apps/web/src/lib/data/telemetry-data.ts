@@ -12,7 +12,7 @@ function generateQuadcopterTelemetry() {
     let roll = 0;
     let pitch = 0;
     let current = 8.5;
-    let batteryV = 50.2 - (i / 60) * 2.8; // discharge from 50.2 to 47.4V
+    const batteryV = 50.2 - (i / 60) * 2.8; // discharge from 50.2 to 47.4V
 
     if (t < 10) {
       alt = (t / 10) * 35;

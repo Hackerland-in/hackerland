@@ -3,20 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Badge, Button, cn } from '@hackerland/ui';
+import { Badge, cn } from '@hackerland/ui';
 import {
   RotateCcw,
-  Eye,
   Maximize2,
   Minimize2,
   Box,
   Compass,
   Zap,
   Layers,
-  Sparkles,
-  Camera,
-  Activity,
-  Flame,
 } from 'lucide-react';
 
 export type Lab3DModelType = 'drone' | 'rocket' | 'car' | 'ev' | 'motorbike' | 'bicycle' | 'mcu';
@@ -134,7 +129,7 @@ export function Simulator3DLab({
     buildModel(modelType, vehicleGroup, rotatingPartsRef.current, thrustEffectsRef.current);
 
     // Animation Loop
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     const animate = () => {
       animFrameRef.current = requestAnimationFrame(animate);

@@ -11,18 +11,12 @@ import {
   Plus,
   Trash2,
   Sliders,
-  Gauge,
-  Flame,
   Disc,
-  Timer,
-  ChevronRight,
 } from 'lucide-react';
 import {
-  calculatePacejkaForce,
   calculateAeroDrag,
   calculateAeroDownforce,
   calculateAirDensity,
-  calculateLongitudinalLoadTransfer,
 } from './physics-engine';
 
 // ==========================================
@@ -203,7 +197,7 @@ export function CarPhysicsSimulator() {
 
       if (isRunning) {
         setSpeedKmh((prevKmh) => {
-          let v = (prevKmh * 1000) / 3600; // m/s
+          const v = (prevKmh * 1000) / 3600; // m/s
           const airDensity = calculateAirDensity(50, 20);
 
           // Transmission & Engine RPM calculation

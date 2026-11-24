@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Card, Badge } from '@hackerland/ui';
-import { PieChart, Sliders, DollarSign, Users, TrendingUp } from 'lucide-react';
+import { PieChart } from 'lucide-react';
 
 export function CapTableCalculator() {
   const [founderEquitySplit, setFounderEquitySplit] = useState<number>(50); // Founder 1 vs Founder 2

@@ -2,11 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Skull,
-  AlertTriangle,
   ArrowRight,
-  TrendingDown,
-  Sparkles,
-  HelpCircle,
   ShieldAlert,
 } from 'lucide-react';
 import { MUSEUM_EXHIBITS } from '@/lib/data/museum-data';

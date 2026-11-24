@@ -1,14 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  Search,
   Cpu,
-  Layers,
   ArrowRight,
-  ShieldCheck,
-  Zap,
   Sparkles,
-  Banknote,
   Compass,
 } from 'lucide-react';
 import { TEARDOWNS_DATA } from '@/lib/data/teardowns-data';

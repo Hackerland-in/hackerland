@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Radar, Compass, Sparkles, Globe, ShieldCheck } from 'lucide-react';
+import { Radar } from 'lucide-react';
 import { listObservatoryItems } from '@/lib/data/observatory-data';
 import { TechRadarView } from '@/components/observatory/tech-radar-view';
 

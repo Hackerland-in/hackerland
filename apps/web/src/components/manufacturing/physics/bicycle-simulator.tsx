@@ -11,11 +11,6 @@ import {
   Plus,
   Trash2,
   Sliders,
-  Shield,
-  Gauge,
-  Wind,
-  CheckCircle2,
-  TrendingUp,
 } from 'lucide-react';
 import {
   calculateAeroDrag,
@@ -230,7 +225,7 @@ export function BicyclePhysicsSimulator() {
 
       if (isRunning) {
         setSpeedKmh((prevKmh) => {
-          let v = (prevKmh * 1000) / 3600; // m/s
+          const v = (prevKmh * 1000) / 3600; // m/s
           const airDensity = calculateAirDensity(elevationMeters, 22);
 
           // Total drive power = rider power + custom motor assist

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Users, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Users, ChevronRight } from 'lucide-react';
 import { SQUADS_DATA, getSquadRoomBySlug } from '@/lib/data/squads-data';
 import { SquadRoomWorkspace } from '@/components/squad/squad-room-workspace';
 

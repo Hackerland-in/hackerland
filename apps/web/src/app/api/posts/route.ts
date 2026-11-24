@@ -1,5 +1,4 @@
 import { getAuth, isAuthConfigured } from '@/lib/auth';
-import { ALL_POSTS } from '@/lib/data/fixtures/posts';
 import { listStoredPosts, addStoredPost } from '@/lib/data/feed-store';
 import { POST_KINDS, type PostKind } from '@hackerland/core';
 import { connectDb, PostModel } from '@hackerland/db';

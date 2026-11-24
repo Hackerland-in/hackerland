@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Badge, StatusDot } from '@hackerland/ui';
+import { StatusDot } from '@hackerland/ui';
 import { getPlatformStats } from '@/lib/data/queries';
-import { Sparkles, ExternalLink, ShieldCheck } from 'lucide-react';
+import { ExternalLink, ShieldCheck } from 'lucide-react';
 
 export async function AppFooter() {
   const stats = await getPlatformStats();

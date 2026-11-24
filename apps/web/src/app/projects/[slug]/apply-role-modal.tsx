@@ -6,7 +6,7 @@ import type { OpenRole } from '@/lib/data/types';
 import { Badge, Button, Input, Textarea } from '@hackerland/ui';
 import { TRACK_META } from '@hackerland/core';
 import { formatRoleCompensation } from '@/components/domain/role-card';
-import { X, CheckCircle2, Sparkles, ExternalLink } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
 
 export interface ApplyRoleModalProps {
   slug: string;

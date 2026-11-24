@@ -9,11 +9,9 @@ import {
   Atom,
   FolderKanban,
   ArrowRight,
-  ExternalLink,
   Sparkles,
-  Filter,
 } from 'lucide-react';
-import { Badge, Button, EmptyState, SectionHeader, cn } from '@hackerland/ui';
+import { Button, EmptyState, SectionHeader, cn } from '@hackerland/ui';
 import { searchGlobalPlatform, type SearchResultItem } from '@/lib/search/search-index';
 
 export const metadata: Metadata = {

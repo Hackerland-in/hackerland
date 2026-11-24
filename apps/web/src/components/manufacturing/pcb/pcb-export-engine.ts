@@ -1,4 +1,4 @@
-import type { PlacedComponent, CopperTraceSegment, PcbVia, BoardSubstrate } from './pcb-types';
+import type { PlacedComponent, CopperTraceSegment, PcbVia } from './pcb-types';
 import { getPinAbsolutePosition } from './pcb-sim-engine';
 
 export interface PcbExportPackage {

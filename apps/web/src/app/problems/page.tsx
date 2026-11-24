@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { listProblems } from '@/lib/data/problems-data';
 import { Badge, Button, Card } from '@hackerland/ui';
-import { ShieldCheck, Compass, Target, ArrowRight, Sparkles, AlertCircle, Coins, Users } from 'lucide-react';
+import { Target, ArrowRight, Coins, Users } from 'lucide-react';
 
 export const metadata = {
   title: 'The Unsolved Problems Library',

@@ -1,11 +1,10 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import { PcbStudio } from '@/components/manufacturing/pcb/pcb-studio';
 import { Badge, Card } from '@hackerland/ui';
-import { Layers, Cpu, Zap, Activity, ShieldCheck, Download, Sparkles, BookOpen } from 'lucide-react';
+import { Layers, Zap, Download } from 'lucide-react';
 
 export default function PcbStudioPage() {
   return (

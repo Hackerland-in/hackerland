@@ -3,20 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  Compass,
-  Radar,
   Sparkles,
   ExternalLink,
-  ShieldCheck,
-  Zap,
-  Layers,
   ArrowRight,
   Lightbulb,
-  FileText,
-  DollarSign,
   TrendingUp,
 } from 'lucide-react';
-import type { ObservatoryItem, RadarQuadrant, RadarRing, ObservatoryCategory } from '@hackerland/core';
+import type { ObservatoryItem, RadarRing, ObservatoryCategory } from '@hackerland/core';
 
 interface Props {
   items: ObservatoryItem[];

@@ -5,14 +5,10 @@ import Link from 'next/link';
 import { Badge, Button, Card } from '@hackerland/ui';
 import {
   ShieldCheck,
-  Award,
   Layers,
-  Cpu,
   GitPullRequest,
-  CheckCircle2,
   Share2,
   Sparkles,
-  ExternalLink,
   Users,
 } from 'lucide-react';
 

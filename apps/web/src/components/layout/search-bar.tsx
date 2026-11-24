@@ -14,10 +14,9 @@ import {
   Atom,
   FolderKanban,
   Sparkles,
-  Command,
   CornerDownLeft,
 } from 'lucide-react';
-import { Badge, IconButton, cn } from '@hackerland/ui';
+import { IconButton, cn } from '@hackerland/ui';
 import { STATIC_SEARCH_CATALOG, type SearchResultItem } from '@/lib/search/search-catalog';
 
 export function SearchBar() {

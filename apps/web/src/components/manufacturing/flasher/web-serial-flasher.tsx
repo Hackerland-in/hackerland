@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import {
   Usb,
   Cpu,
@@ -9,13 +8,9 @@ import {
   Play,
   RotateCcw,
   Zap,
-  CheckCircle2,
   AlertTriangle,
   Send,
   Trash2,
-  Download,
-  Info,
-  ShieldCheck,
 } from 'lucide-react';
 
 interface FirmwarePreset {

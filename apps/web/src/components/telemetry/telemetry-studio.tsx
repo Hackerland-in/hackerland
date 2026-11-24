@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import type { TelemetryProfile, TelemetrySample } from '@hackerland/core';
+import type { TelemetryProfile } from '@hackerland/core';
 import {
   computeTelemetryStats,
   detectTelemetryAnomalies,

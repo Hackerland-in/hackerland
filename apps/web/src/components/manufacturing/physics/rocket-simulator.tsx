@@ -11,12 +11,7 @@ import {
   Plus,
   Trash2,
   Sliders,
-  Flame,
-  Gauge,
-  Rocket,
-  ShieldAlert,
 } from 'lucide-react';
-import { calculateAirDensity } from './physics-engine';
 
 export interface CustomRocketComponent {
   id: string;

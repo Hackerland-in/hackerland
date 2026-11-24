@@ -2,7 +2,6 @@ import type { ProfileView } from './types';
 import { ALL_PROFILES } from './fixtures/people';
 
 declare global {
-  // eslint-disable-next-line no-var
   var __hackerlandProfileRegistry: Map<string, ProfileView> | undefined;
 }
 

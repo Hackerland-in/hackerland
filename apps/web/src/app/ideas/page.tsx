@@ -8,14 +8,9 @@ import { Badge, Button, Card } from '@hackerland/ui';
 import {
   Sparkles,
   Lightbulb,
-  Compass,
   ArrowRight,
-  CheckCircle2,
-  Users,
-  Layers,
   Heart,
   Plus,
-  BookOpen,
 } from 'lucide-react';
 
 const STAGES: { stage: IdeaStage; number: number; name: string; desc: string }[] = [

@@ -11,9 +11,6 @@ import {
   Plus,
   Trash2,
   Sliders,
-  Compass,
-  Wind,
-  Layers,
 } from 'lucide-react';
 import { calculateAirDensity } from './physics-engine';
 
@@ -141,7 +138,7 @@ export function DronePhysicsSimulator() {
 
         // Integrate vertical position
         setVerticalVelocityMps((prevV) => {
-          let newV = prevV + verticalAcc * dt;
+          const newV = prevV + verticalAcc * dt;
           return newV;
         });
 

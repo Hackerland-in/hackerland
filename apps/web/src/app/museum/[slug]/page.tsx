@@ -8,9 +8,6 @@ import {
   Lightbulb,
   Sparkles,
   ChevronRight,
-  TrendingDown,
-  ShieldCheck,
-  RotateCcw,
 } from 'lucide-react';
 import { MUSEUM_EXHIBITS, getMuseumExhibitBySlug } from '@/lib/data/museum-data';
 

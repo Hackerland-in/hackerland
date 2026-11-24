@@ -1,31 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { Card, Badge, Button, SectionHeader } from '@hackerland/ui';
+import { Card, Badge, Button } from '@hackerland/ui';
 import {
   GraduationCap,
   Play,
   ExternalLink,
   BookOpen,
   PieChart,
-  TrendingUp,
   FileText,
   Search,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Sparkles,
-  Users,
-  Compass,
-  ArrowRight,
-  ShieldCheck,
 } from 'lucide-react';
 import {
   ENTREPRENEUR_COURSES,
   CURATED_ESSAYS,
   OPEN_SOURCE_FOUNDER_DOCS,
-  type EntrepreneurCourse,
 } from './entrepreneurship-data';
 import { CapTableCalculator } from './cap-table-calculator';
 import { UnitEconomicsCalculator } from './unit-economics-calculator';

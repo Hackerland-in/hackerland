@@ -2,21 +2,15 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import type { DefensivePublication, HardwareLicense, InventionCategory } from '@hackerland/core';
+import type { DefensivePublication } from '@hackerland/core';
 import { verifyInventionIntegrity } from '@hackerland/core';
 import {
   Search,
   ShieldCheck,
-  Lock,
   FileText,
-  Download,
   CheckCircle2,
   AlertCircle,
-  ExternalLink,
   ChevronRight,
-  Sparkles,
-  Layers,
-  Cpu,
   PlusCircle,
   Hash,
 } from 'lucide-react';

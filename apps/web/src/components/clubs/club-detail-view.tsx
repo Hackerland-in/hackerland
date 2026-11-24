@@ -6,16 +6,12 @@ import type { ClubChapter, ClubEquipment } from '@hackerland/core';
 import {
   MapPin,
   Mail,
-  Calendar,
-  Users,
   ShieldCheck,
-  Cpu,
   Trophy,
   ArrowLeft,
   Wrench,
   CheckCircle2,
   Clock,
-  ExternalLink,
   GraduationCap,
   Layers,
 } from 'lucide-react';

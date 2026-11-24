@@ -11,10 +11,6 @@ import {
   Plus,
   Trash2,
   Sliders,
-  BatteryCharging,
-  Flame,
-  Thermometer,
-  Gauge,
 } from 'lucide-react';
 import { calculateAeroDrag } from './physics-engine';
 
@@ -128,7 +124,7 @@ export function EvPowertrainSimulator() {
 
       if (isRunning) {
         setSpeedKmh((prevKmh) => {
-          let v = (prevKmh * 1000) / 3600; // m/s
+          const v = (prevKmh * 1000) / 3600; // m/s
           const totalVehicleMassKg = 2150; // EV battery mass
           const cdA = 0.23 * 2.35; // Aerodynamic drag
           const aeroDrag = calculateAeroDrag(v, cdA, 1.225);

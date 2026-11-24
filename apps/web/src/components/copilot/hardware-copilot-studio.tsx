@@ -2,11 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import type {
-  ComponentSourcingItem,
   BomAuditItem,
-  IpcTraceInputs,
-  SmpsBuckInputs,
-  ThermalInputs,
 } from '@hackerland/core';
 import {
   calculateIpc2152Trace,
@@ -15,25 +11,12 @@ import {
   auditBomItems,
 } from '@hackerland/core';
 import {
-  Zap,
   Search,
   ShieldAlert,
   MessageSquare,
   Calculator,
-  Cpu,
-  Layers,
-  CheckCircle2,
-  AlertTriangle,
-  AlertCircle,
-  Copy,
-  Check,
   Send,
-  Sparkles,
-  ExternalLink,
-  ChevronRight,
   Flame,
-  Gauge,
-  HelpCircle,
 } from 'lucide-react';
 import { Button } from '@hackerland/ui';
 import {

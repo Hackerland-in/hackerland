@@ -5,11 +5,6 @@ import {
   AlertTriangle,
   ShieldCheck,
   Zap,
-  HelpCircle,
-  Sparkles,
-  ArrowRight,
-  TrendingDown,
-  Info,
 } from 'lucide-react';
 import { evaluateHardwareFailureRisk, type FailureRiskAssessment } from '@hackerland/core';
 

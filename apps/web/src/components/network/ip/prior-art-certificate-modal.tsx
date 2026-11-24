@@ -9,7 +9,6 @@ import {
   Check,
   ShieldCheck,
   Download,
-  FileText,
   Lock,
 } from 'lucide-react';
 import { Button } from '@hackerland/ui';

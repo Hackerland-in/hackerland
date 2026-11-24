@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Card, Badge, Button } from '@hackerland/ui';
-import { Calculator, DollarSign, Factory, Sliders, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Card, Badge } from '@hackerland/ui';
+import { Calculator } from 'lucide-react';
 import { PLANT_BLUEPRINTS } from './how-to-start-data';
 
 export function PlantBudgetEstimator() {

@@ -12,17 +12,14 @@ import {
   AlertCircle,
   ExternalLink,
   ChevronRight,
-  TrendingUp,
   Cpu,
   HeartPulse,
   Leaf,
   Zap,
-  Building2,
   Lock,
-  ArrowRight,
   Sparkles,
 } from 'lucide-react';
-import type { Campaign, CampaignCategory } from '@hackerland/core';
+import type { CampaignCategory } from '@hackerland/core';
 import {
   calculateCampaignProgress,
   calculateMilestonePayout,

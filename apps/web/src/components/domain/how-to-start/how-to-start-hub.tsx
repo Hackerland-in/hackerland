@@ -5,25 +5,17 @@ import Link from 'next/link';
 import { Card, Badge, Button } from '@hackerland/ui';
 import {
   Factory,
-  Cpu,
-  Layers,
   Wrench,
-  Bike,
-  Smartphone,
-  BatteryCharging,
   Compass,
   Search,
   ExternalLink,
   ChevronDown,
   ChevronUp,
   MapPin,
-  CheckCircle2,
-  AlertCircle,
   TrendingUp,
   ShieldCheck,
-  Zap,
 } from 'lucide-react';
-import { PLANT_BLUEPRINTS, type PlantBlueprint } from './how-to-start-data';
+import { PLANT_BLUEPRINTS } from './how-to-start-data';
 import { PlantBudgetEstimator } from './plant-budget-estimator';
 
 export function HowToStartHub() {

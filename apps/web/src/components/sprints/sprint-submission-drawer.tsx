@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { SprintEntry, SprintMilestone } from '@hackerland/core';
+import type { SprintEntry } from '@hackerland/core';
 import { validateMilestoneSubmission } from '@hackerland/core';
 
 interface SprintSubmissionDrawerProps {

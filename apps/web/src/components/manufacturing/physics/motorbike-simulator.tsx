@@ -11,13 +11,9 @@ import {
   Plus,
   Trash2,
   Sliders,
-  Disc,
-  Compass,
-  AlertTriangle,
 } from 'lucide-react';
 import {
   calculateAeroDrag,
-  calculateAeroDownforce,
   calculateAirDensity,
 } from './physics-engine';
 
@@ -169,7 +165,7 @@ export function MotorbikePhysicsSimulator() {
 
       if (isRunning) {
         setSpeedKmh((prevKmh) => {
-          let v = (prevKmh * 1000) / 3600; // m/s
+          const v = (prevKmh * 1000) / 3600; // m/s
           const airDensity = calculateAirDensity(100, 24);
 
           // CdA varies with lean angle and rider tuck

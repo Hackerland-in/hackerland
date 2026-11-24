@@ -9,24 +9,17 @@ import {
   Lock,
   Unlock,
   Clock,
-  Sparkles,
   ArrowRight,
   ExternalLink,
   Kanban,
-  FileCode2,
-  DollarSign,
-  AlertCircle,
   Plus,
   Send,
-  Cpu,
-  Layers,
   Award,
 } from 'lucide-react';
 import type {
   ProjectSquadRoom,
   MilestoneEscrow,
   KanbanTask,
-  SquadMemberRole,
 } from '@hackerland/core';
 
 interface Props {

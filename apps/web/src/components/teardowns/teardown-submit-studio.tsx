@@ -6,16 +6,13 @@ import {
   Compass,
   Cpu,
   Layers,
-  Banknote,
   CheckCircle2,
-  AlertCircle,
   Plus,
   Trash2,
   Sparkles,
   ChevronRight,
   ChevronLeft,
   ArrowRight,
-  ShieldCheck,
 } from 'lucide-react';
 import type { TeardownCategory, TeardownPinoutAnnotation, TeardownSubsystem, TeardownBOMItem } from '@hackerland/core';
 import { calculateBomMarkup } from '@hackerland/core';

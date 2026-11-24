@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Cpu, Factory, FileDown } from 'lucide-react';
+import { ArrowLeft, Cpu, Factory } from 'lucide-react';
 import { RFQCalculator } from '@/components/manufacturing/rfq/rfq-calculator';
 
 export const metadata: Metadata = {

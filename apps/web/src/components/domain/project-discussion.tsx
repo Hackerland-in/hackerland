@@ -6,22 +6,15 @@ import {
   Avatar,
   Badge,
   Button,
-  Card,
-  Chip,
   Panel,
   Textarea,
   cn,
 } from '@hackerland/ui';
 import {
-  MessageSquare,
   ThumbsUp,
   Sparkles,
   Send,
-  HelpCircle,
-  Lightbulb,
-  Rocket,
   CheckCircle2,
-  ExternalLink,
 } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { formatDate } from '@/lib/format';

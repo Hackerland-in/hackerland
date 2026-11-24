@@ -2,22 +2,19 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import type { ClubChapter, ClubEquipment, ClubCategory } from '@hackerland/core';
+import type { ClubChapter, ClubEquipment } from '@hackerland/core';
 import {
   Search,
   MapPin,
-  Users,
   Cpu,
   Trophy,
   ShieldCheck,
   ChevronRight,
-  Sparkles,
-  Calendar,
   Layers,
   Wrench,
   GraduationCap,
 } from 'lucide-react';
-import { Badge, Button } from '@hackerland/ui';
+import { Button } from '@hackerland/ui';
 import { EquipmentReservationModal } from './equipment-reservation-modal';
 
 interface ClubsDirectoryProps {

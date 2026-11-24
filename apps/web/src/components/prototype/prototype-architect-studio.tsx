@@ -6,17 +6,11 @@ import {
   Sparkles,
   Cpu,
   Layers,
-  Wrench,
   DollarSign,
   Users,
   Calendar,
-  ArrowRight,
-  ExternalLink,
-  ChevronRight,
   Zap,
-  ShieldCheck,
   CheckCircle2,
-  Share2,
   Copy,
 } from 'lucide-react';
 import type { PrototypeArchitecturePlan, PrototypeBlockCategory } from '@hackerland/core';

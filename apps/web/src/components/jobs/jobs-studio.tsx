@@ -11,17 +11,12 @@ import {
   Microchip,
   Wrench,
   Search,
-  Building2,
   MapPin,
-  Banknote,
   Sparkles,
   ChevronRight,
   ShieldCheck,
-  CheckCircle2,
-  ExternalLink,
-  GraduationCap,
 } from 'lucide-react';
-import type { HardwareDomain, JobRoleType, LocationType, HardwareJobPosting } from '@hackerland/core';
+import type { HardwareDomain, JobRoleType, LocationType } from '@hackerland/core';
 import { formatSalaryRangeInr, filterHardwareJobs, calculateHiringMatchScore } from '@hackerland/core';
 import { HARDWARE_JOBS_REGISTRY } from '@/lib/data/jobs-data';
 

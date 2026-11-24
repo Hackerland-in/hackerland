@@ -9,7 +9,6 @@ import {
   Factory,
   Layers,
   Wrench,
-  Sparkles,
   Box,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
