@@ -2,15 +2,10 @@
 
 import { useState, useRef } from 'react';
 import {
-  Cpu,
-  Layers,
   Sparkles,
-  ExternalLink,
   Plus,
   Trash2,
   Download,
-  Info,
-  CheckCircle2,
   X,
   Crosshair,
 } from 'lucide-react';
@@ -232,7 +227,7 @@ export function PcbPinoutAnnotator({
 
             {/* Board Silkscreen Label */}
             <div className="absolute top-3 left-10 font-mono text-[10px] text-emerald-400/70 tracking-widest uppercase">
-              REV-3.2 // {deviceTitle.slice(0, 24)} // FR4 4-LAYER COPPER
+              REV-3.2 {'//'} {deviceTitle.slice(0, 24)} {'//'} FR4 4-LAYER COPPER
             </div>
 
             {/* Interactive Pins */}

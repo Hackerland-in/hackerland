@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Rocket, Share2, Sparkles, Globe, Download } from 'lucide-react';
+import { Rocket } from 'lucide-react';
 import { LaunchKit } from '@/components/launch/launch-kit';
 
 export const metadata: Metadata = {

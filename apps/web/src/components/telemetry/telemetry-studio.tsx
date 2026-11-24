@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import type { TelemetryProfile, TelemetrySample } from '@hackerland/core';
+import type { TelemetryProfile } from '@hackerland/core';
 import {
   computeTelemetryStats,
   detectTelemetryAnomalies,
@@ -315,7 +315,7 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
           {/* Serial Terminal View */}
           <div className="h-32 overflow-y-auto rounded-xl border border-stone-900 bg-black p-3 font-mono text-[11px] text-emerald-400 space-y-1">
             {serialLog.length === 0 ? (
-              <span className="text-stone-600">// No serial packets received yet. Click &apos;Open Serial Port&apos; to listen.</span>
+              <span className="text-stone-600">{'//'} No serial packets received yet. Click &apos;Open Serial Port&apos; to listen.</span>
             ) : (
               serialLog.map((log, idx) => <div key={`log-${idx}`}>{log}</div>)
             )}

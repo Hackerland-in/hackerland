@@ -1,7 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { listProjects } from '@/lib/data/queries';
 import { listBuildStories } from '@/lib/data/stories-data';
-import { listProblems } from '@/lib/data/problems-data';
 import { TEARDOWNS_DATA } from '@/lib/data/teardowns-data';
 import { MUSEUM_EXHIBITS } from '@/lib/data/museum-data';
 import { SQUADS_DATA } from '@/lib/data/squads-data';

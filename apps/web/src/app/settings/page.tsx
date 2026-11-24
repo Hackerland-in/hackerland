@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { authClient } from '@/lib/auth-client';
 import {
   TRACKS,
   TRACK_META,
@@ -46,13 +47,24 @@ export default function SettingsPage() {
   const [newLinkLabel, setNewLinkLabel] = useState('');
   const [newLinkUrl, setNewLinkUrl] = useState('');
 
-  const [loading, setLoading] = useState(true);
+  const session = authClient.useSession();
+  const sessionPending = session.isPending;
+  const signedInUserId = session.data?.user?.id;
+  // better-auth flips isPending back on while it refetches a signed-out session
+  // (e.g. on tab focus), so latch the first resolution instead of following it.
+  const [sessionResolved, setSessionResolved] = useState(false);
+  if (!sessionResolved && !sessionPending) setSessionResolved(true);
+  const [profileFetchedFor, setProfileFetchedFor] = useState<string | null>(null);
+  // Signed-out visitors edit a local draft; only signed-in users wait for their server profile.
+  const loading =
+    !sessionResolved || (Boolean(signedInUserId) && profileFetchedFor !== signedInUserId);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // Try to load current user profile from API or localStorage
   useEffect(() => {
+    if (!sessionResolved) return;
     let active = true;
     async function loadProfile() {
       // 1. Check localStorage first for instant hydration
@@ -77,7 +89,8 @@ export default function SettingsPage() {
         // Ignore localStorage read errors
       }
 
-      // 2. Fetch from server API
+      // 2. Fetch from server API (only meaningful for a signed-in user)
+      if (!signedInUserId) return;
       try {
         const res = await fetch('/api/me/profile');
         if (res.ok) {
@@ -99,14 +112,14 @@ export default function SettingsPage() {
       } catch {
         // Fall back gracefully
       } finally {
-        if (active) setLoading(false);
+        if (active) setProfileFetchedFor(signedInUserId);
       }
     }
     loadProfile();
     return () => {
       active = false;
     };
-  }, []);
+  }, [sessionResolved, signedInUserId]);
 
   const toggleTrack = (track: Track) => {
     if (selectedTracks.includes(track)) {
@@ -206,8 +219,11 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16 text-center space-y-4">
+        <h1 className="sr-only">Profile Settings</h1>
         <div className="size-10 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="font-mono text-body-sm text-fg-muted">Loading your settings…</p>
+        <p role="status" className="font-mono text-body-sm text-fg-muted">
+          Loading your settings…
+        </p>
       </div>
     );
   }

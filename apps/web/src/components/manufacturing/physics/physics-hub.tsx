@@ -2,19 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Card, Badge, Button } from '@hackerland/ui';
+import { Badge, Button } from '@hackerland/ui';
 import {
-  Bike,
-  Car,
-  Rocket,
-  Compass,
-  Zap,
-  Layers,
-  ArrowRight,
   ExternalLink,
-  Activity,
-  Sliders,
-  CheckCircle2,
   Box,
 } from 'lucide-react';
 import { BicyclePhysicsSimulator } from './bicycle-simulator';

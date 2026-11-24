@@ -8,9 +8,6 @@ import {
   Lightbulb,
   Sparkles,
   ChevronRight,
-  TrendingDown,
-  ShieldCheck,
-  RotateCcw,
 } from 'lucide-react';
 import { MUSEUM_EXHIBITS, getMuseumExhibitBySlug } from '@/lib/data/museum-data';
 
@@ -85,7 +82,7 @@ export default async function MuseumExhibitPage({ params }: Props) {
           </h1>
 
           <p className="text-base sm:text-xl text-amber-300/90 italic font-medium">
-            "{exhibit.tagline}"
+            &quot;{exhibit.tagline}&quot;
           </p>
 
           <p className="text-base sm:text-lg text-neutral-300 max-w-4xl leading-relaxed">

@@ -2,14 +2,14 @@
 
 import { useState, useMemo } from 'react';
 import { Card, Badge } from '@hackerland/ui';
-import { PieChart, Sliders, DollarSign, Users, TrendingUp } from 'lucide-react';
+import { PieChart } from 'lucide-react';
 
 export function CapTableCalculator() {
   const [founderEquitySplit, setFounderEquitySplit] = useState<number>(50); // Founder 1 vs Founder 2
-  const [preSeedInvestmentUsd, setPreSeedInvestmentUsd] = useState<number>(250000); // $250k
+  const [preSeedInvestmentUsd] = useState<number>(250000); // $250k
   const [preSeedValuationCapUsd, setPreSeedValuationCapUsd] = useState<number>(2500000); // $2.5M cap
-  const [esopPoolPercent, setEsopPoolPercent] = useState<number>(10); // 10% ESOP pool
-  const [seedRoundInvestmentUsd, setSeedRoundInvestmentUsd] = useState<number>(1500000); // $1.5M Seed
+  const [esopPoolPercent] = useState<number>(10); // 10% ESOP pool
+  const [seedRoundInvestmentUsd] = useState<number>(1500000); // $1.5M Seed
   const [seedValuationCapUsd, setSeedValuationCapUsd] = useState<number>(8000000); // $8M cap
 
   const capTable = useMemo(() => {

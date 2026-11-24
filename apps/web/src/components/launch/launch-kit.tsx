@@ -4,12 +4,7 @@ import { useState } from 'react';
 import {
   Copy,
   Check,
-  Share2,
   ExternalLink,
-  Sparkles,
-  Rocket,
-  MessageSquare,
-  Globe,
 } from 'lucide-react';
 
 interface LaunchPlatform {

@@ -1,4 +1,4 @@
-import type { ClubChapter, ClubCategory } from '@hackerland/core';
+import type { ClubChapter } from '@hackerland/core';
 
 export const CLUBS_DATA: ClubChapter[] = [
   {

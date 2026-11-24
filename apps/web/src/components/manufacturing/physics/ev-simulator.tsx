@@ -11,10 +11,6 @@ import {
   Plus,
   Trash2,
   Sliders,
-  BatteryCharging,
-  Flame,
-  Thermometer,
-  Gauge,
 } from 'lucide-react';
 import { calculateAeroDrag } from './physics-engine';
 
@@ -66,27 +62,26 @@ export function EvPowertrainSimulator() {
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [acceleratorPercent, setAcceleratorPercent] = useState<number>(65);
   const [regenLevel, setRegenLevel] = useState<number>(3); // 0 (coast) to 3 (one-pedal max regen)
-  const [driveCycle, setDriveCycle] = useState<'highway' | 'city' | 'track'>('highway');
 
   // Architecture Specs
   const [systemVoltage, setSystemVoltage] = useState<400 | 800>(800);
-  const [baseCapacityKwh, setBaseCapacityKwh] = useState<number>(85); // 85 kWh pack
-  const [frontMotorKw, setFrontMotorKw] = useState<number>(180);
-  const [rearMotorKw, setRearMotorKw] = useState<number>(320);
+  const [baseCapacityKwh] = useState<number>(85); // 85 kWh pack
+  const [frontMotorKw] = useState<number>(180);
+  const [rearMotorKw] = useState<number>(320);
 
   // Dynamic States
-  const [speedKmh, setSpeedKmh] = useState<number>(105);
+  const [, setSpeedKmh] = useState<number>(105);
   const [batterySocPercent, setBatterySocPercent] = useState<number>(78.4);
   const [packTempCelsius, setPackTempCelsius] = useState<number>(34.2);
   const [instantKwPower, setInstantKwPower] = useState<number>(28); // Positive = discharge, negative = regen
-  const [distanceKm, setDistanceKm] = useState<number>(142.5);
-  const [totalEnergyConsumedKwh, setTotalEnergyConsumedKwh] = useState<number>(24.8);
+  const [, setDistanceKm] = useState<number>(142.5);
+  const [, setTotalEnergyConsumedKwh] = useState<number>(24.8);
   const [energyRegeneratedKwh, setEnergyRegeneratedKwh] = useState<number>(4.2);
 
   // Custom Components
   const [customComponents, setCustomComponents] = useState<CustomEvComponent[]>(DEFAULT_EV_MODS);
   const [newCompName, setNewCompName] = useState<string>('');
-  const [newCompCategory, setNewCompCategory] = useState<'Battery' | 'Inverter' | 'Motors' | 'Thermal'>('Battery');
+  const [newCompCategory] = useState<'Battery' | 'Inverter' | 'Motors' | 'Thermal'>('Battery');
   const [newCompKwh, setNewCompKwh] = useState<number>(15);
   const [newCompKw, setNewCompKw] = useState<number>(30);
 
@@ -128,7 +123,7 @@ export function EvPowertrainSimulator() {
 
       if (isRunning) {
         setSpeedKmh((prevKmh) => {
-          let v = (prevKmh * 1000) / 3600; // m/s
+          const v = (prevKmh * 1000) / 3600; // m/s
           const totalVehicleMassKg = 2150; // EV battery mass
           const cdA = 0.23 * 2.35; // Aerodynamic drag
           const aeroDrag = calculateAeroDrag(v, cdA, 1.225);

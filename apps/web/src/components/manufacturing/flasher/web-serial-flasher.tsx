@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
+import { useState, useEffect, useRef, useSyncExternalStore } from 'react';
 import {
   Usb,
   Cpu,
@@ -9,13 +8,9 @@ import {
   Play,
   RotateCcw,
   Zap,
-  CheckCircle2,
   AlertTriangle,
   Send,
   Trash2,
-  Download,
-  Info,
-  ShieldCheck,
 } from 'lucide-react';
 
 interface FirmwarePreset {
@@ -62,8 +57,15 @@ const FIRMWARE_PRESETS: FirmwarePreset[] = [
   },
 ];
 
+/** Browser support never changes after load, so there is nothing to subscribe to. */
+const noopSubscribe = () => () => {};
+
 export function WebSerialFlasher() {
-  const [isSupported, setIsSupported] = useState<boolean>(true);
+  const isSupported = useSyncExternalStore(
+    noopSubscribe,
+    () => 'serial' in navigator,
+    () => true,
+  );
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isFlashing, setIsFlashing] = useState<boolean>(false);
   const [flashProgress, setFlashProgress] = useState<number>(0);
@@ -79,16 +81,6 @@ export function WebSerialFlasher() {
   const [inputText, setInputText] = useState<string>('');
   const [simulatedMode, setSimulatedMode] = useState<boolean>(true);
   const terminalBottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const supported = 'serial' in navigator;
-      setIsSupported(supported);
-      if (!supported) {
-        setSimulatedMode(true);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     terminalBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -118,7 +110,7 @@ export function WebSerialFlasher() {
     try {
       // Real Web Serial API request
       const nav = navigator as unknown as { serial: { requestPort: () => Promise<unknown> } };
-      const port = await nav.serial.requestPort();
+      await nav.serial.requestPort();
       setIsConnected(true);
       addLog(`Connected to hardware USB port at ${baudRate} baud.`, 'system');
     } catch (err: unknown) {

@@ -226,6 +226,9 @@ const STARTER_CIRCUITS: Record<'ne555_flasher' | 'veroboard_audio', StarterCircu
   },
 };
 
+/** Random offset for newly placed parts so they do not stack exactly. */
+const jitter = (base: number, range: number) => base + Math.random() * range;
+
 export function PcbStudio() {
   const [substrate, setSubstrate] = useState<BoardSubstrate>('fr4');
   const [activeLayer, setActiveLayer] = useState<PcbLayer>('top_copper');
@@ -258,7 +261,7 @@ export function PcbStudio() {
   const [showDrcModal, setShowDrcModal] = useState(false);
   const [drcViolations, setDrcViolations] = useState<DrcViolation[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [exportPackage, setExportPackage] = useState<any>(null);
+  const [exportPackage, setExportPackage] = useState<ReturnType<typeof buildCompleteManufacturingExport> | null>(null);
 
   const scopeCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -391,8 +394,8 @@ export function PcbStudio() {
       typeId: item.typeId,
       name: item.name,
       designator: `${item.prefix}${count}`,
-      x: 40 + Math.random() * 40,
-      y: 30 + Math.random() * 30,
+      x: jitter(40, 40),
+      y: jitter(30, 30),
       rotationDeg: 0,
       value: item.defaultValue,
       numericValue: item.simModel.nominalValue,
@@ -466,7 +469,7 @@ export function PcbStudio() {
 
           {/* Presets */}
           <select
-            onChange={(e) => e.target.value && loadPreset(e.target.value as any)}
+            onChange={(e) => e.target.value && loadPreset(e.target.value as Parameters<typeof loadPreset>[0])}
             className="text-xs bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none"
             defaultValue="ne555_flasher"
           >

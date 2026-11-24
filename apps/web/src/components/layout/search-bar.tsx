@@ -14,10 +14,9 @@ import {
   Atom,
   FolderKanban,
   Sparkles,
-  Command,
   CornerDownLeft,
 } from 'lucide-react';
-import { Badge, IconButton, cn } from '@hackerland/ui';
+import { IconButton, cn } from '@hackerland/ui';
 import { STATIC_SEARCH_CATALOG, type SearchResultItem } from '@/lib/search/search-catalog';
 
 export function SearchBar() {
@@ -26,7 +25,26 @@ export function SearchBar() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
+
+  // Reset the search when the dialog closes (adjust state during render).
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (wasOpen !== isOpen) {
+    setWasOpen(isOpen);
+    if (!isOpen) {
+      setQuery('');
+      setResults([]);
+      setSelectedIndex(0);
+    }
+  }
+
+  const updateQuery = (next: string) => {
+    setQuery(next);
+    if (!next.trim()) {
+      setResults([]);
+      setSelectedIndex(0);
+    }
+  };
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,8 +73,6 @@ export function SearchBar() {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
-      setQuery('');
-      setResults([]);
     }
     return () => {
       document.body.style.overflow = '';
@@ -66,11 +82,7 @@ export function SearchBar() {
   // Filter results on query change (instant static + async server query)
   useEffect(() => {
     const trimmed = query.trim().toLowerCase();
-    if (!trimmed) {
-      setResults([]);
-      setSelectedIndex(0);
-      return;
-    }
+    if (!trimmed) return;
 
     startTransition(() => {
       const terms = trimmed.split(/\s+/).filter(Boolean);
@@ -214,7 +226,7 @@ export function SearchBar() {
                 ref={inputRef}
                 type="text"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => updateQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search projects, simulators, factory blueprints, academy, labs…"
                 className="flex-1 bg-transparent text-body-md text-fg placeholder:text-fg-subtle focus:outline-none font-sans"
@@ -222,7 +234,7 @@ export function SearchBar() {
               {query && (
                 <button
                   type="button"
-                  onClick={() => setQuery('')}
+                  onClick={() => updateQuery('')}
                   className="p-1 rounded-md text-fg-subtle hover:text-fg hover:bg-surface-3 transition-colors"
                   aria-label="Clear query"
                 >
@@ -364,7 +376,7 @@ export function SearchBar() {
                           key={item}
                           type="button"
                           onClick={() => {
-                            setQuery(item);
+                            updateQuery(item);
                             inputRef.current?.focus();
                           }}
                           className="px-2.5 py-1.5 rounded-lg border border-hairline bg-surface-2 text-caption text-fg-muted hover:text-fg hover:border-accent/40 hover:bg-surface-3 transition-colors text-left"

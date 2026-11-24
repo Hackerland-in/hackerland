@@ -7,7 +7,8 @@ import { Badge, Button, Input, Textarea } from '@hackerland/ui';
 import { OPPORTUNITY_KIND_LABEL, TRACK_META } from '@hackerland/core';
 import { Money } from '@/components/domain/money';
 import { EscrowMilestoneStepper } from '@/components/domain/escrow-milestone-stepper';
-import { X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
+import { useIsClient } from '@/lib/hooks/use-is-client';
 
 export interface ClaimBountyModalProps {
   opportunity: OpportunityView | null;
@@ -27,11 +28,7 @@ export function ClaimBountyModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

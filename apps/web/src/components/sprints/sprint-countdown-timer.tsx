@@ -3,17 +3,17 @@
 import { useEffect, useState } from 'react';
 import type { SprintEntry } from '@hackerland/core';
 import { calculateSprintProgress } from '@hackerland/core';
+import { useIsClient } from '@/lib/hooks/use-is-client';
 
 interface SprintCountdownTimerProps {
   sprint: SprintEntry;
 }
 
 export function SprintCountdownTimer({ sprint }: SprintCountdownTimerProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsClient();
   const [progress, setProgress] = useState(() => calculateSprintProgress(sprint));
 
   useEffect(() => {
-    setMounted(true);
     const interval = setInterval(() => {
       setProgress(calculateSprintProgress(sprint));
     }, 15000); // refresh every 15s

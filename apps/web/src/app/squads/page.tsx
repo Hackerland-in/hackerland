@@ -2,14 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Users,
-  ShieldCheck,
   ArrowRight,
   Sparkles,
-  Lock,
-  Unlock,
-  DollarSign,
   Briefcase,
-  CheckCircle2,
 } from 'lucide-react';
 import { listSquadRooms } from '@/lib/data/squads-data';
 

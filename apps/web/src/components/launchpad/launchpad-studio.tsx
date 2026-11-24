@@ -12,17 +12,14 @@ import {
   AlertCircle,
   ExternalLink,
   ChevronRight,
-  TrendingUp,
   Cpu,
   HeartPulse,
   Leaf,
   Zap,
-  Building2,
   Lock,
-  ArrowRight,
   Sparkles,
 } from 'lucide-react';
-import type { Campaign, CampaignCategory } from '@hackerland/core';
+import type { CampaignCategory } from '@hackerland/core';
 import {
   calculateCampaignProgress,
   calculateMilestonePayout,
@@ -67,7 +64,7 @@ export function LaunchpadStudio() {
   const [simGoalInr, setSimGoalInr] = useState<number>(1000000);
   const [simTranchePercent, setSimTranchePercent] = useState<number>(35);
   const [simVotesFor, setSimVotesFor] = useState<number>(72);
-  const [simTotalVotes, setSimTotalVotes] = useState<number>(100);
+  const [simTotalVotes] = useState<number>(100);
 
   // Filtered Campaigns
   const filteredCampaigns = useMemo(() => {
@@ -455,7 +452,7 @@ export function LaunchpadStudio() {
             </div>
 
             <div className="space-y-4">
-              {grantMatches.map(({ grant, fitScore, isEligible, reasons, missingPrerequisites }) => (
+              {grantMatches.map(({ grant, isEligible, reasons, missingPrerequisites }) => (
                 <div
                   key={grant.id}
                   className={`rounded-xl border p-5 transition-all ${
@@ -610,7 +607,7 @@ export function LaunchpadStudio() {
               {/* Backer Votes */}
               <div className="space-y-2">
                 <div className="flex justify-between items-baseline">
-                  <label className="text-xs font-medium text-neutral-300">Backers Voting "Approve Release":</label>
+                  <label className="text-xs font-medium text-neutral-300">Backers Voting &quot;Approve Release&quot;:</label>
                   <span className="text-xs font-mono font-bold text-white">
                     {simVotesFor} of {simTotalVotes} Backers ({Math.round((simVotesFor / simTotalVotes) * 100)}%)
                   </span>

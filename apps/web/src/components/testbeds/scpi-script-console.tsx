@@ -147,7 +147,7 @@ export function ScpiScriptConsole({ scriptRunner, equipmentName }: ScpiScriptCon
           <div className="h-[210px] overflow-y-auto rounded-xl border border-stone-900 bg-black p-3 font-mono text-[11px] text-emerald-400 space-y-1">
             {terminalOutput.length === 0 ? (
               <span className="text-stone-600">
-                // Click &apos;Execute SCPI Sequence&apos; below to query instrument over socket.
+                {'//'} Click &apos;Execute SCPI Sequence&apos; below to query instrument over socket.
               </span>
             ) : (
               terminalOutput.map((log, idx) => (

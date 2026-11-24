@@ -5,14 +5,10 @@ import {
   ArrowLeft,
   Cpu,
   Layers,
-  Banknote,
-  ShieldCheck,
-  Zap,
   Lightbulb,
-  ExternalLink,
   ChevronRight,
 } from 'lucide-react';
-import { TEARDOWNS_DATA, type TeardownArticle } from '@/lib/data/teardowns-data';
+import { TEARDOWNS_DATA } from '@/lib/data/teardowns-data';
 import { PcbPinoutAnnotator } from '@/components/teardowns/pcb-pinout-annotator';
 
 interface Props {

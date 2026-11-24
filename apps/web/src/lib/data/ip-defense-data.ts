@@ -1,4 +1,4 @@
-import type { DefensivePublication, HardwareLicense, InventionCategory } from '@hackerland/core';
+import type { DefensivePublication } from '@hackerland/core';
 
 export const IP_DEFENSE_PUBLICATIONS: DefensivePublication[] = [
   {

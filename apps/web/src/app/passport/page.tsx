@@ -1,36 +1,34 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Badge, Button, Card } from '@hackerland/ui';
 import {
   ShieldCheck,
-  Award,
   Layers,
-  Cpu,
   GitPullRequest,
-  CheckCircle2,
   Share2,
   Sparkles,
-  ExternalLink,
   Users,
 } from 'lucide-react';
+import { useStoredValue } from '@/lib/hooks/use-stored-value';
 
 export default function PassportPage() {
-  const [profileHandle, setProfileHandle] = useState('innovator');
-  const [displayName, setDisplayName] = useState('Innovator');
-  const [copySuccess, setCopySuccess] = useState(false);
-
-  useEffect(() => {
+  const cachedProfile = useStoredValue('hackerland_user_profile');
+  const { profileHandle, displayName } = useMemo(() => {
+    const fallback = { profileHandle: 'innovator', displayName: 'Innovator' };
+    if (!cachedProfile) return fallback;
     try {
-      const cached = localStorage.getItem('hackerland_user_profile');
-      if (cached) {
-        const p = JSON.parse(cached);
-        if (p.handle) setProfileHandle(p.handle);
-        if (p.displayName || p.name) setDisplayName(p.displayName || p.name);
-      }
-    } catch {}
-  }, []);
+      const p = JSON.parse(cachedProfile);
+      return {
+        profileHandle: p.handle || fallback.profileHandle,
+        displayName: p.displayName || p.name || fallback.displayName,
+      };
+    } catch {
+      return fallback;
+    }
+  }, [cachedProfile]);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const handleShare = () => {
     if (navigator.clipboard) {

@@ -25,7 +25,6 @@ const PKG_COLORS: Record<string, string> = {
 export function PnpCentroidVisualizer({
   boardDimensions,
   placements,
-  projectName,
 }: PnpCentroidVisualizerProps) {
   const [activeSide, setActiveSide] = useState<PnpPlacementSide>('top');
   const [hoveredComponent, setHoveredComponent] = useState<PnpComponentPlacement | null>(null);

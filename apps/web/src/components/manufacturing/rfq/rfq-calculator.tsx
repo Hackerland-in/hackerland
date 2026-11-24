@@ -3,23 +3,18 @@
 import { useState, useId } from 'react';
 import Link from 'next/link';
 import {
-  Layers,
   Factory,
   Truck,
-  ShieldCheck,
   Download,
   ExternalLink,
   Cpu,
   Clock,
   Sparkles,
-  ArrowRight,
-  HelpCircle,
   FileCode2,
 } from 'lucide-react';
 import {
   calculateVendorQuotes,
   type RFQConfig,
-  type VendorQuote,
   USD_TO_INR,
 } from './rfq-types';
 

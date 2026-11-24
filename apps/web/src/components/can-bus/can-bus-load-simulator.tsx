@@ -142,7 +142,7 @@ export function CanBusLoadSimulator({
           Non-Destructive Bitwise Arbitration (CAN ID Priority)
         </h4>
         <div className="space-y-2 font-mono text-xs">
-          {arbitrationFrames.map((f, idx) => (
+          {arbitrationFrames.map((f) => (
             <div
               key={f.idHex}
               className="bg-slate-950 p-3 rounded-lg border border-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2"

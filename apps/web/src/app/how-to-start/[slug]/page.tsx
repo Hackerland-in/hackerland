@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Wrench, Compass, ShieldCheck, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Wrench, Compass, ShieldCheck, TrendingUp } from 'lucide-react';
 import { Card, Badge, Button } from '@hackerland/ui';
 import { PLANT_BLUEPRINTS } from '@/components/domain/how-to-start/how-to-start-data';
 

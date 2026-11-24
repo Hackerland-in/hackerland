@@ -27,7 +27,7 @@ export function MpptTrackerSimulator({
 
   const maxSteps = 14;
   let v = initialV;
-  let stepSize = (vmppActualV - initialV) / 6;
+  const stepSize = (vmppActualV - initialV) / 6;
 
   for (let i = 0; i < maxSteps; i++) {
     // Find closest power in pvCurve

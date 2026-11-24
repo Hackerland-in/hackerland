@@ -8,7 +8,6 @@ import {
   CardBody,
   Chip,
   EmptyState,
-  SectionHeader,
 } from '@hackerland/ui';
 import {
   Search,
@@ -16,7 +15,6 @@ import {
   Award,
   ExternalLink,
   Sparkles,
-  Users,
   Settings,
 } from 'lucide-react';
 import { listAllStoredProfiles } from '@/lib/data/queries';

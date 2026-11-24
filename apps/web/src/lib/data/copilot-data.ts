@@ -1,4 +1,4 @@
-import type { ComponentSourcingItem, BomAuditItem } from '@hackerland/core';
+import type { ComponentSourcingItem } from '@hackerland/core';
 
 export const HARDWARE_COMPONENTS_CATALOG: ComponentSourcingItem[] = [
   {

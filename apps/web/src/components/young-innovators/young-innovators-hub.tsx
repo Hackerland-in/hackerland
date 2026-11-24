@@ -1,26 +1,16 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import type { JuniorChallenge, JuniorShowcaseProject, AgeBracket } from '@hackerland/core';
 import {
-  Sparkles,
   ShieldCheck,
   CheckCircle2,
   Cpu,
-  Layers,
   Code,
   Terminal,
-  Trophy,
-  Users,
   Play,
-  PlayCircle,
   Clock,
-  Wrench,
   ChevronRight,
   GraduationCap,
-  ExternalLink,
-  BookOpen,
 } from 'lucide-react';
 import { Button } from '@hackerland/ui';
 import {
@@ -40,7 +30,7 @@ export function YoungInnovatorsHub() {
 
   // Modal
   const [showConsentModal, setShowConsentModal] = useState(false);
-  const [verifiedConsentTokens, setVerifiedConsentTokens] = useState<string[]>([]);
+  const [, setVerifiedConsentTokens] = useState<string[]>([]);
 
   const filteredChallenges = useMemo(() => {
     if (selectedAge === 'all') return JUNIOR_CHALLENGES;

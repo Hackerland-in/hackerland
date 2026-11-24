@@ -8,7 +8,6 @@ import {
   Calendar,
   Clock,
   ShieldCheck,
-  AlertTriangle,
   Cpu,
   UserCheck,
   Download,
@@ -203,7 +202,7 @@ export function EquipmentReservationModal({
                   <label className="block text-xs font-mono text-neutral-400 mb-1">Maker Track / Role</label>
                   <select
                     value={applicantRole}
-                    onChange={(e) => setApplicantRole(e.target.value as any)}
+                    onChange={(e) => setApplicantRole(e.target.value as typeof applicantRole)}
                     className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
                   >
                     <option value="student_k12">K-12 School Student (Ages 10-17)</option>

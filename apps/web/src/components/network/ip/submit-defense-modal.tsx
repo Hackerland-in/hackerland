@@ -6,8 +6,6 @@ import {
   X,
   ShieldCheck,
   CheckCircle2,
-  FileCode,
-  Lock,
   Sparkles,
 } from 'lucide-react';
 import { Button } from '@hackerland/ui';
@@ -236,7 +234,7 @@ export function SubmitDefenseModal({ onClose, onAdded }: SubmitDefenseModalProps
                   <label className="block text-xs font-mono text-neutral-400 mb-1">Engineering Domain</label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as any)}
+                    onChange={(e) => setCategory(e.target.value as typeof category)}
                     className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
                   >
                     <option value="clean_mobility_bms">Clean Mobility & EV BMS</option>
@@ -251,7 +249,7 @@ export function SubmitDefenseModal({ onClose, onAdded }: SubmitDefenseModalProps
                   <label className="block text-xs font-mono text-neutral-400 mb-1">Open Hardware License</label>
                   <select
                     value={license}
-                    onChange={(e) => setLicense(e.target.value as any)}
+                    onChange={(e) => setLicense(e.target.value as typeof license)}
                     className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
                   >
                     <option value="CERN-OHL-P-2.0">CERN-OHL-P-2.0 (Permissive)</option>

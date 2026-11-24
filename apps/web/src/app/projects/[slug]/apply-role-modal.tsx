@@ -6,7 +6,8 @@ import type { OpenRole } from '@/lib/data/types';
 import { Badge, Button, Input, Textarea } from '@hackerland/ui';
 import { TRACK_META } from '@hackerland/core';
 import { formatRoleCompensation } from '@/components/domain/role-card';
-import { X, CheckCircle2, Sparkles, ExternalLink } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
+import { useIsClient } from '@/lib/hooks/use-is-client';
 
 export interface ApplyRoleModalProps {
   slug: string;
@@ -26,11 +27,7 @@ export function ApplyRoleModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

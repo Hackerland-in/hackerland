@@ -182,7 +182,7 @@ export const ELECTRONICS_COMPONENT_CATALOG: ComponentCatalogItem[] = [
     standardFootprint: {
       id: 'footprint-pot',
       name: 'Potentiometer_Trimpot_3Pin',
-      packageType: 'THT' as any,
+      packageType: 'THT',
       widthMm: 9.5,
       heightMm: 9.5,
       pins: [
@@ -431,7 +431,7 @@ export const ELECTRONICS_COMPONENT_CATALOG: ComponentCatalogItem[] = [
     standardFootprint: {
       id: 'footprint-button-6mm',
       name: 'Pushbutton_6x6mm',
-      packageType: 'THT' as any,
+      packageType: 'THT',
       widthMm: 6.5,
       heightMm: 6.5,
       pins: [
@@ -458,7 +458,7 @@ export const ELECTRONICS_COMPONENT_CATALOG: ComponentCatalogItem[] = [
     standardFootprint: {
       id: 'footprint-spdt',
       name: 'Switch_SPDT_3Pin',
-      packageType: 'THT' as any,
+      packageType: 'THT',
       widthMm: 8.5,
       heightMm: 4.5,
       pins: [
@@ -520,7 +520,7 @@ export const ELECTRONICS_COMPONENT_CATALOG: ComponentCatalogItem[] = [
     standardFootprint: {
       id: 'footprint-power-2pin',
       name: 'Power_Terminal_2Pin',
-      packageType: 'THT' as any,
+      packageType: 'THT',
       widthMm: 7.5,
       heightMm: 5.0,
       pins: [
@@ -545,7 +545,7 @@ export const ELECTRONICS_COMPONENT_CATALOG: ComponentCatalogItem[] = [
     standardFootprint: {
       id: 'footprint-bat-9v',
       name: 'Battery_Clip_9V',
-      packageType: 'THT' as any,
+      packageType: 'THT',
       widthMm: 12.0,
       heightMm: 6.0,
       pins: [

@@ -392,10 +392,12 @@ export function MainNav() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Close dropdown on route change
-  useEffect(() => {
+  // Close dropdown on route change (adjust state during render; no effect needed)
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
     setOpenDropdown(null);
-  }, [pathname]);
+  }
 
   // Close dropdown on click outside or escape key
   useEffect(() => {
@@ -441,8 +443,6 @@ export function MainNav() {
 
   const isFeedActive = pathname === '/feed' || pathname.startsWith('/feed/');
   const isEarnActive = pathname === '/earn' || pathname.startsWith('/earn/');
-  const isLeaderboardActive =
-    pathname === '/leaderboard' || pathname.startsWith('/leaderboard/');
 
   const renderDropdown = (dropdown: NavDropdown) => {
     const isOpen = openDropdown === dropdown.id;

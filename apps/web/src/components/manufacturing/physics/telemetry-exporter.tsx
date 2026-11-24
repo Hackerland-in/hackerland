@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Badge, Card, cn } from '@hackerland/ui';
-import { Download, Copy, Check, FileJson, FileSpreadsheet, Sliders, Sparkles } from 'lucide-react';
+import { Button, Badge, cn } from '@hackerland/ui';
+import { Download, Copy, Check, FileSpreadsheet, Sliders, Sparkles } from 'lucide-react';
 import type { PhysicsVehicleType } from './physics-hub';
 
 export interface TelemetryExporterProps {

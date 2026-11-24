@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Cpu, Sparkles, Layers, ArrowLeft } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { PrototypeArchitectStudio } from '@/components/prototype/prototype-architect-studio';
 
 export const metadata: Metadata = {

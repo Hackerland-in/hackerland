@@ -7,20 +7,9 @@ import { Simulator3DLab, type Lab3DModelType } from '@/components/manufacturing/
 import { TelemetryExporter } from '@/components/manufacturing/physics/telemetry-exporter';
 import { Badge, Button, Card, cn } from '@hackerland/ui';
 import {
-  Box,
-  Compass,
-  Cpu,
-  Zap,
-  Activity,
   Sliders,
-  Play,
-  Pause,
   RotateCcw,
-  Sparkles,
   ArrowRight,
-  Flame,
-  Gauge,
-  Layers,
 } from 'lucide-react';
 
 const LAB_DOMAINS: {

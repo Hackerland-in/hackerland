@@ -6,9 +6,7 @@ import {
   X,
   ShieldCheck,
   CheckCircle2,
-  Lock,
   Download,
-  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@hackerland/ui';
 
@@ -217,7 +215,7 @@ export function GuardianConsentModal({
                   <label className="block text-xs font-mono text-neutral-400 mb-1">Relationship</label>
                   <select
                     value={guardianRelationship}
-                    onChange={(e) => setGuardianRelationship(e.target.value as any)}
+                    onChange={(e) => setGuardianRelationship(e.target.value as typeof guardianRelationship)}
                     className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
                   >
                     <option value="parent">Parent / Lawful Guardian</option>

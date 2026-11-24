@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { listBuildStories } from '@/lib/data/stories-data';
 import { Badge, Button, Card } from '@hackerland/ui';
-import { BookOpen, Sparkles, Compass, ArrowRight, ShieldCheck, Cpu, Flame, Layers } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export const metadata = {
   title: 'Build Journey Archive & Founder Histories',
@@ -108,7 +108,7 @@ export default async function StoriesPage() {
         <div className="rounded-2xl border border-hairline bg-surface-1 p-8 text-center space-y-4 max-w-2xl mx-auto">
           <h3 className="text-xl font-bold font-display">Are you building an ambitious product or company?</h3>
           <p className="text-xs text-fg-subtle leading-relaxed">
-            Hackerland is building the world's most detailed open archive of human invention.
+            Hackerland is building the world&apos;s most detailed open archive of human invention.
             Document your prototype journey, failure autopsies, and architectural decisions to guide the next generation.
           </p>
           <Button asChild variant="primary">

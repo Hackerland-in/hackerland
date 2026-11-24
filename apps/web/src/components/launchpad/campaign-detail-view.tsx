@@ -4,14 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
-  Rocket,
-  CheckCircle2,
   AlertCircle,
   ExternalLink,
   ChevronLeft,
   Vote,
   Cpu,
-  Clock,
   Layers,
   Sparkles,
   Lock,
@@ -27,7 +24,7 @@ interface CampaignDetailViewProps {
 }
 
 export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
-  const { percent, isFunded } = calculateCampaignProgress(campaign.raisedInr, campaign.fundingGoalInr);
+  const { percent } = calculateCampaignProgress(campaign.raisedInr, campaign.fundingGoalInr);
 
   const [milestones, setMilestones] = useState<CampaignMilestone[]>(campaign.milestones);
   const [userVotedMilestoneId, setUserVotedMilestoneId] = useState<string | null>(null);
@@ -35,7 +32,6 @@ export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
   const [pledgeSuccessMessage, setPledgeSuccessMessage] = useState<string | null>(null);
 
   // Active milestone for voting
-  const reviewMilestone = milestones.find((m) => m.status === 'submitted_for_review');
 
   const handleVote = (milestoneId: string, approve: boolean) => {
     setMilestones((prev) =>

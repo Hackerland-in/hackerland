@@ -2,8 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getBuildStory, listBuildStories } from '@/lib/data/stories-data';
-import { Badge, Button, Card } from '@hackerland/ui';
-import { ArrowLeft, BookOpen, Clock, Compass, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Badge } from '@hackerland/ui';
+import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { InteractiveStoryReader } from './interactive-story-reader';
 
 export async function generateStaticParams() {

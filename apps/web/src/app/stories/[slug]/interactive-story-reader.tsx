@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import type { BuildJourneyStory } from '@hackerland/core';
 import { Badge, Button, Card } from '@hackerland/ui';
-import { CheckCircle2, ChevronRight, HelpCircle, Layers, Sparkles, BookOpen, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface InteractiveStoryReaderProps {

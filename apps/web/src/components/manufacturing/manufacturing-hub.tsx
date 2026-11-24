@@ -25,7 +25,7 @@ import {
   CheckCircle2,
   SlidersHorizontal,
 } from 'lucide-react';
-import { MANUFACTURING_PILLARS, type ManufacturingPillar } from './manufacturing-data';
+import { MANUFACTURING_PILLARS } from './manufacturing-data';
 import { ManufacturingSimulator } from './simulators/manufacturing-simulators';
 import {
   InjectionMoldingSimulator,

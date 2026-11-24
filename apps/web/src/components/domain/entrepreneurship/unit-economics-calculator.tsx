@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Card, Badge } from '@hackerland/ui';
-import { TrendingUp, DollarSign, Activity, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Card } from '@hackerland/ui';
+import { TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export function UnitEconomicsCalculator() {
   const [modelType, setModelType] = useState<'saas' | 'hardware'>('saas');

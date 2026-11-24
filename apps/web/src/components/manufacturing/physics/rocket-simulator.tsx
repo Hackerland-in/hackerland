@@ -11,12 +11,7 @@ import {
   Plus,
   Trash2,
   Sliders,
-  Flame,
-  Gauge,
-  Rocket,
-  ShieldAlert,
 } from 'lucide-react';
-import { calculateAirDensity } from './physics-engine';
 
 export interface CustomRocketComponent {
   id: string;
@@ -69,13 +64,13 @@ export function RocketTrajectorySimulator() {
   const [flightTimeSec, setFlightTimeSec] = useState<number>(0);
   const [propellantMassKg, setPropellantMassKg] = useState<number>(45000); // 45 tonnes fuel
   const [dynamicPressureKpa, setDynamicPressureKpa] = useState<number>(0);
-  const [isMaxQPassed, setIsMaxQPassed] = useState<boolean>(false);
+  const [, setIsMaxQPassed] = useState<boolean>(false);
   const [stageSeparationDone, setStageSeparationDone] = useState<boolean>(false);
 
   // Custom Components
   const [customComponents, setCustomComponents] = useState<CustomRocketComponent[]>(DEFAULT_ROCKET_MODS);
   const [newCompName, setNewCompName] = useState<string>('');
-  const [newCompCategory, setNewCompCategory] = useState<'Propulsion' | 'Structures' | 'Avionics' | 'Boosters'>('Propulsion');
+  const [newCompCategory] = useState<'Propulsion' | 'Structures' | 'Avionics' | 'Boosters'>('Propulsion');
   const [newCompThrust, setNewCompThrust] = useState<number>(50);
   const [newCompMass, setNewCompMass] = useState<number>(-200);
 

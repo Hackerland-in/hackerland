@@ -47,10 +47,11 @@ import {
 import { Avatar, Button, IconButton, cn } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { useIsClient } from '@/lib/hooks/use-is-client';
 
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsClient();
   const pathname = usePathname();
   const router = useRouter();
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -63,11 +64,6 @@ export function MobileMenu() {
     avatarUrl?: string;
     reputation?: number;
   } | null>(null);
-
-  // Mount check for client portal
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Sync profile details
   useEffect(() => {
@@ -122,10 +118,12 @@ export function MobileMenu() {
     };
   }, [user?.id, user?.name, user?.image]);
 
-  // Close on route change
-  useEffect(() => {
+  // Close on route change (adjust state during render; no effect needed)
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
     setIsOpen(false);
-  }, [pathname]);
+  }
 
   // Lock body scroll when drawer is open
   useEffect(() => {

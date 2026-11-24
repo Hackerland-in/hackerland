@@ -9,24 +9,17 @@ import {
   Lock,
   Unlock,
   Clock,
-  Sparkles,
   ArrowRight,
   ExternalLink,
   Kanban,
-  FileCode2,
-  DollarSign,
-  AlertCircle,
   Plus,
   Send,
-  Cpu,
-  Layers,
   Award,
 } from 'lucide-react';
 import type {
   ProjectSquadRoom,
   MilestoneEscrow,
   KanbanTask,
-  SquadMemberRole,
 } from '@hackerland/core';
 
 interface Props {
@@ -51,13 +44,11 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
     .filter((m) => m.status === 'released')
     .reduce((acc, m) => acc + m.escrowAmountInr, 0);
 
-  const lockedEscrowInr = squadRoom.escrowPoolTotalInr - releasedEscrowInr;
 
   const releasedEscrowUsd = milestones
     .filter((m) => m.status === 'released')
     .reduce((acc, m) => acc + m.escrowAmountUsd, 0);
 
-  const lockedEscrowUsd = squadRoom.escrowPoolTotalUsd - releasedEscrowUsd;
 
   const handleSubmitProof = (e: React.FormEvent) => {
     e.preventDefault();
