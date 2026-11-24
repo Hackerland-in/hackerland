@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test.describe('a11y and shell', () => {
   test('first Tab on / focuses Skip to content link', async ({ page }) => {
