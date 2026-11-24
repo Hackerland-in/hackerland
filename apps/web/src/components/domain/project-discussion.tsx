@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
+import { useIsClient } from '@/lib/hooks/use-is-client';
+import { useStoredValue, writeStoredValue } from '@/lib/hooks/use-stored-value';
 import Link from 'next/link';
 import {
   Avatar,
@@ -84,6 +86,27 @@ const DEFAULT_DISCUSSIONS: Record<string, DiscussionComment[]> = {
   ],
 };
 
+/** Seed thread for a project with no saved discussion yet. */
+function buildDefaultDiscussion(projectSlug: string, projectTitle: string): DiscussionComment[] {
+  return (
+    DEFAULT_DISCUSSIONS[projectSlug] || [
+      {
+        id: `disc-default-${Date.now()}`,
+        projectSlug,
+        author: {
+          name: 'Hackerland Squad Bot',
+          handle: 'mesh_bot',
+          role: 'System Relay',
+        },
+        content: `Welcome to the public build discussion room for ${projectTitle}! Ask technical questions, propose architectural RFCs, or share feedback.`,
+        tag: 'Feedback',
+        createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+        upvotes: 5,
+      },
+    ]
+  );
+}
+
 export function ProjectDiscussion({
   projectSlug,
   projectTitle,
@@ -94,50 +117,35 @@ export function ProjectDiscussion({
   const session = authClient.useSession();
   const user = session.data?.user;
 
-  const [comments, setComments] = useState<DiscussionComment[]>([]);
+  const isClient = useIsClient();
+  const storageKey = `hackerland_discussions_${projectSlug}`;
+  const savedRaw = useStoredValue(storageKey);
+  // Latest in-memory thread, kept even if localStorage is unavailable.
+  const [localThread, setLocalThread] = useState<{ slug: string; comments: DiscussionComment[] } | null>(
+    null,
+  );
+  const comments = useMemo<DiscussionComment[]>(() => {
+    // Saved threads live in the browser, so render nothing on the server (as before).
+    if (!isClient) return [];
+    if (localThread?.slug === projectSlug) return localThread.comments;
+    if (savedRaw) {
+      try {
+        return JSON.parse(savedRaw) as DiscussionComment[];
+      } catch {
+        // Corrupt entry: fall back to the seed thread.
+      }
+    }
+    return buildDefaultDiscussion(projectSlug, projectTitle);
+  }, [isClient, localThread, projectSlug, projectTitle, savedRaw]);
   const [newContent, setNewContent] = useState('');
   const [selectedTag, setSelectedTag] = useState<'Question' | 'Proposal' | 'Feedback' | 'Milestone'>('Question');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
 
-  // Load from localStorage or defaults
-  useEffect(() => {
-    try {
-      const storageKey = `hackerland_discussions_${projectSlug}`;
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        setComments(JSON.parse(saved));
-      } else {
-        const initial = DEFAULT_DISCUSSIONS[projectSlug] || [
-          {
-            id: `disc-default-${Date.now()}`,
-            projectSlug,
-            author: {
-              name: 'Hackerland Squad Bot',
-              handle: 'mesh_bot',
-              role: 'System Relay',
-            },
-            content: `Welcome to the public build discussion room for ${projectTitle}! Ask technical questions, propose architectural RFCs, or share feedback.`,
-            tag: 'Feedback',
-            createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-            upvotes: 5,
-          },
-        ];
-        setComments(initial);
-      }
-    } catch {
-      // Fallback silently
-    }
-  }, [projectSlug, projectTitle]);
 
   const saveComments = (newComments: DiscussionComment[]) => {
-    setComments(newComments);
-    try {
-      const storageKey = `hackerland_discussions_${projectSlug}`;
-      localStorage.setItem(storageKey, JSON.stringify(newComments));
-    } catch {
-      // Ignore
-    }
+    setLocalThread({ slug: projectSlug, comments: newComments });
+    writeStoredValue(storageKey, JSON.stringify(newComments));
   };
 
   const handleUpvote = (commentId: string) => {

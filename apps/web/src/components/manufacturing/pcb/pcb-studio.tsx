@@ -226,6 +226,9 @@ const STARTER_CIRCUITS: Record<'ne555_flasher' | 'veroboard_audio', StarterCircu
   },
 };
 
+/** Random offset for newly placed parts so they do not stack exactly. */
+const jitter = (base: number, range: number) => base + Math.random() * range;
+
 export function PcbStudio() {
   const [substrate, setSubstrate] = useState<BoardSubstrate>('fr4');
   const [activeLayer, setActiveLayer] = useState<PcbLayer>('top_copper');
@@ -391,8 +394,8 @@ export function PcbStudio() {
       typeId: item.typeId,
       name: item.name,
       designator: `${item.prefix}${count}`,
-      x: 40 + Math.random() * 40,
-      y: 30 + Math.random() * 30,
+      x: jitter(40, 40),
+      y: jitter(30, 30),
       rotationDeg: 0,
       value: item.defaultValue,
       numericValue: item.simModel.nominalValue,

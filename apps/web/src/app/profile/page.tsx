@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
   User,
@@ -22,6 +22,7 @@ import {
 import { authClient } from '@/lib/auth-client';
 import { TrackBadge } from '@/components/domain/track-badge';
 import type { Track } from '@hackerland/core';
+import { useStoredValue } from '@/lib/hooks/use-stored-value';
 
 interface UserProfileData {
   userId: string;
@@ -39,28 +40,28 @@ interface UserProfileData {
 
 export default function ProfileHubPage() {
   const session = authClient.useSession();
-  const [profile, setProfile] = useState<UserProfileData | null>(null);
-  const [profileLoaded, setProfileLoaded] = useState(false);
+  // Cached profile from localStorage gives instant client hydration; the server
+  // profile replaces it once /api/me/profile answers.
+  const cachedRaw = useStoredValue('hackerland_user_profile');
+  const cachedProfile = useMemo<UserProfileData | null>(() => {
+    if (!cachedRaw) return null;
+    try {
+      const prof = JSON.parse(cachedRaw);
+      return prof?.handle ? prof : null;
+    } catch {
+      return null;
+    }
+  }, [cachedRaw]);
+  const [fetchedProfile, setFetchedProfile] = useState<UserProfileData | null>(null);
+  const [fetchDone, setFetchDone] = useState(false);
+  const profile = fetchedProfile ?? cachedProfile;
+  const profileLoaded = fetchDone || cachedProfile !== null;
 
   const user = session.data?.user;
   const isPending = session.isPending;
 
   useEffect(() => {
-    // 1. Check localStorage first for instant client hydration
-    try {
-      const cached = localStorage.getItem('hackerland_user_profile');
-      if (cached) {
-        const prof = JSON.parse(cached);
-        if (prof?.handle) {
-          setProfile(prof);
-          setProfileLoaded(true);
-        }
-      }
-    } catch {
-      // Ignore
-    }
-
-    // 2. Query /api/me/profile from server
+    // Query /api/me/profile from server
     let active = true;
     fetch('/api/me/profile')
       .then((res) => (res.ok ? res.json() : null))
@@ -68,12 +69,12 @@ export default function ProfileHubPage() {
         if (!active) return;
         const prof = data?.profile || data;
         if (prof?.handle) {
-          setProfile(prof);
+          setFetchedProfile(prof);
         }
-        setProfileLoaded(true);
+        setFetchDone(true);
       })
       .catch(() => {
-        if (active) setProfileLoaded(true);
+        if (active) setFetchDone(true);
       });
 
     return () => {
