@@ -13,4 +13,14 @@ describe('/api/auth route', () => {
     const body = await response.json();
     expect(body).toEqual({ error: 'auth_not_configured' });
   });
+
+  it('reports "no session" instead of an error when auth is not configured', async () => {
+    delete process.env.MONGODB_URI;
+    delete process.env.BETTER_AUTH_SECRET;
+
+    const response = await GET(new Request('http://localhost/api/auth/get-session'));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toBeNull();
+  });
 });
