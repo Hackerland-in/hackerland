@@ -50,16 +50,21 @@ export default function SettingsPage() {
   const session = authClient.useSession();
   const sessionPending = session.isPending;
   const signedInUserId = session.data?.user?.id;
-  const [profileFetched, setProfileFetched] = useState(false);
-  // Signed-out visitors edit a local draft; only signed-in users wait for the server profile.
-  const loading = sessionPending || (Boolean(signedInUserId) && !profileFetched);
+  // better-auth flips isPending back on while it refetches a signed-out session
+  // (e.g. on tab focus), so latch the first resolution instead of following it.
+  const [sessionResolved, setSessionResolved] = useState(false);
+  if (!sessionResolved && !sessionPending) setSessionResolved(true);
+  const [profileFetchedFor, setProfileFetchedFor] = useState<string | null>(null);
+  // Signed-out visitors edit a local draft; only signed-in users wait for their server profile.
+  const loading =
+    !sessionResolved || (Boolean(signedInUserId) && profileFetchedFor !== signedInUserId);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // Try to load current user profile from API or localStorage
   useEffect(() => {
-    if (sessionPending) return;
+    if (!sessionResolved) return;
     let active = true;
     async function loadProfile() {
       // 1. Check localStorage first for instant hydration
@@ -107,14 +112,14 @@ export default function SettingsPage() {
       } catch {
         // Fall back gracefully
       } finally {
-        if (active) setProfileFetched(true);
+        if (active) setProfileFetchedFor(signedInUserId);
       }
     }
     loadProfile();
     return () => {
       active = false;
     };
-  }, [sessionPending, signedInUserId]);
+  }, [sessionResolved, signedInUserId]);
 
   const toggleTrack = (track: Track) => {
     if (selectedTracks.includes(track)) {

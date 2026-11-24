@@ -59,6 +59,49 @@ describe('Settings page', () => {
     expect(profileFetches()).toHaveLength(1);
   });
 
+  it('keeps a signed-out visitor\'s unsaved edits when the session refetches on tab focus', async () => {
+    localStorage.setItem('hackerland_user_profile', JSON.stringify({ bio: 'saved bio' }));
+    mockUseSession.mockReturnValue({ data: null, isPending: false });
+    await act(async () => {
+      root.render(<SettingsPage />);
+    });
+    const bio = () => container.querySelector<HTMLTextAreaElement>('#settings-bio')!;
+    expect(bio().value).toBe('saved bio');
+
+    // Type into the field the way React observes it.
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!;
+      setter.call(bio(), 'unsaved edit');
+      bio().dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(bio().value).toBe('unsaved edit');
+
+    // better-auth marks a signed-out session pending again while it refetches on focus.
+    mockUseSession.mockReturnValue({ data: null, isPending: true });
+    await act(async () => {
+      root.render(<SettingsPage />);
+    });
+    expect(container.textContent).not.toContain('Loading your settings');
+
+    mockUseSession.mockReturnValue({ data: null, isPending: false });
+    await act(async () => {
+      root.render(<SettingsPage />);
+    });
+    expect(bio().value).toBe('unsaved edit');
+  });
+
+  it('fetches again when a different user signs in', async () => {
+    mockUseSession.mockReturnValue({ data: { user: { id: 'u1' } }, isPending: false });
+    await act(async () => {
+      root.render(<SettingsPage />);
+    });
+    mockUseSession.mockReturnValue({ data: { user: { id: 'u2' } }, isPending: false });
+    await act(async () => {
+      root.render(<SettingsPage />);
+    });
+    expect(profileFetches()).toHaveLength(2);
+  });
+
   it('waits for the session before fetching', async () => {
     mockUseSession.mockReturnValue({ data: null, isPending: true });
     await act(async () => {
