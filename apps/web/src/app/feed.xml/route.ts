@@ -4,7 +4,7 @@ import { listProjects } from '@/lib/data/queries';
 const BASE_URL = 'https://www.hackerland.in';
 
 export async function GET() {
-  let projects: any[] = [];
+  let projects: Awaited<ReturnType<typeof listProjects>> = [];
   try {
     projects = await listProjects();
   } catch {
@@ -18,8 +18,8 @@ export async function GET() {
       <title><![CDATA[${p.title}]]></title>
       <link>${BASE_URL}/projects/${p.slug}</link>
       <guid>${BASE_URL}/projects/${p.slug}</guid>
-      <description><![CDATA[${p.description || p.tagline || ''}]]></description>
-      <pubDate>${new Date(p.updatedAt || p.createdAt || Date.now()).toUTCString()}</pubDate>
+      <description><![CDATA[${p.summary}]]></description>
+      <pubDate>${new Date(p.updatedAt).toUTCString()}</pubDate>
     </item>`
     )
     .join('\n');
