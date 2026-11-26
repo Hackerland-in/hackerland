@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { TESTBED_FACILITIES } from '@/lib/data/testbeds-data';
 import { TestbedCatalog } from '@/components/testbeds/testbed-catalog';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 export const metadata: Metadata = {
   title: 'Remote Hardware-in-the-Loop Testbeds & Lab Benches | Hackerland',
@@ -16,8 +19,10 @@ export const metadata: Metadata = {
 
 export default function TestbedsPage() {
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-      <TestbedCatalog initialTestbeds={TESTBED_FACILITIES} />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <TestbedCatalog initialTestbeds={TESTBED_FACILITIES} />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

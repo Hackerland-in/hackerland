@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { COMPLIANCE_ROADMAPS } from '@/lib/data/compliance-data';
 import { ComplianceWizard } from '@/components/compliance/compliance-wizard';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 export const metadata: Metadata = {
   title: 'Indian Hardware Statutory Compliance & NABL Lab Wizard | Hackerland',
@@ -16,8 +19,10 @@ export const metadata: Metadata = {
 
 export default function CompliancePage() {
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-      <ComplianceWizard initialRoadmaps={COMPLIANCE_ROADMAPS} />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <ComplianceWizard initialRoadmaps={COMPLIANCE_ROADMAPS} />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

@@ -2,8 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import type { FirmwareRegistryItem, FirmwareTargetArch, FirmwareCategory } from '@hackerland/core';
-import { filterFirmwareRegistry, formatFirmwareBytes } from '@hackerland/core';
+import { Badge, Button, Card } from '@hackerland/ui';
+import { Search, Cpu } from 'lucide-react';
+import type { FirmwareRegistryItem } from '@hackerland/core';
+import { filterFirmwareRegistry } from '@hackerland/core';
 import { WebSerialFlasherModal } from './webserial-flasher-modal';
 
 interface FirmwareCatalogProps {
@@ -44,49 +46,44 @@ export function FirmwareCatalog({ initialItems }: FirmwareCatalogProps) {
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Hero Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-mono font-medium tracking-wider text-emerald-400 uppercase">
-              Open-Source Hardware Firmware Registry
-            </span>
+    <div className="space-y-6 min-w-0">
+      <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
+              <Cpu className="size-3.5" aria-hidden="true" />
+              <span>Open-Source Hardware Firmware Registry</span>
+            </div>
+            <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
+              Firmware Registry &amp; WebSerial Flasher
+            </h1>
+            <p className="text-body-sm text-fg-muted max-w-2xl leading-relaxed">
+              Verified pre-compiled binaries for flight controllers, EV BMS, indigenous RISC-V silicon, and edge TinyML. Flash straight over USB via WebSerial.
+            </p>
           </div>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Firmware Registry &amp; WebSerial Flasher
-          </h1>
-          <p className="mt-2 text-sm text-stone-400 max-w-2xl leading-relaxed">
-            Verified, pre-compiled embedded binaries for drone flight controllers, EV battery management systems, indigenous RISC-V silicon, and edge TinyML. Flash directly from your browser over USB without local compiler toolchains.
-          </p>
-        </div>
 
-        {/* Global Stats */}
-        <div className="flex items-center space-x-4 font-mono text-xs">
-          <div className="rounded-2xl border border-stone-800 bg-stone-950 px-4 py-3 text-center">
-            <div className="text-stone-500 text-[10px]">VERIFIED BINARIES</div>
-            <div className="text-xl font-bold text-white">{initialItems.length}</div>
-          </div>
-          <div className="rounded-2xl border border-stone-800 bg-stone-950 px-4 py-3 text-center">
-            <div className="text-stone-500 text-[10px]">ONE-CLICK FLASH</div>
-            <div className="text-xl font-bold text-emerald-400">WebSerial</div>
+          <div className="flex items-center gap-3 font-mono text-xs shrink-0">
+            <div className="rounded-xl border border-hairline bg-surface-1 px-4 py-2.5 text-center">
+              <div className="text-fg-subtle text-[10px]">VERIFIED BINARIES</div>
+              <div className="text-lg font-bold text-fg">{initialItems.length}</div>
+            </div>
+            <div className="rounded-xl border border-hairline bg-surface-1 px-4 py-2.5 text-center">
+              <div className="text-fg-subtle text-[10px]">ONE-CLICK FLASH</div>
+              <div className="text-lg font-bold text-accent-fg">WebSerial</div>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-stone-800 bg-stone-950 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-1 items-center space-x-2">
-          <svg className="h-4 w-4 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+      <Card className="border-hairline bg-surface-1 p-3.5 shadow-xs flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-fg-subtle" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search firmware by title, board, chip, or author..."
-            className="w-full bg-transparent font-mono text-xs text-white placeholder:text-stone-600 focus:outline-none"
+            className="h-9 w-full rounded-full border border-line bg-sunken pl-8 pr-3 font-mono text-body-xs text-fg placeholder:text-fg-subtle focus:border-accent focus:bg-surface-1 focus:outline-none"
           />
         </div>
 
@@ -94,7 +91,7 @@ export function FirmwareCatalog({ initialItems }: FirmwareCatalogProps) {
           <select
             value={selectedArch}
             onChange={(e) => setSelectedArch(e.target.value)}
-            className="rounded-xl border border-stone-800 bg-stone-900 px-3 py-1.5 text-xs font-mono text-stone-300 focus:border-amber-500 focus:outline-none"
+            className="h-9 rounded-full border border-line bg-sunken px-3 text-body-xs font-mono text-fg focus:border-accent focus:outline-none"
           >
             {ARCH_OPTIONS.map((opt) => (
               <option key={opt.id} value={opt.id}>
@@ -106,7 +103,7 @@ export function FirmwareCatalog({ initialItems }: FirmwareCatalogProps) {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="rounded-xl border border-stone-800 bg-stone-900 px-3 py-1.5 text-xs font-mono text-stone-300 focus:border-amber-500 focus:outline-none"
+            className="h-9 rounded-full border border-line bg-sunken px-3 text-body-xs font-mono text-fg focus:border-accent focus:outline-none"
           >
             {CATEGORY_OPTIONS.map((opt) => (
               <option key={opt.id} value={opt.id}>
@@ -115,28 +112,25 @@ export function FirmwareCatalog({ initialItems }: FirmwareCatalogProps) {
             ))}
           </select>
         </div>
-      </div>
+      </Card>
 
-      {/* Firmware Grid */}
       {filteredItems.length === 0 ? (
-        <div className="py-16 text-center font-mono text-xs text-stone-500">
+        <Card className="py-12 text-center font-mono text-body-xs text-fg-subtle border-hairline bg-surface-1">
           No firmware matched your filter criteria. Try clearing search or architecture.
-        </div>
+        </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredItems.map((item) => {
             const latestRelease = item.releases[0];
             return (
-              <div
+              <Card
                 key={item.id}
-                className="flex flex-col justify-between rounded-2xl border border-stone-800 bg-stone-950 p-5 shadow-sm transition-all hover:border-stone-700"
+                className="flex flex-col justify-between border-hairline bg-surface-1 p-5 shadow-xs hover:border-accent/40 transition-all min-w-0 [overflow-wrap:anywhere]"
               >
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-lg border border-amber-500/40 bg-amber-950/20 px-2 py-0.5 text-[10px] font-mono font-semibold text-amber-400 uppercase">
-                      {item.targetArch.toUpperCase()}
-                    </span>
-                    <span className="text-[10px] font-mono text-stone-500">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge tone="accent" variant="outline">{item.targetArch.toUpperCase()}</Badge>
+                    <span className="text-[11px] font-mono text-fg-subtle">
                       {item.openSourceLicense}
                     </span>
                   </div>
@@ -144,22 +138,21 @@ export function FirmwareCatalog({ initialItems }: FirmwareCatalogProps) {
                   <div>
                     <Link
                       href={`/firmware/${item.slug}`}
-                      className="text-base font-bold text-white hover:text-amber-400 transition-colors"
+                      className="font-display text-body-lg font-bold text-fg hover:text-accent-fg transition-colors"
                     >
                       {item.title}
                     </Link>
-                    <p className="mt-1 text-xs text-stone-400 line-clamp-2 leading-relaxed">
+                    <p className="mt-1 text-body-xs text-fg-muted line-clamp-2 leading-relaxed">
                       {item.tagline}
                     </p>
                   </div>
 
-                  {/* Partition Preview Bar */}
                   <div className="space-y-1">
-                    <div className="text-[10px] font-mono text-stone-500 flex justify-between">
+                    <div className="text-[10px] font-mono text-fg-subtle flex justify-between">
                       <span>PARTITION LAYOUT</span>
                       <span>{item.partitions.length} partitions</span>
                     </div>
-                    <div className="flex h-2 w-full overflow-hidden rounded bg-stone-900">
+                    <div className="flex h-2 w-full overflow-hidden rounded-full bg-sunken">
                       {item.partitions.map((part) => (
                         <div
                           key={part.name}
@@ -172,52 +165,48 @@ export function FirmwareCatalog({ initialItems }: FirmwareCatalogProps) {
                     </div>
                   </div>
 
-                  {/* Supported Boards Pills */}
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {item.supportedBoards.slice(0, 3).map((b) => (
                       <span
                         key={b}
-                        className="rounded-md border border-stone-800 bg-stone-900/60 px-2 py-0.5 text-[10px] font-mono text-stone-400"
+                        className="rounded-full border border-hairline bg-sunken px-2 py-0.5 text-[10px] font-mono text-fg-muted"
                       >
                         {b}
                       </span>
                     ))}
                     {item.supportedBoards.length > 3 && (
-                      <span className="rounded-md border border-stone-800 bg-stone-900/60 px-2 py-0.5 text-[10px] font-mono text-stone-500">
+                      <span className="rounded-full border border-hairline bg-sunken px-2 py-0.5 text-[10px] font-mono text-fg-subtle">
                         +{item.supportedBoards.length - 3} more
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Card Footer */}
-                <div className="mt-5 border-t border-stone-800/80 pt-3 flex items-center justify-between">
-                  <div className="font-mono text-[11px] text-stone-400">
-                    Version: <strong className="text-white">{latestRelease?.version ?? 'v1.0.0'}</strong>
+                <div className="mt-4 border-t border-hairline pt-3 flex items-center justify-between gap-2">
+                  <div className="font-mono text-[11px] text-fg-muted">
+                    Version: <strong className="text-fg">{latestRelease?.version ?? 'v1.0.0'}</strong>
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Link
-                      href={`/firmware/${item.slug}`}
-                      className="rounded-xl border border-stone-800 px-3 py-1.5 text-xs font-mono text-stone-400 hover:text-white transition-all"
-                    >
-                      Docs
-                    </Link>
-                    <button
+                  <div className="flex items-center gap-2">
+                    <Button asChild variant="secondary" size="sm">
+                      <Link href={`/firmware/${item.slug}`}>Docs</Link>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
                       onClick={() => setActiveFlasherItem(item)}
-                      className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-mono font-bold text-white hover:bg-emerald-500 transition-all shadow-sm"
                     >
                       Flash ⚡
-                    </button>
+                    </Button>
                   </div>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
       )}
 
-      {/* Flasher Modal */}
       {activeFlasherItem && activeFlasherItem.releases[0] && (
         <WebSerialFlasherModal
           item={activeFlasherItem}

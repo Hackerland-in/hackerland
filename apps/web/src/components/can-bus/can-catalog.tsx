@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Badge, Card, cn } from '@hackerland/ui';
 import type { CanBusProject, CanProtocolStandard, TerminationTopology } from '@hackerland/core';
 import { filterCanBusProjects } from '@hackerland/core';
 import { CanBusWorkbench } from './can-bus-workbench';
@@ -18,59 +19,59 @@ export function CanCatalog({ initialProjects }: CanCatalogProps) {
 
   const filteredProjects = filterCanBusProjects(initialProjects, {
     standard: selectedStandard !== 'all' ? (selectedStandard as CanProtocolStandard) : undefined,
-    termination: selectedTermination !== 'all' ? (selectedTermination as TerminationTopology) : undefined,
+    termination:
+      selectedTermination !== 'all' ? (selectedTermination as TerminationTopology) : undefined,
     search: search.trim() !== '' ? search.trim() : undefined,
   });
 
   return (
-    <div className="space-y-8">
-      {/* Top Banner */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">
+    <div className="space-y-6 min-w-0">
+      <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone="accent" variant="outline">
             ISO 11898-1/2 Bit Timing &amp; CAN-FD Synthesis
-          </span>
-          <span className="text-xs text-slate-500 font-mono">
+          </Badge>
+          <span className="text-body-xs text-fg-subtle font-mono">
             ARAI AIS-004 &amp; AIS-156 Automotive Benchmarks
           </span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-100 tracking-tight">
+        <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold text-fg tracking-tight">
           Automotive CAN Bus &amp; ISO 11898 Network Protocol Simulator
         </h1>
-        <p className="text-base text-slate-400 max-w-3xl leading-relaxed">
-          Simulate Controller Area Network (CAN 2.0B &amp; CAN-FD) bit timing segments ($Sync\_Seg, Prop\_Seg, Phase\_Seg1, Phase\_Seg2$), sample point location, and round-trip cable propagation delay. Model non-destructive bitwise arbitration priority, bus load bandwidth saturation, split termination common-mode RF filtering, and differential physical layer oscilloscope traces across Indian EV two-wheelers, passenger cars, commercial 3-wheelers, and drones.
+        <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
+          Simulate CAN 2.0B and CAN-FD bit timing segments (Sync_Seg, Prop_Seg, Phase_Seg1, Phase_Seg2), propagation delay, arbitration, and split termination waveforms.
         </p>
-      </div>
+      </header>
 
-      {/* Tabs */}
-      <div className="flex border-b border-slate-800 gap-2 font-mono text-xs">
+      <div className="flex border-b border-hairline gap-2 font-mono text-xs">
         <button
           type="button"
           onClick={() => setActiveTab('presets')}
-          className={`pb-3 px-3 font-semibold border-b-2 transition-colors ${
+          className={cn(
+            'pb-2.5 px-3 font-semibold border-b-2 transition-colors',
             activeTab === 'presets'
-              ? 'border-amber-400 text-amber-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
+              ? 'border-accent text-accent-fg'
+              : 'border-transparent text-fg-muted hover:text-fg',
+          )}
         >
           Curated Indian Automotive Networks ({initialProjects.length})
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('workbench')}
-          className={`pb-3 px-3 font-semibold border-b-2 transition-colors ${
+          className={cn(
+            'pb-2.5 px-3 font-semibold border-b-2 transition-colors',
             activeTab === 'workbench'
-              ? 'border-amber-400 text-amber-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
+              ? 'border-accent text-accent-fg'
+              : 'border-transparent text-fg-muted hover:text-fg',
+          )}
         >
           Live Universal CAN Workbench
         </button>
       </div>
 
       {activeTab === 'presets' && (
-        <div className="space-y-6">
-          {/* Search and Filters */}
+        <div className="space-y-5">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <input
@@ -78,25 +79,25 @@ export function CanCatalog({ initialProjects }: CanCatalogProps) {
                 placeholder="Search by vehicle, domain, cable, Ather, Nexon, or test lab..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 transition"
+                className="w-full bg-surface-1 border border-line rounded-xl px-4 py-2 text-body-xs font-mono text-fg placeholder:text-fg-subtle focus:outline-none focus:border-accent"
               />
               {search && (
                 <button
                   type="button"
                   onClick={() => setSearch('')}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200 text-xs font-mono"
+                  className="absolute right-3 top-2 text-fg-subtle hover:text-fg text-xs font-mono"
                 >
                   ✕
                 </button>
               )}
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <select
                 aria-label="Filter by Protocol Standard"
                 value={selectedStandard}
                 onChange={(e) => setSelectedStandard(e.target.value)}
-                className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-mono text-slate-300 focus:outline-none focus:border-amber-400 transition"
+                className="bg-surface-1 border border-line rounded-xl px-3 py-2 text-body-xs font-mono text-fg focus:outline-none focus:border-accent"
               >
                 <option value="all">All CAN Standards</option>
                 <option value="can_2_0b_standard">CAN 2.0B Standard (11-bit)</option>
@@ -108,7 +109,7 @@ export function CanCatalog({ initialProjects }: CanCatalogProps) {
                 aria-label="Filter by Termination"
                 value={selectedTermination}
                 onChange={(e) => setSelectedTermination(e.target.value)}
-                className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-mono text-slate-300 focus:outline-none focus:border-amber-400 transition"
+                className="bg-surface-1 border border-line rounded-xl px-3 py-2 text-body-xs font-mono text-fg focus:outline-none focus:border-accent"
               >
                 <option value="all">All Terminations</option>
                 <option value="split_termination_filtered">Split Filtered (2x 60Ω)</option>
@@ -118,72 +119,75 @@ export function CanCatalog({ initialProjects }: CanCatalogProps) {
             </div>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredProjects.map((project) => (
-              <Link
-                key={project.id}
-                href={`/can-bus/${project.slug}`}
-                className="group bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-amber-500/50 transition-all flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                      {project.nominalBaudRateKbps} kbps
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-500 uppercase">
-                      {project.protocolStandard.replace(/_/g, ' ')}
-                    </span>
+              <Link key={project.id} href={`/can-bus/${project.slug}`} className="group block min-w-0">
+                <Card className="h-full bg-surface-1 border-hairline rounded-2xl p-5 hover:border-accent/50 transition-all flex flex-col justify-between [overflow-wrap:anywhere]">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <Badge tone="accent" variant="outline">
+                        {project.nominalBaudRateKbps} kbps
+                      </Badge>
+                      <span className="text-[10px] font-mono text-fg-subtle uppercase">
+                        {project.protocolStandard.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+
+                    <h3 className="font-display text-body-lg font-bold text-fg group-hover:text-accent-fg transition-colors line-clamp-2">
+                      {project.title}
+                    </h3>
+
+                    <p className="text-body-xs text-fg-muted line-clamp-2 leading-relaxed">
+                      {project.automotiveDomain}
+                    </p>
+
+                    <div className="bg-sunken rounded-xl p-3 border border-hairline font-mono text-[11px] space-y-1">
+                      <div className="flex justify-between text-fg-muted">
+                        <span>Bus Length / Nodes:</span>
+                        <span className="text-fg">
+                          {project.busTopology.busLengthMeters}m / {project.busTopology.nodeCount} ECUs
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-fg-muted">
+                        <span>Termination:</span>
+                        <span className="text-success-fg">
+                          {project.busTopology.terminationMethod.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-fg-muted">
+                        <span>Isolation:</span>
+                        <span className="text-accent-fg">
+                          {project.busTopology.isolationType.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <h3 className="text-base font-bold text-slate-100 group-hover:text-amber-400 transition-colors line-clamp-2">
-                    {project.title}
-                  </h3>
-
-                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                    {project.automotiveDomain}
-                  </p>
-
-                  <div className="bg-slate-950/60 rounded-lg p-2.5 border border-slate-800/80 font-mono text-[11px] space-y-1">
-                    <div className="flex justify-between text-slate-300">
-                      <span className="text-slate-500">Bus Length / Nodes:</span>
-                      <span>{project.busTopology.busLengthMeters}m / {project.busTopology.nodeCount} ECUs</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span className="text-slate-500">Termination:</span>
-                      <span className="text-emerald-400">{project.busTopology.terminationMethod.replace(/_/g, ' ')}</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span className="text-slate-500">Isolation:</span>
-                      <span className="text-sky-400">{project.busTopology.isolationType.replace(/_/g, ' ')}</span>
-                    </div>
+                  <div className="pt-3 border-t border-hairline mt-4 flex items-center justify-between text-body-xs font-mono">
+                    <span className="text-fg-subtle truncate max-w-[180px]">
+                      {project.indianContextFacility.split('-')[0]?.trim()}
+                    </span>
+                    <span className="text-accent-fg font-semibold group-hover:translate-x-0.5 transition-transform">
+                      Inspect Architecture →
+                    </span>
                   </div>
-                </div>
-
-                <div className="pt-4 border-t border-slate-800/60 mt-4 flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-500 truncate max-w-[190px]">
-                    {project.indianContextFacility.split('-')[0]?.trim()}
-                  </span>
-                  <span className="text-amber-400 group-hover:translate-x-1 transition-transform">
-                    Inspect Architecture →
-                  </span>
-                </div>
+                </Card>
               </Link>
             ))}
           </div>
 
           {filteredProjects.length === 0 && (
-            <div className="text-center py-12 bg-slate-900/40 rounded-xl border border-slate-800 text-slate-400 font-mono text-xs">
-              No matching CAN bus networks found for query &quot;{search}&quot;. Try resetting filters.
-            </div>
+            <Card className="text-center py-12 bg-surface-1 border-hairline text-fg-subtle font-mono text-body-xs">
+              No matching CAN bus networks found for query &quot;{search}&quot;.
+            </Card>
           )}
         </div>
       )}
 
       {activeTab === 'workbench' && (
         <div className="space-y-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-xs text-slate-400 leading-relaxed font-mono">
-            Defaulted to 500 kbps standard CAN 2.0B (40 MHz clock, 15m harness, 8 nodes). Adjust sliders in real time to simulate bit timing quantum allocations and bus arbitration margins.
+          <div className="bg-sunken border border-hairline rounded-xl p-4 text-body-xs text-fg-muted leading-relaxed font-mono">
+            Defaulted to 500 kbps standard CAN 2.0B (40 MHz clock, 15m harness, 8 nodes). Adjust sliders to simulate bit timing allocations and arbitration margins.
           </div>
           <CanBusWorkbench />
         </div>

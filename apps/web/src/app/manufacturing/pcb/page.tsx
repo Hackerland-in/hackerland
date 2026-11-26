@@ -19,14 +19,14 @@ export default function PcbStudioPage() {
       />
 
       {/* 2. MAIN INTERACTIVE STUDIO */}
-      <section className="border-b border-hairline bg-slate-950">
+      <section className="border-b border-hairline bg-sunken">
         <PcbStudio />
       </section>
 
       {/* 3. TECHNICAL DOCUMENTATION & CAPABILITIES */}
       <div className="container mx-auto px-4 py-12 max-w-7xl space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <Badge variant="outline" className="text-accent border-accent/30 font-mono">
+          <Badge variant="outline" className="text-accent-fg border-accent/30 font-mono">
             Full-Stack Electronic Design Automation (EDA)
           </Badge>
           <h2 className="text-2xl sm:text-3xl font-display font-bold tracking-tight">
@@ -42,19 +42,19 @@ export default function PcbStudioPage() {
         {/* Feature Highlights Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="p-6 bg-surface-1 border-hairline space-y-3">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-accent-soft border border-accent/25 text-accent-fg flex items-center justify-center">
               <Zap className="size-5" />
             </div>
             <h3 className="font-display font-bold text-base text-fg">Live Circuit Simulation Engine</h3>
             <p className="text-xs text-fg-subtle leading-relaxed">
-              Components aren't just passive graphics—they work! Push buttons close switches, potentiometers divide voltages,
+              Components aren&apos;t just passive graphics—they work! Push buttons close switches, potentiometers divide voltages,
               NE555 timers oscillate square waves, LEDs glow with radial light gradients proportional to forward current,
               and our live 2-channel oscilloscope graphs real-time waveforms.
             </p>
           </Card>
 
           <Card className="p-6 bg-surface-1 border-hairline space-y-3">
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-accent-soft border border-accent/25 text-accent-fg flex items-center justify-center">
               <Layers className="size-5" />
             </div>
             <h3 className="font-display font-bold text-base text-fg">Multi-Substrate Prototyping</h3>
@@ -66,7 +66,7 @@ export default function PcbStudioPage() {
           </Card>
 
           <Card className="p-6 bg-surface-1 border-hairline space-y-3">
-            <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-accent-soft border border-accent/25 text-accent-fg flex items-center justify-center">
               <Download className="size-5" />
             </div>
             <h3 className="font-display font-bold text-base text-fg">Fab-Ready Manufacturing Exports</h3>

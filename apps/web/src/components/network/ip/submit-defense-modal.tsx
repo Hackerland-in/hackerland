@@ -2,15 +2,8 @@
 
 import { useState } from 'react';
 import type { DefensivePublication, InventionCategory, HardwareLicense } from '@hackerland/core';
-import {
-  X,
-  ShieldCheck,
-  CheckCircle2,
-  FileCode,
-  Lock,
-  Sparkles,
-} from 'lucide-react';
-import { Button } from '@hackerland/ui';
+import { X, ShieldCheck, CheckCircle2, Sparkles } from 'lucide-react';
+import { Button, Input, Textarea } from '@hackerland/ui';
 
 interface SubmitDefenseModalProps {
   onClose: () => void;
@@ -43,7 +36,6 @@ export function SubmitDefenseModal({ onClose, onAdded }: SubmitDefenseModalProps
     agreePledge;
 
   const handleGenerateSampleHash = () => {
-    // Generate valid 64-char hex
     const chars = '0123456789abcdef';
     let hash = '';
     for (let i = 0; i < 64; i++) {
@@ -113,146 +105,142 @@ export function SubmitDefenseModal({ onClose, onAdded }: SubmitDefenseModalProps
       role="dialog"
       aria-modal="true"
       aria-labelledby="submit-defense-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-fg/40 backdrop-blur-sm p-4 overflow-y-auto"
     >
-      <div className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-neutral-900 shadow-2xl p-6 sm:p-8 my-8 text-neutral-100 space-y-6">
+      <div className="relative w-full max-w-2xl rounded-2xl border border-hairline bg-surface-1 shadow-overlay p-6 sm:p-7 my-8 text-fg space-y-5">
         <button
           onClick={onClose}
           type="button"
           aria-label="Close dialog"
-          className="absolute top-4 right-4 text-neutral-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-neutral-800"
+          className="absolute top-4 right-4 text-fg-subtle hover:text-fg transition-colors p-1 rounded-full hover:bg-surface-2"
         >
           <X className="size-5" />
         </button>
 
         {isSuccess && createdPub ? (
-          <div className="space-y-6 text-center py-4">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <div className="space-y-5 text-center py-4">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-success/10 border border-success/30 text-success-fg">
               <CheckCircle2 className="size-8" />
             </div>
 
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-accent-soft text-accent-fg border border-accent/25 mb-2">
                 PRIOR ART RECORD LOGGED
               </div>
-              <h2 className="text-2xl font-bold tracking-tight text-white">Invention Defensively Published</h2>
-              <p className="text-sm text-neutral-400 mt-1 max-w-md mx-auto">
-                Your technical disclosure has been permanently anchored to the IP Defense Ledger. It is legally cited against future predatory claims.
+              <h2 className="font-display text-headline-md font-bold text-fg">
+                Invention Defensively Published
+              </h2>
+              <p className="text-body-sm text-fg-muted mt-1 max-w-md mx-auto">
+                Your technical disclosure is now anchored to the IP Defense Ledger.
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-neutral-950/60 p-5 text-left space-y-3 font-mono text-xs">
-              <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                <span className="text-neutral-400">DISCLOSURE ID:</span>
-                <span className="text-emerald-400 font-bold text-sm tracking-wider">{createdPub.id}</span>
+            <div className="rounded-xl border border-hairline bg-sunken p-4 text-left space-y-2.5 font-mono text-xs">
+              <div className="flex items-center justify-between border-b border-hairline pb-2">
+                <span className="text-fg-subtle">DISCLOSURE ID:</span>
+                <span className="text-accent-fg font-bold">{createdPub.id}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400">BLOCK HEIGHT:</span>
-                <span className="text-white font-medium">#{createdPub.timestampProof.blockHeight}</span>
+                <span className="text-fg-subtle">BLOCK HEIGHT:</span>
+                <span className="text-fg font-semibold">#{createdPub.timestampProof.blockHeight}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400">LICENSE:</span>
-                <span className="text-white">{createdPub.hardwareLicense}</span>
+                <span className="text-fg-subtle">LICENSE:</span>
+                <span className="text-fg">{createdPub.hardwareLicense}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400">SHA-256 DIGEST:</span>
-                <span className="text-emerald-400 truncate max-w-[220px]">{createdPub.timestampProof.sha256Hash}</span>
+                <span className="text-fg-subtle">SHA-256:</span>
+                <span className="text-accent-fg truncate max-w-[220px]">
+                  {createdPub.timestampProof.sha256Hash}
+                </span>
               </div>
             </div>
 
-            <Button
-              variant="primary"
-              className="text-xs font-mono bg-emerald-600 hover:bg-emerald-500 text-white"
-              onClick={onClose}
-            >
-              Done & Return to Ledger
+            <Button type="button" variant="primary" size="sm" onClick={onClose}>
+              Done &amp; Return to Ledger
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 mb-1">
+              <div className="flex items-center gap-2 text-xs font-mono text-accent-fg font-semibold mb-1">
                 <ShieldCheck className="size-3.5" />
                 <span>DEFENSIVE PUBLICATION STUDIO</span>
               </div>
-              <h2 id="submit-defense-title" className="text-xl font-bold text-white">
+              <h2 id="submit-defense-title" className="font-display text-headline-sm font-bold text-fg">
                 Defensively Publish Open Hardware
               </h2>
-              <p className="text-xs text-neutral-400 mt-1">
-                Establish incontrovertible prior art under USPTO 35 U.S.C. § 102 and Indian Patents Act § 29 to protect open makers.
+              <p className="text-body-xs text-fg-muted mt-1">
+                Establish statutory prior art under USPTO 35 U.S.C. § 102 and Indian Patents Act § 29.
               </p>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Invention Title *</label>
-                <input
+                <label className="block text-xs font-mono text-fg-muted mb-1">Invention Title *</label>
+                <Input
                   type="text"
                   required
                   placeholder="e.g. Non-Contact Inductive Current Sensor for High-Voltage EV Inverter"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Inventor Name *</label>
-                  <input
+                  <label className="block text-xs font-mono text-fg-muted mb-1">Inventor Name *</label>
+                  <Input
                     type="text"
                     required
                     placeholder="e.g. Rohan Sen"
                     value={inventorName}
                     onChange={(e) => setInventorName(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Hackerland Handle *</label>
-                  <input
+                  <label className="block text-xs font-mono text-fg-muted mb-1">Handle *</label>
+                  <Input
                     type="text"
                     required
                     placeholder="rohan_maker"
                     value={inventorHandle}
                     onChange={(e) => setInventorHandle(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Institution / Lab</label>
-                  <input
+                  <label className="block text-xs font-mono text-fg-muted mb-1">Institution</label>
+                  <Input
                     type="text"
                     placeholder="e.g. COEP Robotics"
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Engineering Domain</label>
+                  <label className="block text-xs font-mono text-fg-muted mb-1">Domain</label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as any)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+                    onChange={(e) => setCategory(e.target.value as InventionCategory)}
+                    className="h-11 w-full rounded-xl border border-line bg-sunken px-3 text-body-xs text-fg focus:border-accent focus:outline-none"
                   >
-                    <option value="clean_mobility_bms">Clean Mobility & EV BMS</option>
-                    <option value="avionics_aerospace">Avionics & Aerospace</option>
+                    <option value="clean_mobility_bms">Clean Mobility &amp; EV BMS</option>
+                    <option value="avionics_aerospace">Avionics &amp; Aerospace</option>
                     <option value="biomedical_diagnostics">Biomedical Diagnostics</option>
-                    <option value="robotics_actuation">Robotics & Actuation</option>
-                    <option value="climatetech_agri">Agritech & Climatetech</option>
-                    <option value="open_silicon_asic">Open Silicon & ASIC</option>
+                    <option value="robotics_actuation">Robotics &amp; Actuation</option>
+                    <option value="climatetech_agri">Agritech &amp; Climatetech</option>
+                    <option value="open_silicon_asic">Open Silicon &amp; ASIC</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Open Hardware License</label>
+                  <label className="block text-xs font-mono text-fg-muted mb-1">Hardware License</label>
                   <select
                     value={license}
-                    onChange={(e) => setLicense(e.target.value as any)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+                    onChange={(e) => setLicense(e.target.value as HardwareLicense)}
+                    className="h-11 w-full rounded-xl border border-line bg-sunken px-3 text-body-xs text-fg focus:border-accent focus:outline-none"
                   >
                     <option value="CERN-OHL-P-2.0">CERN-OHL-P-2.0 (Permissive)</option>
                     <option value="CERN-OHL-W-2.0">CERN-OHL-W-2.0 (Weakly Reciprocal)</option>
@@ -265,91 +253,83 @@ export function SubmitDefenseModal({ onClose, onAdded }: SubmitDefenseModalProps
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">
-                  IPC / CPC Patent Classifications (comma-separated)
+                <label className="block text-xs font-mono text-fg-muted mb-1">
+                  IPC Classifications (comma-separated)
                 </label>
-                <input
+                <Input
                   type="text"
                   placeholder="e.g. H01M 10/44, G01R 31/36"
                   value={ipcInput}
                   onChange={(e) => setIpcInput(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">Abstract Summary *</label>
-                <textarea
+                <label className="block text-xs font-mono text-fg-muted mb-1">Abstract Summary *</label>
+                <Textarea
                   rows={2}
                   required
-                  placeholder="Detailed summary describing the physical circuit, mechanical mechanism, or firmware architecture..."
+                  placeholder="Describe the circuit, mechanical mechanism, or firmware architecture..."
                   value={abstractSummary}
                   onChange={(e) => setAbstractSummary(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-neutral-400 mb-1">
-                  Novel Technical Claims & Hardware Mechanisms (one per line) *
+                <label className="block text-xs font-mono text-fg-muted mb-1">
+                  Novel Technical Claims (one per line) *
                 </label>
-                <textarea
+                <Textarea
                   rows={2}
                   required
                   placeholder="1. Interleaved planar transformer trace layout eliminating stray inductance..."
                   value={novelMechanisms}
                   onChange={(e) => setNovelMechanisms(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none resize-none"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-mono text-neutral-400">Primary Artifact SHA-256 Digest *</label>
+                  <label className="text-xs font-mono text-fg-muted">Primary Artifact SHA-256 Digest *</label>
                   <button
                     type="button"
                     onClick={handleGenerateSampleHash}
-                    className="text-[11px] font-mono text-emerald-400 hover:underline flex items-center gap-1"
+                    className="text-[11px] font-mono text-accent-fg hover:underline flex items-center gap-1"
                   >
-                    <Sparkles className="size-3" /> Auto-Compute Test Hash
+                    <Sparkles className="size-3" />
+                    <span>Auto-Compute Test Hash</span>
                   </button>
                 </div>
-                <input
+                <Input
                   type="text"
                   required
-                  placeholder="64-character hexadecimal SHA-256 hash of schematic or Gerber zip..."
+                  placeholder="64-character hexadecimal SHA-256 hash..."
                   value={sha256Hash}
                   onChange={(e) => setSha256Hash(e.target.value.trim().toLowerCase())}
-                  className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs font-mono text-emerald-300 placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
+                  className="font-mono text-xs"
                 />
               </div>
 
-              {/* Non-Aggression Pledge Agreement */}
-              <div className="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-950/20 text-xs space-y-2">
-                <label className="flex items-start gap-2.5 cursor-pointer text-neutral-200">
+              <div className="p-3.5 rounded-xl border border-accent/25 bg-accent-soft text-xs space-y-2">
+                <label className="flex items-start gap-2.5 cursor-pointer text-fg">
                   <input
                     type="checkbox"
                     checked={agreePledge}
                     onChange={(e) => setAgreePledge(e.target.checked)}
-                    className="mt-0.5 rounded border-neutral-700 bg-neutral-900 text-emerald-500 focus:ring-emerald-500"
+                    className="mt-0.5 size-4 rounded border-line accent-accent"
                   />
                   <span>
-                    <strong>Open Hardware Mutual Non-Aggression Pledge:</strong> I irrevocably publish this design to the public domain or open hardware license, and agree never to assert patents offensively against fellow open-source builders.
+                    <strong>Open Hardware Mutual Non-Aggression Pledge:</strong> I publish this design to the public domain or open hardware license and agree never to assert patents offensively against open builders.
                   </span>
                 </label>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <Button type="button" variant="secondary" onClick={onClose} className="text-xs">
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <Button type="button" variant="secondary" size="sm" onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={!isValid}
-                variant="primary"
-                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono disabled:opacity-40"
-              >
+              <Button type="submit" disabled={!isValid} variant="primary" size="sm">
                 Defensively Publish to Ledger
               </Button>
             </div>

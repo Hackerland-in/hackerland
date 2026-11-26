@@ -11,13 +11,10 @@ import {
   Copy,
   Check,
   ArrowLeft,
-  ExternalLink,
   Cpu,
   Layers,
-  Code,
-  Box,
 } from 'lucide-react';
-import { Button } from '@hackerland/ui';
+import { Badge, Button, Card } from '@hackerland/ui';
 import { PriorArtCertificateModal } from './prior-art-certificate-modal';
 
 interface DefensivePublicationDetailProps {
@@ -29,238 +26,215 @@ export function DefensivePublicationDetail({ publication }: DefensivePublication
   const [copiedHash, setCopiedHash] = useState(false);
 
   const handleCopyHash = () => {
-    navigator.clipboard.writeText(publication.timestampProof.sha256Hash);
+    try {
+      navigator.clipboard?.writeText(publication.timestampProof.sha256Hash);
+    } catch {}
     setCopiedHash(true);
     setTimeout(() => setCopiedHash(false), 2000);
   };
 
   return (
-    <div className="space-y-8 min-w-0">
-      {/* Back Link */}
-      <div>
+    <div className="space-y-6 min-w-0">
+      <div className="rounded-xl border border-hairline bg-surface-1 px-4 py-3">
         <Link
           href="/network/ip"
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-neutral-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-body-xs font-mono text-fg-muted hover:text-accent-fg transition-colors"
         >
           <ArrowLeft className="size-3.5" />
-          Back to Open Invention Network & IP Defense Ledger
+          <span>Back to Open Invention Network &amp; IP Defense Ledger</span>
         </Link>
       </div>
 
-      {/* Hero Header */}
-      <div className="rounded-2xl border border-white/10 bg-neutral-900/80 p-6 sm:p-8 backdrop-blur-sm space-y-6">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-          <div className="space-y-3 max-w-3xl">
+      <Card className="border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 space-y-5 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div className="space-y-2.5 max-w-2xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-1 rounded text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                <ShieldCheck className="size-3.5" /> PRIOR ART DISCLOSURE #{publication.id}
-              </span>
-              <span className="px-2.5 py-1 rounded text-xs font-mono bg-neutral-800 text-neutral-300 border border-white/5">
-                {publication.hardwareLicense}
-              </span>
-              <span className="px-2.5 py-1 rounded text-xs font-mono text-neutral-400 bg-neutral-950 border border-white/5">
+              <Badge tone="accent" variant="outline">
+                <ShieldCheck className="size-3 mr-1 inline" />
+                PRIOR ART DISCLOSURE #{publication.id}
+              </Badge>
+              <Badge tone="neutral" variant="outline">{publication.hardwareLicense}</Badge>
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-mono text-fg-muted bg-surface-1 border border-hairline">
                 BLOCK #{publication.timestampProof.blockHeight}
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+            <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
               {publication.title}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-neutral-400">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-body-xs text-fg-muted">
               <span>
-                Disclosed by <strong className="text-neutral-200">{publication.inventor.name}</strong> (@{publication.inventor.handle})
+                Disclosed by <strong className="text-fg">{publication.inventor.name}</strong> (@{publication.inventor.handle})
               </span>
-              {publication.inventor.organization && (
-                <>
-                  <span>·</span>
-                  <span>{publication.inventor.organization}</span>
-                </>
-              )}
-              <span>·</span>
+              {publication.inventor.organization && <span>· {publication.inventor.organization}</span>}
               <span className="font-mono">
-                {new Date(publication.firstPublicDisclosureDate).toUTCString()}
+                · {new Date(publication.firstPublicDisclosureDate).toUTCString()}
               </span>
             </div>
 
-            <p className="text-sm text-neutral-300 leading-relaxed pt-1">
+            <p className="text-body-sm text-fg-muted leading-relaxed pt-1">
               {publication.abstractSummary}
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 shrink-0 w-full md:w-auto">
-            <Button
-              variant="primary"
-              onClick={() => setShowAffidavit(true)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono"
-            >
-              <FileText className="size-3.5 mr-1.5" />
-              Generate Prior-Art Affidavit
+          <div className="flex flex-col gap-2 shrink-0 w-full md:w-auto">
+            <Button type="button" variant="primary" size="sm" onClick={() => setShowAffidavit(true)}>
+              <FileText className="size-3.5" />
+              <span>Generate Prior-Art Affidavit</span>
             </Button>
-            <Button
-              variant="secondary"
-              onClick={handleCopyHash}
-              className="text-xs font-mono"
-            >
+            <Button type="button" variant="secondary" size="sm" onClick={handleCopyHash}>
               {copiedHash ? (
                 <>
-                  <Check className="size-3.5 mr-1.5 text-emerald-400" />
-                  Hash Copied
+                  <Check className="size-3.5 text-success-fg" />
+                  <span>Hash Copied</span>
                 </>
               ) : (
                 <>
-                  <Copy className="size-3.5 mr-1.5" />
-                  Copy SHA-256 Digest
+                  <Copy className="size-3.5" />
+                  <span>Copy SHA-256 Digest</span>
                 </>
               )}
             </Button>
           </div>
         </div>
 
-        {/* Cryptographic Proof Strip */}
-        <div className="p-4 rounded-xl border border-white/10 bg-neutral-950 font-mono text-xs space-y-2">
-          <div className="flex items-center justify-between text-neutral-400 border-b border-white/5 pb-2">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <Lock className="size-3.5" /> RFC 3161 CRYPTOGRAPHIC TIMESTAMP TOKEN
+        <div className="p-4 rounded-xl border border-hairline bg-surface-1 font-mono text-xs space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-fg-muted border-b border-hairline pb-2">
+            <span className="flex items-center gap-1.5 text-accent-fg font-semibold">
+              <Lock className="size-3.5" />
+              <span>RFC 3161 CRYPTOGRAPHIC TIMESTAMP TOKEN</span>
             </span>
-            <span className="text-[11px] text-neutral-500">{publication.timestampProof.publicNotaryService}</span>
+            <span className="text-[11px] text-fg-subtle">{publication.timestampProof.publicNotaryService}</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] pt-1">
             <div>
-              <span className="text-neutral-500 block">SHA-256 HASH:</span>
-              <span className="text-emerald-300 break-all select-all">{publication.timestampProof.sha256Hash}</span>
+              <span className="text-fg-subtle block">SHA-256 HASH:</span>
+              <span className="text-fg font-semibold break-all select-all">
+                {publication.timestampProof.sha256Hash}
+              </span>
             </div>
             <div>
-              <span className="text-neutral-500 block">MERKLE ROOT:</span>
-              <span className="text-neutral-300 break-all select-all">{publication.timestampProof.merkleRoot}</span>
+              <span className="text-fg-subtle block">MERKLE ROOT:</span>
+              <span className="text-fg-muted break-all select-all">
+                {publication.timestampProof.merkleRoot}
+              </span>
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
-      {/* Main Technical Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column (2 Cols): Novel Mechanisms & Open Artifacts */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Novel Mechanisms */}
-          <div className="rounded-xl border border-white/10 bg-neutral-900/60 p-6 space-y-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Cpu className="size-4 text-emerald-400" />
-              Novel Technical Claims & Hardware Mechanisms
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        <div className="xl:col-span-2 space-y-5">
+          <Card className="border-hairline bg-surface-1 p-5 space-y-3.5">
+            <h2 className="font-display text-body-lg font-bold text-fg flex items-center gap-2">
+              <Cpu className="size-4 text-accent" />
+              <span>Novel Technical Claims &amp; Hardware Mechanisms</span>
             </h2>
-            <p className="text-xs text-neutral-400">
+            <p className="text-body-xs text-fg-muted">
               The following physical mechanisms and topologies are irrevocably established as prior art:
             </p>
-            <div className="space-y-3 pt-1">
+            <div className="space-y-2.5">
               {publication.novelMechanisms.map((mech, index) => (
-                <div key={index} className="flex items-start gap-3 text-xs text-neutral-300 leading-relaxed">
-                  <span className="size-5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-mono text-[11px] shrink-0 mt-0.5">
+                <div key={index} className="flex items-start gap-2.5 text-body-xs text-fg leading-relaxed">
+                  <span className="size-5 rounded-full bg-accent-soft text-accent-fg border border-accent/25 flex items-center justify-center font-mono text-[11px] font-bold shrink-0 mt-0.5">
                     {index + 1}
                   </span>
                   <p>{mech}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
-          {/* Open Hardware Artifacts Registry */}
-          <div className="rounded-xl border border-white/10 bg-neutral-900/60 p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Layers className="size-4 text-cyan-400" />
-                Anchored Open Hardware Artifacts ({publication.openArtifacts.length})
+          <Card className="border-hairline bg-surface-1 p-5 space-y-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-display text-body-lg font-bold text-fg flex items-center gap-2">
+                <Layers className="size-4 text-accent" />
+                <span>Anchored Open Hardware Artifacts ({publication.openArtifacts.length})</span>
               </h2>
-              <span className="text-xs font-mono text-neutral-400">VERIFIABLE DOWNLOADS</span>
+              <span className="text-[11px] font-mono text-fg-subtle">VERIFIABLE DOWNLOADS</span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {publication.openArtifacts.map((art) => (
                 <div
                   key={art.id}
-                  className="rounded-lg border border-white/5 bg-neutral-950 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  className="rounded-xl border border-hairline bg-sunken p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-body-xs"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-white font-medium">{art.fileName}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-neutral-800 text-neutral-400">
-                        {art.artifactType.toUpperCase()}
-                      </span>
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-fg font-semibold truncate">{art.fileName}</span>
+                      <Badge tone="neutral" variant="outline">{art.artifactType.toUpperCase()}</Badge>
                     </div>
-                    <div className="text-[11px] font-mono text-neutral-500">
+                    <div className="text-[11px] font-mono text-fg-subtle">
                       {(art.fileSizeBytes / 1024 / 1024).toFixed(2)} MB · SHA-256: {art.sha256Hash.slice(0, 16)}...
                     </div>
                   </div>
 
                   {art.downloadUrl && (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => alert(`Initiating download for ${art.fileName}...`)}
-                      className="text-xs font-mono shrink-0"
-                    >
-                      <Download className="size-3.5 mr-1.5" />
-                      Download
+                    <Button asChild size="sm" variant="secondary" className="shrink-0">
+                      <a href={art.downloadUrl} download={art.fileName}>
+                        <Download className="size-3.5" />
+                        <span>Download</span>
+                      </a>
                     </Button>
                   )}
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
-          {/* Prior Art Citations */}
           {publication.priorArtCitations.length > 0 && (
-            <div className="rounded-xl border border-white/10 bg-neutral-900/60 p-6 space-y-4">
-              <h2 className="text-base font-bold text-white">
-                Prior Art Citations & Distinction Archaeology
+            <Card className="border-hairline bg-surface-1 p-5 space-y-3">
+              <h2 className="font-display text-body-lg font-bold text-fg">
+                Prior Art Citations &amp; Distinction Archaeology
               </h2>
-              <p className="text-xs text-neutral-400">
-                Explicit technical distinctions demonstrating why this disclosure cannot be anticipated by earlier commercial patents:
+              <p className="text-body-xs text-fg-muted">
+                Explicit technical distinctions establishing novelty over earlier disclosures:
               </p>
 
-              <div className="space-y-3 pt-1">
+              <div className="space-y-2.5">
                 {publication.priorArtCitations.map((cit, idx) => (
-                  <div key={idx} className="p-4 rounded-lg bg-neutral-950 border border-white/5 space-y-2 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-white">{cit.title}</span>
-                      <span className="font-mono text-[11px] text-amber-400">{cit.patentOrPaperId}</span>
+                  <div key={idx} className="p-3.5 rounded-xl bg-sunken border border-hairline space-y-1 text-body-xs">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-bold text-fg">{cit.title}</span>
+                      <span className="font-mono text-[11px] text-accent-fg font-semibold">
+                        {cit.patentOrPaperId}
+                      </span>
                     </div>
-                    <p className="text-neutral-400 leading-relaxed text-[11px]">
-                      {cit.distinctionSummary}
-                    </p>
+                    <p className="text-fg-muted leading-relaxed text-[11px]">{cit.distinctionSummary}</p>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           )}
         </div>
 
-        {/* Right Column (1 Col): Legal Enforcement & Non-Aggression */}
-        <div className="space-y-6">
-          <div className="rounded-xl border border-white/10 bg-neutral-900/60 p-6 space-y-4 text-xs">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <ShieldCheck className="size-4 text-emerald-400" />
-              Statutory Prior Art Protection
+        <div className="space-y-4">
+          <Card className="border-hairline bg-surface-1 p-5 space-y-3 text-body-xs">
+            <h3 className="font-display text-body-md font-bold text-fg flex items-center gap-2">
+              <ShieldCheck className="size-4 text-accent" />
+              <span>Statutory Prior Art Protection</span>
             </h3>
-            <p className="text-neutral-400 leading-relaxed">
+            <p className="text-fg-muted leading-relaxed">
               This publication constitutes an official defensive publication under:
             </p>
-            <ul className="space-y-2 text-neutral-300 list-disc list-inside text-[11px]">
-              <li><strong>USPTO 35 U.S.C. § 102(a)(1)</strong> — Prior public disclosure prior to effective filing date.</li>
-              <li><strong>The Patents Act 1970 (India) § 29 & § 30</strong> — Anticipation by public prior publication.</li>
-              <li><strong>European Patent Convention (EPC) Art. 54(2)</strong> — State of the art available to the public worldwide.</li>
+            <ul className="space-y-2 text-fg-muted list-disc list-inside text-[11px]">
+              <li><strong className="text-fg">USPTO 35 U.S.C. § 102(a)(1)</strong> — Prior public disclosure prior to effective filing date.</li>
+              <li><strong className="text-fg">The Patents Act 1970 (India) § 29 &amp; § 30</strong> — Anticipation by public prior publication.</li>
+              <li><strong className="text-fg">European Patent Convention (EPC) Art. 54(2)</strong> — State of the art available worldwide.</li>
             </ul>
-          </div>
+          </Card>
 
-          <div className="rounded-xl border border-white/10 bg-neutral-900/60 p-6 space-y-3 text-xs">
-            <h3 className="text-sm font-bold text-white">Mutual Non-Aggression</h3>
-            <p className="text-neutral-400 leading-relaxed text-[11px]">
-              The author has signed the <strong>Hackerland Open Hardware Non-Aggression Pledge</strong>, agreeing never to assert patents offensively against downstream makers who build upon this work.
+          <Card className="border-hairline bg-surface-1 p-5 space-y-2 text-body-xs">
+            <h3 className="font-display text-body-md font-bold text-fg">Mutual Non-Aggression</h3>
+            <p className="text-fg-muted leading-relaxed text-[11px]">
+              The author has signed the <strong className="text-fg">Hackerland Open Hardware Non-Aggression Pledge</strong>, agreeing never to assert patents offensively against downstream makers.
             </p>
-          </div>
+          </Card>
         </div>
       </div>
 
-      {/* Affidavit Modal */}
       {showAffidavit && (
         <PriorArtCertificateModal
           publication={publication}

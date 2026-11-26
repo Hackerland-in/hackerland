@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { TESTBED_FACILITIES } from '@/lib/data/testbeds-data';
 import { TestbedDetailView } from '@/components/testbeds/testbed-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 interface TestbedPageProps {
   params: Promise<{ slug: string }>;
@@ -40,8 +43,10 @@ export default async function TestbedDetailPage({ params }: TestbedPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-      <TestbedDetailView testbed={item} />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <TestbedDetailView testbed={item} />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

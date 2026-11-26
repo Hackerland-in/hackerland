@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { FIRMWARE_REGISTRY } from '@/lib/data/firmware-data';
 import { FirmwareCatalog } from '@/components/firmware/firmware-catalog';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 export const metadata: Metadata = {
   title: 'Hardware Firmware Registry & WebSerial Flasher | Hackerland',
@@ -16,8 +19,10 @@ export const metadata: Metadata = {
 
 export default function FirmwarePage() {
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-      <FirmwareCatalog initialItems={FIRMWARE_REGISTRY} />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <FirmwareCatalog initialItems={FIRMWARE_REGISTRY} />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

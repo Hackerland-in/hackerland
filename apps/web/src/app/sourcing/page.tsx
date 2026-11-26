@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
+import { PackageSearch } from 'lucide-react';
 import { COMPONENT_SOURCING_REGISTRY } from '@/lib/data/sourcing-data';
 import { SourcingCatalog } from '@/components/sourcing/sourcing-catalog';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 export const metadata: Metadata = {
   title: 'Hardware Component Sourcing & Drop-In Alternates | Hackerland',
@@ -55,27 +59,28 @@ export default function SourcingPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12 space-y-8">
-      {/* Page Header */}
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-mono font-medium text-primary">
-          <span>📦 DOMESTIC DISTRIBUTORS & PIN-COMPATIBLE ALTERNATES</span>
-        </div>
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground">
-          Component Sourcing & Drop-In Alternates
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed">
-          Shield your hardware bill of materials from supply-chain choke points and tariff shocks. Compare live domestic Indian stock across Robu.in, Evelta, and Element14, calculate true landed costs with HSN 8542 customs duty and 18% GST, and discover verified 100% pin-compatible drop-in alternatives.
-        </p>
-      </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-2">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
+            <PackageSearch className="size-3.5" aria-hidden="true" />
+            <span>Domestic Distributors &amp; Alternates</span>
+          </div>
+          <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
+            Component Sourcing &amp; Drop-In Alternates
+          </h1>
+          <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
+            Compare live domestic Indian stock across Robu.in, Evelta, and Element14, compute landed invoice cost with HSN 8542 customs duty &amp; 18% GST, and spot pin-compatible replacements.
+          </p>
+        </header>
 
-      <SourcingCatalog initialRecords={COMPONENT_SOURCING_REGISTRY} />
+        <SourcingCatalog initialRecords={COMPONENT_SOURCING_REGISTRY} />
 
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-    </div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

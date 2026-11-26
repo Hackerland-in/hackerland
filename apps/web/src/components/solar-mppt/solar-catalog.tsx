@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Badge, Card, cn } from '@hackerland/ui';
 import type { SolarMpptProject, MpptAlgorithm, BatteryBankType } from '@hackerland/core';
 import { filterSolarMpptProjects } from '@hackerland/core';
 import { SolarConverterWorkbench } from './solar-converter-workbench';
@@ -23,54 +24,53 @@ export function SolarCatalog({ initialProjects }: SolarCatalogProps) {
   });
 
   return (
-    <div className="space-y-8">
-      {/* Top Banner */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">
+    <div className="space-y-6 min-w-0">
+      <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone="accent" variant="outline">
             Single-Diode PV Physics &amp; MPPT Power Converters
-          </span>
-          <span className="text-xs text-slate-500 font-mono">
+          </Badge>
+          <span className="text-body-xs text-fg-subtle font-mono">
             BIS IS 14286 / IS 16221 &amp; PM-KUSUM Architecture
           </span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-100 tracking-tight">
+        <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold text-fg tracking-tight">
           Solar PV &amp; MPPT Battery Charge Controller Simulator
         </h1>
-        <p className="text-base text-slate-400 max-w-3xl leading-relaxed">
-          Simulate single-diode photovoltaic I-V and P-V characteristic curves under variable solar irradiance ($G$) and extreme cell temperatures ($T_{'{'}cell{'}'}$). Model MPPT algorithms (Incremental Conductance, Perturb &amp; Observe, and Global Sweep) with synchronous buck converter inductor and output capacitor sizing for Indian climatic extremes from -30°C Ladakh posts to 65°C Rajasthan canal-top arrays.
+        <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
+          Simulate single-diode photovoltaic I-V and P-V characteristic curves under irradiance G and cell temperature T_cell, plus MPPT buck converter component sizing.
         </p>
-      </div>
+      </header>
 
-      {/* Tabs */}
-      <div className="flex border-b border-slate-800 gap-2 font-mono text-xs">
+      <div className="flex border-b border-hairline gap-2 font-mono text-xs">
         <button
           type="button"
           onClick={() => setActiveTab('presets')}
-          className={`pb-3 px-3 font-semibold border-b-2 transition-colors ${
+          className={cn(
+            'pb-2.5 px-3 font-semibold border-b-2 transition-colors',
             activeTab === 'presets'
-              ? 'border-amber-400 text-amber-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
+              ? 'border-accent text-accent-fg'
+              : 'border-transparent text-fg-muted hover:text-fg',
+          )}
         >
           Curated Indian Solar Projects ({initialProjects.length})
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('workbench')}
-          className={`pb-3 px-3 font-semibold border-b-2 transition-colors ${
+          className={cn(
+            'pb-2.5 px-3 font-semibold border-b-2 transition-colors',
             activeTab === 'workbench'
-              ? 'border-amber-400 text-amber-400'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
+              ? 'border-accent text-accent-fg'
+              : 'border-transparent text-fg-muted hover:text-fg',
+          )}
         >
           Live Interactive Simulator
         </button>
       </div>
 
       {activeTab === 'presets' && (
-        <div className="space-y-6">
-          {/* Search and Filters */}
+        <div className="space-y-5">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <input
@@ -78,25 +78,25 @@ export function SolarCatalog({ initialProjects }: SolarCatalogProps) {
                 placeholder="Search by project, canal, PM-KUSUM, standard, or test lab..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400 transition"
+                className="w-full bg-surface-1 border border-line rounded-xl px-4 py-2 text-body-xs font-mono text-fg placeholder:text-fg-subtle focus:outline-none focus:border-accent"
               />
               {search && (
                 <button
                   type="button"
                   onClick={() => setSearch('')}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200 text-xs font-mono"
+                  className="absolute right-3 top-2 text-fg-subtle hover:text-fg text-xs font-mono"
                 >
                   ✕
                 </button>
               )}
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <select
                 aria-label="Filter by MPPT Algorithm"
                 value={selectedAlgorithm}
                 onChange={(e) => setSelectedAlgorithm(e.target.value)}
-                className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-mono text-slate-300 focus:outline-none focus:border-amber-400 transition"
+                className="bg-surface-1 border border-line rounded-xl px-3 py-2 text-body-xs font-mono text-fg focus:outline-none focus:border-accent"
               >
                 <option value="all">All MPPT Algorithms</option>
                 <option value="incremental_conductance">Incremental Conductance</option>
@@ -109,7 +109,7 @@ export function SolarCatalog({ initialProjects }: SolarCatalogProps) {
                 aria-label="Filter by Battery Chemistry"
                 value={selectedBattery}
                 onChange={(e) => setSelectedBattery(e.target.value)}
-                className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-mono text-slate-300 focus:outline-none focus:border-amber-400 transition"
+                className="bg-surface-1 border border-line rounded-xl px-3 py-2 text-body-xs font-mono text-fg focus:outline-none focus:border-accent"
               >
                 <option value="all">All Battery Banks</option>
                 <option value="lfp_48v">48V LFP Pack</option>
@@ -121,72 +121,69 @@ export function SolarCatalog({ initialProjects }: SolarCatalogProps) {
             </div>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredProjects.map((project) => (
-              <Link
-                key={project.id}
-                href={`/solar-mppt/${project.slug}`}
-                className="group bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-amber-500/50 transition-all flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                      {project.systemCapacityWatts}W
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-500 uppercase">
-                      {project.panelSpecs.technology.replace(/_/g, ' ')}
-                    </span>
-                  </div>
-
-                  <h3 className="text-base font-bold text-slate-100 group-hover:text-amber-400 transition-colors line-clamp-2">
-                    {project.title}
-                  </h3>
-
-                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                    {project.application}
-                  </p>
-
-                  <div className="bg-slate-950/60 rounded-lg p-2.5 border border-slate-800/80 font-mono text-[11px] space-y-1">
-                    <div className="flex justify-between text-slate-300">
-                      <span className="text-slate-500">Nominal Vmp / Imp:</span>
-                      <span>{project.panelSpecs.nominalVmpV}V / {project.panelSpecs.nominalImpA}A</span>
+              <Link key={project.id} href={`/solar-mppt/${project.slug}`} className="group block min-w-0">
+                <Card className="h-full bg-surface-1 border-hairline rounded-2xl p-5 hover:border-accent/50 transition-all flex flex-col justify-between [overflow-wrap:anywhere]">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <Badge tone="accent" variant="outline">{project.systemCapacityWatts}W</Badge>
+                      <span className="text-[10px] font-mono text-fg-subtle uppercase">
+                        {project.panelSpecs.technology.replace(/_/g, ' ')}
+                      </span>
                     </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span className="text-slate-500">Target Battery:</span>
-                      <span className="text-sky-400">{project.targetBattery.toUpperCase()}</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span className="text-slate-500">Algorithm:</span>
-                      <span className="text-emerald-400">{project.mpptAlgorithm.replace(/_/g, ' ')}</span>
+
+                    <h3 className="font-display text-body-lg font-bold text-fg group-hover:text-accent-fg transition-colors line-clamp-2">
+                      {project.title}
+                    </h3>
+
+                    <p className="text-body-xs text-fg-muted line-clamp-2 leading-relaxed">
+                      {project.application}
+                    </p>
+
+                    <div className="bg-sunken rounded-xl p-3 border border-hairline font-mono text-[11px] space-y-1">
+                      <div className="flex justify-between text-fg-muted">
+                        <span>Nominal Vmp / Imp:</span>
+                        <span className="text-fg">
+                          {project.panelSpecs.nominalVmpV}V / {project.panelSpecs.nominalImpA}A
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-fg-muted">
+                        <span>Target Battery:</span>
+                        <span className="text-accent-fg font-semibold">{project.targetBattery.toUpperCase()}</span>
+                      </div>
+                      <div className="flex justify-between text-fg-muted">
+                        <span>Algorithm:</span>
+                        <span className="text-success-fg">{project.mpptAlgorithm.replace(/_/g, ' ')}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="pt-4 border-t border-slate-800/60 mt-4 flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-500 truncate max-w-[190px]">
-                    {project.indianContextFacility.split('-')[0]?.trim()}
-                  </span>
-                  <span className="text-amber-400 group-hover:translate-x-1 transition-transform">
-                    Inspect Architecture →
-                  </span>
-                </div>
+                  <div className="pt-3 border-t border-hairline mt-4 flex items-center justify-between text-body-xs font-mono">
+                    <span className="text-fg-subtle truncate max-w-[180px]">
+                      {project.indianContextFacility.split('-')[0]?.trim()}
+                    </span>
+                    <span className="text-accent-fg font-semibold group-hover:translate-x-0.5 transition-transform">
+                      Inspect Architecture →
+                    </span>
+                  </div>
+                </Card>
               </Link>
             ))}
           </div>
 
           {filteredProjects.length === 0 && (
-            <div className="text-center py-12 bg-slate-900/40 rounded-xl border border-slate-800 text-slate-400 font-mono text-xs">
-              No matching solar MPPT projects found for query &quot;{search}&quot;. Try resetting filters.
-            </div>
+            <Card className="text-center py-12 bg-surface-1 border-hairline text-fg-subtle font-mono text-body-xs">
+              No matching solar MPPT projects found for query &quot;{search}&quot;.
+            </Card>
           )}
         </div>
       )}
 
       {activeTab === 'workbench' && (
         <div className="space-y-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-xs text-slate-400 leading-relaxed font-mono">
-            Defaulted to 540W Monocrystalline PERC panel (41.8V Vmp, 12.92A Imp). Adjust sliders in real time to simulate diurnal solar transitions and buck converter passive component dynamics.
+          <div className="bg-sunken border border-hairline rounded-xl p-4 text-body-xs text-fg-muted leading-relaxed font-mono">
+            Defaulted to 540W Monocrystalline PERC panel (41.8V Vmp, 12.92A Imp). Adjust sliders to inspect irradiance and buck converter passive dynamics.
           </div>
           <SolarConverterWorkbench
             initialPanelSpecs={{

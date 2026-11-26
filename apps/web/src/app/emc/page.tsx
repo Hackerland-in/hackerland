@@ -1,21 +1,15 @@
 import type { Metadata } from 'next';
+import { Radio } from 'lucide-react';
 import { EMC_SCAN_REGISTRY } from '@/lib/data/emc-data';
 import { EmcCatalog } from '@/components/emc/emc-catalog';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 export const metadata: Metadata = {
   title: 'EMI / EMC Pre-Scan Analyzer & Near-Field Probe Visualizer | Hackerland',
   description:
-    'Interactive conducted and radiated electromagnetic compatibility (EMC) pre-scan analyzer. Evaluate spectral traces against CISPR 25 Class 5, CISPR 32 Class B, and MIL-STD-461G limits with near-field probe hotspot diagnostics from SAMEER Chennai and ARAI Pune test chambers.',
-  keywords: [
-    'emi emc analyzer',
-    'cispr 25 class 5 automotive',
-    'cispr 32 class b radiated emissions',
-    'near field probe visualizer',
-    'sameer chennai emc lab',
-    'arai emc testing pune',
-    'common mode choke calculator',
-    'pre-compliance spectrum',
-  ],
+    'Interactive conducted and radiated electromagnetic compatibility (EMC) pre-scan analyzer evaluated against CISPR 25 Class 5, CISPR 32 Class B, and MIL-STD-461G.',
   openGraph: {
     title: 'EMI / EMC Pre-Scan Analyzer & Near-Field Probe Visualizer | Hackerland',
     description:
@@ -32,7 +26,8 @@ export default function EmcPage() {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'Hackerland EMI/EMC Pre-Compliance Testing Registry',
-    description: 'Electromagnetic compatibility pre-scan spectrum data, CISPR limits, and near-field probe diagnostics.',
+    description:
+      'Electromagnetic compatibility pre-scan spectrum data, CISPR limits, and near-field probe diagnostics.',
     itemListElement: EMC_SCAN_REGISTRY.map((proj, index) => ({
       '@type': 'ListItem',
       position: index + 1,
@@ -46,27 +41,28 @@ export default function EmcPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12 space-y-8">
-      {/* Page Header */}
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-mono font-medium text-primary">
-          <span>📡 EMI / EMC PRE-COMPLIANCE & NEAR-FIELD PROBES</span>
-        </div>
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground">
-          EMI / EMC Radiation Pre-Scan Analyzer
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed">
-          Inspect 150 kHz to 1 GHz conducted and radiated emissions against statutory limits (CISPR 25 Class 5 for EVs, CISPR 32 Class B for IoT, and MIL-STD-461G for aerospace). Map electromagnetic near-field radiation hotspots across PCB switching loops and size common-mode suppression chokes before committing to formal NABL lab certification.
-        </p>
-      </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-2">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
+            <Radio className="size-3.5" aria-hidden="true" />
+            <span>EMI / EMC Pre-Compliance &amp; Near-Field Probes</span>
+          </div>
+          <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
+            EMI / EMC Radiation Pre-Scan Analyzer
+          </h1>
+          <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
+            Inspect 150 kHz–1 GHz conducted &amp; radiated scans against CISPR 25, CISPR 32, and MIL-STD-461G limits before booking formal NABL chambers.
+          </p>
+        </header>
 
-      <EmcCatalog initialProjects={EMC_SCAN_REGISTRY} />
+        <EmcCatalog initialProjects={EMC_SCAN_REGISTRY} />
 
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-    </div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

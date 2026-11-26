@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
-import { SectionHeader, StatTile } from '@hackerland/ui';
+import { Factory } from 'lucide-react';
+import { StatTile } from '@hackerland/ui';
 import { ManufacturingHub } from '@/components/manufacturing/manufacturing-hub';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 export const metadata: Metadata = {
   title: 'Hardware & Advanced Manufacturing Hub · Hackerland',
@@ -10,43 +14,50 @@ export const metadata: Metadata = {
 
 export default function ManufacturingPage() {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 min-w-0">
-      <SectionHeader
-        as="h1"
-        size="page"
-        eyebrow="CYBER-PHYSICAL HARDWARE & FABRICATION"
-        title="Advanced Manufacturing Hub"
-        description="From schematic and multilayer PCB routing to autonomous drones, EV battery packs, rocket engines, and mass-market certified hardware."
-      />
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-2">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
+            <Factory className="size-3.5" aria-hidden="true" />
+            <span>Cyber-Physical Hardware &amp; Fabrication</span>
+          </div>
+          <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
+            Advanced Manufacturing Hub
+          </h1>
+          <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
+            From schematic capture and multilayer PCB routing to autonomous drones, EV battery packs, rocket propulsion, and certified hardware production.
+          </p>
+        </header>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 min-w-0">
-        <StatTile
-          label="Manufacturing Pillars"
-          value="8 Disciplines"
-          hint="PCB, Drone, EV, Engine, Mobile & Future Tech"
-          tone="accent"
-        />
-        <StatTile
-          label="Interactive Labs"
-          value="8 Virtual Testbenches"
-          hint="Physics, Feeds, RF & Dyno Simulations"
-          tone="make"
-        />
-        <StatTile
-          label="Execution Stages"
-          value="7-Stage Pipeline"
-          hint="CAD to BIS, ARAI & DGCA Certification"
-          tone="code"
-        />
-        <StatTile
-          label="Domestic Ecosystem"
-          value="100% Verified"
-          hint="Indian Sourcing & ATL Node Integration"
-          tone="earn"
-        />
-      </div>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 min-w-0">
+          <StatTile
+            label="Manufacturing Pillars"
+            value="8 Disciplines"
+            hint="PCB, Drone, EV & Aero"
+            tone="accent"
+          />
+          <StatTile
+            label="Interactive Labs"
+            value="8 Workbenches"
+            hint="Physics, SPICE & RF sims"
+            tone="make"
+          />
+          <StatTile
+            label="Execution Stages"
+            value="7-Stage Flow"
+            hint="CAD to BIS & DGCA approval"
+            tone="code"
+          />
+          <StatTile
+            label="Domestic Ecosystem"
+            value="Verified"
+            hint="Indian Sourcing & ATL Nodes"
+            tone="earn"
+          />
+        </div>
 
-      <ManufacturingHub />
-    </div>
+        <ManufacturingHub />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

@@ -5,6 +5,9 @@ import {
   getAllDefensivePublicationIds,
 } from '@/lib/data/ip-defense-data';
 import { DefensivePublicationDetail } from '@/components/network/ip/defensive-publication-detail';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 interface DefensivePublicationPageProps {
   params: Promise<{ ledgerId: string }>;
@@ -42,8 +45,10 @@ export default async function DefensivePublicationPage({ params }: DefensivePubl
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 min-w-0">
-      <DefensivePublicationDetail publication={publication} />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <DefensivePublicationDetail publication={publication} />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

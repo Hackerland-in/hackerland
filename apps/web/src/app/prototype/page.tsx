@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Cpu, Sparkles, Layers, ArrowLeft } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
+import { StatTile } from '@hackerland/ui';
 import { PrototypeArchitectStudio } from '@/components/prototype/prototype-architect-studio';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 export const metadata: Metadata = {
   title: 'Idea-to-Prototype Hardware Simulator & Architect | Hackerland',
@@ -11,45 +14,30 @@ export const metadata: Metadata = {
 
 export default function PrototypePage() {
   return (
-    <div className="min-h-screen bg-black text-white pb-24">
-      {/* Header Banner */}
-      <section className="relative overflow-hidden border-b border-neutral-800 bg-gradient-to-b from-neutral-950 via-neutral-900 to-black pt-16 pb-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            <Sparkles className="w-3.5 h-3.5" /> Idea-to-Prototype Engine (Feature 7)
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-2">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
+            <Sparkles className="size-3.5" aria-hidden="true" />
+            <span>Idea-to-Prototype Synthesizer</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white">
+          <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
             Idea-to-Prototype Hardware Architecture Simulator
           </h1>
-          <p className="text-neutral-400 max-w-3xl text-base sm:text-lg leading-relaxed">
-            Enter any hardware concept to instantly synthesize a production-grade engineering plan: system topology, MCU pinout interconnects, component-level Bill of Materials (BOM), squad roles, and 1-click export to our in-browser PCB Studio.
+          <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
+            Turn any hardware prompt into a complete architecture plan: system blocks, MCU pinouts, component BOM, squad roles, and direct handoff to PCB Studio.
           </p>
+        </header>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
-            <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60">
-              <div className="text-2xl font-black text-emerald-400">Zero to BOM</div>
-              <div className="text-xs text-neutral-400 mt-0.5">Instant Component List</div>
-            </div>
-            <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60">
-              <div className="text-2xl font-black text-white">Pinout Matrix</div>
-              <div className="text-xs text-neutral-400 mt-0.5">I2C, SPI & UART Mapping</div>
-            </div>
-            <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60">
-              <div className="text-2xl font-black text-white">Squad Roster</div>
-              <div className="text-xs text-neutral-400 mt-0.5">Skills & Time Estimates</div>
-            </div>
-            <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60">
-              <div className="text-2xl font-black text-emerald-400">1-Click Export</div>
-              <div className="text-xs text-neutral-400 mt-0.5">Direct to PCB Studio & RFQ</div>
-            </div>
-          </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
+          <StatTile label="Zero to BOM" value="Instant" hint="Component list & footprints" tone="accent" />
+          <StatTile label="Pinout Matrix" value="I2C / SPI" hint="Verified bus interconnects" tone="code" />
+          <StatTile label="Squad Roster" value="Roles" hint="Skills & hour estimates" tone="make" />
+          <StatTile label="1-Click Export" value="PCB / RFQ" hint="Ready for prototyping" tone="earn" />
         </div>
-      </section>
 
-      {/* Main Studio Area */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
         <PrototypeArchitectStudio />
-      </section>
-    </div>
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

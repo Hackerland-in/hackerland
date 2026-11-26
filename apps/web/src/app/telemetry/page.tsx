@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { TELEMETRY_PROFILES } from '@/lib/data/telemetry-data';
 import { TelemetryStudio } from '@/components/telemetry/telemetry-studio';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 export const metadata: Metadata = {
   title: 'Digital Twin & Hardware Telemetry Stream Visualizer | Hackerland',
@@ -16,8 +19,10 @@ export const metadata: Metadata = {
 
 export default function TelemetryPage() {
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-      <TelemetryStudio initialProfiles={TELEMETRY_PROFILES} />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <TelemetryStudio initialProfiles={TELEMETRY_PROFILES} />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

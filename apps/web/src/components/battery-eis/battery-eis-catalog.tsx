@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Badge, Card, StatTile, cn } from '@hackerland/ui';
 import type { BatteryEisProject, CellChemistry } from '@hackerland/core';
 import { filterBatteryEisProjects } from '@hackerland/core';
 
@@ -16,7 +17,10 @@ export function BatteryEisCatalog({ initialProjects }: BatteryEisCatalogProps) {
 
   const filteredProjects = filterBatteryEisProjects(initialProjects, {
     chemistry: selectedChemistry !== 'all' ? (selectedChemistry as CellChemistry) : undefined,
-    safetyVerdict: selectedVerdict !== 'all' ? (selectedVerdict as 'certified_safe' | 'advisory_derate' | 'quarantine_isolate') : undefined,
+    safetyVerdict:
+      selectedVerdict !== 'all'
+        ? (selectedVerdict as 'certified_safe' | 'advisory_derate' | 'quarantine_isolate')
+        : undefined,
     search: search.trim() !== '' ? search.trim() : undefined,
   });
 
@@ -25,70 +29,46 @@ export function BatteryEisCatalog({ initialProjects }: BatteryEisCatalogProps) {
   const isolateCount = initialProjects.filter((p) => p.diagnostics.ais156SafetyVerdict === 'quarantine_isolate').length;
 
   return (
-    <div className="space-y-8">
-      {/* Top Banner */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+    <div className="space-y-6 min-w-0">
+      <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone="accent" variant="outline">
             Electrochemical Impedance Spectroscopy (EIS)
-          </span>
-          <span className="text-xs text-stone-500 font-mono">
+          </Badge>
+          <span className="text-body-xs text-fg-subtle font-mono">
             AIS-156 Amendment 3 &amp; Cell Degradation Physics
           </span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-100 tracking-tight">
+        <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold text-fg tracking-tight">
           Battery State-of-Health (SoH) &amp; EIS Analyzer
         </h1>
-        <p className="text-base text-stone-400 max-w-3xl leading-relaxed">
-          Analyze complex impedance spectra (0.01 Hz to 100 kHz) with Nyquist semicircles, Bode frequency responses, and Randles Equivalent Circuit Model (ECM) extraction. Detect Solid Electrolyte Interphase (SEI) growth, charge-transfer resistance surges, and low-temperature metallic lithium plating for Indian EV fleets.
+        <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
+          Inspect Nyquist semicircles, Bode responses, and Randles Equivalent Circuit Models (0.01 Hz–100 kHz) to spot SEI growth and lithium plating.
         </p>
+      </header>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatTile label="Total Characterized Cells" value={initialProjects.length} hint="LFP, NMC & Na-Ion" tone="accent" />
+        <StatTile label="AIS-156 Certified Safe" value={safeCount} hint="Nominal impedance" tone="make" />
+        <StatTile label="Advisory Derate" value={derateCount} hint="45°C heatwave aging" tone="code" />
+        <StatTile label="Quarantine Isolate" value={isolateCount} hint="Plating / abuse flagged" tone="danger" />
       </div>
 
-      {/* High-Level Fleet Stats Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
-        <div className="bg-stone-900 border border-stone-800 rounded-xl p-3.5">
-          <span className="text-[10px] text-stone-400 uppercase tracking-wider block">Total Characterized Cells</span>
-          <span className="text-2xl font-bold text-stone-100 mt-0.5 block">{initialProjects.length}</span>
-          <span className="text-[10px] text-stone-500 block">LFP, NMC, Tabless &amp; Na-Ion</span>
-        </div>
-
-        <div className="bg-stone-900 border border-stone-800 rounded-xl p-3.5">
-          <span className="text-[10px] text-emerald-400 uppercase tracking-wider block">AIS-156 Certified Safe</span>
-          <span className="text-2xl font-bold text-emerald-400 mt-0.5 block">{safeCount}</span>
-          <span className="text-[10px] text-stone-500 block">Nominal internal resistance</span>
-        </div>
-
-        <div className="bg-stone-900 border border-stone-800 rounded-xl p-3.5">
-          <span className="text-[10px] text-amber-400 uppercase tracking-wider block">Advisory Derate</span>
-          <span className="text-2xl font-bold text-amber-400 mt-0.5 block">{derateCount}</span>
-          <span className="text-[10px] text-stone-500 block">45°C ambient heatwave aging</span>
-        </div>
-
-        <div className="bg-stone-900 border border-stone-800 rounded-xl p-3.5">
-          <span className="text-[10px] text-rose-400 uppercase tracking-wider block">Quarantine Isolate</span>
-          <span className="text-2xl font-bold text-rose-400 mt-0.5 block">{isolateCount}</span>
-          <span className="text-[10px] text-stone-500 block">Lithium plating / abuse detected</span>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            placeholder="Search cells by model, facility (ARAI, ICAT, IIT-M, CSIR) or failure mode..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-stone-900 border border-stone-800 rounded-xl px-4 py-2.5 text-xs font-mono text-stone-200 placeholder-stone-500 focus:outline-none focus:border-emerald-500"
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Search cells by model, facility (ARAI, ICAT, IIT-M, CSIR) or failure mode..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 bg-surface-1 border border-line rounded-xl px-4 py-2 text-body-xs font-mono text-fg placeholder:text-fg-subtle focus:outline-none focus:border-accent"
+        />
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <select
             aria-label="Filter by battery chemistry"
             value={selectedChemistry}
             onChange={(e) => setSelectedChemistry(e.target.value)}
-            className="bg-stone-900 border border-stone-800 rounded-xl px-3 py-2 text-xs font-mono text-stone-300 focus:outline-none focus:border-emerald-500"
+            className="bg-surface-1 border border-line rounded-xl px-3 py-2 text-body-xs font-mono text-fg focus:outline-none focus:border-accent"
           >
             <option value="all">All Chemistries</option>
             <option value="lfp_32700">LFP (32700 Cylindrical)</option>
@@ -101,7 +81,7 @@ export function BatteryEisCatalog({ initialProjects }: BatteryEisCatalogProps) {
             aria-label="Filter by AIS-156 safety verdict"
             value={selectedVerdict}
             onChange={(e) => setSelectedVerdict(e.target.value)}
-            className="bg-stone-900 border border-stone-800 rounded-xl px-3 py-2 text-xs font-mono text-stone-300 focus:outline-none focus:border-emerald-500"
+            className="bg-surface-1 border border-line rounded-xl px-3 py-2 text-body-xs font-mono text-fg focus:outline-none focus:border-accent"
           >
             <option value="all">All Verdicts</option>
             <option value="certified_safe">Certified Safe</option>
@@ -111,71 +91,77 @@ export function BatteryEisCatalog({ initialProjects }: BatteryEisCatalogProps) {
         </div>
       </div>
 
-      {/* Projects Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredProjects.map((project) => (
-          <Link
-            key={project.id}
-            href={`/battery-eis/${project.slug}`}
-            className="group bg-stone-900/70 hover:bg-stone-900 border border-stone-800 hover:border-emerald-800/80 rounded-2xl p-5 transition-all flex flex-col justify-between shadow-lg"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono uppercase">
-                  {project.chemistry.replace(/_/g, ' ')}
-                </span>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
-                  project.diagnostics.ais156SafetyVerdict === 'certified_safe'
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    : project.diagnostics.ais156SafetyVerdict === 'advisory_derate'
-                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                }`}>
-                  {project.diagnostics.ais156SafetyVerdict.replace(/_/g, ' ')}
-                </span>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {filteredProjects.map((project) => {
+          const verdictTone: 'success' | 'warning' | 'danger' =
+            project.diagnostics.ais156SafetyVerdict === 'certified_safe'
+              ? 'success'
+              : project.diagnostics.ais156SafetyVerdict === 'advisory_derate'
+                ? 'warning'
+                : 'danger';
+          return (
+            <Link key={project.id} href={`/battery-eis/${project.slug}`} className="group block min-w-0">
+              <Card className="h-full border-hairline bg-surface-1 hover:border-accent/50 rounded-2xl p-5 transition-all flex flex-col justify-between [overflow-wrap:anywhere]">
+                <div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <Badge tone="accent" variant="outline">
+                      {project.chemistry.replace(/_/g, ' ').toUpperCase()}
+                    </Badge>
+                    <Badge tone={verdictTone} variant="outline">
+                      {project.diagnostics.ais156SafetyVerdict.replace(/_/g, ' ').toUpperCase()}
+                    </Badge>
+                  </div>
 
-              <h3 className="text-base font-bold text-stone-100 group-hover:text-emerald-300 transition-colors">
-                {project.title}
-              </h3>
-              <p className="text-xs text-stone-400 mt-1 line-clamp-2 leading-relaxed">
-                {project.cellModel} · Tested at {project.testTemperatureC}°C after {project.cycleCount} cycles
-              </p>
-            </div>
+                  <h3 className="font-display text-body-lg font-bold text-fg group-hover:text-accent-fg transition-colors">
+                    {project.title}
+                  </h3>
+                  <p className="text-body-xs text-fg-muted mt-1 line-clamp-2 leading-relaxed">
+                    {project.cellModel} · Tested at {project.testTemperatureC}°C after {project.cycleCount} cycles
+                  </p>
+                </div>
 
-            <div className="mt-5 pt-3 border-t border-stone-800/80 space-y-2 font-mono text-[11px]">
-              <div className="flex justify-between text-stone-400">
-                <span>State of Health (SoH):</span>
-                <span className={`font-bold ${
-                  project.diagnostics.sohPercent >= 90
-                    ? 'text-emerald-400'
-                    : project.diagnostics.sohPercent >= 80
-                    ? 'text-amber-400'
-                    : 'text-rose-400'
-                }`}>
-                  {project.diagnostics.sohPercent}% ({project.diagnostics.capacityAh}Ah)
-                </span>
-              </div>
-              <div className="flex justify-between text-stone-400">
-                <span>R₀ (Bulk 1kHz):</span>
-                <span className="text-stone-200 font-bold">{(project.fittedEcm.rBulkOhm * 1000).toFixed(2)} mΩ</span>
-              </div>
-              <div className="flex justify-between text-stone-400">
-                <span>Charge Transfer R_ct:</span>
-                <span className="text-purple-400 font-bold">{(project.fittedEcm.rCtOhm * 1000).toFixed(2)} mΩ</span>
-              </div>
-              <div className="text-[10px] text-stone-500 truncate pt-1 border-t border-stone-800/50">
-                📍 {project.testFacility}
-              </div>
-            </div>
-          </Link>
-        ))}
+                <div className="mt-4 pt-3 border-t border-hairline space-y-1.5 font-mono text-[11px]">
+                  <div className="flex justify-between text-fg-muted">
+                    <span>State of Health (SoH):</span>
+                    <span
+                      className={cn(
+                        'font-bold',
+                        project.diagnostics.sohPercent >= 90
+                          ? 'text-success-fg'
+                          : project.diagnostics.sohPercent >= 80
+                            ? 'text-warning-fg'
+                            : 'text-danger-fg',
+                      )}
+                    >
+                      {project.diagnostics.sohPercent}% ({project.diagnostics.capacityAh}Ah)
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-fg-muted">
+                    <span>R₀ (Bulk 1kHz):</span>
+                    <span className="text-fg font-bold">
+                      {(project.fittedEcm.rBulkOhm * 1000).toFixed(2)} mΩ
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-fg-muted">
+                    <span>Charge Transfer R_ct:</span>
+                    <span className="text-accent-fg font-bold">
+                      {(project.fittedEcm.rCtOhm * 1000).toFixed(2)} mΩ
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-fg-subtle truncate pt-1 border-t border-hairline">
+                    📍 {project.testFacility}
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
 
       {filteredProjects.length === 0 && (
-        <div className="text-center py-12 bg-stone-900/40 rounded-2xl border border-stone-800 font-mono text-stone-400 text-xs">
+        <Card className="text-center py-12 bg-surface-1 border-hairline font-mono text-fg-subtle text-body-xs">
           No matching battery EIS records found for current search and filters.
-        </div>
+        </Card>
       )}
     </div>
   );

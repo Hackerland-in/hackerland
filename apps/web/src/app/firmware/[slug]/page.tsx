@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { FIRMWARE_REGISTRY } from '@/lib/data/firmware-data';
 import { FirmwareDetailView } from '@/components/firmware/firmware-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 interface FirmwarePageProps {
   params: Promise<{ slug: string }>;
@@ -40,8 +43,10 @@ export default async function FirmwareDetailPage({ params }: FirmwarePageProps) 
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-      <FirmwareDetailView item={item} />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <FirmwareDetailView item={item} />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

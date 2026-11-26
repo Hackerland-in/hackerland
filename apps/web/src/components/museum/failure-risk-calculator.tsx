@@ -1,17 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  AlertTriangle,
-  ShieldCheck,
-  Zap,
-  HelpCircle,
-  Sparkles,
-  ArrowRight,
-  TrendingDown,
-  Info,
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AlertTriangle, ShieldCheck, Zap, Bookmark, Trash2 } from 'lucide-react';
+import { Badge, Button, Card, Input, Label, cn } from '@hackerland/ui';
 import { evaluateHardwareFailureRisk, type FailureRiskAssessment } from '@hackerland/core';
+
+interface SavedScenario {
+  id: string;
+  label: string;
+  score: number;
+  level: string;
+  marginPct: number;
+}
 
 export function FailureRiskCalculator() {
   const [retailPrice, setRetailPrice] = useState<number>(120);
@@ -19,6 +19,17 @@ export function FailureRiskCalculator() {
   const [customParts, setCustomParts] = useState<number>(4);
   const [hasMechanical, setHasMechanical] = useState<boolean>(false);
   const [requiresCert, setRequiresCert] = useState<boolean>(true);
+  const [scenarios, setScenarios] = useState<SavedScenario[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('hackerland_risk_scenarios');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setScenarios(parsed);
+      }
+    } catch {}
+  }, []);
 
   const assessment: FailureRiskAssessment = evaluateHardwareFailureRisk({
     retailPriceUsd: retailPrice,
@@ -30,70 +41,94 @@ export function FailureRiskCalculator() {
 
   const marginPct = Math.round(((retailPrice - bomCost) / (retailPrice || 1)) * 100);
 
-  let badgeColor = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40';
-  if (assessment.level === 'Moderate') badgeColor = 'bg-amber-500/20 text-amber-400 border-amber-500/40';
-  if (assessment.level === 'High') badgeColor = 'bg-orange-500/20 text-orange-400 border-orange-500/40';
-  if (assessment.level === 'Critical') badgeColor = 'bg-rose-500/20 text-rose-400 border-rose-500/40';
+  const badgeTone: 'success' | 'warning' | 'danger' =
+    assessment.level === 'Low'
+      ? 'success'
+      : assessment.level === 'Moderate'
+        ? 'warning'
+        : 'danger';
+
+  const handleSaveScenario = () => {
+    const next: SavedScenario = {
+      id: `risk_${Date.now()}`,
+      label: `$${retailPrice} Retail / $${bomCost} BOM · ${customParts} custom parts`,
+      score: assessment.score,
+      level: assessment.level,
+      marginPct,
+    };
+    const updated = [next, ...scenarios].slice(0, 4);
+    setScenarios(updated);
+    try {
+      localStorage.setItem('hackerland_risk_scenarios', JSON.stringify(updated));
+    } catch {}
+  };
 
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-neutral-800 pb-4">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-neutral-800 text-neutral-300 mb-1 border border-neutral-700">
-            <Zap className="w-3.5 h-3.5 text-amber-400" /> Interactive Pre-Mortem Tool
+    <Card className="border-hairline bg-surface-1 p-5 sm:p-6 space-y-5 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-hairline pb-4">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-2.5 py-0.5 text-[11px] font-display font-semibold text-accent-fg">
+            <Zap className="size-3.5" />
+            <span>Interactive Pre-Mortem Tool</span>
           </div>
-          <h3 className="text-lg font-bold text-white">Hardware Failure Risk Evaluator</h3>
-          <p className="text-xs text-neutral-400">
-            Test your project against historical post-mortem data from Juicero, Theranos, and Better Place.
+          <h3 className="font-display text-headline-sm font-bold text-fg">
+            Hardware Failure Risk Evaluator
+          </h3>
+          <p className="text-body-xs text-fg-muted">
+            Benchmark your unit economics against Juicero, Theranos, and Better Place post-mortem thresholds.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className={`text-xs px-3 py-1 rounded-full font-bold border ${badgeColor}`}>
+        <div className="flex items-center gap-2 shrink-0">
+          <Badge tone={badgeTone} variant="outline">
             Risk Level: {assessment.level} ({assessment.score}/100)
-          </span>
+          </Badge>
+          <Button type="button" variant="secondary" size="sm" onClick={handleSaveScenario}>
+            <Bookmark className="size-3.5" />
+            <span>Save Check</span>
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Input Parameters */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-neutral-400 mb-1">
-                Target Retail Price ($)
-              </label>
-              <input
+            <div className="space-y-1">
+              <Label htmlFor="risk-retail">Target Retail Price ($)</Label>
+              <Input
+                id="risk-retail"
                 type="number"
                 min={1}
                 value={retailPrice}
                 onChange={(e) => setRetailPrice(Number(e.target.value) || 1)}
-                className="w-full rounded-lg bg-neutral-950 border border-neutral-800 px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-neutral-400 mb-1">
-                Estimated BOM Cost ($)
-              </label>
-              <input
+            <div className="space-y-1">
+              <Label htmlFor="risk-bom">Estimated BOM Cost ($)</Label>
+              <Input
+                id="risk-bom"
                 type="number"
                 min={1}
                 value={bomCost}
                 onChange={(e) => setBomCost(Number(e.target.value) || 1)}
-                className="w-full rounded-lg bg-neutral-950 border border-neutral-800 px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
             </div>
           </div>
 
-          <div className="text-xs text-neutral-400 flex items-center justify-between px-1">
-            <span>Gross Unit Margin:</span>
-            <span className={`font-mono font-bold ${marginPct >= 65 ? 'text-emerald-400' : 'text-rose-400'}`}>
-              {marginPct}% {marginPct < 65 ? '(Caution: <65% is dangerous for hardware)' : '(Healthy)'}
+          <div className="text-body-xs text-fg-muted flex items-center justify-between px-1">
+            <span>Gross Unit Margin</span>
+            <span
+              className={cn(
+                'font-mono font-bold',
+                marginPct >= 65 ? 'text-success-fg' : 'text-danger-fg',
+              )}
+            >
+              {marginPct}% {marginPct < 65 ? '(Caution: <65% margin risk)' : '(Healthy)'}
             </span>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1">
+            <label className="block text-body-xs font-medium text-fg-muted mb-1">
               Custom Molds / Machined Parts ({customParts})
             </label>
             <input
@@ -102,64 +137,100 @@ export function FailureRiskCalculator() {
               max={25}
               value={customParts}
               onChange={(e) => setCustomParts(Number(e.target.value))}
-              className="w-full accent-emerald-500 cursor-pointer"
+              className="w-full accent-accent cursor-pointer"
             />
-            <span className="text-[11px] text-neutral-500 block mt-0.5">
-              More than 8 custom tooling components creates high scrap rates & supply chain bottlenecks.
+            <span className="text-[11px] text-fg-subtle block mt-0.5">
+              More than 8 custom tooling components increases scrap &amp; supply bottlenecks.
             </span>
           </div>
 
-          <div className="pt-2 border-t border-neutral-800 space-y-2">
-            <label className="flex items-center gap-2.5 text-xs text-neutral-300 cursor-pointer">
+          <div className="pt-2 border-t border-hairline space-y-2">
+            <label className="flex items-center gap-2.5 text-body-xs text-fg cursor-pointer">
               <input
                 type="checkbox"
                 checked={hasMechanical}
                 onChange={(e) => setHasMechanical(e.target.checked)}
-                className="rounded border-neutral-700 bg-neutral-950 text-emerald-500 focus:ring-0 w-4 h-4"
+                className="rounded border-line accent-accent size-4"
               />
-              <span>Contains moving mechanical actuators, gearboxes, or high-pressure valves</span>
+              <span>Moving mechanical actuators, gearboxes, or high-pressure valves</span>
             </label>
 
-            <label className="flex items-center gap-2.5 text-xs text-neutral-300 cursor-pointer">
+            <label className="flex items-center gap-2.5 text-body-xs text-fg cursor-pointer">
               <input
                 type="checkbox"
                 checked={requiresCert}
                 onChange={(e) => setRequiresCert(e.target.checked)}
-                className="rounded border-neutral-700 bg-neutral-950 text-emerald-500 focus:ring-0 w-4 h-4"
+                className="rounded border-line accent-accent size-4"
               />
-              <span>Requires mandatory certification (FCC, CE, BIS, medical FDA / CDSCO)</span>
+              <span>Requires statutory certification (FCC, CE, BIS, AIS-156, CDSCO)</span>
             </label>
           </div>
         </div>
 
-        {/* Diagnosis & Recommendations */}
-        <div className="rounded-xl bg-neutral-950 p-4 border border-neutral-800 space-y-4 flex flex-col justify-between">
-          <div className="space-y-3">
-            <span className="text-xs font-semibold text-neutral-300 uppercase tracking-wider block">
-              Automated Autopsy Diagnosis:
+        <div className="rounded-xl bg-sunken p-4 border border-hairline space-y-4 flex flex-col justify-between">
+          <div className="space-y-2.5">
+            <span className="text-[11px] font-mono font-semibold text-fg-subtle uppercase tracking-wider block">
+              Automated Autopsy Diagnosis
             </span>
 
             {assessment.identifiedTraps.map((trap, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-xs text-rose-300/90 leading-relaxed">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-rose-400 mt-0.5" />
+              <div key={idx} className="flex items-start gap-2 text-body-xs text-danger-fg leading-relaxed">
+                <AlertTriangle className="size-3.5 shrink-0 mt-0.5" />
                 <span>{trap}</span>
               </div>
             ))}
           </div>
 
-          <div className="pt-3 border-t border-neutral-800 space-y-2">
-            <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider block">
-              Preventative Engineering Measures:
+          <div className="pt-3 border-t border-hairline space-y-2">
+            <span className="text-[11px] font-mono font-semibold text-success-fg uppercase tracking-wider block">
+              Preventative Measures
             </span>
             {assessment.preventativeMeasures.map((measure, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-xs text-emerald-300/90 leading-relaxed">
-                <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-emerald-400 mt-0.5" />
+              <div key={idx} className="flex items-start gap-2 text-body-xs text-fg leading-relaxed">
+                <ShieldCheck className="size-3.5 shrink-0 text-success-fg mt-0.5" />
                 <span>{measure}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
-    </div>
+
+      {scenarios.length > 0 && (
+        <div className="pt-3 border-t border-hairline space-y-2">
+          <div className="text-[11px] font-mono font-semibold uppercase text-fg-subtle">
+            Saved BOM Pre-Mortem Snapshots ({scenarios.length})
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {scenarios.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center justify-between gap-2 rounded-xl border border-hairline bg-sunken px-3 py-2 text-body-xs"
+              >
+                <div className="min-w-0 truncate">
+                  <span className="font-medium text-fg">{s.label}</span>
+                  <span className="text-fg-subtle font-mono ml-1.5">
+                    · {s.level} ({s.score})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = scenarios.filter((item) => item.id !== s.id);
+                    setScenarios(next);
+                    try {
+                      localStorage.setItem('hackerland_risk_scenarios', JSON.stringify(next));
+                    } catch {}
+                  }}
+                  aria-label="Remove snapshot"
+                  className="text-fg-subtle hover:text-danger-fg shrink-0"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }

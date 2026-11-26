@@ -1,24 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Sparkles,
   Cpu,
   Layers,
-  Wrench,
   DollarSign,
   Users,
   Calendar,
-  ArrowRight,
-  ExternalLink,
-  ChevronRight,
   Zap,
-  ShieldCheck,
   CheckCircle2,
-  Share2,
   Copy,
+  Bookmark,
+  Trash2,
 } from 'lucide-react';
+import { Badge, Button, Card, Input, cn } from '@hackerland/ui';
 import type { PrototypeArchitecturePlan, PrototypeBlockCategory } from '@hackerland/core';
 import { PROTOTYPE_PRESETS, synthesizePrototypePlan } from '@/lib/data/prototype-data';
 
@@ -28,6 +25,17 @@ export function PrototypeArchitectStudio() {
   const [currentPlan, setCurrentPlan] = useState<PrototypeArchitecturePlan>(PROTOTYPE_PRESETS[0]!);
   const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
   const [copied, setCopied] = useState<boolean>(false);
+  const [savedPlans, setSavedPlans] = useState<PrototypeArchitecturePlan[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('hackerland_proto_plans');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setSavedPlans(parsed);
+      }
+    } catch {}
+  }, []);
 
   const handleSelectPreset = (plan: PrototypeArchitecturePlan) => {
     setSelectedPresetId(plan.id);
@@ -43,18 +51,36 @@ export function PrototypeArchitectStudio() {
     setCurrentPlan(synthesized);
   };
 
-  const getCategoryColor = (cat: PrototypeBlockCategory) => {
+  const handleSavePlan = () => {
+    const exists = savedPlans.some((p) => p.ideaTitle === currentPlan.ideaTitle);
+    if (exists) return;
+    const updated = [currentPlan, ...savedPlans].slice(0, 5);
+    setSavedPlans(updated);
+    try {
+      localStorage.setItem('hackerland_proto_plans', JSON.stringify(updated));
+    } catch {}
+  };
+
+  const handleRemoveSaved = (title: string) => {
+    const updated = savedPlans.filter((p) => p.ideaTitle !== title);
+    setSavedPlans(updated);
+    try {
+      localStorage.setItem('hackerland_proto_plans', JSON.stringify(updated));
+    } catch {}
+  };
+
+  const getCategoryTone = (cat: PrototypeBlockCategory): 'accent' | 'code' | 'make' | 'earn' | 'danger' => {
     switch (cat) {
       case 'Power':
-        return 'text-amber-400 bg-amber-500/10 border-amber-500/30';
+        return 'earn';
       case 'Compute':
-        return 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30';
+        return 'code';
       case 'Sensing':
-        return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
+        return 'make';
       case 'Connectivity':
-        return 'text-purple-400 bg-purple-500/10 border-purple-500/30';
+        return 'accent';
       case 'Actuation':
-        return 'text-rose-400 bg-rose-500/10 border-rose-500/30';
+        return 'danger';
     }
   };
 
@@ -75,47 +101,53 @@ ${currentPlan.bom.map((i) => `• ${i.component}: ${i.partNumber} (${i.footprint
 
 Synthesized by Hackerland Prototype Simulator: https://www.hackerland.in/prototype
 `;
-    navigator.clipboard.writeText(text);
+    try {
+      navigator.clipboard?.writeText(text);
+    } catch {}
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const isAlreadySaved = savedPlans.some((p) => p.ideaTitle === currentPlan.ideaTitle);
+
   return (
-    <div className="space-y-10">
-      {/* Interactive Prompt & Preset Selector */}
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 space-y-5">
+    <div className="space-y-6 min-w-0">
+      {/* Step 1 Selector */}
+      <Card className="border-hairline bg-surface-1 p-5 space-y-4 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider block mb-1">
-              Step 1: Choose a Concept or Enter Custom Hardware Idea
+            <span className="text-[11px] font-mono font-semibold text-accent-fg uppercase tracking-wider block">
+              Step 1: Choose a Concept or Type Any Idea
             </span>
-            <h2 className="text-xl font-bold text-white">Instant Hardware Architecture Synthesizer</h2>
+            <h2 className="font-display text-headline-sm font-bold text-fg">
+              Instant Hardware Architecture Synthesizer
+            </h2>
           </div>
 
-          {/* Currency Toggle */}
-          <div className="flex rounded-lg bg-neutral-950 border border-neutral-800 p-0.5 self-start sm:self-auto">
+          <div className="inline-flex rounded-full bg-sunken border border-hairline p-1 self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setCurrency('INR')}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${
-                currency === 'INR' ? 'bg-emerald-500 text-black' : 'text-neutral-400 hover:text-white'
-              }`}
+              className={cn(
+                'px-3 py-1 rounded-full text-xs font-display font-semibold transition',
+                currency === 'INR' ? 'bg-accent text-on-solid' : 'text-fg-muted hover:text-fg',
+              )}
             >
               ₹ INR
             </button>
             <button
               type="button"
               onClick={() => setCurrency('USD')}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${
-                currency === 'USD' ? 'bg-emerald-500 text-black' : 'text-neutral-400 hover:text-white'
-              }`}
+              className={cn(
+                'px-3 py-1 rounded-full text-xs font-display font-semibold transition',
+                currency === 'USD' ? 'bg-accent text-on-solid' : 'text-fg-muted hover:text-fg',
+              )}
             >
               $ USD
             </button>
           </div>
         </div>
 
-        {/* Quick Reference Presets */}
         <div className="flex flex-wrap gap-2">
           {PROTOTYPE_PRESETS.map((preset) => {
             const isSelected = selectedPresetId === preset.id;
@@ -124,170 +156,202 @@ Synthesized by Hackerland Prototype Simulator: https://www.hackerland.in/prototy
                 key={preset.id}
                 type="button"
                 onClick={() => handleSelectPreset(preset)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-medium transition text-left flex items-center gap-2 border ${
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-xs font-medium transition flex items-center gap-1.5 border',
                   isSelected
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-lg shadow-emerald-500/5'
-                    : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-700 hover:text-neutral-200'
-                }`}
+                    ? 'bg-accent-soft text-accent-fg border-accent font-semibold'
+                    : 'bg-sunken text-fg-muted border-hairline hover:border-accent/40 hover:text-fg',
+                )}
               >
-                <Zap className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <Zap className="size-3.5 text-accent shrink-0" />
                 <span className="truncate max-w-[220px]">{preset.ideaTitle}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Custom Synthesis Prompt */}
-        <form onSubmit={handleSynthesize} className="flex gap-2 pt-2 border-t border-neutral-800">
-          <input
+        <form onSubmit={handleSynthesize} className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-hairline">
+          <Input
             type="text"
-            placeholder="Or type any hardware idea (e.g. 'LoRa GPS cattle tracker' or 'Sub-100ms BLDC gimbal')..."
+            placeholder="Describe any hardware idea (e.g. 'LoRa GPS cattle tracker' or 'Sub-100ms BLDC gimbal')..."
             value={customPrompt}
             onChange={(e) => setCustomPrompt(e.target.value)}
-            className="flex-1 rounded-xl bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-emerald-500"
+            className="flex-1"
           />
-          <button
-            type="submit"
-            className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs sm:text-sm transition flex items-center gap-2 shrink-0 shadow-lg shadow-emerald-500/10"
-          >
-            <Sparkles className="w-4 h-4" /> Synthesize Architecture
-          </button>
+          <Button type="submit" variant="primary" size="md" className="shrink-0">
+            <Sparkles className="size-4" />
+            <span>Synthesize Architecture</span>
+          </Button>
         </form>
-      </div>
 
-      {/* Generated Architecture Blueprint Header */}
-      <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/20 via-neutral-900 to-black p-6 space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {savedPlans.length > 0 && (
+          <div className="pt-2 border-t border-hairline space-y-2">
+            <span className="text-[11px] font-mono uppercase text-fg-subtle font-semibold">
+              Saved Architecture Blueprints ({savedPlans.length})
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {savedPlans.map((sp) => (
+                <div
+                  key={sp.ideaTitle}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-sunken px-3 py-1 text-body-xs"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPreset(sp)}
+                    className="font-medium text-fg hover:text-accent-fg truncate max-w-[200px]"
+                  >
+                    {sp.ideaTitle}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSaved(sp.ideaTitle)}
+                    aria-label={`Remove ${sp.ideaTitle}`}
+                    className="text-fg-subtle hover:text-danger-fg"
+                  >
+                    <Trash2 className="size-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Architecture Overview Header */}
+      <Card className="border-accent/25 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                {currentPlan.domain}
-              </span>
-              <span className="text-xs text-neutral-400 font-mono">
-                Target Form: {currentPlan.targetFormFactor}
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone="accent" variant="outline">{currentPlan.domain}</Badge>
+              <span className="text-body-xs text-fg-subtle font-mono">
+                Form: {currentPlan.targetFormFactor}
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">
+            <h2 className="font-display text-headline-md font-bold text-fg">
               {currentPlan.ideaTitle}
-            </h1>
-            <p className="text-xs sm:text-sm text-neutral-300 max-w-3xl leading-relaxed">
-              {currentPlan.summary}
-            </p>
+            </h2>
+            <p className="text-body-sm text-fg-muted leading-relaxed">{currentPlan.summary}</p>
           </div>
 
-          {/* Prototype Cost Summary Card */}
-          <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-4 text-center shrink-0 min-w-[200px]">
-            <span className="text-xs text-neutral-400 block mb-0.5">Estimated 1-Unit Prototype Cost</span>
-            <div className="text-2xl font-black text-emerald-400">
+          <div className="rounded-xl border border-hairline bg-surface-1 p-4 text-center shrink-0 min-w-[180px]">
+            <span className="text-[11px] font-mono text-fg-subtle block">Est. 1-Unit Proto Cost</span>
+            <div className="font-display text-headline-md font-bold text-accent-fg mt-0.5">
               {currency === 'INR'
                 ? `₹${currentPlan.estimatedTotalProtoCost.inr.toLocaleString('en-IN')}`
                 : `$${currentPlan.estimatedTotalProtoCost.usd}`}
             </div>
-            <span className="text-[11px] text-neutral-500 block mt-0.5">BOM + 2-Layer PCB fab</span>
+            <span className="text-[11px] text-fg-subtle block">BOM + 2-Layer PCB fab</span>
           </div>
         </div>
 
-        {/* Action Bar */}
-        <div className="pt-4 border-t border-neutral-800/80 flex flex-wrap items-center justify-between gap-3">
+        <div className="pt-3 border-t border-hairline flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/manufacturing/pcb"
-              className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold transition flex items-center gap-1.5"
-            >
-              <Cpu className="w-3.5 h-3.5" /> Open in PCB Studio
-            </Link>
-            <Link
-              href="/manufacturing/rfq"
-              className="px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold transition flex items-center gap-1.5 border border-neutral-700"
-            >
-              <Layers className="w-3.5 h-3.5 text-emerald-400" /> Get Indian Fab Quotes
-            </Link>
-            <Link
-              href="/earn"
-              className="px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold transition flex items-center gap-1.5 border border-neutral-700"
-            >
-              <Users className="w-3.5 h-3.5 text-cyan-400" /> Recruit Squad for This
-            </Link>
+            <Button asChild variant="primary" size="sm">
+              <Link href="/manufacturing/pcb">
+                <Cpu className="size-3.5" />
+                <span>Open in PCB Studio</span>
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/manufacturing/rfq">
+                <Layers className="size-3.5 text-accent" />
+                <span>Get Indian Fab Quotes</span>
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/earn">
+                <Users className="size-3.5 text-accent" />
+                <span>Recruit Squad</span>
+              </Link>
+            </Button>
           </div>
 
-          <button
-            type="button"
-            onClick={handleCopySpec}
-            className="px-3 py-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 text-xs font-medium transition flex items-center gap-1.5 border border-neutral-800"
-          >
-            {copied ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Copied Specification!
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" /> Export Architecture Spec (.txt)
-              </>
-            )}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant={isAlreadySaved ? 'soft' : 'secondary'}
+              size="sm"
+              onClick={handleSavePlan}
+            >
+              <Bookmark className={cn('size-3.5', isAlreadySaved && 'fill-current')} />
+              <span>{isAlreadySaved ? 'Saved Blueprint' : 'Save Blueprint'}</span>
+            </Button>
+            <Button type="button" variant="secondary" size="sm" onClick={handleCopySpec}>
+              {copied ? (
+                <>
+                  <CheckCircle2 className="size-3.5 text-success-fg" />
+                  <span>Copied Spec!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="size-3.5" />
+                  <span>Export Spec (.txt)</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-      </div>
+      </Card>
 
-      {/* Grid: System Blocks & Pinout Matrix */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* System Topology Blocks (7 cols) */}
-        <div className="lg:col-span-7 space-y-4">
+      {/* Blocks + Pinouts */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+        <div className="xl:col-span-7 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-emerald-400" /> 1. System Topology & Functional Blocks
+            <h3 className="font-display text-body-lg font-bold text-fg flex items-center gap-2">
+              <Cpu className="size-4 text-accent" />
+              <span>1. System Topology Blocks</span>
             </h3>
-            <span className="text-xs text-neutral-500">{currentPlan.systemBlocks.length} Integrated Blocks</span>
+            <span className="text-body-xs text-fg-subtle font-mono">
+              {currentPlan.systemBlocks.length} blocks
+            </span>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {currentPlan.systemBlocks.map((block) => (
-              <div
-                key={block.name}
-                className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-4 space-y-2 hover:border-neutral-700 transition"
-              >
-                <div className="flex items-center justify-between">
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border uppercase tracking-wider ${getCategoryColor(block.category)}`}>
+              <Card key={block.name} className="border-hairline bg-surface-1 p-4 space-y-1.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <Badge tone={getCategoryTone(block.category)} variant="outline">
                     {block.category}
-                  </span>
-                  <span className="text-xs font-mono font-medium text-emerald-300">
+                  </Badge>
+                  <span className="text-body-xs font-mono font-semibold text-accent-fg">
                     {block.icChoice}
                   </span>
                 </div>
-                <h4 className="text-sm font-bold text-white">{block.name}</h4>
-                <p className="text-xs text-neutral-400 leading-relaxed">{block.function}</p>
-              </div>
+                <h4 className="font-display text-body-sm font-bold text-fg">{block.name}</h4>
+                <p className="text-body-xs text-fg-muted leading-relaxed">{block.function}</p>
+              </Card>
             ))}
           </div>
         </div>
 
-        {/* Pinout & Interconnect Matrix (5 cols) */}
-        <div className="lg:col-span-5 space-y-4">
+        <div className="xl:col-span-5 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400" /> 2. MCU Pinout & Protocol Matrix
+            <h3 className="font-display text-body-lg font-bold text-fg flex items-center gap-2">
+              <Zap className="size-4 text-accent" />
+              <span>2. MCU Pinout Matrix</span>
             </h3>
-            <span className="text-xs text-neutral-500">{currentPlan.pinoutMapping.length} Pins</span>
+            <span className="text-body-xs text-fg-subtle font-mono">
+              {currentPlan.pinoutMapping.length} pins
+            </span>
           </div>
 
-          <div className="rounded-xl border border-neutral-800 bg-neutral-950 overflow-hidden">
-            <table className="w-full text-left text-xs">
-              <thead className="border-b border-neutral-800 bg-neutral-900/80 text-neutral-400 font-semibold uppercase tracking-wider text-[10px]">
+          <div className="rounded-2xl border border-hairline bg-surface-1 overflow-x-auto">
+            <table className="w-full text-left text-body-xs">
+              <thead className="border-b border-hairline bg-sunken text-fg-subtle font-mono uppercase text-[10px]">
                 <tr>
                   <th className="py-2.5 px-3">Pin</th>
-                  <th className="py-2.5 px-3">Bus / Protocol</th>
-                  <th className="py-2.5 px-3">Interconnect Node</th>
+                  <th className="py-2.5 px-3">Protocol</th>
+                  <th className="py-2.5 px-3">Node</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-800/60 text-neutral-300 font-mono">
+              <tbody className="divide-y divide-hairline font-mono">
                 {currentPlan.pinoutMapping.map((pin) => (
-                  <tr key={pin.pin} className="hover:bg-neutral-900/40">
-                    <td className="py-2.5 px-3 font-bold text-emerald-400">{pin.pin}</td>
+                  <tr key={pin.pin}>
+                    <td className="py-2.5 px-3 font-bold text-accent-fg">{pin.pin}</td>
                     <td className="py-2.5 px-3">
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-300">
-                        {pin.protocol}
-                      </span>
+                      <Badge tone="neutral" variant="outline">{pin.protocol}</Badge>
                     </td>
-                    <td className="py-2.5 px-3 text-[11px] text-neutral-300 font-sans">{pin.connectedTo}</td>
+                    <td className="py-2.5 px-3 font-sans text-fg-muted">{pin.connectedTo}</td>
                   </tr>
                 ))}
               </tbody>
@@ -296,36 +360,39 @@ Synthesized by Hackerland Prototype Simulator: https://www.hackerland.in/prototy
         </div>
       </div>
 
-      {/* Bill of Materials (BOM) Table */}
-      <section className="space-y-4">
+      {/* BOM Cost Table */}
+      <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-emerald-400" /> 3. Bill of Materials (BOM) Cost Breakdown
+          <h3 className="font-display text-body-lg font-bold text-fg flex items-center gap-2">
+            <DollarSign className="size-4 text-accent" />
+            <span>3. Bill of Materials (BOM)</span>
           </h3>
-          <span className="text-xs text-neutral-400">Total: {currentPlan.bom.length} Line Items</span>
+          <span className="text-body-xs text-fg-subtle font-mono">
+            {currentPlan.bom.length} Line Items
+          </span>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-950">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b border-neutral-800 bg-neutral-900/80 text-neutral-400 font-semibold uppercase tracking-wider text-[10px]">
+        <div className="overflow-x-auto rounded-2xl border border-hairline bg-surface-1">
+          <table className="w-full text-left text-body-xs">
+            <thead className="border-b border-hairline bg-sunken text-fg-subtle font-mono uppercase text-[10px]">
               <tr>
-                <th className="py-2.5 px-4">Component Subsystem</th>
+                <th className="py-2.5 px-4">Component</th>
                 <th className="py-2.5 px-4">Part Number</th>
-                <th className="py-2.5 px-4">Package / Footprint</th>
+                <th className="py-2.5 px-4">Footprint</th>
                 <th className="py-2.5 px-4">Est. Cost</th>
-                <th className="py-2.5 px-4">Recommended Distributor</th>
+                <th className="py-2.5 px-4">Distributor</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-800/60 text-neutral-300">
+            <tbody className="divide-y divide-hairline">
               {currentPlan.bom.map((item) => (
-                <tr key={item.partNumber} className="hover:bg-neutral-900/40">
-                  <td className="py-3 px-4 font-semibold text-white">{item.component}</td>
-                  <td className="py-3 px-4 font-mono text-emerald-400">{item.partNumber}</td>
-                  <td className="py-3 px-4 font-mono text-neutral-400">{item.footprint}</td>
-                  <td className="py-3 px-4 font-bold text-white whitespace-nowrap">
+                <tr key={item.partNumber}>
+                  <td className="py-3 px-4 font-semibold text-fg">{item.component}</td>
+                  <td className="py-3 px-4 font-mono text-accent-fg font-semibold">{item.partNumber}</td>
+                  <td className="py-3 px-4 font-mono text-fg-muted">{item.footprint}</td>
+                  <td className="py-3 px-4 font-bold text-fg whitespace-nowrap">
                     {currency === 'INR' ? `₹${item.estCostInr}` : `$${item.estCostUsd.toFixed(2)}`}
                   </td>
-                  <td className="py-3 px-4 text-neutral-400">{item.distributor}</td>
+                  <td className="py-3 px-4 text-fg-muted">{item.distributor}</td>
                 </tr>
               ))}
             </tbody>
@@ -333,26 +400,26 @@ Synthesized by Hackerland Prototype Simulator: https://www.hackerland.in/prototy
         </div>
       </section>
 
-      {/* Squad Roles & Development Milestones */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Required Skills & Squad Roster */}
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-5 space-y-4">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Users className="w-4 h-4 text-cyan-400" /> 4. Required Squad Roles & Skill Sets
+      {/* Squad + Roadmap */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="border-hairline bg-surface-1 p-5 space-y-3">
+          <h3 className="font-display text-body-lg font-bold text-fg flex items-center gap-2">
+            <Users className="size-4 text-accent" />
+            <span>4. Required Squad Roles</span>
           </h3>
-
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {currentPlan.requiredSkills.map((role) => (
-              <div key={role.role} className="rounded-xl bg-neutral-950 p-3.5 border border-neutral-800 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-xs">{role.role}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-950/40 text-cyan-300 font-mono border border-cyan-500/30">
-                    ~{role.estimatedHours} hrs
-                  </span>
+              <div key={role.role} className="rounded-xl bg-sunken p-3.5 border border-hairline space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-display font-bold text-fg text-body-xs">{role.role}</span>
+                  <Badge tone="accent" variant="outline">~{role.estimatedHours} hrs</Badge>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {role.skills.map((skill) => (
-                    <span key={skill} className="text-[10px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">
+                    <span
+                      key={skill}
+                      className="text-[11px] px-2 py-0.5 rounded-full bg-surface-1 border border-hairline text-fg-muted"
+                    >
                       {skill}
                     </span>
                   ))}
@@ -360,34 +427,32 @@ Synthesized by Hackerland Prototype Simulator: https://www.hackerland.in/prototy
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
-        {/* Development Milestones */}
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-5 space-y-4">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-purple-400" /> 5. Recommended 4-Stage Development Roadmap
+        <Card className="border-hairline bg-surface-1 p-5 space-y-3">
+          <h3 className="font-display text-body-lg font-bold text-fg flex items-center gap-2">
+            <Calendar className="size-4 text-accent" />
+            <span>5. 4-Stage Build Roadmap</span>
           </h3>
-
-          <div className="space-y-3">
-            {currentPlan.milestones.map((m, idx) => (
-              <div key={m.phase} className="rounded-xl bg-neutral-950 p-3.5 border border-neutral-800 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-xs">{m.phase}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-purple-950/40 text-purple-300 font-mono border border-purple-500/30">
-                    {m.durationWeeks} Weeks
-                  </span>
+          <div className="space-y-2.5">
+            {currentPlan.milestones.map((m) => (
+              <div key={m.phase} className="rounded-xl bg-sunken p-3.5 border border-hairline space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-display font-bold text-fg text-body-xs">{m.phase}</span>
+                  <Badge tone="code" variant="outline">{m.durationWeeks} Weeks</Badge>
                 </div>
-                <ul className="text-xs text-neutral-400 space-y-0.5">
+                <ul className="text-body-xs text-fg-muted space-y-0.5">
                   {m.deliverables.map((del) => (
-                    <li key={del} className="flex items-center gap-1.5">
-                      <span className="text-purple-400">✓</span> {del}
+                    <li key={del} className="flex items-start gap-1.5">
+                      <span className="text-accent font-bold">✓</span>
+                      <span>{del}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

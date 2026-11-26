@@ -3,15 +3,7 @@
 import { useState } from 'react';
 import type { DefensivePublication } from '@hackerland/core';
 import { generatePriorArtAffidavitText } from '@hackerland/core';
-import {
-  X,
-  Copy,
-  Check,
-  ShieldCheck,
-  Download,
-  FileText,
-  Lock,
-} from 'lucide-react';
+import { X, Copy, Check, ShieldCheck, Download, Lock } from 'lucide-react';
 import { Button } from '@hackerland/ui';
 
 interface PriorArtCertificateModalProps {
@@ -27,7 +19,9 @@ export function PriorArtCertificateModal({
   const affidavitText = generatePriorArtAffidavitText(publication);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(affidavitText);
+    try {
+      navigator.clipboard?.writeText(affidavitText);
+    } catch {}
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -47,88 +41,70 @@ export function PriorArtCertificateModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="affidavit-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-fg/40 backdrop-blur-sm p-4 overflow-y-auto"
     >
-      <div className="relative w-full max-w-3xl rounded-2xl border border-white/10 bg-neutral-900 shadow-2xl p-6 sm:p-8 my-8 text-neutral-100 space-y-6">
+      <div className="relative w-full max-w-3xl rounded-2xl border border-hairline bg-surface-1 shadow-overlay p-6 sm:p-8 my-8 text-fg space-y-5">
         <button
           onClick={onClose}
           type="button"
           aria-label="Close dialog"
-          className="absolute top-4 right-4 text-neutral-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-neutral-800"
+          className="absolute top-4 right-4 text-fg-subtle hover:text-fg transition-colors p-1 rounded-full hover:bg-surface-2"
         >
           <X className="size-5" />
         </button>
 
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono text-accent-fg font-semibold mb-1">
             <ShieldCheck className="size-3.5" />
-            <span>STATUTORY PRIOR ART CERTIFICATE · USPTO § 102 & INDIA § 29 COMPLIANT</span>
+            <span>STATUTORY PRIOR ART CERTIFICATE · USPTO § 102 &amp; INDIA § 29</span>
           </div>
-          <h2 id="affidavit-title" className="text-xl font-bold text-white">
+          <h2 id="affidavit-title" className="font-display text-headline-sm font-bold text-fg">
             Prior-Art Defense Affidavit
           </h2>
-          <p className="text-xs text-neutral-400 mt-1">
-            Official cryptographic disclosure token proving indisputable prior public existence to invalidate competing predatory patent claims.
+          <p className="text-body-xs text-fg-muted mt-1">
+            Cryptographic disclosure certificate proving prior public art to defend against competing patent claims.
           </p>
         </div>
 
-        {/* Certificate Pre Block */}
-        <div className="relative rounded-xl border border-white/10 bg-neutral-950 p-4 font-mono text-[11px] text-neutral-300 overflow-x-auto max-h-[380px] leading-relaxed select-all">
+        <div className="rounded-xl border border-hairline bg-sunken p-4 font-mono text-[11px] text-fg overflow-x-auto max-h-[360px] leading-relaxed select-all">
           <pre className="whitespace-pre-wrap">{affidavitText}</pre>
         </div>
 
-        {/* Proof Check Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl border border-white/10 bg-neutral-950/60 text-xs font-mono">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl border border-hairline bg-sunken text-xs font-mono">
           <div className="flex items-center gap-2">
-            <Lock className="size-3.5 text-emerald-400" />
-            <span className="text-neutral-400">LEDGER BLOCK:</span>
-            <span className="text-white font-bold">#{publication.timestampProof.blockHeight}</span>
+            <Lock className="size-3.5 text-accent" />
+            <span className="text-fg-subtle">LEDGER BLOCK:</span>
+            <span className="text-fg font-bold">#{publication.timestampProof.blockHeight}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-neutral-400">SHA-256:</span>
-            <span className="text-emerald-400 truncate max-w-[200px]">
+            <span className="text-fg-subtle">SHA-256:</span>
+            <span className="text-accent-fg font-semibold truncate max-w-[220px]">
               {publication.timestampProof.sha256Hash}
             </span>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-white/10">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleDownload}
-            className="text-xs font-mono w-full sm:w-auto"
-          >
-            <Download className="size-3.5 mr-1.5" />
-            Download Affidavit (.txt)
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-hairline">
+          <Button type="button" variant="secondary" size="sm" onClick={handleDownload}>
+            <Download className="size-3.5" />
+            <span>Download Affidavit (.txt)</span>
           </Button>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleCopy}
-              className="text-xs font-mono"
-            >
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+            <Button type="button" variant="secondary" size="sm" onClick={handleCopy}>
               {copied ? (
                 <>
-                  <Check className="size-3.5 mr-1.5 text-emerald-400" />
-                  Copied to Clipboard
+                  <Check className="size-3.5 text-success-fg" />
+                  <span>Copied</span>
                 </>
               ) : (
                 <>
-                  <Copy className="size-3.5 mr-1.5" />
-                  Copy Legal Text
+                  <Copy className="size-3.5" />
+                  <span>Copy Legal Text</span>
                 </>
               )}
             </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={onClose}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono"
-            >
+            <Button type="button" variant="primary" size="sm" onClick={onClose}>
               Done
             </Button>
           </div>
