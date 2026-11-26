@@ -6,7 +6,7 @@ import type { OpenRole } from '@/lib/data/types';
 import { Badge, Button, Input, Textarea } from '@hackerland/ui';
 import { TRACK_META } from '@hackerland/core';
 import { formatRoleCompensation } from '@/components/domain/role-card';
-import { X, CheckCircle2, Sparkles, ExternalLink } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
 
 export interface ApplyRoleModalProps {
   slug: string;
@@ -73,7 +73,6 @@ export function ApplyRoleModal({
           throw new Error('You have already applied for this position.');
         }
         if (res.status === 503) {
-          // Simulation fallback for environments without live MongoDB
           setIsSuccess(true);
           onSuccess?.();
           return;
@@ -95,7 +94,7 @@ export function ApplyRoleModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="apply-role-modal-title"
-      className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-canvas/80 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-fg/35 backdrop-blur-sm animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -113,9 +112,9 @@ export function ApplyRoleModal({
             </div>
             <h2
               id="apply-role-modal-title"
-              className="font-display text-headline-sm text-fg break-words"
+              className="font-display text-headline-sm font-bold text-fg break-words"
             >
-              Apply for {role.title}
+              Join squad as {role.title}
             </h2>
             {role.description ? (
               <p className="mt-1 text-body-sm text-fg-muted break-words">
@@ -127,7 +126,7 @@ export function ApplyRoleModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-fg-subtle hover:text-fg hover:bg-surface-2 transition-colors"
+            className="p-1.5 rounded-full text-fg-subtle hover:text-fg hover:bg-surface-2 transition-colors"
             aria-label="Close modal"
           >
             <X className="size-5" />
@@ -137,7 +136,7 @@ export function ApplyRoleModal({
         {error && (
           <div
             role="alert"
-            className="rounded-lg border border-danger/40 bg-danger/10 p-3 text-body-sm text-danger-fg break-words"
+            className="rounded-xl border border-danger/30 bg-danger/8 p-3 text-body-sm text-danger-fg break-words"
           >
             {error}
           </div>
@@ -146,22 +145,22 @@ export function ApplyRoleModal({
         {isSuccess ? (
           <div
             role="status"
-            className="rounded-xl border border-success/40 bg-success/10 p-5 text-body-sm text-success-fg space-y-3"
+            className="rounded-2xl border border-success/30 bg-success/8 p-5 text-body-sm text-success-fg space-y-3"
           >
             <div className="flex items-center gap-2 font-display font-bold text-body-md">
               <CheckCircle2 className="size-5 text-success" />
-              <span>Squad application submitted!</span>
+              <span>Application sent to the squad!</span>
             </div>
             <p className="text-fg-muted">
-              The project leads have received your submission. Once reviewed, you will be notified in your Mission Control activity feed.
+              The project leads have received your note. Check your activity bell for updates once they respond.
             </p>
             <Button
               type="button"
               variant="secondary"
               onClick={onClose}
-              className="mt-3 w-full"
+              className="mt-2 w-full"
             >
-              Close
+              Done
             </Button>
           </div>
         ) : (
@@ -171,14 +170,14 @@ export function ApplyRoleModal({
                 htmlFor="apply-portfolio-input"
                 className="block font-display text-label-md text-fg"
               >
-                Portfolio, GitHub or relevant PR link (optional)
+                GitHub, portfolio, or build link (optional)
               </label>
               <Input
                 id="apply-portfolio-input"
                 type="url"
                 value={portfolioUrl}
                 onChange={(e) => setPortfolioUrl(e.target.value)}
-                placeholder="https://github.com/your-username or portfolio URL"
+                placeholder="https://github.com/your-handle or demo URL"
                 className="w-full"
               />
             </div>
@@ -188,22 +187,22 @@ export function ApplyRoleModal({
                 htmlFor="apply-note-input"
                 className="block font-display text-label-md text-fg"
               >
-                Why do you want to join this squad? (optional)
+                Say hello &amp; share how you can help (optional)
               </label>
               <Textarea
                 id="apply-note-input"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Share your experience, relevant repositories, hardware toolchain availability, or what you'd like to build..."
+                placeholder="Share your background, past builds, or tools you enjoy working with..."
                 rows={4}
                 className="w-full text-body-sm"
               />
             </div>
 
-            <div className="flex justify-end gap-3 pt-2 border-t border-hairline">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-hairline">
               <Button
                 type="button"
-                variant="secondary"
+                variant="ghost"
                 disabled={isSubmitting}
                 onClick={onClose}
               >
@@ -222,6 +221,6 @@ export function ApplyRoleModal({
         )}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

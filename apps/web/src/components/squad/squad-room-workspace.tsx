@@ -9,24 +9,19 @@ import {
   Lock,
   Unlock,
   Clock,
-  Sparkles,
   ArrowRight,
   ExternalLink,
   Kanban,
-  FileCode2,
-  DollarSign,
-  AlertCircle,
   Plus,
   Send,
-  Cpu,
-  Layers,
   Award,
+  X,
 } from 'lucide-react';
+import { Avatar, Badge, Button, Card, CardBody, Chip, Input, TRACK_TONES, Textarea, cn, type Tone } from '@hackerland/ui';
 import type {
   ProjectSquadRoom,
   MilestoneEscrow,
   KanbanTask,
-  SquadMemberRole,
 } from '@hackerland/core';
 
 interface Props {
@@ -43,7 +38,6 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
   const [proofSuccessMsg, setProofSuccessMsg] = useState<string | null>(null);
   const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
 
-  // New task form state
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
   const [newTaskPriority, setNewTaskPriority] = useState<KanbanTask['priority']>('medium');
 
@@ -51,13 +45,9 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
     .filter((m) => m.status === 'released')
     .reduce((acc, m) => acc + m.escrowAmountInr, 0);
 
-  const lockedEscrowInr = squadRoom.escrowPoolTotalInr - releasedEscrowInr;
-
   const releasedEscrowUsd = milestones
     .filter((m) => m.status === 'released')
     .reduce((acc, m) => acc + m.escrowAmountUsd, 0);
-
-  const lockedEscrowUsd = squadRoom.escrowPoolTotalUsd - releasedEscrowUsd;
 
   const handleSubmitProof = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,11 +66,13 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
                 submittedBy: 'current_builder',
               },
             }
-          : m
-      )
+          : m,
+      ),
     );
 
-    setProofSuccessMsg(`Proof submitted for "${selectedMilestone.title}"! Escrow will release upon peer review.`);
+    setProofSuccessMsg(
+      `Proof submitted for "${selectedMilestone.title}"! Funds unlock after peer review.`,
+    );
     setSelectedMilestone(null);
     setProofUrl('');
     setProofSummary('');
@@ -89,11 +81,9 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
 
   const handleSimulateDisburse = (milestoneId: string) => {
     setMilestones((prev) =>
-      prev.map((m) =>
-        m.id === milestoneId ? { ...m, status: 'released' } : m
-      )
+      prev.map((m) => (m.id === milestoneId ? { ...m, status: 'released' } : m)),
     );
-    setProofSuccessMsg('Escrow disbursed! Verified credential minted to member Personal Innovation Passport.');
+    setProofSuccessMsg('Escrow released! Verified badge credited to squad members.');
     setTimeout(() => setProofSuccessMsg(null), 5000);
   };
 
@@ -122,320 +112,333 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
           done: 'todo',
         };
         return { ...t, status: next[t.status] };
-      })
+      }),
     );
   };
 
   return (
-    <div className="space-y-8">
-      {/* Escrow Pool Vault Header */}
-      <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/30 via-neutral-900 to-black p-6 space-y-4 shadow-xl">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5" /> Milestone Escrow Active
-              </span>
-              <span className="text-xs text-neutral-400 font-mono">
-                Project: {squadRoom.projectTitle}
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">
-              Squad Room & Proof-of-Work Vault
-            </h1>
-            <p className="text-xs sm:text-sm text-neutral-300 max-w-2xl leading-relaxed">
-              {squadRoom.tagline}
-            </p>
-          </div>
-
-          {/* Escrow Pool Vault Counter */}
-          <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4 shrink-0 flex items-center gap-6">
-            <div>
-              <span className="text-[11px] text-neutral-400 block mb-0.5">Total Escrow Vault</span>
-              <div className="text-2xl font-black text-white">
-                {currency === 'INR'
-                  ? `₹${squadRoom.escrowPoolTotalInr.toLocaleString('en-IN')}`
-                  : `$${squadRoom.escrowPoolTotalUsd}`}
+    <div className="space-y-6 min-w-0">
+      {/* Crisp White & Pink Squad Room Header */}
+      <Card className="border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft/70">
+        <CardBody className="p-5 sm:p-6 space-y-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            <div className="space-y-2 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge tone="earn" variant="outline">
+                  <ShieldCheck className="size-3.5" aria-hidden="true" />
+                  <span>Milestone Escrow Active</span>
+                </Badge>
+                <span className="text-[12px] font-medium text-fg-subtle">
+                  {squadRoom.projectTitle}
+                </span>
               </div>
-              <div className="text-[10px] text-emerald-400 mt-0.5 flex items-center gap-1">
-                <Unlock className="w-3 h-3" />
-                {currency === 'INR' ? `₹${releasedEscrowInr.toLocaleString('en-IN')} Disbursed` : `$${releasedEscrowUsd} Disbursed`}
-              </div>
+              <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold text-fg break-words">
+                Squad Room &amp; Milestone Vault
+              </h1>
+              <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl">
+                {squadRoom.tagline}
+              </p>
             </div>
 
-            <div className="border-l border-neutral-800 pl-4 flex flex-col justify-between">
-              <div className="flex rounded-lg bg-neutral-900 border border-neutral-800 p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setCurrency('INR')}
-                  className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
-                    currency === 'INR' ? 'bg-emerald-500 text-black' : 'text-neutral-400 hover:text-white'
-                  }`}
+            {/* Escrow Pool Vault Widget */}
+            <div className="rounded-2xl border border-hairline bg-surface-1 p-4 shrink-0 flex items-center gap-5 shadow-xs">
+              <div>
+                <span className="text-[12px] text-fg-subtle block mb-0.5">Total Escrow Pool</span>
+                <div className="font-display text-headline-lg font-bold text-fg tabular-nums">
+                  {currency === 'INR'
+                    ? `₹${squadRoom.escrowPoolTotalInr.toLocaleString('en-IN')}`
+                    : `$${squadRoom.escrowPoolTotalUsd}`}
+                </div>
+                <div className="text-[12px] font-medium text-earn-fg mt-0.5 flex items-center gap-1 tabular-nums">
+                  <Unlock className="size-3" aria-hidden="true" />
+                  {currency === 'INR'
+                    ? `₹${releasedEscrowInr.toLocaleString('en-IN')} released`
+                    : `$${releasedEscrowUsd} released`}
+                </div>
+              </div>
+
+              <div className="border-l border-hairline pl-4 flex flex-col items-end justify-between gap-2">
+                <div className="flex rounded-full bg-surface-2 border border-hairline p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setCurrency('INR')}
+                    className={cn(
+                      'px-2.5 py-1 rounded-full text-[12px] font-display font-semibold transition-colors',
+                      currency === 'INR'
+                        ? 'bg-accent text-on-solid'
+                        : 'text-fg-muted hover:text-fg',
+                    )}
+                  >
+                    ₹
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrency('USD')}
+                    className={cn(
+                      'px-2.5 py-1 rounded-full text-[12px] font-display font-semibold transition-colors',
+                      currency === 'USD'
+                        ? 'bg-accent text-on-solid'
+                        : 'text-fg-muted hover:text-fg',
+                    )}
+                  >
+                    $
+                  </button>
+                </div>
+
+                <Link
+                  href={`/projects/${squadRoom.projectSlug}`}
+                  className="text-[12px] font-display font-medium text-accent-fg hover:underline inline-flex items-center gap-1"
                 >
-                  ₹
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrency('USD')}
-                  className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
-                    currency === 'USD' ? 'bg-emerald-500 text-black' : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  $
-                </button>
+                  <span>Overview</span>
+                  <ArrowRight className="size-3" aria-hidden="true" />
+                </Link>
               </div>
-
-              <Link
-                href={`/projects/${squadRoom.projectSlug}`}
-                className="text-[11px] text-neutral-400 hover:text-white mt-2 flex items-center gap-1"
-              >
-                Project Details <ArrowRight className="w-3 h-3" />
-              </Link>
             </div>
           </div>
-        </div>
 
-        {/* Success Alert Banner */}
-        {proofSuccessMsg && (
-          <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-3.5 text-xs text-emerald-300 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{proofSuccessMsg}</span>
-          </div>
-        )}
-      </div>
+          {proofSuccessMsg && (
+            <div
+              role="status"
+              className="rounded-xl border border-success/30 bg-success/8 p-3.5 text-body-sm text-success-fg flex items-center gap-2"
+            >
+              <CheckCircle2 className="size-4 text-success shrink-0" aria-hidden="true" />
+              <span>{proofSuccessMsg}</span>
+            </div>
+          )}
+        </CardBody>
+      </Card>
 
-      {/* Workspace Tabs Bar */}
-      <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
+      {/* Workspace Pill Tabs */}
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setActiveTab('escrow')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+          className={cn(
+            'inline-flex items-center gap-2 rounded-full px-4 py-2 text-body-sm font-display font-semibold transition-all border',
             activeTab === 'escrow'
-              ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/10'
-              : 'bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800'
-          }`}
+              ? 'border-accent bg-accent text-on-solid shadow-xs'
+              : 'border-hairline bg-surface-1 text-fg-muted hover:border-accent/40 hover:text-fg',
+          )}
         >
-          <Lock className="w-3.5 h-3.5" /> Milestone Escrow & Proofs ({milestones.length})
+          <Lock className="size-3.5" aria-hidden="true" />
+          <span>Milestone Proofs ({milestones.length})</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('kanban')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+          className={cn(
+            'inline-flex items-center gap-2 rounded-full px-4 py-2 text-body-sm font-display font-semibold transition-all border',
             activeTab === 'kanban'
-              ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/10'
-              : 'bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800'
-          }`}
+              ? 'border-accent bg-accent text-on-solid shadow-xs'
+              : 'border-hairline bg-surface-1 text-fg-muted hover:border-accent/40 hover:text-fg',
+          )}
         >
-          <Kanban className="w-3.5 h-3.5" /> Squad Kanban Board ({tasks.length})
+          <Kanban className="size-3.5" aria-hidden="true" />
+          <span>Kanban Board ({tasks.length})</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('roster')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+          className={cn(
+            'inline-flex items-center gap-2 rounded-full px-4 py-2 text-body-sm font-display font-semibold transition-all border',
             activeTab === 'roster'
-              ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/10'
-              : 'bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800'
-          }`}
+              ? 'border-accent bg-accent text-on-solid shadow-xs'
+              : 'border-hairline bg-surface-1 text-fg-muted hover:border-accent/40 hover:text-fg',
+          )}
         >
-          <Users className="w-3.5 h-3.5" /> Squad Roster & Roles ({squadRoom.squadMembers.length})
+          <Users className="size-3.5" aria-hidden="true" />
+          <span>Squad Roster ({squadRoom.squadMembers.length})</span>
         </button>
       </div>
 
-      {/* TAB 1: Milestone Escrow & Proof-of-Work Vault */}
+      {/* TAB 1: Milestone Proofs */}
       {activeTab === 'escrow' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {milestones.map((m, idx) => {
-              let statusBadge = (
-                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700 flex items-center gap-1">
-                  <Lock className="w-3 h-3 text-neutral-500" /> Escrow Locked
-                </span>
-              );
-
-              if (m.status === 'in_review') {
-                statusBadge = (
-                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1 font-semibold">
-                    <Clock className="w-3 h-3 text-amber-400" /> In Peer Review
-                  </span>
-                );
-              } else if (m.status === 'released') {
-                statusBadge = (
-                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center gap-1 font-semibold">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Disbursed
-                  </span>
-                );
-              }
-
-              return (
-                <div
-                  key={m.id}
-                  className={`rounded-2xl border p-5 flex flex-col justify-between space-y-4 transition ${
-                    m.status === 'released'
-                      ? 'border-emerald-500/40 bg-emerald-950/10'
-                      : m.status === 'in_review'
-                      ? 'border-amber-500/40 bg-amber-950/10'
-                      : 'border-neutral-800 bg-neutral-900/40 hover:border-neutral-700'
-                  }`}
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono text-neutral-500">MILESTONE 0{idx + 1}</span>
-                      {statusBadge}
-                    </div>
-
-                    <h3 className="text-base font-bold text-white leading-snug">{m.title}</h3>
-                    <p className="text-xs text-neutral-400 leading-relaxed">{m.description}</p>
-
-                    <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800/80 space-y-1">
-                      <div className="text-[11px] text-neutral-500">Escrow Bounty:</div>
-                      <div className="text-lg font-black text-emerald-400">
-                        {currency === 'INR'
-                          ? `₹${m.escrowAmountInr.toLocaleString('en-IN')}`
-                          : `$${m.escrowAmountUsd}`}
-                      </div>
-                      <div className="text-[10px] text-neutral-400 flex items-center gap-1 pt-1 border-t border-neutral-800">
-                        <Award className="w-3 h-3 text-amber-400" /> Badge: {m.unlockedPassportBadge}
-                      </div>
-                    </div>
-
-                    {/* Proof Requirements */}
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block">
-                        Deliverables Required:
-                      </span>
-                      <ul className="text-xs text-neutral-400 space-y-1">
-                        {m.proofRequirements.map((req) => (
-                          <li key={req} className="flex items-start gap-1.5 text-[11px]">
-                            <span className="text-emerald-400 mt-0.5">•</span>
-                            <span>{req}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Submitted Proof Card */}
-                    {m.submittedProof && (
-                      <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 space-y-1.5 text-xs">
-                        <div className="flex items-center justify-between text-[10px] text-neutral-400">
-                          <span>Proof by @{m.submittedProof.submittedBy}</span>
-                          <span>{m.submittedProof.submittedAt}</span>
-                        </div>
-                        <p className="text-[11px] text-neutral-300 italic">{m.submittedProof.summary}</p>
-                        <a
-                          href={m.submittedProof.proofUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:underline"
-                        >
-                          Inspect Deliverable <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {milestones.map((m, idx) => (
+              <Card
+                key={m.id}
+                accent={m.status === 'released' ? 'earn' : m.status === 'in_review' ? 'make' : 'accent'}
+                className="flex flex-col justify-between min-w-0"
+              >
+                <CardBody className="p-5 space-y-3.5 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[11px] font-semibold text-fg-subtle">
+                      Milestone 0{idx + 1}
+                    </span>
+                    {m.status === 'released' ? (
+                      <Badge tone="success" variant="solid">
+                        <CheckCircle2 className="size-3" /> Disbursed
+                      </Badge>
+                    ) : m.status === 'in_review' ? (
+                      <Badge tone="warning" variant="outline">
+                        <Clock className="size-3" /> In Review
+                      </Badge>
+                    ) : (
+                      <Badge tone="neutral" variant="outline">
+                        <Lock className="size-3" /> Locked
+                      </Badge>
                     )}
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="pt-3 border-t border-neutral-800">
-                    {m.status === 'escrow_locked' && (
-                      <button
-                        type="button"
-                        onClick={() => setSelectedMilestone(m)}
-                        className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/10"
-                      >
-                        <Send className="w-3.5 h-3.5" /> Submit Proof of Work
-                      </button>
-                    )}
+                  <h3 className="font-display text-headline-sm font-bold text-fg leading-snug">
+                    {m.title}
+                  </h3>
+                  <p className="text-body-sm text-fg-muted leading-relaxed">{m.description}</p>
 
-                    {m.status === 'in_review' && (
-                      <button
-                        type="button"
-                        onClick={() => handleSimulateDisburse(m.id)}
-                        className="w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/10"
-                      >
-                        <Unlock className="w-3.5 h-3.5" /> Approve & Disburse Escrow
-                      </button>
-                    )}
-
-                    {m.status === 'released' && (
-                      <div className="text-center text-xs text-emerald-400 font-medium py-1.5 bg-emerald-950/40 rounded-lg border border-emerald-500/30">
-                        ✓ Credited to Passport
-                      </div>
-                    )}
+                  <div className="rounded-xl border border-hairline bg-surface-2/60 p-3 space-y-1">
+                    <div className="text-[11px] text-fg-subtle">Escrow Reward</div>
+                    <div className="font-display text-headline-sm font-bold text-earn-fg tabular-nums">
+                      {currency === 'INR'
+                        ? `₹${m.escrowAmountInr.toLocaleString('en-IN')}`
+                        : `$${m.escrowAmountUsd}`}
+                    </div>
+                    <div className="text-[11px] text-fg-muted flex items-center gap-1 pt-1 border-t border-hairline">
+                      <Award className="size-3 text-accent" aria-hidden="true" />
+                      <span>Unlocks: {m.unlockedPassportBadge}</span>
+                    </div>
                   </div>
+
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-display font-semibold text-fg-subtle block">
+                      Deliverables
+                    </span>
+                    <ul className="space-y-1 text-body-sm text-fg-muted">
+                      {m.proofRequirements.map((req) => (
+                        <li key={req} className="flex items-start gap-1.5 text-[12px]">
+                          <span className="text-accent mt-0.5">•</span>
+                          <span>{req}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {m.submittedProof && (
+                    <div className="rounded-xl border border-hairline bg-surface-2/50 p-3 space-y-1 text-[12px]">
+                      <div className="flex items-center justify-between text-fg-subtle">
+                        <span>@{m.submittedProof.submittedBy}</span>
+                        <span>{m.submittedProof.submittedAt}</span>
+                      </div>
+                      <p className="text-fg-muted italic">{m.submittedProof.summary}</p>
+                      <a
+                        href={m.submittedProof.proofUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-medium text-accent-fg hover:underline"
+                      >
+                        <span>Inspect Deliverable</span>
+                        <ExternalLink className="size-3" />
+                      </a>
+                    </div>
+                  )}
+                </CardBody>
+
+                <div className="border-t border-hairline px-5 py-3.5 bg-surface-2/30">
+                  {m.status === 'escrow_locked' && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => setSelectedMilestone(m)}
+                      className="w-full"
+                    >
+                      <Send className="size-3.5" aria-hidden="true" />
+                      <span>Submit Proof</span>
+                    </Button>
+                  )}
+                  {m.status === 'in_review' && (
+                    <Button
+                      variant="earn"
+                      size="sm"
+                      onClick={() => handleSimulateDisburse(m.id)}
+                      className="w-full"
+                    >
+                      <Unlock className="size-3.5" aria-hidden="true" />
+                      <span>Approve &amp; Release</span>
+                    </Button>
+                  )}
+                  {m.status === 'released' && (
+                    <div className="text-center text-body-sm font-display font-semibold text-success-fg py-1">
+                      ✓ Verified &amp; Credited
+                    </div>
+                  )}
                 </div>
-              );
-            })}
+              </Card>
+            ))}
           </div>
 
-          {/* Submit Proof Modal / Drawer */}
+          {/* White Proof Submission Dialog */}
           {selectedMilestone && (
-            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="w-full max-w-lg rounded-2xl border border-neutral-800 bg-neutral-950 p-6 space-y-4 shadow-2xl">
-                <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+            <div
+              role="dialog"
+              aria-modal="true"
+              className="fixed inset-0 z-50 bg-fg/35 backdrop-blur-sm flex items-center justify-center p-4"
+            >
+              <div className="w-full max-w-lg rounded-2xl border border-hairline bg-surface-1 p-6 space-y-4 shadow-overlay">
+                <div className="flex items-center justify-between border-b border-hairline pb-3">
                   <div>
-                    <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-                      Proof Submission
+                    <span className="text-[11px] font-display font-semibold text-accent-fg">
+                      Submit Milestone Proof
                     </span>
-                    <h3 className="text-base font-bold text-white">{selectedMilestone.title}</h3>
+                    <h3 className="font-display text-headline-sm font-bold text-fg">
+                      {selectedMilestone.title}
+                    </h3>
                   </div>
                   <button
                     type="button"
                     onClick={() => setSelectedMilestone(null)}
-                    className="text-neutral-400 hover:text-white text-xs"
+                    className="rounded-full p-1.5 text-fg-subtle hover:bg-surface-2 hover:text-fg"
+                    aria-label="Close proof dialog"
                   >
-                    ✕ Close
+                    <X className="size-4" />
                   </button>
                 </div>
 
                 <form onSubmit={handleSubmitProof} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-neutral-300 mb-1">
+                    <label className="block font-display text-label-md text-fg mb-1.5">
                       Proof URL (GitHub PR / Gerber ZIP / Video / Datasheet)
                     </label>
-                    <input
+                    <Input
                       type="url"
                       required
                       placeholder="https://github.com/..."
                       value={proofUrl}
                       onChange={(e) => setProofUrl(e.target.value)}
-                      className="w-full rounded-lg bg-neutral-900 border border-neutral-800 px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-neutral-300 mb-1">
-                      Summary of Deliverable & Benchmark Results
+                    <label className="block font-display text-label-md text-fg mb-1.5">
+                      Deliverable &amp; Benchmark Summary
                     </label>
-                    <textarea
+                    <Textarea
                       rows={3}
                       required
-                      placeholder="Describe test methodology, achieved metrics, and artifacts..."
+                      placeholder="Describe test results, verification checks, and screenshots..."
                       value={proofSummary}
                       onChange={(e) => setProofSummary(e.target.value)}
-                      className="w-full rounded-lg bg-neutral-900 border border-neutral-800 px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
                     />
                   </div>
 
-                  <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 text-xs text-emerald-300">
-                    Bounty on verification: <strong>₹{selectedMilestone.escrowAmountInr.toLocaleString('en-IN')}</strong> ($
-                    {selectedMilestone.escrowAmountUsd}) + <strong>{selectedMilestone.unlockedPassportBadge}</strong> badge.
+                  <div className="rounded-xl border border-earn/25 bg-earn/8 p-3 text-body-sm text-earn-fg">
+                    Unlocks{' '}
+                    <strong>₹{selectedMilestone.escrowAmountInr.toLocaleString('en-IN')}</strong>{' '}
+                    + <strong>{selectedMilestone.unlockedPassportBadge}</strong> badge.
                   </div>
 
                   <div className="flex items-center justify-end gap-2 pt-2">
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
                       onClick={() => setSelectedMilestone(null)}
-                      className="px-4 py-2 rounded-lg bg-neutral-800 text-xs text-neutral-300 hover:bg-neutral-700"
                     >
                       Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs"
-                    >
-                      Submit for Peer Review
-                    </button>
+                    </Button>
+                    <Button type="submit" variant="primary">
+                      Submit for Review
+                    </Button>
                   </div>
                 </form>
               </div>
@@ -444,93 +447,91 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
         </div>
       )}
 
-      {/* TAB 2: Interactive Squad Kanban Board */}
+      {/* TAB 2: Squad Kanban Board */}
       {activeTab === 'kanban' && (
-        <div className="space-y-6">
-          {/* Quick Task Creator */}
-          <form onSubmit={handleAddTask} className="flex gap-2">
-            <input
+        <div className="space-y-5">
+          <form onSubmit={handleAddTask} className="flex flex-col sm:flex-row gap-2">
+            <Input
               type="text"
               placeholder="Add squad task (e.g. 'Route CAN transceiver termination in PCB Studio')..."
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
-              className="flex-1 rounded-xl bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              className="flex-1"
             />
             <select
               value={newTaskPriority}
               onChange={(e) => setNewTaskPriority(e.target.value as KanbanTask['priority'])}
-              className="rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              className="h-11 rounded-xl border border-line bg-sunken px-3 text-body-sm text-fg focus:border-accent focus:outline-none"
             >
               <option value="low">Low Priority</option>
               <option value="medium">Medium Priority</option>
               <option value="high">High Priority</option>
               <option value="critical">Critical Path</option>
             </select>
-            <button
-              type="submit"
-              className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs flex items-center gap-1.5 shrink-0"
-            >
-              <Plus className="w-3.5 h-3.5" /> Add Task
-            </button>
+            <Button type="submit" variant="primary" size="md">
+              <Plus className="size-4" aria-hidden="true" />
+              <span>Add Task</span>
+            </Button>
           </form>
 
-          {/* Kanban Columns */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {(
               [
-                { id: 'todo', label: 'To Do', color: 'border-neutral-700' },
-                { id: 'in_progress', label: 'In Progress', color: 'border-cyan-500/50' },
-                { id: 'review', label: 'Peer Review', color: 'border-amber-500/50' },
-                { id: 'done', label: 'Completed', color: 'border-emerald-500/50' },
+                { id: 'todo', label: 'To Do' },
+                { id: 'in_progress', label: 'In Progress' },
+                { id: 'review', label: 'Peer Review' },
+                { id: 'done', label: 'Completed' },
               ] as const
             ).map((col) => {
               const colTasks = tasks.filter((t) => t.status === col.id);
               return (
                 <div
                   key={col.id}
-                  className={`rounded-2xl border ${col.color} bg-neutral-900/30 p-4 space-y-3 min-h-[350px] flex flex-col justify-between`}
+                  className="rounded-2xl border border-hairline bg-surface-1 p-4 space-y-3 min-h-[320px] shadow-xs"
                 >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
-                      <span className="text-xs font-bold text-white uppercase tracking-wider">{col.label}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 font-mono">
-                        {colTasks.length}
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-between border-b border-hairline pb-2.5">
+                    <span className="font-display text-label-md font-bold text-fg">{col.label}</span>
+                    <span className="rounded-full bg-surface-2 px-2 py-0.5 font-mono text-[11px] font-semibold text-fg-muted">
+                      {colTasks.length}
+                    </span>
+                  </div>
 
-                    <div className="space-y-2.5">
-                      {colTasks.map((t) => {
-                        let priorityColor = 'text-neutral-400';
-                        if (t.priority === 'high') priorityColor = 'text-orange-400';
-                        if (t.priority === 'critical') priorityColor = 'text-rose-400 font-bold';
-
-                        return (
-                          <div
-                            key={t.id}
-                            onClick={() => handleCycleTaskStatus(t.id)}
-                            className="cursor-pointer rounded-xl border border-neutral-800 bg-neutral-950 p-3 space-y-2 hover:border-emerald-500/50 transition group"
-                            title="Click to advance status"
+                  <div className="space-y-2.5">
+                    {colTasks.map((t) => (
+                      <button
+                        type="button"
+                        key={t.id}
+                        onClick={() => handleCycleTaskStatus(t.id)}
+                        className="w-full text-left rounded-xl border border-hairline bg-surface-2/50 p-3 space-y-2 hover:border-accent/40 hover:bg-surface-1 transition-all group shadow-xs"
+                        title="Click to advance status"
+                      >
+                        <p className="text-body-sm font-medium text-fg group-hover:text-accent-fg leading-snug">
+                          {t.title}
+                        </p>
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span
+                            className={cn(
+                              'font-display font-semibold capitalize',
+                              t.priority === 'critical'
+                                ? 'text-danger-fg'
+                                : t.priority === 'high'
+                                ? 'text-make-fg'
+                                : 'text-fg-subtle',
+                            )}
                           >
-                            <p className="text-xs font-medium text-white group-hover:text-emerald-300 leading-snug">
-                              {t.title}
-                            </p>
-                            <div className="flex items-center justify-between text-[10px]">
-                              <span className={priorityColor}>
-                                {t.priority.toUpperCase()}
-                              </span>
-                              {t.assigneeHandle ? (
-                                <span className="text-neutral-400 font-mono">@{t.assigneeHandle}</span>
-                              ) : (
-                                <span className="text-neutral-600">Unassigned</span>
-                              )}
-                            </div>
-                            <div className="text-[9px] text-neutral-500 flex justify-end">
-                              Click to advance →
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                            {t.priority}
+                          </span>
+                          {t.assigneeHandle ? (
+                            <span className="font-mono text-fg-muted">@{t.assigneeHandle}</span>
+                          ) : (
+                            <span className="text-fg-subtle">Unassigned</span>
+                          )}
+                        </div>
+                        <div className="text-[10px] font-medium text-accent-fg/80 text-right">
+                          Advance status →
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               );
@@ -539,84 +540,77 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
         </div>
       )}
 
-      {/* TAB 3: Squad Roster & Role Applications */}
+      {/* TAB 3: Squad Roster */}
       {activeTab === 'roster' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {squadRoom.squadMembers.map((member) => {
-              const isFilled = member.status === 'filled';
-              return (
-                <div
-                  key={member.id}
-                  className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-5 space-y-4 flex flex-col justify-between"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 uppercase tracking-wider font-semibold">
-                        {member.track} Track
-                      </span>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${
-                          isFilled
-                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                            : 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40 animate-pulse'
-                        }`}
-                      >
-                        {isFilled ? 'Filled Role' : 'Open for Application'}
-                      </span>
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {squadRoom.squadMembers.map((member) => {
+            const isFilled = member.status === 'filled';
+            const memberTrackTone: Tone = (TRACK_TONES as readonly string[]).includes(member.track)
+              ? (member.track as Tone)
+              : 'accent';
+            return (
+              <Card key={member.id} className="flex flex-col justify-between">
+                <CardBody className="p-5 space-y-3.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge tone={memberTrackTone} variant="outline">
+                      {member.track}
+                    </Badge>
+                    <Badge tone={isFilled ? 'success' : 'accent'} variant={isFilled ? 'outline' : 'solid'}>
+                      {isFilled ? 'Filled' : 'Open Role'}
+                    </Badge>
+                  </div>
 
-                    <h3 className="text-base font-bold text-white">{member.roleTitle}</h3>
+                  <div>
+                    <h3 className="font-display text-headline-sm font-bold text-fg">
+                      {member.roleTitle}
+                    </h3>
                     {member.stipend && (
-                      <div className="text-xs font-mono text-emerald-400 font-semibold">
+                      <div className="font-display text-body-sm font-semibold text-earn-fg mt-0.5">
                         {member.stipend}
                       </div>
                     )}
+                  </div>
 
-                    {isFilled && member.assignee && (
-                      <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs flex items-center justify-center">
-                          {member.assignee.name.charAt(0)}
+                  {isFilled && member.assignee && (
+                    <div className="rounded-xl border border-hairline bg-surface-2/60 p-3 flex items-center gap-2.5">
+                      <Avatar name={member.assignee.name} size="sm" />
+                      <div className="min-w-0">
+                        <div className="text-body-sm font-bold text-fg truncate">
+                          {member.assignee.name}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-bold text-white truncate">{member.assignee.name}</div>
-                          <div className="text-[10px] text-neutral-500 font-mono">
-                            @{member.assignee.handle} • {member.assignee.reputationScore ?? 300} REP
-                          </div>
+                        <div className="text-[11px] font-mono text-fg-subtle truncate">
+                          @{member.assignee.handle} · {member.assignee.reputationScore ?? 300} REP
                         </div>
-                      </div>
-                    )}
-
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block">
-                        Required Core Skills:
-                      </span>
-                      <div className="flex flex-wrap gap-1">
-                        {member.skills.map((s) => (
-                          <span key={s} className="text-[10px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300">
-                            {s}
-                          </span>
-                        ))}
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="pt-3 border-t border-neutral-800">
-                    {!isFilled ? (
-                      <Link
-                        href={`/projects/${squadRoom.projectSlug}#open-roles`}
-                        className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/10"
-                      >
-                        Apply for This Role <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    ) : (
-                      <div className="text-center text-xs text-neutral-500 py-1.5">Active Contributor</div>
-                    )}
+                  <div className="flex flex-wrap gap-1.5">
+                    {member.skills.map((s) => (
+                      <Chip key={s} className="text-[11px] py-0.5 px-2.5">
+                        {s}
+                      </Chip>
+                    ))}
                   </div>
+                </CardBody>
+
+                <div className="border-t border-hairline px-5 py-3 bg-surface-2/30">
+                  {!isFilled ? (
+                    <Button asChild size="sm" variant="primary" className="w-full">
+                      <Link href={`/projects/${squadRoom.projectSlug}`}>
+                        <span>Apply for Role</span>
+                        <ArrowRight className="size-3.5" aria-hidden="true" />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <div className="text-center text-[12px] text-fg-subtle py-1">
+                      Active Squad Contributor
+                    </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

@@ -2,182 +2,212 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Users,
-  ShieldCheck,
   ArrowRight,
   Sparkles,
-  Lock,
-  Unlock,
-  DollarSign,
   Briefcase,
-  CheckCircle2,
 } from 'lucide-react';
+import { Avatar, Badge, Button, Card, CardBody, CardFooter, StatTile } from '@hackerland/ui';
 import { listSquadRooms } from '@/lib/data/squads-data';
+import {
+  getPlatformStats,
+  listOpportunities,
+  listProjects,
+} from '@/lib/data/queries';
+import { ALL_PEOPLE } from '@/lib/data/fixtures/people';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRightRail } from '@/components/social/community-right-rail';
 
 export const metadata: Metadata = {
-  title: 'Active Project Squads & Milestone Escrow Directory | Hackerland',
+  title: 'Squad Rooms & Milestone Escrows',
   description:
-    'Join active engineering squads building hardware, AI, and robotics. Verified proof-of-work milestone escrows, stipend grants, and cross-disciplinary co-founders.',
+    'Join active hardware and software squads with transparent milestone escrows and contributor Kanban boards.',
 };
 
-export default function SquadsDirectoryPage() {
+export default async function SquadsDirectoryPage() {
   const squads = listSquadRooms();
+  const [projects, bounties, stats] = await Promise.all([
+    listProjects(),
+    listOpportunities('bounty'),
+    getPlatformStats(),
+  ]);
 
   const totalEscrowInr = squads.reduce((acc, s) => acc + s.escrowPoolTotalInr, 0);
   const totalOpenRoles = squads.reduce(
     (acc, s) => acc + s.squadMembers.filter((m) => m.status === 'open').length,
-    0
+    0,
   );
   const totalFilledMembers = squads.reduce(
     (acc, s) => acc + s.squadMembers.filter((m) => m.status === 'filled').length,
-    0
+    0,
   );
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24">
-      {/* Hero Banner */}
-      <section className="relative overflow-hidden border-b border-neutral-800 bg-gradient-to-b from-neutral-950 via-neutral-900 to-black pt-16 pb-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            <Users className="w-3.5 h-3.5" /> Collaboration Hub & Escrow Vault
+    <SocialCommunityProvider>
+      <SocialShell
+        rightRail={
+          <CommunityRightRail
+            suggestedMakers={ALL_PEOPLE.slice(0, 4)}
+            trendingProjects={projects.slice(0, 3)}
+            openBounties={bounties.slice(0, 3)}
+            stats={stats}
+          />
+        }
+      >
+        {/* Header Card */}
+        <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-3">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
+            <Users className="size-3.5" aria-hidden="true" />
+            <span>Collaboration &amp; Escrow Rooms</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white">
-            Project Squad Rooms & Milestone Escrows
+          <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold text-fg tracking-tight">
+            Squad Rooms &amp; Active Teams
           </h1>
-          <p className="text-neutral-400 max-w-3xl text-base sm:text-lg leading-relaxed">
-            Stop coding and building alone. Join interdisciplinary project squads of hardware engineers, firmware coders, AI researchers, and designers. Every squad milestone is backed by verifiable escrow and credited to your Personal Innovation Passport.
+          <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl">
+            Stop building alone. Join cross-disciplinary teams of makers, firmware engineers, researchers, and designers shipping milestones together.
           </p>
+        </header>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
-            <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60">
-              <div className="text-2xl font-black text-emerald-400">
-                ₹{totalEscrowInr.toLocaleString('en-IN')}
-              </div>
-              <div className="text-xs text-neutral-400 mt-0.5">Total Escrow Backing</div>
-            </div>
-            <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60">
-              <div className="text-2xl font-black text-white">{totalOpenRoles} Open Roles</div>
-              <div className="text-xs text-neutral-400 mt-0.5">Actively Recruiting</div>
-            </div>
-            <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60">
-              <div className="text-2xl font-black text-white">{totalFilledMembers} Active Builders</div>
-              <div className="text-xs text-neutral-400 mt-0.5">Verified Contributors</div>
-            </div>
-            <div className="p-4 rounded-xl border border-neutral-800 bg-neutral-900/60">
-              <div className="text-2xl font-black text-emerald-400">100% Escrow</div>
-              <div className="text-xs text-neutral-400 mt-0.5">Non-Custodial Milestone Payouts</div>
-            </div>
-          </div>
+        {/* Stats Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+          <StatTile
+            label="Escrow Pool"
+            value={`₹${totalEscrowInr.toLocaleString('en-IN')}`}
+            hint="Milestone backed"
+            tone="earn"
+          />
+          <StatTile
+            label="Open Positions"
+            value={totalOpenRoles}
+            hint="Recruiting now"
+            tone="accent"
+          />
+          <StatTile
+            label="Active Makers"
+            value={totalFilledMembers}
+            hint="Verified contributors"
+          />
+          <StatTile
+            label="Active Rooms"
+            value={squads.length}
+            hint="Public workspaces"
+          />
         </div>
-      </section>
 
-      {/* Directory Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Briefcase className="w-5 h-5 text-emerald-400" /> Active Squad Workspaces
+        {/* Squads Grid */}
+        <div className="flex items-center justify-between px-1">
+          <h2 className="font-display text-headline-sm font-bold text-fg flex items-center gap-2">
+            <Briefcase className="size-4 text-accent" aria-hidden="true" />
+            <span>Active Squad Workspaces</span>
           </h2>
-          <span className="text-xs text-neutral-500">{squads.length} Active Squads</span>
+          <span className="text-body-sm text-fg-subtle">{squads.length} rooms</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {squads.map((squad) => {
             const openRoles = squad.squadMembers.filter((m) => m.status === 'open');
             const filledMembers = squad.squadMembers.filter((m) => m.status === 'filled');
 
             return (
-              <div
+              <Card
                 key={squad.projectSlug}
-                className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 flex flex-col justify-between space-y-6 hover:border-neutral-700 transition"
+                accent="accent"
+                interactive
+                className="flex flex-col justify-between min-w-0 break-words"
               >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono text-neutral-500">
-                      PROJECT SQUAD
-                    </span>
-                    <span className="text-xs font-black text-emerald-400">
+                <CardBody className="p-5 space-y-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge tone="neutral" variant="outline">
+                      Squad Room
+                    </Badge>
+                    <Badge tone="earn" variant="solid">
                       ₹{squad.escrowPoolTotalInr.toLocaleString('en-IN')} Escrow
-                    </span>
+                    </Badge>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-bold text-white">{squad.projectTitle}</h3>
-                    <p className="text-xs text-neutral-400 mt-1 line-clamp-2 leading-relaxed">
+                    <h3 className="font-display text-headline-sm font-bold text-fg break-words">
+                      {squad.projectTitle}
+                    </h3>
+                    <p className="text-body-sm text-fg-muted mt-1 line-clamp-2 leading-relaxed">
                       {squad.tagline}
                     </p>
                   </div>
 
-                  {/* Active Squad Members Avatars */}
+                  {/* Active Members */}
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block">
-                      Active Squad Roster ({filledMembers.length} Members):
+                    <span className="text-[12px] font-display font-semibold text-fg-subtle block">
+                      Squad Members ({filledMembers.length})
                     </span>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {filledMembers.map((m) => (
                         <div
                           key={m.id}
-                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-950 border border-neutral-800 text-xs"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface-2/70 px-2.5 py-1 text-[12px]"
                         >
-                          <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                          <span className="font-medium text-white">{m.assignee?.name}</span>
-                          <span className="text-neutral-500 text-[10px]">({m.roleTitle})</span>
+                          <Avatar name={m.assignee?.name ?? m.roleTitle} size="sm" className="size-5 text-[9px]" />
+                          <span className="font-medium text-fg">{m.assignee?.name}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* Open Positions */}
+                  {/* Open Roles */}
                   {openRoles.length > 0 && (
                     <div className="space-y-1.5">
-                      <span className="text-[10px] font-semibold text-cyan-400 uppercase tracking-wider block">
-                        Open Positions ({openRoles.length} Available):
+                      <span className="text-[12px] font-display font-semibold text-accent-fg block">
+                        Open Positions ({openRoles.length})
                       </span>
                       <div className="flex flex-wrap gap-1.5">
                         {openRoles.map((role) => (
                           <span
                             key={role.id}
-                            className="text-[11px] px-2.5 py-1 rounded-lg bg-cyan-950/40 text-cyan-300 border border-cyan-500/30 flex items-center gap-1"
+                            className="inline-flex items-center gap-1 rounded-full border border-accent/25 bg-accent/8 px-2.5 py-0.5 text-[11px] font-medium text-accent-fg"
                           >
-                            <Sparkles className="w-3 h-3 text-cyan-400" /> {role.roleTitle}
+                            <Sparkles className="size-3" aria-hidden="true" />
+                            <span>{role.roleTitle}</span>
                           </span>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Milestones Preview */}
-                  <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 space-y-1 text-xs">
-                    <span className="text-[10px] text-neutral-500 uppercase tracking-wider block">
-                      Next Milestone in Queue:
-                    </span>
-                    <div className="text-white font-medium truncate">
-                      {squad.milestones[0]?.title}
+                  {/* Next Milestone */}
+                  {squad.milestones[0] && (
+                    <div className="rounded-xl border border-hairline bg-surface-2/50 p-3 space-y-1">
+                      <span className="text-[11px] font-display font-medium text-fg-subtle block">
+                        Next Milestone
+                      </span>
+                      <div className="text-body-sm font-semibold text-fg truncate">
+                        {squad.milestones[0].title}
+                      </div>
+                      <div className="text-[12px] font-display font-semibold text-earn-fg">
+                        ₹{squad.milestones[0].escrowAmountInr.toLocaleString('en-IN')} Milestone Pool
+                      </div>
                     </div>
-                    <div className="text-[11px] text-emerald-400 font-mono">
-                      ₹{squad.milestones[0]?.escrowAmountInr.toLocaleString('en-IN')} Bounty Escrow
-                    </div>
-                  </div>
-                </div>
+                  )}
+                </CardBody>
 
-                <div className="pt-4 border-t border-neutral-800 flex items-center justify-between gap-3">
+                <CardFooter className="justify-between bg-surface-2/30">
                   <Link
                     href={`/projects/${squad.projectSlug}`}
-                    className="text-xs text-neutral-400 hover:text-white transition"
+                    className="text-body-sm font-display font-medium text-fg-muted hover:text-accent-fg transition-colors"
                   >
-                    View Project
+                    Overview
                   </Link>
 
-                  <Link
-                    href={`/projects/${squad.projectSlug}/squad`}
-                    className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/10"
-                  >
-                    Enter Squad Room <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
+                  <Button asChild size="sm" variant="primary">
+                    <Link href={`/projects/${squad.projectSlug}/squad`}>
+                      <span>Enter Squad Room</span>
+                      <ArrowRight className="size-3.5" aria-hidden="true" />
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
             );
           })}
         </div>
-      </section>
-    </div>
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

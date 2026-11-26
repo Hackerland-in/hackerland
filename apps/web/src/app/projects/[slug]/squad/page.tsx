@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Users, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Users, ChevronRight, ArrowLeft } from 'lucide-react';
 import { SQUADS_DATA, getSquadRoomBySlug } from '@/lib/data/squads-data';
 import { SquadRoomWorkspace } from '@/components/squad/squad-room-workspace';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -21,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!squad) return { title: 'Squad Room Not Found' };
 
   return {
-    title: `${squad.projectTitle} Squad Room & Milestone Escrow | Hackerland`,
+    title: `${squad.projectTitle} Squad Room`,
     description: squad.tagline,
   };
 }
@@ -35,34 +37,40 @@ export default async function ProjectSquadRoomPage({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24">
-      {/* Top Breadcrumb */}
-      <div className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur sticky top-16 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 text-neutral-400">
-            <Link href="/squads" className="hover:text-white transition flex items-center gap-1">
-              <Users className="w-3.5 h-3.5" /> All Squads
+    <SocialCommunityProvider>
+      <SocialShell>
+        {/* Clean White Breadcrumb Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-hairline bg-surface-1 px-4 py-3 text-body-sm shadow-xs">
+          <div className="flex flex-wrap items-center gap-1.5 text-fg-muted min-w-0">
+            <Link
+              href="/squads"
+              className="hover:text-accent-fg transition-colors inline-flex items-center gap-1.5 font-display font-medium"
+            >
+              <Users className="size-3.5" aria-hidden="true" />
+              <span>All Squads</span>
             </Link>
-            <ChevronRight className="w-3 h-3 text-neutral-600" />
-            <Link href={`/projects/${squad.projectSlug}`} className="hover:text-white transition">
+            <ChevronRight className="size-3.5 text-fg-subtle shrink-0" aria-hidden="true" />
+            <Link
+              href={`/projects/${squad.projectSlug}`}
+              className="hover:text-accent-fg transition-colors truncate max-w-[180px] sm:max-w-xs"
+            >
               {squad.projectTitle}
             </Link>
-            <ChevronRight className="w-3 h-3 text-neutral-600" />
-            <span className="text-emerald-400 font-medium">Squad Room</span>
+            <ChevronRight className="size-3.5 text-fg-subtle shrink-0" aria-hidden="true" />
+            <span className="font-display font-semibold text-accent-fg">Squad Room</span>
           </div>
 
           <Link
             href={`/projects/${squad.projectSlug}`}
-            className="text-neutral-400 hover:text-white transition"
+            className="inline-flex items-center gap-1 font-display font-medium text-fg-muted hover:text-accent-fg transition-colors"
           >
-            ← Back to Project Overview
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
+            <span>Back to Project</span>
           </Link>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <SquadRoomWorkspace squadRoom={squad} />
-      </div>
-    </div>
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Lock } from 'lucide-react';
+import { ArrowLeft, Users } from 'lucide-react';
 import {
   PROJECT_STAGE_LABEL,
   TRACK_META,
@@ -10,25 +10,37 @@ import {
 import {
   AvatarGroup,
   Badge,
+  Button,
+  Card,
+  CardBody,
   Chip,
   EmptyState,
   Panel,
   ProgressBar,
   SegmentedProgress,
-  StatTile,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@hackerland/ui';
-import { getProject, listProjects } from '@/lib/data/queries';
+import {
+  getPlatformStats,
+  getProject,
+  listOpportunities,
+  listProjects,
+} from '@/lib/data/queries';
+import { ALL_PEOPLE } from '@/lib/data/fixtures/people';
 import { formatDate } from '@/lib/format';
 import { PersonChip } from '@/components/domain/person-chip';
 import { ProjectCover } from '@/components/domain/project-cover';
+import { PostCard } from '@/components/domain/post-card';
 import { KiCanvasViewer } from '@/components/domain/kicanvas-viewer';
 import { WokwiSimulator } from '@/components/domain/wokwi-simulator';
 import { ProjectBOM } from '@/components/domain/project-bom';
 import { ProjectDiscussion } from '@/components/domain/project-discussion';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRightRail } from '@/components/social/community-right-rail';
 import {
   InteractiveRoleList,
   PostUpdateAction,
@@ -49,7 +61,7 @@ export async function generateMetadata({
   const project = await getProject(slug);
   if (!project) {
     return {
-      title: 'Signal lost: page not found · Hackerland',
+      title: 'Project not found · Hackerland',
     };
   }
   return {
@@ -64,486 +76,294 @@ export default async function ProjectDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const project = await getProject(slug);
+  const [project, allProjects, bounties, stats] = await Promise.all([
+    getProject(slug),
+    listProjects(),
+    listOpportunities('bounty'),
+    getPlatformStats(),
+  ]);
 
   if (!project) {
     notFound();
   }
 
-  const primaryTrack = project.tracks[0] ?? 'code';
+  const otherTrending = allProjects.filter((p) => p.slug !== project.slug).slice(0, 2);
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:px-8">
-      {/* Top Blueprint Cover Art */}
-      <ProjectCover
-        tracks={project.tracks}
-        title={project.title}
-        className="h-44 w-full rounded-lg md:h-64"
-      />
+    <SocialCommunityProvider>
+      <SocialShell
+        rightRail={
+          <div className="space-y-5 min-w-0">
+            <Panel
+              title="Open Squad Roles"
+              action={
+                <Badge tone="accent" variant="solid">
+                  {project.openRoles.length} open
+                </Badge>
+              }
+            >
+              <InteractiveRoleList slug={project.slug} roles={project.openRoles} compact />
+            </Panel>
 
-      {/* Hero Header */}
-      <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-        <div className="min-w-0 max-w-3xl space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-label-sm uppercase text-accent-fg">
-              PROJECT #{project.slug.slice(0, 8).toUpperCase()}
-            </span>
-            {project.tracks.map((track) => (
-              <Badge key={track} tone={track} variant="outline">
-                {TRACK_META[track]?.label ?? track}
-              </Badge>
-            ))}
-            <Badge tone="neutral" variant="outline">
-              {PROJECT_STAGE_LABEL[project.stage]}
-            </Badge>
-            <span className="font-mono text-label-sm uppercase text-fg-subtle">
-              {project.licence}
-            </span>
-            <Badge tone="accent" variant="outline">
-              Public workspace
-            </Badge>
+            <CommunityRightRail
+              suggestedMakers={ALL_PEOPLE.slice(0, 3)}
+              trendingProjects={otherTrending}
+              openBounties={bounties.slice(0, 2)}
+              stats={stats}
+            />
           </div>
-
-          <h1 className="font-display text-headline-xl text-fg break-words">
-            {project.title}
-          </h1>
-
-          <p className="text-body-lg text-fg-muted break-words">
-            {project.summary}
-          </p>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-3">
-          <ProjectHeroActions
-            slug={project.slug}
-            openRoles={project.openRoles}
-          />
+        }
+      >
+        {/* Back Breadcrumb */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <Link
-            href={`/projects/${project.slug}/squad`}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/40 px-4 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 transition shadow-sm"
+            href="/projects"
+            className="inline-flex items-center gap-1.5 rounded-full bg-surface-1 border border-hairline px-3.5 py-1.5 text-body-sm font-display font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors shadow-xs"
           >
-            <Lock className="w-3.5 h-3.5" />
-            <span>Enter Squad Room & Escrow</span>
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
+            <span>All builds</span>
           </Link>
+
+          <Button asChild variant="soft" size="sm">
+            <Link href={`/projects/${project.slug}/squad`}>
+              <Users className="size-3.5" aria-hidden="true" />
+              <span>Squad Room &amp; Escrow</span>
+            </Link>
+          </Button>
         </div>
-      </div>
 
-      {/* Stat Strip of 4 StatTiles */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile
-          label="STAGE"
-          value={PROJECT_STAGE_LABEL[project.stage]}
-          hint={`Next: ${project.milestone.next}`}
-        >
-          <div className="mt-2">
-            <SegmentedProgress
-              completed={project.milestone.current}
-              total={project.milestone.total}
-              label="Milestone progress"
-              tone={primaryTrack}
-            />
-          </div>
-        </StatTile>
+        {/* Social Showcase Hero Card */}
+        <Card className="overflow-hidden min-w-0 break-words">
+          <ProjectCover
+            tracks={project.tracks}
+            title={project.title}
+            className="h-36 sm:h-48 w-full"
+          />
 
-        <StatTile
-          label="FUNDING"
-          value={
-            project.funding
-              ? formatMoney(project.funding.raised, project.funding.currency)
-              : 'Self-funded'
-          }
-          hint={
-            project.funding
-              ? `Goal: ${formatMoney(project.funding.goal, project.funding.currency)}`
-              : 'No capital required'
-          }
-          tone="earn"
-        >
-          {project.funding ? (
-            <div className="mt-2">
-              <ProgressBar
-                value={project.funding.raised}
-                max={project.funding.goal}
-                tone="earn"
-                label="Funding progress"
-              />
+          <CardBody className="p-5 sm:p-6 space-y-5">
+            <div className="space-y-3 min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {project.tracks.map((track) => (
+                  <Badge key={track} tone={track} variant="outline">
+                    {TRACK_META[track]?.label ?? track}
+                  </Badge>
+                ))}
+                <Badge tone="neutral" variant="outline">
+                  {PROJECT_STAGE_LABEL[project.stage]}
+                </Badge>
+                <span className="rounded-full bg-surface-2 px-2.5 py-0.5 font-mono text-[11px] text-fg-subtle">
+                  {project.licence}
+                </span>
+              </div>
+
+              <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold text-fg break-words [overflow-wrap:anywhere]">
+                {project.title}
+              </h1>
+
+              <p className="text-body-md text-fg-muted break-words [overflow-wrap:anywhere] leading-relaxed">
+                {project.summary}
+              </p>
+
+              <div className="pt-1">
+                <ProjectHeroActions
+                  slug={project.slug}
+                  openRoles={project.openRoles}
+                  squadSize={project.squadSize}
+                />
+              </div>
             </div>
-          ) : null}
-        </StatTile>
 
-        <StatTile
-          label="SQUAD"
-          value={`${project.squadSize} active`}
-          hint={`${project.openRoleCount} ${project.openRoleCount === 1 ? 'role open' : 'roles open'}`}
-        >
-          <div className="mt-2">
-            <AvatarGroup
-              people={project.squad.map((p) => ({ name: p.name, src: p.avatarUrl }))}
-              max={4}
-              size="sm"
-            />
-          </div>
-        </StatTile>
-
-        <StatTile
-          label="ACTIVITY"
-          value={`${project.updates.length} ${project.updates.length === 1 ? 'update' : 'updates'}`}
-          hint={`Last update: ${formatDate(project.updatedAt)}`}
-        />
-      </div>
-
-      {/* Two-Column Body */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
-        {/* Left Column: Tabs */}
-        <div className="min-w-0 space-y-6">
-          <Tabs defaultValue="overview">
-            <TabsList label="Project sections">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="squad-roles">Squad & Roles</TabsTrigger>
-              <TabsTrigger value="updates">
-                Updates ({project.updates.length})
-              </TabsTrigger>
-              <TabsTrigger value="resources">
-                Resources ({project.resources.length})
-              </TabsTrigger>
-              <TabsTrigger value="discussions">
-                Discussion
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Tab: Overview */}
-            <TabsContent value="overview" className="space-y-6">
-              <Panel title="About">
-                <p className="whitespace-pre-line text-body-md leading-relaxed text-fg-muted break-words">
-                  {project.body}
-                </p>
-              </Panel>
-
-              <Panel title="Squad leads">
-                <div className="space-y-4">
-                  {project.leads.map((lead) => (
-                    <div
-                      key={lead.handle}
-                      className="rounded-lg border border-hairline bg-surface-2/40 p-4 space-y-2"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <PersonChip person={lead} size="md" />
-                        <Badge tone="accent" variant="outline">
-                          {lead.role}
-                        </Badge>
-                      </div>
-                      {lead.bio ? (
-                        <p className="text-body-sm text-fg-muted break-words">
-                          {lead.bio}
-                        </p>
-                      ) : null}
-                      {lead.skills && lead.skills.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {lead.skills.map((skill) => (
-                            <Chip key={skill} tone="neutral">
-                              {skill}
-                            </Chip>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-                  ))}
+            {/* Compact Progress & Stats Strip */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-hairline pt-4">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="font-display font-semibold text-fg">
+                    {PROJECT_STAGE_LABEL[project.stage]}
+                  </span>
+                  <span className="text-accent-fg font-semibold tabular-nums">
+                    {project.milestone.current}/{project.milestone.total}
+                  </span>
                 </div>
-              </Panel>
+                <SegmentedProgress
+                  completed={project.milestone.current}
+                  total={project.milestone.total}
+                  label="Milestone progress"
+                  tone="accent"
+                />
+                <p className="text-[12px] text-fg-subtle truncate">Next: {project.milestone.next}</p>
+              </div>
 
-              {project.resources.length > 0 ? (
-                <Panel
-                  title="Resources & bill of materials"
-                  action={
-                    <span className="font-mono text-label-sm text-fg-subtle">
-                      {project.resources.length} items
-                    </span>
-                  }
-                >
-                  <div className="max-w-full overflow-x-auto">
-                    <table className="w-full min-w-[540px] border-collapse text-left">
-                      <thead>
-                        <tr className="border-b border-hairline font-display text-label-sm uppercase text-fg-subtle">
-                          <th className="px-3 py-2.5">Item</th>
-                          <th className="px-3 py-2.5 text-center">Qty</th>
-                          <th className="px-3 py-2.5">Specification</th>
-                          <th className="px-3 py-2.5 text-right">Est. Cost</th>
-                          <th className="px-3 py-2.5 text-right">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-hairline text-body-sm">
-                        {project.resources.map((item, idx) => (
-                          <tr key={idx} className="transition-colors hover:bg-surface-2/40">
-                            <td className="px-3 py-3 font-medium text-fg break-words">
-                              {item.name}
-                            </td>
-                            <td className="px-3 py-3 text-center font-mono text-fg-muted">
-                              {item.qty}
-                            </td>
-                            <td className="px-3 py-3 font-mono text-xs text-fg-muted break-words">
-                              {item.spec ?? '—'}
-                            </td>
-                            <td className="px-3 py-3 text-right font-mono tabular-nums text-fg">
-                              {item.cost !== undefined && item.currency
-                                ? formatMoney(item.cost, item.currency)
-                                : '—'}
-                            </td>
-                            <td className="px-3 py-3 text-right">
-                              {item.status === 'funded' && (
-                                <Badge tone="success" variant="solid">
-                                  Funded
-                                </Badge>
-                              )}
-                              {item.status === 'sourcing' && (
-                                <Badge tone="warning" variant="outline">
-                                  Sourcing
-                                </Badge>
-                              )}
-                              {item.status === 'needs-funding' && (
-                                <Badge tone="danger" variant="outline">
-                                  Needs funding
-                                </Badge>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </Panel>
-              ) : null}
-
-              {project.updates.length > 0 ? (
-                <Panel
-                  title="Updates"
-                  action={
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-label-sm text-fg-subtle">
-                        {project.updates.length} posts
-                      </span>
-                      <PostUpdateAction slug={project.slug} />
-                    </div>
-                  }
-                >
-                  <div className="space-y-4">
-                    {project.updates.map((update) => (
-                      <div
-                        key={update.id}
-                        className="rounded-lg border border-hairline bg-surface-2/40 p-4 space-y-3"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Badge tone="accent" variant="solid">
-                              {update.kind}
-                            </Badge>
-                            <span className="font-mono text-label-sm text-fg-subtle">
-                              {formatDate(update.createdAt)}
-                            </span>
-                          </div>
-                          <PersonChip person={update.author} size="sm" showBadges={false} />
-                        </div>
-
-                        <h3 className="font-display text-headline-sm text-fg break-words">
-                          {update.title}
-                        </h3>
-
-                        <p className="whitespace-pre-line text-body-sm text-fg-muted break-words">
-                          {update.body}
-                        </p>
-
-                        {update.progress ? (
-                          <div className="space-y-1 pt-1">
-                            <div className="flex items-center justify-between text-label-sm text-fg-subtle">
-                              <span>{update.progress.label}</span>
-                              <span className="font-mono">
-                                {update.progress.current} / {update.progress.total}
-                              </span>
-                            </div>
-                            <SegmentedProgress
-                              completed={update.progress.current}
-                              total={update.progress.total}
-                              label={update.progress.label}
-                              tone="accent"
-                            />
-                          </div>
-                        ) : null}
-
-                        {update.tags && update.tags.length > 0 ? (
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {update.tags.map((tag) => (
-                              <span key={tag} className="font-mono text-[11px] text-fg-subtle">
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                </Panel>
-              ) : null}
-            </TabsContent>
-
-            {/* Tab: Squad & Roles */}
-            <TabsContent value="squad-roles" className="space-y-6">
-              <Panel title="Squad leads">
-                <div className="space-y-4">
-                  {project.leads.map((lead) => (
-                    <div
-                      key={lead.handle}
-                      className="rounded-lg border border-hairline bg-surface-2/40 p-4 space-y-2"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <PersonChip person={lead} size="md" />
-                        <Badge tone="accent" variant="outline">
-                          {lead.role}
-                        </Badge>
-                      </div>
-                      {lead.bio ? (
-                        <p className="text-body-sm text-fg-muted break-words">
-                          {lead.bio}
-                        </p>
-                      ) : null}
-                      {lead.skills && lead.skills.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {lead.skills.map((skill) => (
-                            <Chip key={skill} tone="neutral">
-                              {skill}
-                            </Chip>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-                  ))}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="font-display font-semibold text-fg">Funding</span>
+                  <span className="text-earn-fg font-semibold tabular-nums">
+                    {project.funding
+                      ? `${formatMoney(project.funding.raised, project.funding.currency)} / ${formatMoney(project.funding.goal, project.funding.currency)}`
+                      : 'Self-funded'}
+                  </span>
                 </div>
-              </Panel>
-
-              <Panel title="Active squad">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {project.squad.map((member) => (
-                    <div
-                      key={member.handle}
-                      className="rounded-lg border border-hairline bg-surface-2/40 p-3"
-                    >
-                      <PersonChip person={member} size="sm" />
-                    </div>
-                  ))}
-                </div>
-              </Panel>
-            </TabsContent>
-
-            {/* Tab: Updates */}
-            <TabsContent value="updates" className="space-y-6">
-              <Panel
-                title="Project updates"
-                action={<PostUpdateAction slug={project.slug} />}
-              >
-                {project.updates.length > 0 ? (
-                  <div className="space-y-4">
-                    {project.updates.map((update) => (
-                      <div
-                        key={update.id}
-                        className="rounded-lg border border-hairline bg-surface-2/40 p-4 space-y-3"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Badge tone="accent" variant="solid">
-                              {update.kind}
-                            </Badge>
-                            <span className="font-mono text-label-sm text-fg-subtle">
-                              {formatDate(update.createdAt)}
-                            </span>
-                          </div>
-                          <PersonChip person={update.author} size="sm" showBadges={false} />
-                        </div>
-
-                        <h3 className="font-display text-headline-sm text-fg break-words">
-                          {update.title}
-                        </h3>
-
-                        <p className="whitespace-pre-line text-body-sm text-fg-muted break-words">
-                          {update.body}
-                        </p>
-
-                        {update.progress ? (
-                          <div className="space-y-1 pt-1">
-                            <div className="flex items-center justify-between text-label-sm text-fg-subtle">
-                              <span>{update.progress.label}</span>
-                              <span className="font-mono">
-                                {update.progress.current} / {update.progress.total}
-                              </span>
-                            </div>
-                            <SegmentedProgress
-                              completed={update.progress.current}
-                              total={update.progress.total}
-                              label={update.progress.label}
-                              tone="accent"
-                            />
-                          </div>
-                        ) : null}
-
-                        {update.tags && update.tags.length > 0 ? (
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {update.tags.map((tag) => (
-                              <span key={tag} className="font-mono text-[11px] text-fg-subtle">
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState
-                    title="No updates posted yet"
-                    description="The squad has not posted any progress logs yet. Check back soon for project milestones."
+                {project.funding ? (
+                  <ProgressBar
+                    value={project.funding.raised}
+                    max={project.funding.goal}
+                    tone="earn"
+                    label="Funding progress"
                   />
+                ) : (
+                  <p className="text-[12px] text-fg-subtle">Community &amp; volunteer run</p>
                 )}
-              </Panel>
-            </TabsContent>
+              </div>
 
-            {/* Tab: Resources */}
-            <TabsContent value="resources" className="space-y-6">
-              <ProjectBOM
-                initialResources={project.resources}
-                projectTitle={project.title}
+              <div className="flex items-center justify-between sm:justify-end gap-3">
+                <div className="text-left sm:text-right">
+                  <div className="font-display text-body-sm font-bold text-fg tabular-nums">
+                    {project.squadSize} builders
+                  </div>
+                  <div className="text-[12px] text-fg-subtle">
+                    Updated {formatDate(project.updatedAt)}
+                  </div>
+                </div>
+                <AvatarGroup
+                  people={project.squad.map((p) => ({ name: p.name, src: p.avatarUrl }))}
+                  max={4}
+                  size="sm"
+                />
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Showcase Navigation Tabs */}
+        <Tabs defaultValue="overview" className="min-w-0">
+          <TabsList label="Project sections">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="updates">Updates ({project.updates.length})</TabsTrigger>
+            <TabsTrigger value="squad-roles">Squad ({project.squadSize})</TabsTrigger>
+            <TabsTrigger value="resources">Hardware &amp; BOM ({project.resources.length})</TabsTrigger>
+            <TabsTrigger value="discussions">Discussion</TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-5">
+            <Panel title="About this build">
+              <p className="whitespace-pre-line text-body-md leading-relaxed text-fg-muted break-words [overflow-wrap:anywhere]">
+                {project.body}
+              </p>
+            </Panel>
+
+            <Panel title="Project Leads">
+              <div className="grid grid-cols-1 gap-3.5">
+                {project.leads.map((lead) => (
+                  <div
+                    key={lead.handle}
+                    className="rounded-xl border border-hairline bg-surface-2/50 p-4 space-y-2.5"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <PersonChip person={lead} size="md" />
+                      <Badge tone="accent" variant="outline">
+                        {lead.role}
+                      </Badge>
+                    </div>
+                    {lead.bio ? (
+                      <p className="text-body-sm text-fg-muted break-words">{lead.bio}</p>
+                    ) : null}
+                    {lead.skills && lead.skills.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {lead.skills.map((skill) => (
+                          <Chip key={skill}>{skill}</Chip>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </Panel>
+
+            {project.updates.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between px-1">
+                  <h2 className="font-display text-headline-sm font-bold text-fg">
+                    Recent build logs
+                  </h2>
+                  <PostUpdateAction slug={project.slug} />
+                </div>
+                {project.updates.map((update) => (
+                  <PostCard key={update.id} post={update} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Updates Tab */}
+          <TabsContent value="updates" className="space-y-4">
+            <div className="flex items-center justify-between rounded-2xl border border-hairline bg-surface-1 p-4 shadow-xs">
+              <div>
+                <h2 className="font-display text-body-md font-bold text-fg">
+                  Project Build Stream
+                </h2>
+                <p className="text-body-sm text-fg-muted">
+                  Milestone notes, bench runs, and telemetry shared by the squad.
+                </p>
+              </div>
+              <PostUpdateAction slug={project.slug} />
+            </div>
+
+            {project.updates.length > 0 ? (
+              <div className="space-y-4">
+                {project.updates.map((update) => (
+                  <PostCard key={update.id} post={update} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="No build logs yet"
+                description="Follow this build to catch milestone updates as soon as the team ships."
               />
+            )}
+          </TabsContent>
 
-              {/* KiCanvas Multi-Layer PCB & Schematic CAD Preview */}
-              <Panel title="Interactive PCB & Schematic CAD">
-                <KiCanvasViewer boardName={`${project.title} Flight Controller & Telemetry PCB`} />
-              </Panel>
+          {/* Squad Tab */}
+          <TabsContent value="squad-roles" className="space-y-5">
+            <Panel title="Active Squad Members">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {project.squad.map((member) => (
+                  <div
+                    key={member.handle}
+                    className="rounded-xl border border-hairline bg-surface-2/50 p-3"
+                  >
+                    <PersonChip person={member} size="sm" />
+                  </div>
+                ))}
+              </div>
+            </Panel>
 
-              {/* Wokwi Virtual Microcontroller Twin */}
-              <Panel title="Virtual Microcontroller Twin & Bench Simulator">
-                <WokwiSimulator projectTitle={`${project.title} Telemetry Simulation`} />
-              </Panel>
-            </TabsContent>
+            <Panel title={`Open Roles (${project.openRoles.length})`}>
+              <InteractiveRoleList slug={project.slug} roles={project.openRoles} />
+            </Panel>
+          </TabsContent>
 
-            {/* Tab: Discussions */}
-            <TabsContent value="discussions" className="space-y-6">
-              <ProjectDiscussion projectSlug={project.slug} projectTitle={project.title} />
-            </TabsContent>
-          </Tabs>
-        </div>
+          {/* Hardware & BOM Tab */}
+          <TabsContent value="resources" className="space-y-5">
+            <ProjectBOM
+              initialResources={project.resources}
+              projectTitle={project.title}
+            />
 
-        {/* Right Rail: Panel "Open roles" */}
-        <div className="min-w-0">
-          <Panel
-            title="Open roles"
-            action={
-              <Badge tone="accent" variant="solid">
-                {project.openRoles.length} OPEN
-              </Badge>
-            }
-            className="sticky top-20"
-          >
-            <InteractiveRoleList slug={project.slug} roles={project.openRoles} />
-          </Panel>
-        </div>
-      </div>
-    </div>
+            <Panel title="PCB & Schematic Preview">
+              <KiCanvasViewer boardName={`${project.title} Controller PCB`} />
+            </Panel>
+
+            <Panel title="MCU Simulation Bench">
+              <WokwiSimulator projectTitle={`${project.title} MCU Twin`} />
+            </Panel>
+          </TabsContent>
+
+          {/* Discussion Tab */}
+          <TabsContent value="discussions" className="space-y-5">
+            <ProjectDiscussion projectSlug={project.slug} projectTitle={project.title} />
+          </TabsContent>
+        </Tabs>
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

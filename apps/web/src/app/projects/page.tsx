@@ -1,54 +1,23 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import { TRACKS, TRACK_META, parseEnum } from '@hackerland/core';
-import { Button, EmptyState, FilterChip, SectionHeader } from '@hackerland/ui';
-import { listProjects } from '@/lib/data/queries';
-import { ProjectCard } from '@/components/domain/project-card';
-
-const TRACK_HUB_PROMOTIONS: Record<
-  string,
-  {
-    title: string;
-    description: string;
-    actionLabel: string;
-    href: string;
-  }
-> = {
-  earn: {
-    title: 'Looking for funded bounties, grants & paid roles?',
-    description:
-      'The Earn Platform features active reverse RFCs, bounties, and hardware seed grants.',
-    actionLabel: 'Go to Earn Platform',
-    href: '/earn',
-  },
-  learn: {
-    title: 'Looking for structured skill roadmaps & entrepreneurship playbooks?',
-    description:
-      'Learn by Doing features full curriculum roadmaps and our Open Source Founder Academy.',
-    actionLabel: 'Go to Learn Platform',
-    href: '/learn',
-  },
-  make: {
-    title: 'Looking for circuit simulators, physics engines & factory blueprints?',
-    description:
-      'The Manufacturing Suite features SPICE, HDL, and real-time vehicle multibody physics simulators.',
-    actionLabel: 'Launch Manufacturing Suite',
-    href: '/manufacturing',
-  },
-  research: {
-    title: 'Looking for Atal Tinkering Labs (ATL) & university testbenches?',
-    description:
-      'Explore distributed hardware fabrication facilities and testbench nodes across India.',
-    actionLabel: 'Explore Labs Directory',
-    href: '/labs',
-  },
-};
+import { FolderKanban, Plus, Users } from 'lucide-react';
+import { TRACKS, parseEnum } from '@hackerland/core';
+import { Button } from '@hackerland/ui';
+import {
+  getPlatformStats,
+  listOpportunities,
+  listProjects,
+} from '@/lib/data/queries';
+import { ALL_PEOPLE } from '@/lib/data/fixtures/people';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { ProjectCatalog } from '@/components/social/project-catalog';
+import { CommunityRightRail } from '@/components/social/community-right-rail';
 
 export const metadata: Metadata = {
-  title: 'Projects · Hackerland',
+  title: 'Builds & Projects',
   description:
-    'Explore open-source hardware, software, research, and design initiatives looking for squads.',
+    'Discover open-source hardware, robotics, software, and research builds looking for squad collaborators.',
 };
 
 export default async function ProjectsPage({
@@ -58,102 +27,61 @@ export default async function ProjectsPage({
 }) {
   const { track, q } = await searchParams;
   const selectedTrack = parseEnum(TRACKS, track);
-  let projects = await listProjects(selectedTrack);
 
-  if (q && q.trim()) {
-    const term = q.trim().toLowerCase();
-    projects = projects.filter(
-      (p) =>
-        p.title.toLowerCase().includes(term) ||
-        p.summary.toLowerCase().includes(term) ||
-        p.slug.toLowerCase().includes(term) ||
-        p.tracks.some((t) => t.toLowerCase().includes(term))
-    );
-  }
-
-  const trackLabel = selectedTrack ? TRACK_META[selectedTrack]?.label ?? selectedTrack : '';
+  const [projects, opportunities, stats] = await Promise.all([
+    listProjects(),
+    listOpportunities('bounty'),
+    getPlatformStats(),
+  ]);
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:px-8">
-      {/* Page Header */}
-      <SectionHeader
-        as="h1"
-        size="page"
-        eyebrow="PROJECT DIRECTORY"
-        title="Projects looking for squads"
-        description="Discover open-source hardware, software, scientific research, and design initiatives. Join an active squad or start your own build in public."
-        action={
-          <Button asChild variant="primary">
-            <Link href="/new">Start project</Link>
-          </Button>
+    <SocialCommunityProvider>
+      <SocialShell
+        rightRail={
+          <CommunityRightRail
+            suggestedMakers={ALL_PEOPLE.slice(0, 4)}
+            trendingProjects={projects.slice(0, 3)}
+            openBounties={opportunities.slice(0, 3)}
+            stats={stats}
+          />
         }
-      />
-
-      {/* Filter Row */}
-      <div
-        role="navigation"
-        aria-label="Filter by track"
-        className="flex max-w-full items-center gap-2 overflow-x-auto pb-2"
       >
-        <FilterChip asChild selected={!selectedTrack}>
-          <Link href="/projects">All</Link>
-        </FilterChip>
-        {TRACKS.map((t) => {
-          const meta = TRACK_META[t];
-          const isSelected = selectedTrack === t;
-          return (
-            <FilterChip key={t} asChild selected={isSelected} tone={t}>
-              <Link href={`/projects?track=${t}`}>{meta.label}</Link>
-            </FilterChip>
-          );
-        })}
-      </div>
-
-      {/* Track Hub Context Banner */}
-      {selectedTrack && TRACK_HUB_PROMOTIONS[selectedTrack] && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-surface-1 border border-accent/20">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Sparkles className="size-4 text-accent" />
-              <h3 className="text-body-sm font-display font-bold text-fg">
-                {TRACK_HUB_PROMOTIONS[selectedTrack].title}
-              </h3>
+        <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5 min-w-0">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
+              <FolderKanban className="size-3.5" aria-hidden="true" />
+              <span>Builds &amp; Squads</span>
             </div>
-            <p className="text-caption text-fg-muted">
-              {TRACK_HUB_PROMOTIONS[selectedTrack].description}
+            <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold text-fg tracking-tight">
+              Open builds looking for teammates
+            </h1>
+            <p className="text-body-sm sm:text-body-md text-fg-muted max-w-xl">
+              Join a maker squad, contribute PRs or schematics, track milestones, or launch your own idea.
             </p>
           </div>
-          <Button asChild variant="primary" size="sm" className="shrink-0 gap-1.5 font-mono text-caption">
-            <Link href={TRACK_HUB_PROMOTIONS[selectedTrack].href}>
-              <span>{TRACK_HUB_PROMOTIONS[selectedTrack].actionLabel}</span>
-              <ArrowRight className="size-3.5" />
-            </Link>
-          </Button>
-        </div>
-      )}
 
-      {/* Projects Grid or Empty State */}
-      {projects.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <ProjectCard key={project.slug} project={project} />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          title={selectedTrack ? `No ${trackLabel} projects yet` : 'No projects found'}
-          description={
-            selectedTrack
-              ? `Be the first to start a ${trackLabel} project on Hackerland or explore open roles across other disciplines.`
-              : 'No projects match your current filters. Check back soon or start a new project.'
-          }
-          action={
-            <Button asChild variant="primary">
-              <Link href="/new">Start project</Link>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <Button asChild variant="primary" size="sm">
+              <Link href="/new">
+                <Plus className="size-3.5" aria-hidden="true" />
+                <span>Start build</span>
+              </Link>
             </Button>
-          }
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/squads">
+                <Users className="size-3.5" aria-hidden="true" />
+                <span>Squad rooms</span>
+              </Link>
+            </Button>
+          </div>
+        </header>
+
+        <ProjectCatalog
+          initialProjects={projects}
+          initialTrack={selectedTrack}
+          initialQuery={q ?? ''}
         />
-      )}
-    </div>
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }
