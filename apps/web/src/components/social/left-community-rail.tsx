@@ -14,6 +14,8 @@ import {
   Plus,
   Hash,
   Sparkles,
+  Briefcase,
+  Rocket,
 } from 'lucide-react';
 import { Button, cn } from '@hackerland/ui';
 
@@ -24,6 +26,8 @@ const PRIMARY_LINKS = [
   { href: '/u', label: 'Makers', icon: Users },
   { href: '/earn', label: 'Bounties & Grants', icon: Trophy },
   { href: '/sprints', label: '48H Sprints', icon: Zap, badge: 'Live' },
+  { href: '/jobs', label: 'Jobs & Residencies', icon: Briefcase },
+  { href: '/launchpad', label: 'Launchpad', icon: Rocket },
   { href: '/leaderboard', label: 'Leaderboard', icon: Sparkles },
   { href: '/learn', label: 'Learn Roadmaps', icon: GraduationCap },
   { href: '/manufacturing', label: 'Hardware Labs', icon: Cpu },

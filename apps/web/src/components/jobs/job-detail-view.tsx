@@ -6,19 +6,18 @@ import {
   Briefcase,
   Cpu,
   MapPin,
-  Building2,
-  Banknote,
   CheckCircle2,
   ChevronLeft,
   ExternalLink,
-  ShieldCheck,
   Wrench,
   Check,
   Send,
   Sparkles,
+  ShieldCheck,
 } from 'lucide-react';
 import type { HardwareJobPosting } from '@hackerland/core';
 import { formatSalaryRangeInr } from '@hackerland/core';
+import { Avatar, Badge, Button, Card, CardBody, Input, Panel, Textarea } from '@hackerland/ui';
 
 interface JobDetailViewProps {
   job: HardwareJobPosting;
@@ -43,280 +42,260 @@ export function JobDetailView({ job }: JobDetailViewProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 min-w-0">
       {/* Breadcrumb Navigation */}
-      <div className="flex items-center gap-2 text-xs text-neutral-400">
-        <Link href="/jobs" className="inline-flex items-center gap-1 hover:text-white transition-colors">
-          <ChevronLeft className="size-4" />
-          <span>Deep-Tech Jobs & Fellowships</span>
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-body-sm text-fg-subtle">
+        <Link
+          href="/jobs"
+          className="inline-flex items-center gap-1 font-display font-medium hover:text-accent-fg transition-colors"
+        >
+          <ChevronLeft className="size-4" aria-hidden="true" />
+          <span>Deep-Tech Jobs &amp; Fellowships</span>
         </Link>
         <span>/</span>
-        <span className="text-white font-medium truncate">{job.title}</span>
-      </div>
+        <span className="text-fg font-medium truncate">{job.title}</span>
+      </nav>
 
       {/* Hero Header */}
-      <div className="rounded-2xl border border-white/10 bg-neutral-900/80 p-6 md:p-8 space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-            {job.hardwareDomain.replace(/_/g, ' ')}
-          </span>
-          <span className="text-xs font-mono text-neutral-300 bg-neutral-800 px-2.5 py-0.5 rounded-full">
-            {job.roleType.replace(/_/g, ' ')}
-          </span>
-          <span className="text-xs font-mono text-neutral-400 bg-neutral-800 px-2.5 py-0.5 rounded-full">
-            {job.experienceLevel.replace(/_/g, ' ')}
-          </span>
-          {job.company.verifiedDpiit && (
-            <span className="text-xs font-mono text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-              DPIIT Startup India
-            </span>
-          )}
-        </div>
-
-        <h1 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight">
-          {job.title}
-        </h1>
-
-        <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-300">
-          <span className="text-base font-bold text-white">{job.company.name}</span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <MapPin className="size-3.5 text-neutral-400" />
-            <span>{job.workLocation}</span>
-          </span>
-          <span>•</span>
-          <span className="text-emerald-400 font-mono font-bold text-sm">{salaryText}</span>
-        </div>
-      </div>
-
-      {/* 2-Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Responsibilities, Prerequisites, Lab Benches, Proof of Work (8 cols) */}
-        <div className="lg:col-span-8 space-y-8">
-          {/* Overview */}
-          <div className="rounded-xl border border-white/10 bg-neutral-900/60 p-6 space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Briefcase className="size-4 text-emerald-400" />
-              <span>Role Overview</span>
-            </h2>
-            <div className="text-xs sm:text-sm text-neutral-300 leading-relaxed whitespace-pre-line space-y-3 font-sans">
-              {job.descriptionMarkdown}
-            </div>
-          </div>
-
-          {/* Key Responsibilities */}
-          <div className="rounded-xl border border-white/10 bg-neutral-900/60 p-6 space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-emerald-400" />
-              <span>Key Engineering Responsibilities</span>
-            </h2>
-            <div className="space-y-2">
-              {job.responsibilities.map((resp, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 text-xs text-neutral-300">
-                  <Check className="size-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span className="leading-relaxed">{resp}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Prerequisites */}
-          <div className="rounded-xl border border-white/10 bg-neutral-900/60 p-6 space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Cpu className="size-4 text-emerald-400" />
-              <span>Prerequisites & Domain Qualifications</span>
-            </h2>
-            <div className="space-y-2">
-              {job.prerequisites.map((prereq, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 text-xs text-neutral-300">
-                  <span className="size-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
-                  <span className="leading-relaxed">{prereq}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Physical Lab Benches & Test Equipment */}
-          <div className="rounded-xl border border-emerald-500/30 bg-neutral-900/60 p-6 space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Wrench className="size-4 text-emerald-400" />
-              <span>Physical Lab Benches & Test Equipment</span>
-            </h2>
-            <p className="text-xs text-neutral-400">
-              You will have direct hands-on access to the following instrumentation testbenches:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              {job.hardwareBenchesUsed.map((bench, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-lg border border-white/10 bg-neutral-950 p-3 text-xs font-mono text-neutral-200 flex items-center gap-2"
-                >
-                  <Cpu className="size-3.5 text-emerald-400 shrink-0" />
-                  <span>{bench}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Required Proof of Work */}
-          <div className="rounded-xl border border-amber-500/30 bg-amber-950/15 p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <Sparkles className="size-4 text-amber-400" />
-              <h2 className="text-lg font-bold text-white">Proof-of-Work Application Standard</h2>
-            </div>
-            <p className="text-xs text-neutral-300 leading-relaxed">
-              We do not filter by college pedigree or standard PDF resumes. Instead, the hiring engineering lead
-              will evaluate your application based on verified evidence of physical hardware built:
-            </p>
-            <div className="space-y-2 pt-1">
-              {job.proofOfWorkRequirements.map((req, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 text-xs text-amber-200/90 font-mono">
-                  <span className="text-amber-400 font-bold shrink-0">[{idx + 1}]</span>
-                  <span className="leading-relaxed">{req}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Compensation, Company & Application Form (4 cols) */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Compensation Card */}
-          <div className="rounded-xl border border-white/10 bg-neutral-900/90 p-6 space-y-4">
-            <span className="text-xs font-mono text-neutral-400 uppercase">COMPENSATION PACKAGE</span>
-            <div className="space-y-1">
-              <span className="text-2xl font-black text-emerald-400 font-mono block">
-                {salaryText}
-              </span>
-              <span className="text-[11px] text-neutral-500 font-mono block">
-                Approx. ₹{Math.round((job.salaryInr.minLakhs * 100000) / 12).toLocaleString('en-IN')} – ₹
-                {Math.round((job.salaryInr.maxLakhs * 100000) / 12).toLocaleString('en-IN')} / month
-              </span>
-            </div>
-
-            {job.fellowshipGrantStipendInr && (
-              <div className="pt-2 border-t border-white/10 space-y-1 text-xs font-mono">
-                <span className="text-neutral-400 block text-[11px]">FELLOWSHIP MONTHLY STIPEND:</span>
-                <span className="text-base font-bold text-white">
-                  ₹{job.fellowshipGrantStipendInr.toLocaleString('en-IN')} / mo
-                </span>
-              </div>
+      <Card className="border-accent/20 bg-gradient-to-br from-surface-1 via-surface-1 to-accent-soft">
+        <CardBody className="p-5 sm:p-7 space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone="accent" variant="solid">
+              {job.hardwareDomain.replace(/_/g, ' ')}
+            </Badge>
+            <Badge tone="neutral" variant="outline">
+              {job.roleType.replace(/_/g, ' ')}
+            </Badge>
+            <Badge tone="neutral" variant="outline">
+              {job.experienceLevel.replace(/_/g, ' ')}
+            </Badge>
+            {job.company.verifiedDpiit && (
+              <Badge tone="success" variant="outline">
+                <ShieldCheck className="size-3" aria-hidden="true" />
+                <span>DPIIT Startup India</span>
+              </Badge>
             )}
           </div>
 
-          {/* Company Profile Card */}
-          <div className="rounded-xl border border-white/10 bg-neutral-900/90 p-6 space-y-3">
-            <span className="text-xs font-mono text-neutral-400 uppercase">ORGANIZATION PROFILE</span>
-            <h3 className="text-base font-bold text-white">{job.company.name}</h3>
-            <div className="space-y-1.5 text-xs text-neutral-300">
-              <div className="flex justify-between">
-                <span className="text-neutral-500">Location:</span>
-                <span>{job.company.city}, {job.company.state}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">Founded:</span>
-                <span className="font-mono">{job.company.foundedYear}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">Stage:</span>
-                <span className="font-mono text-emerald-400">{job.company.stage}</span>
+          <div className="flex items-start gap-3.5">
+            <Avatar name={job.company.name} size="lg" className="shrink-0 mt-0.5" />
+            <div className="space-y-1.5 min-w-0">
+              <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold text-fg tracking-tight [overflow-wrap:anywhere]">
+                {job.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-3 text-body-sm text-fg-muted">
+                <span className="font-display font-bold text-fg">{job.company.name}</span>
+                <span>•</span>
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="size-3.5 text-fg-subtle" aria-hidden="true" />
+                  <span>{job.workLocation}</span>
+                </span>
+                <span>•</span>
+                <span className="font-display font-bold text-earn-fg tabular-nums">{salaryText}</span>
               </div>
             </div>
+          </div>
 
-            <div className="pt-2 border-t border-white/10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-hairline">
+            <div className="rounded-xl border border-hairline bg-surface-1/90 p-3.5">
+              <span className="font-mono text-[11px] uppercase text-fg-subtle block">
+                COMPENSATION PACKAGE
+              </span>
+              <span className="font-display text-headline-sm font-bold text-earn-fg tabular-nums block mt-0.5">
+                {salaryText}
+              </span>
+              <span className="text-[11px] text-fg-subtle font-mono block">
+                Approx. ₹{Math.round((job.salaryInr.minLakhs * 100000) / 12).toLocaleString('en-IN')} – ₹
+                {Math.round((job.salaryInr.maxLakhs * 100000) / 12).toLocaleString('en-IN')} / month
+              </span>
+              {job.fellowshipGrantStipendInr && (
+                <span className="text-[11px] font-mono font-semibold text-accent-fg block mt-1">
+                  Fellowship Stipend: ₹{job.fellowshipGrantStipendInr.toLocaleString('en-IN')} / mo
+                </span>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-hairline bg-surface-1/90 p-3.5 space-y-1.5">
+              <span className="font-mono text-[11px] uppercase text-fg-subtle block">
+                ORGANIZATION PROFILE
+              </span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-display text-body-md font-bold text-fg">{job.company.name}</span>
+                <Badge tone="earn" variant="outline">{job.company.stage}</Badge>
+              </div>
+              <div className="text-body-xs text-fg-muted">
+                {job.company.city}, {job.company.state} • Founded {job.company.foundedYear}
+              </div>
               <a
                 href={job.company.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold"
+                className="inline-flex items-center gap-1 text-body-xs font-display font-semibold text-accent-fg hover:underline"
               >
                 <span>Company Website</span>
-                <ExternalLink className="size-3.5" />
+                <ExternalLink className="size-3.5" aria-hidden="true" />
               </a>
             </div>
           </div>
+        </CardBody>
+      </Card>
 
-          {/* Proof-of-Work Application Form */}
-          <div className="rounded-xl border border-emerald-500/40 bg-neutral-900/95 p-6 space-y-4 shadow-xl">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-400 font-bold">
-                <Send className="size-3" />
-                <span>DIRECT TO ENGINEERING LEAD</span>
+      {/* Role Overview */}
+      <Panel title="Role Overview" icon={<Briefcase aria-hidden="true" />}>
+        <div className="text-body-sm sm:text-body-md text-fg-muted leading-relaxed whitespace-pre-line">
+          {job.descriptionMarkdown}
+        </div>
+      </Panel>
+
+      {/* Responsibilities & Prerequisites */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Panel title="Key Engineering Responsibilities" icon={<CheckCircle2 aria-hidden="true" />}>
+          <div className="space-y-2.5">
+            {job.responsibilities.map((resp, idx) => (
+              <div key={idx} className="flex items-start gap-2.5 text-body-sm text-fg-muted">
+                <Check className="size-4 text-success shrink-0 mt-0.5" aria-hidden="true" />
+                <span className="leading-relaxed">{resp}</span>
               </div>
-              <h3 className="text-base font-bold text-white">Apply with Proof-of-Work</h3>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel title="Prerequisites & Domain Qualifications" icon={<Cpu aria-hidden="true" />}>
+          <div className="space-y-2.5">
+            {job.prerequisites.map((prereq, idx) => (
+              <div key={idx} className="flex items-start gap-2.5 text-body-sm text-fg-muted">
+                <span className="size-1.5 rounded-full bg-accent mt-2 shrink-0" />
+                <span className="leading-relaxed">{prereq}</span>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      {/* Physical Lab Benches & Test Equipment */}
+      <Panel
+        title="Physical Lab Benches & Test Equipment"
+        icon={<Wrench aria-hidden="true" />}
+      >
+        <p className="text-body-sm text-fg-muted mb-3">
+          You will have direct hands-on access to the following instrumentation testbenches:
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {job.hardwareBenchesUsed.map((bench, idx) => (
+            <div
+              key={idx}
+              className="rounded-xl border border-hairline bg-sunken px-3.5 py-2.5 text-body-xs font-mono text-fg flex items-center gap-2"
+            >
+              <Cpu className="size-3.5 text-accent shrink-0" aria-hidden="true" />
+              <span>{bench}</span>
+            </div>
+          ))}
+        </div>
+      </Panel>
+
+      {/* Required Proof of Work */}
+      <Panel
+        title="Proof-of-Work Application Standard"
+        icon={<Sparkles aria-hidden="true" />}
+        className="border-warning/30 bg-warning/5"
+      >
+        <p className="text-body-sm text-fg-muted leading-relaxed mb-3">
+          We do not filter by college pedigree or standard PDF resumes. Instead, the hiring engineering lead evaluates your application based on verified evidence of physical hardware built:
+        </p>
+        <div className="space-y-2">
+          {job.proofOfWorkRequirements.map((req, idx) => (
+            <div key={idx} className="flex items-start gap-2.5 text-body-xs font-mono text-fg">
+              <span className="text-warning-fg font-bold shrink-0">[{idx + 1}]</span>
+              <span className="leading-relaxed">{req}</span>
+            </div>
+          ))}
+        </div>
+      </Panel>
+
+      {/* Proof-of-Work Application Form */}
+      <Panel
+        title="Apply with Proof-of-Work"
+        icon={<Send aria-hidden="true" />}
+        action={<Badge tone="accent" variant="outline">Direct to Engineering Lead</Badge>}
+        className="border-accent/25"
+      >
+        {applied ? (
+          <div
+            role="status"
+            className="rounded-xl border border-success/40 bg-success/10 p-5 text-center space-y-2"
+          >
+            <CheckCircle2 className="size-8 text-success-fg mx-auto" aria-hidden="true" />
+            <h3 className="font-display text-headline-sm font-bold text-fg">
+              Application Received!
+            </h3>
+            <p className="text-body-sm text-fg-muted leading-relaxed">
+              Your proof-of-work submission has been routed directly to the engineering hiring team at{' '}
+              <strong className="text-fg">{job.company.name}</strong>.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmitApplication} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className="font-display text-label-md text-fg block mb-1">
+                  Your Full Name
+                </label>
+                <Input
+                  type="text"
+                  required
+                  placeholder="e.g. Vikram Joshi"
+                  value={applicantName}
+                  onChange={(e) => setApplicantName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="font-display text-label-md text-fg block mb-1">
+                  Email Address
+                </label>
+                <Input
+                  type="email"
+                  required
+                  placeholder="vikram@example.com"
+                  value={applicantEmail}
+                  onChange={(e) => setApplicantEmail(e.target.value)}
+                />
+              </div>
             </div>
 
-            {applied ? (
-              <div className="rounded-lg border border-emerald-500 bg-emerald-500/10 p-4 text-center space-y-2">
-                <CheckCircle2 className="size-8 text-emerald-400 mx-auto" />
-                <h4 className="text-sm font-bold text-white">Application Received!</h4>
-                <p className="text-xs text-neutral-300 leading-relaxed">
-                  Your proof-of-work submission has been routed directly to the engineering hiring team at{' '}
-                  <span className="font-bold text-white">{job.company.name}</span>.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmitApplication} className="space-y-3 text-xs">
-                <div>
-                  <label className="text-neutral-400 block mb-1">Your Full Name:</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Vikram Joshi"
-                    value={applicantName}
-                    onChange={(e) => setApplicantName(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-white placeholder-neutral-600 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-neutral-400 block mb-1">Email Address:</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="vikram@example.com"
-                    value={applicantEmail}
-                    onChange={(e) => setApplicantEmail(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-white placeholder-neutral-600 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-neutral-400 block mb-1">
-                    Proof-of-Work Link (GitHub / Altium / CAD / Video):
-                  </label>
-                  <input
-                    type="url"
-                    required
-                    placeholder="https://github.com/my-profile/firmware-repo"
-                    value={proofUrl}
-                    onChange={(e) => setProofUrl(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-white placeholder-neutral-600 focus:outline-none focus:border-emerald-500 font-mono text-[11px]"
-                  />
-                </div>
-                <div>
-                  <label className="text-neutral-400 block mb-1">
-                    Describe a hard hardware bug you encountered and resolved:
-                  </label>
-                  <textarea
-                    rows={3}
-                    required
-                    placeholder="e.g. Solved ringing on high-side gate driver by adding ferrite bead and tuned deadtime to 120ns..."
-                    value={hardwareBugStory}
-                    onChange={(e) => setHardwareBugStory(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-white placeholder-neutral-600 focus:outline-none focus:border-emerald-500 text-xs"
-                  />
-                </div>
+            <div>
+              <label className="font-display text-label-md text-fg block mb-1">
+                Proof-of-Work Link (GitHub / Altium / CAD / Video)
+              </label>
+              <Input
+                type="url"
+                required
+                placeholder="https://github.com/my-profile/firmware-repo"
+                value={proofUrl}
+                onChange={(e) => setProofUrl(e.target.value)}
+                className="font-mono text-body-sm"
+              />
+            </div>
 
-                <button
-                  type="submit"
-                  className="w-full py-2.5 bg-emerald-500 text-neutral-950 font-bold text-xs rounded-lg hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20"
-                >
-                  Submit Application with Proof-of-Work
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      </div>
+            <div>
+              <label className="font-display text-label-md text-fg block mb-1">
+                Describe a hard hardware bug you encountered and resolved
+              </label>
+              <Textarea
+                rows={3}
+                required
+                placeholder="e.g. Solved ringing on high-side gate driver by adding ferrite bead and tuned deadtime to 120ns..."
+                value={hardwareBugStory}
+                onChange={(e) => setHardwareBugStory(e.target.value)}
+              />
+            </div>
+
+            <Button type="submit" variant="primary" size="md" className="w-full shadow-glow-accent">
+              <Send className="size-4" aria-hidden="true" />
+              <span>Submit Application with Proof-of-Work</span>
+            </Button>
+          </form>
+        )}
+      </Panel>
     </div>
   );
 }

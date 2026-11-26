@@ -1,6 +1,11 @@
 import type { Metadata } from 'next';
+import { Zap } from 'lucide-react';
 import { SPRINTS_CATALOG } from '@/lib/data/sprints-data';
 import { SprintCatalog } from '@/components/sprints/sprint-catalog';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
+import { OpportunitiesTabs } from '@/components/social/opportunities-tabs';
 
 export const metadata: Metadata = {
   title: 'Hardware Sprints & 48-Hour Rapid Build Hackathons | Hackerland',
@@ -53,27 +58,32 @@ export default function SprintsPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12 space-y-8">
-      {/* Page Header */}
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-mono font-medium text-primary">
-          <span>⚡ 48-HOUR TIME-BOXED RAPID PROTOTYPING</span>
-        </div>
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground">
-          Hardware Build Sprints & Bounties
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed">
-          Prove your engineering mettle in high-stakes 48-hour sprints. Clear sequential review gates—Hour 12 CAD, Hour 24 KiCad Schematics, Hour 36 RTOS Bringup, Hour 48 Physical Video Demo—to unlock non-dilutive grant escrows, free prototype fabrication credits, and premier lab vouchers.
-        </p>
-      </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <OpportunitiesTabs />
 
-      <SprintCatalog initialSprints={SPRINTS_CATALOG} />
+        <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-2.5">
+          <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
+            <span className="size-2 rounded-full bg-accent animate-pulse" aria-hidden="true" />
+            <Zap className="size-3.5" aria-hidden="true" />
+            <span>48-Hour Time-Boxed Rapid Prototyping</span>
+          </div>
+          <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
+            Hardware Build Sprints &amp; Bounties
+          </h1>
+          <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
+            Clear sequential engineering gates — Hour 12 CAD, Hour 24 KiCad Schematics, Hour 36 RTOS Bringup, and Hour 48 Physical Video Demo — to unlock non-dilutive grant escrows and NABL lab vouchers.
+          </p>
+        </header>
 
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-    </div>
+        <SprintCatalog initialSprints={SPRINTS_CATALOG} />
+
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

@@ -2,8 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { Bookmark, Clock, Search, Trophy, Users, Zap } from 'lucide-react';
 import type { SprintEntry, SprintTrack, SprintStatus } from '@hackerland/core';
 import { filterSprints } from '@hackerland/core';
+import { Badge, Card, CardBody, FilterChip, StatTile, cn } from '@hackerland/ui';
+import { useSocialCommunity } from '@/components/social/social-context';
 
 interface SprintCatalogProps {
   initialSprints: SprintEntry[];
@@ -31,6 +34,7 @@ export function SprintCatalog({ initialSprints }: SprintCatalogProps) {
   const [selectedTrack, setSelectedTrack] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const { isItemSaved, toggleSaveItem } = useSocialCommunity();
 
   const filtered = useMemo(() => {
     return filterSprints(initialSprints, {
@@ -49,175 +53,200 @@ export function SprintCatalog({ initialSprints }: SprintCatalogProps) {
   }, [initialSprints]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 min-w-0">
       {/* Top Banner Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-border bg-card/50 p-4">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Total Prize Escrow
-          </span>
-          <p className="text-2xl font-mono font-bold text-foreground mt-1">
-            ₹{(totalPrizePool / 100000).toFixed(1)} Lakhs
-          </p>
-          <span className="text-[11px] text-emerald-500 font-mono">100% Non-Dilutive Grants</span>
-        </div>
-        <div className="rounded-xl border border-border bg-card/50 p-4">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Rapid Sprints
-          </span>
-          <p className="text-2xl font-mono font-bold text-foreground mt-1">
-            {initialSprints.length}
-          </p>
-          <span className="text-[11px] text-muted-foreground font-mono">48H Time-Boxed Builds</span>
-        </div>
-        <div className="rounded-xl border border-border bg-card/50 p-4">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Squads Building
-          </span>
-          <p className="text-2xl font-mono font-bold text-foreground mt-1">
-            {totalTeams}
-          </p>
-          <span className="text-[11px] text-primary font-mono">Vetted Hardware Engineers</span>
-        </div>
-        <div className="rounded-xl border border-border bg-card/50 p-4">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Sponsors & Partners
-          </span>
-          <p className="text-2xl font-mono font-bold text-foreground mt-1">
-            CSIR / ARAI / IISc
-          </p>
-          <span className="text-[11px] text-muted-foreground font-mono">Premier Indian R&D Hubs</span>
-        </div>
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3.5 min-w-0">
+        <StatTile
+          label="Total Prize Escrow"
+          value={`₹${(totalPrizePool / 100000).toFixed(1)} Lakhs`}
+          hint="100% Non-Dilutive Grants"
+          tone="earn"
+          icon={<Trophy aria-hidden="true" />}
+        />
+        <StatTile
+          label="Rapid Sprints"
+          value={initialSprints.length}
+          hint="48H Time-Boxed Builds"
+          tone="accent"
+          icon={<Zap aria-hidden="true" />}
+        />
+        <StatTile
+          label="Squads Building"
+          value={totalTeams}
+          hint="Vetted Hardware Engineers"
+          tone="code"
+          icon={<Users aria-hidden="true" />}
+        />
+        <StatTile
+          label="Sponsors & Partners"
+          value="CSIR / ARAI / IISc"
+          hint="Premier Indian R&D Hubs"
+          tone="make"
+        />
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Status Buttons */}
-          {(['all', 'active', 'upcoming', 'completed'] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setSelectedStatus(status)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                selectedStatus === status
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground'
-              }`}
-            >
-              {STATUS_LABELS[status]}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Track Filter Dropdown */}
-          <select
-            value={selectedTrack}
-            onChange={(e) => setSelectedTrack(e.target.value)}
-            className="rounded-lg border border-border bg-secondary/50 px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            {Object.entries(TRACK_LABELS).map(([val, label]) => (
-              <option key={val} value={val}>
-                {label}
-              </option>
+      <div className="rounded-2xl border border-hairline bg-surface-1 p-3.5 shadow-xs space-y-3">
+        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            {(['all', 'active', 'upcoming', 'completed'] as const).map((status) => (
+              <FilterChip
+                key={status}
+                selected={selectedStatus === status}
+                tone="accent"
+                onClick={() => setSelectedStatus(status)}
+              >
+                {STATUS_LABELS[status]}
+              </FilterChip>
             ))}
-          </select>
+          </div>
 
-          {/* Search Input */}
-          <input
-            type="search"
-            placeholder="Search sprints, sponsors..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="rounded-lg border border-border bg-secondary/30 px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary w-full md:w-56"
-          />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <select
+              aria-label="Filter sprint track"
+              value={selectedTrack}
+              onChange={(e) => setSelectedTrack(e.target.value)}
+              className="h-9 rounded-full border border-line bg-sunken px-3.5 text-body-sm text-fg focus:border-accent focus:bg-surface-1 focus:outline-none"
+            >
+              {Object.entries(TRACK_LABELS).map(([val, label]) => (
+                <option key={val} value={val}>
+                  {label}
+                </option>
+              ))}
+            </select>
+
+            <div className="relative w-full sm:w-56">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-fg-subtle" aria-hidden="true" />
+              <input
+                type="search"
+                placeholder="Search sprints, sponsors..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 w-full rounded-full border border-line bg-sunken pl-9 pr-3.5 text-body-sm text-fg placeholder:text-fg-subtle focus:border-accent focus:bg-surface-1 focus:outline-none"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Sprints Grid */}
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border p-12 text-center">
-          <p className="text-sm font-medium text-foreground">No sprints match your criteria</p>
-          <p className="text-xs text-muted-foreground mt-1">Try resetting your filters or search keywords.</p>
+        <div className="rounded-2xl border border-dashed border-line bg-surface-1 p-10 text-center space-y-1.5">
+          <p className="font-display text-headline-sm font-semibold text-fg">
+            No sprints match your criteria
+          </p>
+          <p className="text-body-sm text-fg-muted">
+            Try resetting your filters or search keywords.
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
           {filtered.map((sprint) => {
             const trackLabel = TRACK_LABELS[sprint.track] || sprint.track;
             const prizeInLakhs = (sprint.totalPrizePoolINR / 100000).toFixed(1);
+            const saved = isItemSaved(`sprint:${sprint.slug}`);
+            const statusTone =
+              sprint.currentStatus === 'active'
+                ? 'success'
+                : sprint.currentStatus === 'upcoming'
+                ? 'warning'
+                : 'neutral';
 
             return (
-              <Link
+              <Card
                 key={sprint.id}
-                href={`/sprints/${sprint.slug}`}
-                className="group relative flex flex-col justify-between rounded-xl border border-border/80 bg-card/60 p-5 transition-all duration-200 hover:border-primary/40 hover:bg-card hover:shadow-lg backdrop-blur-sm"
+                className="flex flex-col justify-between min-w-0 [overflow-wrap:anywhere] transition-all hover:border-accent/40"
               >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                      {trackLabel}
-                    </span>
-                    <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        sprint.currentStatus === 'active'
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                          : sprint.currentStatus === 'upcoming'
-                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                          : 'bg-muted text-muted-foreground'
-                      }`}
-                    >
-                      {sprint.currentStatus}
-                    </span>
-                  </div>
+                <CardBody className="p-5 flex flex-col justify-between h-full space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                        <Badge tone="make" variant="outline">
+                          {trackLabel}
+                        </Badge>
+                        <Badge
+                          tone={statusTone}
+                          variant={sprint.currentStatus === 'active' ? 'solid' : 'outline'}
+                        >
+                          {sprint.currentStatus}
+                        </Badge>
+                      </div>
 
-                  <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                    {sprint.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
-                    {sprint.tagline}
-                  </p>
-
-                  <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs">
-                    <div>
-                      <span className="text-[10px] text-muted-foreground uppercase font-mono block">
-                        Prize Pool
-                      </span>
-                      <span className="font-mono font-bold text-foreground">
-                        ₹{prizeInLakhs} Lakhs
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[10px] text-muted-foreground uppercase font-mono block">
-                        Duration
-                      </span>
-                      <span className="font-mono font-medium text-foreground">
-                        {sprint.durationHours} Hours
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Hardware Perks pills */}
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {sprint.hardwarePerks.slice(0, 2).map((perk, i) => (
-                      <span
-                        key={i}
-                        className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/5 text-primary border border-primary/10 line-clamp-1"
+                      <button
+                        type="button"
+                        onClick={() => toggleSaveItem(`sprint:${sprint.slug}`)}
+                        aria-label={saved ? `Unsave ${sprint.title}` : `Save ${sprint.title}`}
+                        aria-pressed={saved}
+                        className={cn(
+                          'flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors',
+                          saved
+                            ? 'border-accent/40 bg-accent-soft text-accent-fg'
+                            : 'border-hairline bg-surface-2/60 text-fg-subtle hover:border-accent/30 hover:text-accent-fg',
+                        )}
                       >
-                        ⚡ {perk}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                        <Bookmark className={cn('size-3.5', saved && 'fill-current')} aria-hidden="true" />
+                      </button>
+                    </div>
 
-                <div className="mt-5 pt-3 border-t border-border/40 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-mono text-[11px] truncate max-w-[170px]">
-                    by {sprint.sponsor.name}
-                  </span>
-                  <div className="flex items-center gap-1.5 font-mono text-[11px] text-foreground">
-                    <span>{sprint.registeredTeamsCount}/{sprint.maxTeams} Squads</span>
+                    <Link
+                      href={`/sprints/${sprint.slug}`}
+                      className="block group space-y-1.5"
+                    >
+                      <h3 className="font-display text-headline-sm font-bold text-fg group-hover:text-accent-fg transition-colors line-clamp-2 [overflow-wrap:anywhere]">
+                        {sprint.title}
+                      </h3>
+                      <p className="text-body-sm text-fg-muted line-clamp-2 leading-relaxed">
+                        {sprint.tagline}
+                      </p>
+                    </Link>
+
+                    <div className="grid grid-cols-2 gap-2.5 rounded-xl border border-hairline bg-sunken/70 p-3">
+                      <div>
+                        <span className="font-display text-[11px] uppercase tracking-wider text-fg-subtle block">
+                          Prize Pool
+                        </span>
+                        <span className="font-display text-body-md font-bold text-earn-fg tabular-nums">
+                          ₹{prizeInLakhs} Lakhs
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-display text-[11px] uppercase tracking-wider text-fg-subtle block">
+                          Duration
+                        </span>
+                        <span className="inline-flex items-center gap-1 font-display text-body-md font-semibold text-fg tabular-nums">
+                          <Clock className="size-3.5 text-accent" aria-hidden="true" />
+                          <span>{sprint.durationHours} Hours</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Hardware Perks pills */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {sprint.hardwarePerks.slice(0, 2).map((perk, i) => (
+                        <span
+                          key={i}
+                          className="rounded-full border border-accent/20 bg-accent-soft px-2.5 py-0.5 text-[11px] font-medium text-accent-fg line-clamp-1"
+                        >
+                          ⚡ {perk}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </Link>
+
+                  <div className="pt-3 border-t border-hairline flex items-center justify-between gap-2 text-body-xs">
+                    <span className="text-fg-subtle truncate">
+                      by <strong className="font-medium text-fg">{sprint.sponsor.name}</strong>
+                    </span>
+                    <Link
+                      href={`/sprints/${sprint.slug}`}
+                      className="shrink-0 inline-flex items-center gap-1.5 font-display font-semibold text-accent-fg hover:underline tabular-nums"
+                    >
+                      <span>{sprint.registeredTeamsCount}/{sprint.maxTeams} Squads</span>
+                      <span aria-hidden="true">→</span>
+                    </Link>
+                  </div>
+                </CardBody>
+              </Card>
             );
           })}
         </div>

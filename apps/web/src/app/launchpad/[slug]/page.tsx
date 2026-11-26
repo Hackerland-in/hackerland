@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getCampaignBySlug, getAllCampaignSlugs } from '@/lib/data/launchpad-data';
 import { CampaignDetailView } from '@/components/launchpad/campaign-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 interface CampaignPageProps {
   params: Promise<{ slug: string }>;
@@ -42,8 +45,10 @@ export default async function CampaignDetailPage({ params }: CampaignPageProps) 
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-      <CampaignDetailView campaign={campaign} />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <CampaignDetailView campaign={campaign} />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

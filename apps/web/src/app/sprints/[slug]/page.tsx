@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SPRINTS_CATALOG } from '@/lib/data/sprints-data';
 import { SprintDetailView } from '@/components/sprints/sprint-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 interface SprintPageProps {
   params: Promise<{ slug: string }>;
@@ -87,14 +90,16 @@ export default async function SprintDetailPage({ params }: SprintPageProps) {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12">
-      <SprintDetailView sprint={sprint} />
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <SprintDetailView sprint={sprint} />
 
-      {/* JSON-LD Event Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-    </div>
+        {/* JSON-LD Event Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

@@ -11,10 +11,10 @@ export function PostOpportunityTrigger() {
   return (
     <>
       <Button
-        variant="earn"
+        variant="primary"
         size="md"
         onClick={() => setIsOpen(true)}
-        className="gap-2 shadow-glow-earn"
+        className="gap-2 shadow-glow-accent"
       >
         <Plus className="size-4" />
         Post an Opportunity

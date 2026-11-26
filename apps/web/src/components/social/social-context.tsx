@@ -7,6 +7,7 @@ interface SocialCommunityContextValue {
   bookmarkedPostIds: string[];
   repostedPostIds: string[];
   starredProjectSlugs: string[];
+  savedItemIds: string[];
   isFollowing: (handle: string) => boolean;
   toggleFollow: (handle: string) => void;
   isBookmarked: (postId: string) => boolean;
@@ -15,6 +16,8 @@ interface SocialCommunityContextValue {
   toggleRepost: (postId: string) => void;
   isProjectStarred: (slug: string) => boolean;
   toggleStarProject: (slug: string) => void;
+  isItemSaved: (itemId: string) => boolean;
+  toggleSaveItem: (itemId: string) => void;
 }
 
 const DEFAULT_FOLLOWING = ['meera-iyer', 'zoya-khan'];
@@ -27,6 +30,7 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
   const [bookmarkedPostIds, setBookmarkedPostIds] = useState<string[]>([]);
   const [repostedPostIds, setRepostedPostIds] = useState<string[]>([]);
   const [starredProjectSlugs, setStarredProjectSlugs] = useState<string[]>(DEFAULT_STARRED_PROJECTS);
+  const [savedItemIds, setSavedItemIds] = useState<string[]>([]);
 
   useEffect(() => {
     try {
@@ -49,6 +53,11 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
       if (savedStars) {
         const parsed = JSON.parse(savedStars);
         if (Array.isArray(parsed)) setStarredProjectSlugs(parsed);
+      }
+      const savedItems = localStorage.getItem('hackerland_saved_items');
+      if (savedItems) {
+        const parsed = JSON.parse(savedItems);
+        if (Array.isArray(parsed)) setSavedItemIds(parsed);
       }
     } catch {
       // Ignore storage errors in sandboxed contexts
@@ -95,6 +104,16 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const toggleSaveItem = (itemId: string) => {
+    setSavedItemIds((prev) => {
+      const next = prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId];
+      try {
+        localStorage.setItem('hackerland_saved_items', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
   return (
     <SocialCommunityContext.Provider
       value={{
@@ -102,6 +121,7 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
         bookmarkedPostIds,
         repostedPostIds,
         starredProjectSlugs,
+        savedItemIds,
         isFollowing: (handle) => followingHandles.includes(handle),
         toggleFollow,
         isBookmarked: (postId) => bookmarkedPostIds.includes(postId),
@@ -110,6 +130,8 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
         toggleRepost,
         isProjectStarred: (slug) => starredProjectSlugs.includes(slug),
         toggleStarProject,
+        isItemSaved: (itemId) => savedItemIds.includes(itemId),
+        toggleSaveItem,
       }}
     >
       {children}
@@ -126,6 +148,7 @@ export function useSocialCommunity(): SocialCommunityContextValue {
   const [localBookmarks, setLocalBookmarks] = useState<string[]>([]);
   const [localReposts, setLocalReposts] = useState<string[]>([]);
   const [localStars, setLocalStars] = useState<string[]>(DEFAULT_STARRED_PROJECTS);
+  const [localSavedItems, setLocalSavedItems] = useState<string[]>([]);
 
   if (ctx) return ctx;
 
@@ -134,6 +157,7 @@ export function useSocialCommunity(): SocialCommunityContextValue {
     bookmarkedPostIds: localBookmarks,
     repostedPostIds: localReposts,
     starredProjectSlugs: localStars,
+    savedItemIds: localSavedItems,
     isFollowing: (handle) => localFollowing.includes(handle),
     toggleFollow: (handle) =>
       setLocalFollowing((prev) =>
@@ -153,6 +177,11 @@ export function useSocialCommunity(): SocialCommunityContextValue {
     toggleStarProject: (slug) =>
       setLocalStars((prev) =>
         prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+      ),
+    isItemSaved: (itemId) => localSavedItems.includes(itemId),
+    toggleSaveItem: (itemId) =>
+      setLocalSavedItems((prev) =>
+        prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId],
       ),
   };
 }

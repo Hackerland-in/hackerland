@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
 import { LaunchpadStudio } from '@/components/launchpad/launchpad-studio';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
+import { OpportunitiesTabs } from '@/components/social/opportunities-tabs';
 
 export const metadata: Metadata = {
   title: 'Hardware Launchpad & Indian Govt Grant Matcher | Hackerland',
@@ -15,8 +19,11 @@ export const metadata: Metadata = {
 
 export default function LaunchpadPage() {
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-      <LaunchpadStudio />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <OpportunitiesTabs />
+        <LaunchpadStudio />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

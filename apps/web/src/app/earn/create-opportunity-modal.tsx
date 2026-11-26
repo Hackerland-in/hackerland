@@ -135,9 +135,9 @@ export function CreateOpportunityModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="create-opportunity-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/80 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-fg/35 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
     >
-      <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-lg border border-hairline bg-surface-2 p-6 shadow-overlay space-y-6">
+      <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border border-hairline bg-surface-1 p-6 shadow-overlay space-y-6">
         <div className="flex items-center justify-between border-b border-hairline pb-4">
           <div>
             <h2

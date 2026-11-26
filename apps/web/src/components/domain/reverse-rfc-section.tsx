@@ -132,12 +132,12 @@ export function ReverseRFCSection() {
     selectedDomain === 'All' ? rfcs : rfcs.filter((r) => r.domain === selectedDomain);
 
   return (
-    <div className="space-y-6 pt-4 border-t border-hairline" data-testid="reverse-rfc-section">
+    <div className="space-y-6 pt-5 border-t border-hairline" data-testid="reverse-rfc-section">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="size-4 text-earn" />
-            <span className="font-display text-caption font-semibold uppercase tracking-wider text-earn">
+            <Sparkles className="size-4 text-accent" />
+            <span className="font-display text-caption font-semibold uppercase tracking-wider text-accent-fg">
               Grassroots Innovation Pipeline
             </span>
           </div>
@@ -152,7 +152,7 @@ export function ReverseRFCSection() {
 
         <Button
           onClick={() => setIsModalOpen(true)}
-          variant="earn"
+          variant="primary"
           size="sm"
           className="shrink-0 self-start md:self-auto"
         >
@@ -168,10 +168,10 @@ export function ReverseRFCSection() {
             key={dom}
             type="button"
             onClick={() => setSelectedDomain(dom)}
-            className={`px-3 py-1 rounded-full text-caption font-medium transition-colors border ${
+            className={`px-3.5 py-1.5 rounded-full text-caption font-display font-medium transition-colors border ${
               selectedDomain === dom
-                ? 'border-earn bg-earn/10 text-earn font-semibold'
-                : 'border-hairline bg-surface-1 text-fg-muted hover:text-fg hover:border-hairline-strong'
+                ? 'border-accent bg-accent text-on-solid font-semibold shadow-xs'
+                : 'border-hairline bg-surface-1 text-fg-muted hover:text-fg hover:border-accent/40'
             }`}
           >
             {dom}
@@ -184,7 +184,7 @@ export function ReverseRFCSection() {
         {filteredRfcs.map((rfc) => {
           const hasVoted = votedIds.has(rfc.id);
           return (
-            <Card key={rfc.id} className="flex flex-col justify-between border-hairline bg-surface-1">
+            <Card key={rfc.id} className="flex flex-col justify-between border-hairline bg-surface-1 hover:border-accent/35 transition-colors">
               <div>
                 <CardHeader className="space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -198,12 +198,12 @@ export function ReverseRFCSection() {
                         </Badge>
                       )}
                     </div>
-                    <span className="font-display font-semibold text-earn text-body-sm tabular-nums">
+                    <span className="font-display font-semibold text-earn-fg text-body-sm tabular-nums">
                       {formatMoney(rfc.bountyAmount, 'INR')} Bounty
                     </span>
                   </div>
 
-                  <h3 className="font-display text-body-lg font-semibold text-fg">{rfc.title}</h3>
+                  <h3 className="font-display text-body-lg font-semibold text-fg [overflow-wrap:anywhere]">{rfc.title}</h3>
                   <p className="text-caption text-fg-subtle">Posted by {rfc.sponsor}</p>
                 </CardHeader>
 
@@ -218,10 +218,10 @@ export function ReverseRFCSection() {
                     type="button"
                     onClick={() => handleVote(rfc.id)}
                     aria-label={`Upvote ${rfc.title}`}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-caption transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-caption transition-colors ${
                       hasVoted
-                        ? 'border-earn bg-earn/15 text-earn font-semibold'
-                        : 'border-hairline text-fg-muted hover:text-fg hover:bg-surface-2'
+                        ? 'border-accent bg-accent-soft text-accent-fg font-semibold'
+                        : 'border-hairline bg-surface-2/60 text-fg-muted hover:text-fg hover:border-accent/30'
                     }`}
                   >
                     <ThumbsUp className={`size-3.5 ${hasVoted ? 'fill-current' : ''}`} />
@@ -251,9 +251,9 @@ export function ReverseRFCSection() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="submit-rfc-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/80 backdrop-blur-sm animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-fg/35 backdrop-blur-sm animate-in fade-in duration-150"
         >
-          <div className="w-full max-w-lg rounded-lg border border-hairline bg-surface-2 p-6 shadow-overlay space-y-4">
+          <div className="w-full max-w-lg rounded-2xl border border-hairline bg-surface-1 p-6 shadow-overlay space-y-4">
             <h3 id="submit-rfc-dialog-title" className="font-display text-headline-sm font-semibold text-fg">
               Submit Reverse RFC / Problem Statement
             </h3>

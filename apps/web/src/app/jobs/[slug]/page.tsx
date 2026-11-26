@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getJobBySlug, getAllJobSlugs } from '@/lib/data/jobs-data';
 import { JobDetailView } from '@/components/jobs/job-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 interface JobPageProps {
   params: Promise<{ slug: string }>;
@@ -42,8 +45,10 @@ export default async function JobDetailPage({ params }: JobPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-      <JobDetailView job={job} />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <JobDetailView job={job} />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

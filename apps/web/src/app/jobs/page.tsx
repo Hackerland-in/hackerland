@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
 import { JobsStudio } from '@/components/jobs/jobs-studio';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
+import { OpportunitiesTabs } from '@/components/social/opportunities-tabs';
 
 export const metadata: Metadata = {
   title: 'Hardware & Deep-Tech Jobs, Fellowships & Residencies | Hackerland',
@@ -15,8 +19,11 @@ export const metadata: Metadata = {
 
 export default function JobsPage() {
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-      <JobsStudio />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <OpportunitiesTabs />
+        <JobsStudio />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

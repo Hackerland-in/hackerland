@@ -98,7 +98,7 @@ export function ClaimBountyModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="claim-bounty-modal-title"
-      className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-canvas/80 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-fg/35 backdrop-blur-sm animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
