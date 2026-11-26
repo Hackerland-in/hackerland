@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { POST_KIND_LABEL, type PostKind } from '@hackerland/core';
 import { Button, EmptyState, FilterChip, cn } from '@hackerland/ui';
 import { Sparkles, X } from 'lucide-react';
 import type { FeedPost } from '@/lib/data/types';
+import { useBuilderIdentity } from '@/lib/builder-identity';
 import { PostCard } from '@/components/domain/post-card';
 import { InlinePostComposer } from './inline-post-composer';
 import { useSocialCommunity } from './social-context';
@@ -36,14 +37,38 @@ export function SocialFeedStream({
   showComposer = true,
 }: SocialFeedStreamProps) {
   const { isFollowing, bookmarkedPostIds } = useSocialCommunity();
+  const { identity } = useBuilderIdentity();
   const [posts, setPosts] = useState<FeedPost[]>(initialPosts);
   const [streamMode, setStreamMode] = useState<'for-you' | 'following' | 'saved'>('for-you');
   const [kindFilter, setKindFilter] = useState<PostKind | 'all'>(initialKind ?? 'all');
   const [activeTag, setActiveTag] = useState<string | null>(initialTag ?? null);
 
+  useEffect(() => {
+    if (typeof fetch !== 'function') return;
+    let active = true;
+    fetch(`/api/social?handle=${encodeURIComponent(identity.handle)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data || !Array.isArray(data.posts)) return;
+        setPosts((prev) => {
+          const seen = new Set(prev.map((p) => p.id));
+          const extra = (data.posts as FeedPost[]).filter((p) => !seen.has(p.id));
+          return extra.length > 0 ? [...extra, ...prev] : prev;
+        });
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [identity.handle]);
+
   const visiblePosts = useMemo(() => {
     return posts.filter((post) => {
-      if (streamMode === 'following' && !isFollowing(post.author.handle) && post.author.handle !== 'community-builder') {
+      if (
+        streamMode === 'following' &&
+        !isFollowing(post.author.handle) &&
+        post.author.handle !== identity.handle
+      ) {
         return false;
       }
       if (streamMode === 'saved' && !bookmarkedPostIds.includes(post.id)) {

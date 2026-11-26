@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { TeardownSubmitStudio } from '@/components/teardowns/teardown-submit-studio';
 import { SocialCommunityProvider } from '@/components/social/social-context';
-import { SocialShell } from '@/components/social/social-shell';
-import { CommunityRailServer } from '@/components/social/community-rail-server';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 export const metadata: Metadata = {
   title: 'Submit Hardware Teardown & Reverse Engineering Autopsy | Hackerland',
@@ -18,9 +17,19 @@ export const metadata: Metadata = {
 export default function TeardownSubmitPage() {
   return (
     <SocialCommunityProvider>
-      <SocialShell rightRail={<CommunityRailServer />}>
+      <FullScreenLabShell
+        labKind="teardown"
+        title="Hardware Teardown & Pinout Annotator Studio"
+        subtitle="Annotate die & PCB test-point hotspots, map subsystems & document BOM costs"
+        category="Reverse Engineering"
+        badge="Pinout Canvas"
+        backHref="/teardowns"
+        backLabel="Teardowns Library"
+        currentRoute="/teardowns/submit"
+        edgeToEdge
+      >
         <TeardownSubmitStudio />
-      </SocialShell>
+      </FullScreenLabShell>
     </SocialCommunityProvider>
   );
 }

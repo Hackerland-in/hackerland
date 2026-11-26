@@ -3,8 +3,7 @@ import { notFound } from 'next/navigation';
 import { COMPLIANCE_ROADMAPS } from '@/lib/data/compliance-data';
 import { ComplianceDetailView } from '@/components/compliance/compliance-detail-view';
 import { SocialCommunityProvider } from '@/components/social/social-context';
-import { SocialShell } from '@/components/social/social-shell';
-import { CommunityRailServer } from '@/components/social/community-rail-server';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface CompliancePageProps {
   params: Promise<{ slug: string }>;
@@ -44,9 +43,18 @@ export default async function ComplianceDetailPage({ params }: CompliancePagePro
 
   return (
     <SocialCommunityProvider>
-      <SocialShell rightRail={<CommunityRailServer />}>
+      <FullScreenLabShell
+        labKind="risk_audit"
+        title={item.title}
+        subtitle={item.tagline}
+        category="Regulatory Roadmap"
+        badge="BIS / WPC / ARAI"
+        backHref="/compliance"
+        backLabel="Compliance Roadmaps"
+        currentRoute={`/compliance/${item.slug}`}
+      >
         <ComplianceDetailView item={item} />
-      </SocialShell>
+      </FullScreenLabShell>
     </SocialCommunityProvider>
   );
 }

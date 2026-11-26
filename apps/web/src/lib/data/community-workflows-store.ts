@@ -170,6 +170,10 @@ export function listReverseRfcs(): ReverseRfcRecord[] {
   return structuredClone(getWorkflowsRegistry().rfcs);
 }
 
+export function setReverseRfcs(rfcs: ReverseRfcRecord[]): void {
+  getWorkflowsRegistry().rfcs = structuredClone(rfcs);
+}
+
 export function createReverseRfc(input: {
   title: string;
   domain: string;
@@ -184,7 +188,7 @@ export function createReverseRfc(input: {
     id: `rfc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     title: input.title,
     domain: input.domain,
-    sponsor: input.sponsor || 'Community Partner',
+    sponsor: input.sponsor || 'IndiMaker Partner',
     bountyAmount: Math.max(1000, Number(input.bountyAmount) || 25000),
     description: input.description,
     upvotes: 1,
@@ -223,7 +227,7 @@ export function replyToReverseRfc(
   if (!item) return null;
   item.replies.push({
     id: `rfc-reply-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    authorName: authorName.trim() || 'Community Maker',
+    authorName: authorName.trim() || 'Rohan Kulkarni',
     body: body.trim(),
     createdAt: new Date().toISOString(),
   });
@@ -242,6 +246,10 @@ export function getSprintState(slug: string): SprintStateRecord {
   return structuredClone(reg.sprints[slug]);
 }
 
+export function setSprintState(slug: string, state: SprintStateRecord): void {
+  getWorkflowsRegistry().sprints[slug] = structuredClone(state);
+}
+
 export function toggleSprintRegistration(
   slug: string,
   squadName?: string,
@@ -256,7 +264,7 @@ export function toggleSprintRegistration(
   };
   const nextRegistered = !current.registered;
   current.registered = nextRegistered;
-  current.squadName = nextRegistered ? squadName?.trim() || 'Your Hardware Squad' : undefined;
+  current.squadName = nextRegistered ? squadName?.trim() || 'Kaveri Bench Squad' : undefined;
   current.registeredCountDelta = nextRegistered ? 1 : 0;
   reg.sprints[slug] = current;
   return structuredClone(current);
@@ -294,11 +302,11 @@ export function addSprintCheckin(
     milestoneId: input.milestoneId,
     milestoneTitle: input.milestoneTitle,
     milestoneHour: input.milestoneHour,
-    squadName: input.squadName?.trim() || current.squadName || 'Community Squad',
+    squadName: input.squadName?.trim() || current.squadName || 'Kaveri Bench Squad',
     cadUrl: input.cadUrl?.trim() || undefined,
     repoUrl: input.repoUrl?.trim() || undefined,
     videoUrl: input.videoUrl?.trim() || undefined,
-    notes: input.notes.trim() || 'Artifact check-in anchored.',
+    notes: input.notes.trim() || 'Bench verification notes uploaded.',
     ledgerHash: `hl_sprint_${randomHash}`,
     submittedAt: new Date().toISOString(),
   };
@@ -312,7 +320,7 @@ export function addSprintCheckin(
     addStoredPost({
       kind: 'update',
       title: `[48H Sprint H+${input.milestoneHour}] ${sprint.title}`,
-      body: `${checkin.notes} — Anchored at ${checkin.ledgerHash}`,
+      body: `${checkin.notes} — Build log ref ${checkin.ledgerHash}`,
       tags: ['48h-sprint', sprint.track.replace(/_/g, '-')],
     });
   }
@@ -327,6 +335,10 @@ export function getJobApplication(jobSlug: string): JobApplicationRecord | null 
 
 export function listJobApplications(): Record<string, JobApplicationRecord> {
   return structuredClone(getWorkflowsRegistry().jobApplications);
+}
+
+export function setJobApplication(jobSlug: string, record: JobApplicationRecord): void {
+  getWorkflowsRegistry().jobApplications[jobSlug] = structuredClone(record);
 }
 
 export function saveJobApplication(input: {
@@ -373,6 +385,10 @@ export function getLaunchpadState(slug: string): LaunchpadCampaignState | null {
     };
   }
   return structuredClone(reg.launchpad[slug]);
+}
+
+export function setLaunchpadState(slug: string, state: LaunchpadCampaignState): void {
+  getWorkflowsRegistry().launchpad[slug] = structuredClone(state);
 }
 
 export function pledgeLaunchpadTier(
@@ -429,7 +445,7 @@ export function addLaunchpadComment(
   const state = reg.launchpad[slug]!;
   state.comments.unshift({
     id: `camp-qa-${Date.now()}`,
-    authorName: authorName.trim() || 'Community Backer',
+    authorName: authorName.trim() || 'Rohan Kulkarni',
     body: body.trim(),
     createdAt: new Date().toISOString(),
   });
@@ -449,12 +465,16 @@ export function getSquadWorkflowState(slug: string): SquadWorkflowState | null {
   return structuredClone(reg.squads[slug]);
 }
 
+export function setSquadWorkflowState(slug: string, state: SquadWorkflowState): void {
+  getWorkflowsRegistry().squads[slug] = structuredClone(state);
+}
+
 export function mutateSquadWorkflow(
   slug: string,
   action:
     | { type: 'add_task'; title: string; priority: KanbanTask['priority'] }
     | { type: 'cycle_task'; taskId: string }
-    | { type: 'submit_proof'; milestoneId: string; proofUrl: string; summary: string }
+    | { type: 'submit_proof'; milestoneId: string; proofUrl: string; summary: string; submittedBy?: string }
     | { type: 'release_escrow'; milestoneId: string; shareToFeed?: boolean },
 ): SquadWorkflowState | null {
   const base = getSquadWorkflowState(slug);
@@ -491,7 +511,7 @@ export function mutateSquadWorkflow(
               proofUrl: action.proofUrl.trim(),
               summary: action.summary.trim() || 'Proof of work submitted for peer review.',
               submittedAt: new Date().toISOString().split('T')[0] ?? '',
-              submittedBy: 'current_builder',
+              submittedBy: action.submittedBy?.trim() || 'rohan_k',
             },
           }
         : m,

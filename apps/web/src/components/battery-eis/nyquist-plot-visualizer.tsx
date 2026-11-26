@@ -17,20 +17,17 @@ export function NyquistPlotVisualizer({
 }: NyquistPlotVisualizerProps) {
   const [hoveredPoint, setHoveredPoint] = useState<EisDataPoint | null>(null);
 
-  // Convert Ohms to milli-Ohms (mΩ) for clean readability
   const pointsInMilliOhm = measuredSpectrum.map((pt) => ({
     ...pt,
     zRealMOhm: pt.zRealOhm * 1000,
-    zImagMOhm: -pt.zImagOhm * 1000, // Standard Nyquist plots -Z'' on Y axis (positive values upwards)
+    zImagMOhm: -pt.zImagOhm * 1000,
   }));
 
-  // Find bounds for SVG scaling
   const maxReal = Math.max(...pointsInMilliOhm.map((p) => p.zRealMOhm)) * 1.15;
   const minReal = Math.max(0, Math.min(...pointsInMilliOhm.map((p) => p.zRealMOhm)) * 0.8);
   const maxImag = Math.max(5, Math.max(...pointsInMilliOhm.map((p) => p.zImagMOhm)) * 1.25);
   const minImag = Math.min(-2, Math.min(...pointsInMilliOhm.map((p) => p.zImagMOhm)) * 1.1);
 
-  // SVG dimensions
   const svgWidth = 600;
   const svgHeight = 360;
   const padding = { top: 30, right: 30, bottom: 50, left: 65 };
@@ -45,7 +42,6 @@ export function NyquistPlotVisualizer({
     return padding.top + plotHeight - ((negZImagMOhm - minImag) / (maxImag - minImag || 1)) * plotHeight;
   };
 
-  // Generate synthetic smooth curve from fitted Randles ECM if provided
   let fittedPolyline = '';
   if (fittedEcm) {
     const fittedCurvePoints: { x: number; y: number }[] = [];
@@ -68,65 +64,54 @@ export function NyquistPlotVisualizer({
     fittedPolyline = fittedCurvePoints.map((pt) => `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' ');
   }
 
-  // Identify key diagnostic features
   const zeroCrossingPt = pointsInMilliOhm.reduce((prev, curr) =>
-    Math.abs(curr.zImagMOhm) < Math.abs(prev.zImagMOhm) ? curr : prev
+    Math.abs(curr.zImagMOhm) < Math.abs(prev.zImagMOhm) ? curr : prev,
   );
 
   return (
-    <div className="bg-stone-900 border border-stone-800 rounded-xl p-5 flex flex-col items-center">
+    <div className="bg-surface-1 border border-hairline rounded-2xl p-5 flex flex-col items-center shadow-xs">
       <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2 text-xs">
         <div>
-          <span className="font-mono uppercase font-bold tracking-wider text-emerald-400">
+          <span className="font-mono uppercase font-bold tracking-wider text-accent-fg">
             Nyquist Impedance Spectrum (-Z″ vs Z′)
           </span>
-          <span className="text-stone-400 block text-[11px] mt-0.5">
+          <span className="text-fg-muted block text-[11px] mt-0.5">
             {cellTitle} · Standard Electrochemical Representation
           </span>
         </div>
 
         <div className="flex items-center gap-3 font-mono text-[11px]">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" />
-            <span className="text-stone-300">Measured EIS</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-accent inline-block" />
+            <span className="text-fg">Measured EIS</span>
           </div>
           {fittedEcm && (
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 bg-cyan-400 inline-block" />
-              <span className="text-stone-300">Fitted Randles ECM</span>
+              <span className="w-3 h-0.5 bg-info inline-block" />
+              <span className="text-fg">Fitted Randles ECM</span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="relative w-full aspect-[16/10] max-w-[700px] bg-stone-950 rounded-lg p-2 border border-stone-800 select-none">
+      <div className="relative w-full aspect-[16/10] max-w-[740px] bg-sunken rounded-xl p-2 border border-hairline select-none">
         <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-full text-xs font-mono">
-          <defs>
-            <linearGradient id="nyquistArea" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
-
-          {/* Grid lines */}
-          {/* Zero Imag axis */}
           <line
             x1={padding.left}
             y1={toSvgY(0)}
             x2={svgWidth - padding.right}
             y2={toSvgY(0)}
-            stroke="#475569"
+            stroke="#94a3b8"
             strokeWidth="1.5"
             strokeDasharray="4 4"
           />
 
-          {/* Vertical axis ticks and grid */}
           {Array.from({ length: 5 }).map((_, i) => {
             const val = minReal + (i / 4) * (maxReal - minReal);
             const x = toSvgX(val);
             return (
               <g key={i}>
-                <line x1={x} y1={padding.top} x2={x} y2={svgHeight - padding.bottom} stroke="#1e293b" strokeWidth="1" />
+                <line x1={x} y1={padding.top} x2={x} y2={svgHeight - padding.bottom} stroke="#e5d5de" strokeWidth="1" />
                 <text x={x} y={svgHeight - padding.bottom + 18} fill="#64748b" fontSize="10" textAnchor="middle">
                   {val.toFixed(1)}
                 </text>
@@ -134,13 +119,12 @@ export function NyquistPlotVisualizer({
             );
           })}
 
-          {/* Horizontal axis ticks and grid */}
           {Array.from({ length: 4 }).map((_, i) => {
             const val = minImag + (i / 3) * (maxImag - minImag);
             const y = toSvgY(val);
             return (
               <g key={i}>
-                <line x1={padding.left} y1={y} x2={svgWidth - padding.right} y2={y} stroke="#1e293b" strokeWidth="1" />
+                <line x1={padding.left} y1={y} x2={svgWidth - padding.right} y2={y} stroke="#e5d5de" strokeWidth="1" />
                 <text x={padding.left - 10} y={y + 4} fill="#64748b" fontSize="10" textAnchor="end">
                   {val.toFixed(1)}
                 </text>
@@ -148,15 +132,7 @@ export function NyquistPlotVisualizer({
             );
           })}
 
-          {/* Axis Labels */}
-          <text
-            x={svgWidth / 2}
-            y={svgHeight - 10}
-            textAnchor="middle"
-            fill="#94a3b8"
-            fontSize="11"
-            fontWeight="bold"
-          >
+          <text x={svgWidth / 2} y={svgHeight - 10} textAnchor="middle" fill="#475569" fontSize="11" fontWeight="bold">
             Real Impedance Z′ (mΩ)
           </text>
           <text
@@ -164,51 +140,48 @@ export function NyquistPlotVisualizer({
             y={18}
             transform="rotate(-90)"
             textAnchor="middle"
-            fill="#94a3b8"
+            fill="#475569"
             fontSize="11"
             fontWeight="bold"
           >
             -Imaginary Impedance -Z″ (mΩ)
           </text>
 
-          {/* Fitted ECM Curve */}
           {fittedPolyline && (
             <polyline
               points={fittedPolyline}
               fill="none"
-              stroke="#06b6d4"
-              strokeWidth="2"
-              opacity="0.85"
+              stroke="#2563eb"
+              strokeWidth="2.2"
+              opacity="0.9"
             />
           )}
 
-          {/* Measured Data Points Connection Line */}
           <polyline
             points={pointsInMilliOhm
               .map((p) => `${toSvgX(p.zRealMOhm).toFixed(1)},${toSvgY(p.zImagMOhm).toFixed(1)}`)
               .join(' ')}
             fill="none"
-            stroke="#10b981"
+            stroke="#e11d74"
             strokeWidth="1.5"
             strokeDasharray="2 2"
-            opacity="0.5"
+            opacity="0.6"
           />
 
-          {/* Bulk Resistance R0 Zero-crossing marker */}
           {zeroCrossingPt && (
             <g>
               <circle
                 cx={toSvgX(zeroCrossingPt.zRealMOhm)}
                 cy={toSvgY(zeroCrossingPt.zImagMOhm)}
-                r="6"
+                r="6.5"
                 fill="none"
-                stroke="#f59e0b"
+                stroke="#d97706"
                 strokeWidth="2"
               />
               <text
                 x={toSvgX(zeroCrossingPt.zRealMOhm)}
                 y={toSvgY(zeroCrossingPt.zImagMOhm) - 12}
-                fill="#f59e0b"
+                fill="#b45309"
                 fontSize="10"
                 fontWeight="bold"
                 textAnchor="middle"
@@ -218,7 +191,6 @@ export function NyquistPlotVisualizer({
             </g>
           )}
 
-          {/* Measured Data Points */}
           {pointsInMilliOhm.map((pt, idx) => {
             const x = toSvgX(pt.zRealMOhm);
             const y = toSvgY(pt.zImagMOhm);
@@ -235,22 +207,13 @@ export function NyquistPlotVisualizer({
                   cx={x}
                   cy={y}
                   r={isHovered ? 6 : 4}
-                  fill={isHovered ? '#38bdf8' : '#10b981'}
-                  stroke="#022c22"
+                  fill={isHovered ? '#2563eb' : '#e11d74'}
+                  stroke="#ffffff"
                   strokeWidth="1.5"
                 />
-                {/* Frequency annotation for endpoints */}
                 {(idx === 0 || idx === pointsInMilliOhm.length - 1 || idx === 2) && (
-                  <text
-                    x={x + 8}
-                    y={y - 6}
-                    fill="#94a3b8"
-                    fontSize="9"
-                    fontWeight="500"
-                  >
-                    {pt.frequencyHz >= 1000
-                      ? `${pt.frequencyHz / 1000}kHz`
-                      : `${pt.frequencyHz}Hz`}
+                  <text x={x + 8} y={y - 6} fill="#475569" fontSize="9" fontWeight="600">
+                    {pt.frequencyHz >= 1000 ? `${pt.frequencyHz / 1000}kHz` : `${pt.frequencyHz}Hz`}
                   </text>
                 )}
               </g>
@@ -258,29 +221,28 @@ export function NyquistPlotVisualizer({
           })}
         </svg>
 
-        {/* Hover Tooltip Box */}
         {hoveredPoint && (
-          <div className="absolute top-4 right-4 bg-stone-900/95 border border-cyan-500/50 rounded-lg p-2.5 text-[11px] font-mono shadow-2xl backdrop-blur-sm pointer-events-none space-y-0.5">
-            <span className="text-cyan-400 font-bold block">
+          <div className="absolute top-4 right-4 bg-surface-1/95 border border-accent/40 rounded-xl p-2.5 text-[11px] font-mono shadow-overlay backdrop-blur-sm pointer-events-none space-y-0.5">
+            <span className="text-accent-fg font-bold block">
               Frequency: {hoveredPoint.frequencyHz >= 1000 ? `${hoveredPoint.frequencyHz / 1000} kHz` : `${hoveredPoint.frequencyHz} Hz`}
             </span>
-            <div className="text-stone-300">
-              Z′: <span className="text-stone-100 font-bold">{(hoveredPoint.zRealOhm * 1000).toFixed(2)} mΩ</span>
+            <div className="text-fg-muted">
+              Z′: <span className="text-fg font-bold">{(hoveredPoint.zRealOhm * 1000).toFixed(2)} mΩ</span>
             </div>
-            <div className="text-stone-300">
-              -Z″: <span className="text-stone-100 font-bold">{(-hoveredPoint.zImagOhm * 1000).toFixed(2)} mΩ</span>
+            <div className="text-fg-muted">
+              -Z″: <span className="text-fg font-bold">{(-hoveredPoint.zImagOhm * 1000).toFixed(2)} mΩ</span>
             </div>
-            <div className="text-stone-300">
-              |Z|: <span className="text-stone-100 font-bold">{(hoveredPoint.magnitudeOhm * 1000).toFixed(2)} mΩ</span>
+            <div className="text-fg-muted">
+              |Z|: <span className="text-fg font-bold">{(hoveredPoint.magnitudeOhm * 1000).toFixed(2)} mΩ</span>
             </div>
-            <div className="text-stone-300">
-              Phase: <span className="text-amber-400 font-bold">{hoveredPoint.phaseDeg.toFixed(1)}°</span>
+            <div className="text-fg-muted">
+              Phase: <span className="text-info-fg font-bold">{hoveredPoint.phaseDeg.toFixed(1)}°</span>
             </div>
           </div>
         )}
       </div>
 
-      <div className="w-full mt-3 flex items-center justify-between text-[11px] font-mono text-stone-400 border-t border-stone-800 pt-2 px-1">
+      <div className="w-full mt-3 flex items-center justify-between text-[11px] font-mono text-fg-muted border-t border-hairline pt-2.5 px-1">
         <span>High-Frequency &larr; (Inductive/Bulk Electrolyte)</span>
         <span>Low-Frequency (Warburg Diffusion) &rarr;</span>
       </div>

@@ -15,8 +15,10 @@ import {
   Send,
   Plus,
   X,
+  UserCheck,
 } from 'lucide-react';
 import type { FeedPost } from '@/lib/data/types';
+import { useBuilderIdentity } from '@/lib/builder-identity';
 
 export interface InlinePostComposerProps {
   onPostPublished?: (post: FeedPost) => void;
@@ -31,7 +33,11 @@ const KIND_ICONS: Record<PostKind, typeof Hammer> = {
 };
 
 export function InlinePostComposer({ onPostPublished, className }: InlinePostComposerProps) {
+  const { identity, updateIdentity } = useBuilderIdentity();
   const [expanded, setExpanded] = useState(false);
+  const [editingIdentity, setEditingIdentity] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const [handleDraft, setHandleDraft] = useState('');
   const [kind, setKind] = useState<PostKind>('update');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -52,6 +58,22 @@ export function InlinePostComposer({ onPostPublished, className }: InlinePostCom
     setTags(tags.filter((t) => t !== tag));
   };
 
+  const openIdentityEditor = () => {
+    setNameDraft(identity.name);
+    setHandleDraft(identity.handle);
+    setEditingIdentity(true);
+  };
+
+  const applyIdentityEdit = () => {
+    if (nameDraft.trim() || handleDraft.trim()) {
+      updateIdentity({
+        name: nameDraft.trim() || identity.name,
+        handle: handleDraft.trim() || identity.handle,
+      });
+    }
+    setEditingIdentity(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !body.trim()) return;
@@ -70,10 +92,10 @@ export function InlinePostComposer({ onPostPublished, className }: InlinePostCom
       id: `local-post-${Date.now()}`,
       kind,
       author: {
-        handle: 'community-builder',
-        name: 'You (Builder)',
-        headline: 'Open Hardware & Software Maker',
-        badges: [{ label: 'Maker', tone: 'design' }],
+        handle: identity.handle,
+        name: identity.name,
+        headline: identity.headline,
+        badges: [{ label: identity.badgeLabel, tone: 'design' }],
       },
       title: payload.title,
       body: payload.body,
@@ -92,13 +114,25 @@ export function InlinePostComposer({ onPostPublished, className }: InlinePostCom
 
       if (res.ok) {
         const data = await res.json().catch(() => null);
-        if (data?.post) {
-          onPostPublished?.(data.post);
+        onPostPublished?.(data?.post ?? optimisticPost);
+      } else {
+        const socialRes = await fetch('/api/social', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'publish_post',
+            ...payload,
+            authorName: identity.name,
+            authorHandle: identity.handle,
+            authorHeadline: identity.headline,
+          }),
+        });
+        if (socialRes.ok) {
+          const data = await socialRes.json().catch(() => null);
+          onPostPublished?.(data?.post ?? optimisticPost);
         } else {
           onPostPublished?.(optimisticPost);
         }
-      } else {
-        onPostPublished?.(optimisticPost);
       }
     } catch {
       onPostPublished?.(optimisticPost);
@@ -123,7 +157,7 @@ export function InlinePostComposer({ onPostPublished, className }: InlinePostCom
       {!expanded ? (
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Avatar name="Maker" tone="accent" size="md" />
+            <Avatar name={identity.name} tone="accent" size="md" />
             <button
               type="button"
               onClick={() => setExpanded(true)}
@@ -198,6 +232,49 @@ export function InlinePostComposer({ onPostPublished, className }: InlinePostCom
             >
               <X className="size-4" />
             </button>
+          </div>
+
+          {/* Author identity bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-hairline bg-sunken/70 px-3 py-2 text-[12px]">
+            {!editingIdentity ? (
+              <>
+                <span className="inline-flex items-center gap-1.5 text-fg-muted">
+                  <UserCheck className="size-3.5 text-accent" aria-hidden="true" />
+                  <span>Posting as</span>
+                  <strong className="font-semibold text-fg">{identity.name}</strong>
+                  <span className="font-mono text-fg-subtle">@{identity.handle}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={openIdentityEditor}
+                  className="font-display font-semibold text-accent-fg hover:underline"
+                >
+                  Edit name
+                </button>
+              </>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2 w-full">
+                <input
+                  type="text"
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  placeholder="Your full name"
+                  aria-label="Your name"
+                  className="h-7 rounded-lg border border-line bg-surface-1 px-2.5 text-[12px] text-fg focus:border-accent focus:outline-none flex-1 min-w-[130px]"
+                />
+                <input
+                  type="text"
+                  value={handleDraft}
+                  onChange={(e) => setHandleDraft(e.target.value)}
+                  placeholder="@handle"
+                  aria-label="Your handle"
+                  className="h-7 rounded-lg border border-line bg-surface-1 px-2.5 font-mono text-[12px] text-fg focus:border-accent focus:outline-none w-32"
+                />
+                <Button type="button" size="sm" variant="soft" onClick={applyIdentityEdit}>
+                  Save
+                </Button>
+              </div>
+            )}
           </div>
 
           <Input

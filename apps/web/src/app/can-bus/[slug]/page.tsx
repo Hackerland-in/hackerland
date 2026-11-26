@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { CAN_BUS_PROJECTS_REGISTRY, getCanBusProjectBySlug } from '@/lib/data/can-bus-data';
 import { simulateCanBus } from '@hackerland/core';
 import { CanDetailView } from '@/components/can-bus/can-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface CanDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -143,14 +145,25 @@ export default async function CanDetailPage({ params }: CanDetailPageProps) {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12 space-y-8">
-      {/* Schema.org Microdata */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="can_bus"
+        title={project.title}
+        subtitle={`${project.automotiveDomain} · Bit Timing & Bus Load Analyzer`}
+        category="CAN Bus Studio"
+        badge={`${project.nominalBaudRateKbps} kbps`}
+        backHref="/can-bus"
+        backLabel="All CAN Bus"
+        currentRoute={`/can-bus/${project.slug}`}
+      >
+        {/* Schema.org Microdata */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
 
-      <CanDetailView project={project} />
-    </div>
+        <CanDetailView project={project} />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

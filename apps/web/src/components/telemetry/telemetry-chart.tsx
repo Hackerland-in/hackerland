@@ -16,7 +16,6 @@ export function TelemetryChart({
   currentIndex,
   onSelectIndex,
 }: TelemetryChartProps) {
-  // Enabled channels map (by default show first 3 channels)
   const [activeChannels, setActiveChannels] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
     channels.forEach((ch, idx) => {
@@ -36,13 +35,12 @@ export function TelemetryChart({
 
   if (samples.length === 0 || visibleChannels.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-2xl border border-stone-800 bg-stone-950 p-6 text-stone-500 font-mono text-xs">
+      <div className="flex h-64 items-center justify-center rounded-2xl border border-hairline bg-surface-1 p-6 text-fg-subtle font-mono text-xs">
         No active channels selected or no samples recorded.
       </div>
     );
   }
 
-  // Chart dimensions
   const width = 800;
   const height = 260;
   const paddingLeft = 45;
@@ -53,7 +51,6 @@ export function TelemetryChart({
   const chartWidth = width - paddingLeft - paddingRight;
   const chartHeight = height - paddingTop - paddingBottom;
 
-  // Compute global min and max among all currently visible channels
   let globalMin = Number.POSITIVE_INFINITY;
   let globalMax = Number.NEGATIVE_INFINITY;
 
@@ -72,7 +69,6 @@ export function TelemetryChart({
     globalMax = 100;
   }
 
-  // Add 10% breathing room on top and bottom
   const range = globalMax - globalMin || 1;
   const yMin = globalMin - range * 0.1;
   const yMax = globalMax + range * 0.1;
@@ -87,39 +83,39 @@ export function TelemetryChart({
     return paddingTop + chartHeight - ((val - yMin) / effectiveRange) * chartHeight;
   };
 
-  // Playhead scrubber position
   const scrubberX = getX(currentIndex);
 
   return (
-    <div className="rounded-2xl border border-stone-800 bg-stone-950 p-4 shadow-sm">
-      {/* Channel toggle chips */}
+    <div className="rounded-2xl border border-hairline bg-surface-1 p-4 sm:p-5 shadow-xs">
+      {/* Channel toggles */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-mono text-stone-400 mr-2">CHANNELS:</span>
+        <span className="text-xs font-mono font-semibold text-fg-muted mr-2">CHANNELS:</span>
         {channels.map((ch) => {
           const isActive = activeChannels[ch.id] ?? false;
           return (
             <button
+              type="button"
               key={ch.id}
               onClick={() => toggleChannel(ch.id)}
-              className={`inline-flex items-center space-x-1.5 rounded-lg border px-2.5 py-1 text-xs font-mono transition-all ${
+              className={`inline-flex items-center space-x-1.5 rounded-full border px-3 py-1 text-xs font-mono transition-all ${
                 isActive
-                  ? 'border-stone-700 bg-stone-800 text-white shadow-sm'
-                  : 'border-stone-800 bg-stone-900/40 text-stone-500 hover:text-stone-300'
+                  ? 'border-accent/40 bg-accent-soft text-fg font-semibold shadow-xs'
+                  : 'border-hairline bg-sunken text-fg-subtle hover:text-fg'
               }`}
             >
               <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: isActive ? ch.color : '#525252' }}
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: isActive ? ch.color : '#cbd5e1' }}
               />
               <span>{ch.name}</span>
-              <span className="text-[10px] text-stone-400">({ch.unit})</span>
+              <span className="text-[10px] text-fg-muted">({ch.unit})</span>
             </button>
           );
         })}
       </div>
 
-      {/* SVG Canvas */}
-      <div className="relative w-full overflow-hidden">
+      {/* Scientific SVG Waveform Plot */}
+      <div className="relative w-full overflow-hidden rounded-xl border border-hairline bg-sunken/60 p-1">
         <svg
           viewBox={`0 0 ${width} ${height}`}
           className="w-full h-auto cursor-crosshair select-none"
@@ -133,7 +129,6 @@ export function TelemetryChart({
             onSelectIndex(newIndex);
           }}
         >
-          {/* Background Grid Lines */}
           {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
             const y = paddingTop + ratio * chartHeight;
             const valueAtY = yMax - ratio * effectiveRange;
@@ -144,7 +139,7 @@ export function TelemetryChart({
                   y1={y}
                   x2={width - paddingRight}
                   y2={y}
-                  stroke="#262626"
+                  stroke="#e5d5de"
                   strokeDasharray="4 4"
                   strokeWidth="1"
                 />
@@ -152,7 +147,7 @@ export function TelemetryChart({
                   x={paddingLeft - 8}
                   y={y + 3}
                   textAnchor="end"
-                  fill="#737373"
+                  fill="#64748b"
                   fontSize="10"
                   fontFamily="monospace"
                 >
@@ -162,7 +157,6 @@ export function TelemetryChart({
             );
           })}
 
-          {/* Time axis labels */}
           {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
             const idx = Math.min(samples.length - 1, Math.round(ratio * (samples.length - 1)));
             const s = samples[idx];
@@ -174,7 +168,7 @@ export function TelemetryChart({
                 x={x}
                 y={height - 8}
                 textAnchor="middle"
-                fill="#737373"
+                fill="#64748b"
                 fontSize="10"
                 fontFamily="monospace"
               >
@@ -183,7 +177,6 @@ export function TelemetryChart({
             );
           })}
 
-          {/* Traces for visible channels */}
           {visibleChannels.map((ch) => {
             const points: string[] = [];
             samples.forEach((s, i) => {
@@ -200,7 +193,7 @@ export function TelemetryChart({
                 key={`line-${ch.id}`}
                 fill="none"
                 stroke={ch.color}
-                strokeWidth="2"
+                strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 points={points.join(' ')}
@@ -208,18 +201,17 @@ export function TelemetryChart({
             );
           })}
 
-          {/* Current scrubber playback line */}
+          {/* Scrubber Playback Cursor */}
           <line
             x1={scrubberX}
             y1={paddingTop}
             x2={scrubberX}
             y2={height - paddingBottom}
-            stroke="#ffffff"
+            stroke="#e11d74"
             strokeWidth="1.5"
             strokeDasharray="3 3"
           />
 
-          {/* Scrubber pointer circle on active traces */}
           {visibleChannels.map((ch) => {
             const currentSample = samples[currentIndex];
             if (!currentSample) return null;
@@ -233,7 +225,7 @@ export function TelemetryChart({
                 cy={getY(val)}
                 r="4.5"
                 fill={ch.color}
-                stroke="#171717"
+                stroke="#ffffff"
                 strokeWidth="2"
               />
             );
@@ -241,18 +233,18 @@ export function TelemetryChart({
         </svg>
       </div>
 
-      {/* Live readout strip below chart */}
-      <div className="mt-3 flex flex-wrap items-center gap-4 border-t border-stone-800/80 pt-3">
-        <span className="text-xs font-mono text-stone-400">
-          T: <strong className="text-white">{((samples[currentIndex]?.timestampMs ?? 0) / 1000).toFixed(1)}s</strong>
+      {/* Live readout strip */}
+      <div className="mt-3 flex flex-wrap items-center gap-4 border-t border-hairline pt-3">
+        <span className="text-xs font-mono text-fg-muted">
+          T: <strong className="text-fg">{((samples[currentIndex]?.timestampMs ?? 0) / 1000).toFixed(1)}s</strong>
         </span>
         {visibleChannels.map((ch) => {
           const val = samples[currentIndex]?.values[ch.id];
           return (
             <div key={`readout-${ch.id}`} className="flex items-center space-x-1.5 text-xs font-mono">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: ch.color }} />
-              <span className="text-stone-400">{ch.name}:</span>
-              <span className="font-bold text-white">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ch.color }} />
+              <span className="text-fg-muted">{ch.name}:</span>
+              <span className="font-bold text-fg">
                 {val !== undefined ? val.toFixed(2) : '--'} {ch.unit}
               </span>
             </div>

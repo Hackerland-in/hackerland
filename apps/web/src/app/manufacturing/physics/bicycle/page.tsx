@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import { BicyclePhysicsSimulator } from '@/components/manufacturing/physics/bicycle-simulator';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
+import { SocialCommunityProvider } from '@/components/social/social-context';
 
 export const metadata: Metadata = {
   title: 'Bicycle Dynamics & Custom Component Physics Studio | Hackerland',
@@ -10,14 +12,24 @@ export const metadata: Metadata = {
 
 export default function BicycleStudioPage() {
   return (
-    <div className="container max-w-7xl mx-auto px-4 py-8 space-y-6">
-      <StudioBreadcrumb
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="physics"
         title="Bicycle Physics Studio"
+        subtitle="Gear ratio inches, cadence torque, aero CdA drag & custom e-assist drive mods"
         category="Multibody Dynamics"
         badge="Vector Forces & Custom Mods"
-        activeId="bicycle"
-      />
-      <BicyclePhysicsSimulator />
-    </div>
+        currentRoute="/manufacturing/physics/bicycle"
+        edgeToEdge
+      >
+        <BicyclePhysicsSimulator />
+        <StudioBreadcrumb
+          title="Bicycle Physics Studio"
+          category="Multibody Dynamics"
+          badge="Vector Forces & Custom Mods"
+          activeId="bicycle"
+        />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

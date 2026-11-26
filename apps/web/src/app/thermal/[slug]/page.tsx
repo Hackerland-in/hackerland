@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { THERMAL_PROFILES_REGISTRY } from '@/lib/data/thermal-data';
 import { calculateThermalDissipation } from '@hackerland/core';
 import { ThermalDetailView } from '@/components/thermal/thermal-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface ThermalDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -93,14 +95,25 @@ export default async function ThermalDetailPage({ params }: ThermalDetailPagePro
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12 space-y-8">
-      {/* Schema.org Article Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="thermal"
+        title={project.title}
+        subtitle={`${project.deviceType} · ${project.powerDissipationWatts}W Heatsink & Fin Solver`}
+        category="Thermal Studio"
+        badge={`${project.powerDissipationWatts}W`}
+        backHref="/thermal"
+        backLabel="All Thermal Labs"
+        currentRoute={`/thermal/${project.slug}`}
+      >
+        {/* Schema.org Article Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
 
-      <ThermalDetailView project={project} />
-    </div>
+        <ThermalDetailView project={project} />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

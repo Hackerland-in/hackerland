@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { getActiveBuilderIdentity } from '@/lib/builder-identity';
 
 export interface PersistedReply {
   id: string;
@@ -35,6 +36,15 @@ const DEFAULT_STARRED_PROJECTS = ['aeroglide'];
 
 const SocialCommunityContext = createContext<SocialCommunityContextValue | null>(null);
 
+function postSocialMutation(payload: Record<string, unknown>) {
+  if (typeof fetch !== 'function') return;
+  void fetch('/api/social', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+}
+
 export function SocialCommunityProvider({ children }: { children: ReactNode }) {
   const [followingHandles, setFollowingHandles] = useState<string[]>(DEFAULT_FOLLOWING);
   const [bookmarkedPostIds, setBookmarkedPostIds] = useState<string[]>([]);
@@ -44,16 +54,23 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
   const [postRepliesById, setPostRepliesById] = useState<Record<string, PersistedReply[]>>({});
 
   useEffect(() => {
+    let hasLocalState = false;
     try {
       const savedFollows = localStorage.getItem('hackerland_following_handles');
       if (savedFollows) {
         const parsed = JSON.parse(savedFollows);
-        if (Array.isArray(parsed)) setFollowingHandles(parsed);
+        if (Array.isArray(parsed)) {
+          setFollowingHandles(parsed);
+          hasLocalState = true;
+        }
       }
       const savedBookmarks = localStorage.getItem('hackerland_bookmarked_posts');
       if (savedBookmarks) {
         const parsed = JSON.parse(savedBookmarks);
-        if (Array.isArray(parsed)) setBookmarkedPostIds(parsed);
+        if (Array.isArray(parsed)) {
+          setBookmarkedPostIds(parsed);
+          hasLocalState = true;
+        }
       }
       const savedReposts = localStorage.getItem('hackerland_reposted_posts');
       if (savedReposts) {
@@ -78,7 +95,50 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
     } catch {
       // Ignore storage errors in sandboxed contexts
     }
+
+    if (typeof fetch !== 'function') return;
+    let active = true;
+    const identity = getActiveBuilderIdentity();
+    fetch(`/api/social?handle=${encodeURIComponent(identity.handle)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data) return;
+        if (!hasLocalState && data.graph) {
+          if (Array.isArray(data.graph.followedHandles)) {
+            setFollowingHandles(data.graph.followedHandles);
+          }
+          if (Array.isArray(data.graph.bookmarkedPostIds)) {
+            setBookmarkedPostIds(data.graph.bookmarkedPostIds);
+          }
+        }
+        if (data.repliesByPostId && typeof data.repliesByPostId === 'object') {
+          setPostRepliesById((prev) => ({
+            ...data.repliesByPostId,
+            ...prev,
+          }));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
   }, []);
+
+  const syncGraph = (
+    nextFollows: string[],
+    nextBookmarks: string[],
+    nextReposts: string[],
+  ) => {
+    const identity = getActiveBuilderIdentity();
+    postSocialMutation({
+      action: 'sync_graph',
+      handle: identity.handle,
+      followedHandles: nextFollows,
+      bookmarkedPostIds: nextBookmarks,
+      likedPostIds: nextReposts,
+    });
+  };
 
   const toggleFollow = (handle: string) => {
     setFollowingHandles((prev) => {
@@ -86,6 +146,7 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
       try {
         localStorage.setItem('hackerland_following_handles', JSON.stringify(next));
       } catch {}
+      syncGraph(next, bookmarkedPostIds, repostedPostIds);
       return next;
     });
   };
@@ -96,6 +157,7 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
       try {
         localStorage.setItem('hackerland_bookmarked_posts', JSON.stringify(next));
       } catch {}
+      syncGraph(followingHandles, next, repostedPostIds);
       return next;
     });
   };
@@ -106,6 +168,7 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
       try {
         localStorage.setItem('hackerland_reposted_posts', JSON.stringify(next));
       } catch {}
+      syncGraph(followingHandles, bookmarkedPostIds, next);
       return next;
     });
   };
@@ -133,11 +196,12 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
   const addPostReply = (postId: string, body: string) => {
     const trimmed = body.trim();
     if (!trimmed) return;
+    const identity = getActiveBuilderIdentity();
     setPostRepliesById((prev) => {
       const reply: PersistedReply = {
         id: `${postId}-reply-${Date.now()}`,
-        authorName: 'You (Builder)',
-        authorHandle: 'community-builder',
+        authorName: identity.name,
+        authorHandle: identity.handle,
         body: trimmed,
         timeAgo: 'Just now',
       };
@@ -149,6 +213,13 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('hackerland_post_replies', JSON.stringify(next));
       } catch {}
       return next;
+    });
+    postSocialMutation({
+      action: 'reply',
+      postId,
+      authorName: identity.name,
+      authorHandle: identity.handle,
+      body: trimmed,
     });
   };
 
@@ -228,14 +299,15 @@ export function useSocialCommunity(): SocialCommunityContextValue {
     addPostReply: (postId, body) => {
       const trimmed = body.trim();
       if (!trimmed) return;
+      const identity = getActiveBuilderIdentity();
       setLocalReplies((prev) => ({
         ...prev,
         [postId]: [
           ...(prev[postId] ?? []),
           {
             id: `${postId}-reply-${Date.now()}`,
-            authorName: 'You (Builder)',
-            authorHandle: 'community-builder',
+            authorName: identity.name,
+            authorHandle: identity.handle,
             body: trimmed,
             timeAgo: 'Just now',
           },

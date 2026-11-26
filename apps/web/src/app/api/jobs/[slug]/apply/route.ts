@@ -1,9 +1,10 @@
-import { getJobBySlug } from '@/lib/data/jobs-data';
+import { saveJobApplication } from '@/lib/data/community-workflows-store';
 import {
-  getJobApplication,
-  listJobApplications,
-  saveJobApplication,
-} from '@/lib/data/community-workflows-store';
+  hydrateAllJobApplications,
+  hydrateJobApplication,
+  persistJobApplication,
+} from '@/lib/data/community-workflows-server';
+import { getJobBySlug } from '@/lib/data/jobs-data';
 
 export async function GET(
   _request: Request,
@@ -11,13 +12,15 @@ export async function GET(
 ) {
   const { slug } = await params;
   if (slug === '_all') {
-    return Response.json({ success: true, applications: listJobApplications() });
+    const applications = await hydrateAllJobApplications();
+    return Response.json({ success: true, applications });
   }
   const job = getJobBySlug(slug);
   if (!job) {
     return Response.json({ error: 'job_not_found' }, { status: 404 });
   }
-  return Response.json({ success: true, application: getJobApplication(slug) });
+  const application = await hydrateJobApplication(slug);
+  return Response.json({ success: true, application });
 }
 
 export async function POST(
@@ -57,6 +60,7 @@ export async function POST(
     proofUrl,
     hardwareBugStory,
   });
+  await persistJobApplication(slug);
 
   return Response.json({ success: true, application }, { status: 201 });
 }

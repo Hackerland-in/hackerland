@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import {
   InjectionMoldingSimulator,
@@ -10,6 +11,7 @@ import {
   ThermalHeatsinkSimulator,
   CleanroomSimulator,
 } from '@/components/manufacturing/simulators/advanced-industrial-simulators';
+import { SocialCommunityProvider } from '@/components/social/social-context';
 
 export default function IndustrialToolsStudioPage() {
   const [activeTab, setActiveTab] = useState<
@@ -26,43 +28,52 @@ export default function IndustrialToolsStudioPage() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6 min-w-0">
-      <StudioBreadcrumb
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="sim_preset"
         title="Industrial Workshop & Factory Tooling Engines"
-        category="Tooling & Production Engineering"
+        subtitle="Injection molding clamp tonnage, sheet metal K-factor, nickel spot weld & BLDC stator calcs"
+        category="Production Tooling"
         badge="6 Industrial Calculators"
-        activeId="tools"
-      />
+        currentRoute="/manufacturing/tools"
+        edgeToEdge
+      >
+        <div className="space-y-4 rounded-2xl border border-hairline bg-surface-1 p-5 sm:p-6 shadow-xs">
+          {/* Tool selector pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            {tools.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                className={`px-3.5 py-1.5 rounded-lg text-body-xs font-medium whitespace-nowrap transition-all border ${
+                  activeTab === tab.id
+                    ? 'border-accent bg-accent/15 text-accent font-semibold shadow-sm'
+                    : 'border-hairline bg-surface-2 text-fg-muted hover:text-fg hover:border-hairline-strong'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-      <div className="space-y-4 rounded-xl border border-hairline bg-surface-1 p-6">
-        {/* Tool selector pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
-          {tools.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`px-3.5 py-1.5 rounded-lg text-body-xs font-medium whitespace-nowrap transition-all border ${
-                activeTab === tab.id
-                  ? 'border-accent bg-accent/15 text-accent font-semibold shadow-sm'
-                  : 'border-hairline bg-surface-2 text-fg-muted hover:text-fg hover:border-hairline-strong'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          <div className="pt-2">
+            {activeTab === 'injection' && <InjectionMoldingSimulator />}
+            {activeTab === 'sheet_metal' && <SheetMetalBendSimulator />}
+            {activeTab === 'battery_weld' && <BatteryWeldingSimulator />}
+            {activeTab === 'bldc_winding' && <BLDCMotorSimulator />}
+            {activeTab === 'thermal' && <ThermalHeatsinkSimulator />}
+            {activeTab === 'cleanroom' && <CleanroomSimulator />}
+          </div>
         </div>
 
-        {/* Selected Industrial Calculator */}
-        <div className="pt-2">
-          {activeTab === 'injection' && <InjectionMoldingSimulator />}
-          {activeTab === 'sheet_metal' && <SheetMetalBendSimulator />}
-          {activeTab === 'battery_weld' && <BatteryWeldingSimulator />}
-          {activeTab === 'bldc_winding' && <BLDCMotorSimulator />}
-          {activeTab === 'thermal' && <ThermalHeatsinkSimulator />}
-          {activeTab === 'cleanroom' && <CleanroomSimulator />}
-        </div>
-      </div>
-    </div>
+        <StudioBreadcrumb
+          title="Industrial Workshop & Factory Tooling Engines"
+          category="Tooling & Production Engineering"
+          badge="6 Industrial Calculators"
+          activeId="tools"
+        />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

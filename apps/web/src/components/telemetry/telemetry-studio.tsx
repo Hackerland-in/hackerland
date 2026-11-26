@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
-import type { TelemetryProfile, TelemetrySample } from '@hackerland/core';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { TelemetryProfile } from '@hackerland/core';
 import {
   computeTelemetryStats,
   detectTelemetryAnomalies,
   parseCsvTelemetry,
 } from '@hackerland/core';
+import { Button } from '@hackerland/ui';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
 import { AttitudeIndicator } from './attitude-indicator';
 import { BmsCellMatrix } from './bms-cell-matrix';
 import { TelemetryChart } from './telemetry-chart';
@@ -16,6 +18,7 @@ interface TelemetryStudioProps {
 }
 
 export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
+  const labShell = useLabShell();
   const [selectedProfileId, setSelectedProfileId] = useState<string>(
     initialProfiles[0]?.id ?? 'tel_garuda_drone',
   );
@@ -39,8 +42,26 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
   const samples = activeProfile.recordedSamples;
   const currentSample = samples[currentIndex] ?? samples[0];
 
-  // Playback timer loop
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: `${activeProfile.title} Telemetry Log`,
+        summary: `${samples.length} samples across ${activeProfile.channels.length} channels (${activeProfile.hardwareBoard}).`,
+        tags: ['telemetry', activeProfile.deviceType],
+        payload: { activeProfile },
+      }),
+      onLoad: (ws) => {
+        const saved = ws.payload?.activeProfile as TelemetryProfile | undefined;
+        if (saved && Array.isArray(saved.recordedSamples)) {
+          setProfiles((prev) => [saved, ...prev.filter((p) => p.id !== saved.id)]);
+          setSelectedProfileId(saved.id);
+          setCurrentIndex(0);
+        }
+      },
+    });
+  }, [labShell, activeProfile, samples.length]);
 
   useEffect(() => {
     if (!isPlaying || samples.length <= 1) {
@@ -51,12 +72,7 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
     const intervalMs = Math.max(50, 500 / playbackSpeed);
 
     timerRef.current = setInterval(() => {
-      setCurrentIndex((prev) => {
-        if (prev >= samples.length - 1) {
-          return 0; // loop back to beginning
-        }
-        return prev + 1;
-      });
+      setCurrentIndex((prev) => (prev >= samples.length - 1 ? 0 : prev + 1));
     }, intervalMs);
 
     return () => {
@@ -64,19 +80,16 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
     };
   }, [isPlaying, playbackSpeed, samples.length]);
 
-  // When profile changes, reset index to 0
   const handleSelectProfile = (id: string) => {
     setSelectedProfileId(id);
     setCurrentIndex(0);
     setIsPlaying(true);
   };
 
-  // Compute anomalies across profile
   const anomalies = useMemo(() => {
     return detectTelemetryAnomalies(samples, activeProfile.channels);
   }, [samples, activeProfile.channels]);
 
-  // WebSerial handler
   const handleToggleWebSerial = async () => {
     if (serialConnected) {
       setSerialConnected(false);
@@ -90,7 +103,6 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
           ...prev,
           `[SYSTEM] Requesting WebSerial port at ${baudRate} baud...`,
         ]);
-        // Request port in modern Chromium/Edge
         const nav = navigator as unknown as { serial: { requestPort: () => Promise<unknown> } };
         await nav.serial.requestPort();
         setSerialConnected(true);
@@ -103,18 +115,16 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
         setSerialLog((prev) => [...prev, `[ERROR] Serial connection aborted: ${msg}`]);
       }
     } else {
-      // Browser fallback simulation
       setSerialConnected(true);
       setSerialLog((prev) => [
         ...prev,
-        `[FALLBACK] WebSerial API not natively supported on this browser engine. Starting virtual hardware bridge at ${baudRate} baud.`,
+        `[VIRTUAL BRIDGE] Started WebSerial virtual stream at ${baudRate} baud.`,
         `[UART] $GNGGA,123519,1258.1234,N,07735.4321,E,1,08,0.9,915.2,M,46.9,M,,*47`,
         `[UART] $BMS,V=57.42,I=-32.1,T_MAX=38.4,SOC=82.4,DELTA_MV=22*5A`,
       ]);
     }
   };
 
-  // CSV Importer
   const handleImportCsv = () => {
     setCsvError(null);
     if (!csvInput.trim()) {
@@ -137,12 +147,12 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
       id: `tel_custom_${Date.now()}`,
       slug: `custom-telemetry-${Date.now()}`,
       title: 'Imported Custom Telemetry Stream',
-      subtitle: `User uploaded log with ${parsed.channels.length} channels and ${parsed.samples.length} samples`,
+      subtitle: `Uploaded CSV with ${parsed.channels.length} channels and ${parsed.samples.length} samples`,
       deviceType: 'custom',
       hardwareBoard: 'Custom Serial / CSV Log',
       firmwareStack: 'Custom Firmware',
       sampleRateHz: 1,
-      description: 'Custom timeseries telemetry stream imported directly into Hackerland OS.',
+      description: 'Custom timeseries telemetry stream imported directly into Hackerland Telemetry Studio.',
       channels: parsed.channels.map((ch, idx) => ({
         id: ch,
         name: ch.toUpperCase().replace(/_/g, ' '),
@@ -150,7 +160,7 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
         type: 'custom',
         minNominal: 0,
         maxNominal: 100,
-        color: ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'][idx % 6] ?? '#3b82f6',
+        color: ['#e11d74', '#2563eb', '#059669', '#d97706', '#7c3aed', '#0891b2'][idx % 6] ?? '#e11d74',
       })),
       recordedSamples: parsed.samples,
     };
@@ -160,9 +170,15 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
     setCurrentIndex(0);
     setShowCsvModal(false);
     setCsvInput('');
+
+    void labShell?.saveWorkspace({
+      title: newProfile.title,
+      summary: newProfile.subtitle,
+      tags: ['telemetry', 'csv-import'],
+      payload: { activeProfile: newProfile },
+    });
   };
 
-  // Export current telemetry to CSV
   const handleExportCsv = () => {
     if (samples.length === 0) return;
     const headers = ['time_ms', ...activeProfile.channels.map((c) => c.id)];
@@ -180,106 +196,94 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header and Profile Switcher */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className="space-y-5">
+      {/* Header and Profile Actions */}
+      <div className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 shadow-xs flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <div className="flex items-center space-x-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-mono font-medium tracking-wider text-emerald-400 uppercase">
-              Hackerland Mission Control // Digital Twin Telemetry
+          <div className="inline-flex items-center space-x-2 rounded-full bg-accent/10 px-3 py-1">
+            <span className="flex h-2 w-2 rounded-full bg-accent animate-pulse" />
+            <span className="text-[11px] font-mono font-semibold tracking-wider text-accent-fg uppercase">
+              Hackerland Mission Control · Digital Twin Telemetry
             </span>
           </div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-fg sm:text-3xl">
             {activeProfile.title}
           </h1>
-          <p className="mt-1 text-sm text-stone-400 max-w-3xl">{activeProfile.subtitle}</p>
+          <p className="mt-1 text-sm text-fg-muted max-w-3xl">{activeProfile.subtitle}</p>
         </div>
 
-        {/* Global Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          <button
+          <Button
+            type="button"
+            size="sm"
+            variant={serialConnected ? 'soft' : 'secondary'}
             onClick={() => setShowWebSerial(!showWebSerial)}
-            className={`inline-flex items-center space-x-1.5 rounded-xl border px-3 py-1.5 text-xs font-mono font-medium transition-all ${
-              serialConnected
-                ? 'border-emerald-500/60 bg-emerald-950/40 text-emerald-300'
-                : 'border-stone-700 bg-stone-900 text-stone-300 hover:border-stone-600 hover:text-white'
-            }`}
           >
-            <span className={`h-2 w-2 rounded-full ${serialConnected ? 'bg-emerald-400 animate-ping' : 'bg-stone-500'}`} />
+            <span className={`h-2 w-2 rounded-full ${serialConnected ? 'bg-success animate-ping' : 'bg-fg-subtle'}`} />
             <span>{serialConnected ? 'WebSerial Live' : 'Connect WebSerial'}</span>
-          </button>
+          </Button>
 
-          <button
-            onClick={() => setShowCsvModal(true)}
-            className="inline-flex items-center space-x-1.5 rounded-xl border border-stone-700 bg-stone-900 px-3 py-1.5 text-xs font-mono text-stone-300 hover:border-stone-600 hover:text-white transition-all"
-          >
-            <svg className="h-3.5 w-3.5 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
+          <Button type="button" size="sm" variant="secondary" onClick={() => setShowCsvModal(true)}>
             <span>Import CSV</span>
-          </button>
+          </Button>
 
-          <button
-            onClick={handleExportCsv}
-            className="inline-flex items-center space-x-1.5 rounded-xl border border-stone-700 bg-stone-900 px-3 py-1.5 text-xs font-mono text-stone-300 hover:border-stone-600 hover:text-white transition-all"
-          >
-            <svg className="h-3.5 w-3.5 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
+          <Button type="button" size="sm" variant="primary" onClick={handleExportCsv}>
             <span>Export CSV</span>
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* Profile Selector Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-stone-800 pb-3">
+      {/* Profile Selector Pills */}
+      <div className="flex flex-wrap gap-2">
         {profiles.map((p) => {
           const isSelected = p.id === selectedProfileId;
           return (
             <button
+              type="button"
               key={p.id}
               onClick={() => handleSelectProfile(p.id)}
-              className={`rounded-xl px-3.5 py-2 text-xs font-medium transition-all ${
+              className={`rounded-xl px-4 py-2 text-xs text-left transition-all border ${
                 isSelected
-                  ? 'border border-amber-500/50 bg-amber-500/10 text-amber-300 shadow-sm'
-                  : 'border border-stone-800 bg-stone-900/60 text-stone-400 hover:border-stone-700 hover:text-stone-200'
+                  ? 'border-accent bg-accent-soft text-fg shadow-xs ring-1 ring-accent/25'
+                  : 'border-hairline bg-surface-1 text-fg-muted hover:border-accent/35 hover:text-fg'
               }`}
             >
-              <div className="font-semibold">{p.title.split(' ')[0]} {p.title.split(' ')[1]}</div>
-              <div className="text-[10px] text-stone-500 font-mono">{p.deviceType.replace('_', ' ').toUpperCase()}</div>
+              <div className="font-display font-bold">{p.title.split(' ')[0]} {p.title.split(' ')[1]}</div>
+              <div className="text-[10px] text-accent-fg font-mono">{p.deviceType.replace('_', ' ').toUpperCase()}</div>
             </button>
           );
         })}
       </div>
 
-      {/* WebSerial Connect Modal / Drawer */}
+      {/* WebSerial Drawer */}
       {showWebSerial && (
-        <div className="rounded-2xl border border-stone-800 bg-stone-950 p-4 shadow-md space-y-3">
+        <div className="rounded-2xl border border-hairline bg-surface-1 p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="font-mono text-xs font-bold text-white">HARDWARE SERIAL BUS (UART / USB-CDC)</span>
-              <span className="text-xs text-stone-400">Direct physical hardware debugging</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-xs font-bold text-fg">HARDWARE SERIAL BUS (UART / USB-CDC)</span>
+              <span className="text-xs text-fg-muted">Direct physical hardware debugging</span>
             </div>
             <button
+              type="button"
               onClick={() => setShowWebSerial(false)}
-              className="text-stone-400 hover:text-white text-xs font-mono"
+              className="text-fg-muted hover:text-fg text-xs font-mono"
             >
               ✕ Close
             </button>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <label className="text-xs font-mono text-stone-400">
+            <label className="text-xs font-mono text-fg-muted">
               Baud Rate:
               <select
                 value={baudRate}
                 onChange={(e) => setBaudRate(Number(e.target.value))}
                 disabled={serialConnected}
-                className="ml-2 rounded-lg border border-stone-700 bg-stone-900 px-2.5 py-1 text-xs font-mono text-white"
+                className="ml-2 rounded-lg border border-line bg-sunken px-2.5 py-1 text-xs font-mono text-fg"
               >
                 <option value={9600}>9600</option>
                 <option value={57600}>57600</option>
@@ -288,34 +292,33 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
               </select>
             </label>
 
-            <button
+            <Button
+              type="button"
+              size="sm"
+              variant={serialConnected ? 'secondary' : 'primary'}
               onClick={handleToggleWebSerial}
-              className={`rounded-xl px-4 py-1.5 text-xs font-mono font-medium transition-all ${
-                serialConnected
-                  ? 'bg-red-900/40 text-red-300 border border-red-700/60 hover:bg-red-900/60'
-                  : 'bg-emerald-600 text-white hover:bg-emerald-500'
-              }`}
             >
               {serialConnected ? 'Disconnect Port' : 'Open Serial Port'}
-            </button>
+            </Button>
 
-            <button
+            <Button
+              type="button"
+              size="sm"
+              variant="soft"
               onClick={() => {
                 setSerialLog((prev) => [
                   ...prev,
                   `[UART INJECT] $SYS,STATUS=OK,V_IN=12.24,PWR=18.4W,CHKSUM=0x9A`,
                 ]);
               }}
-              className="rounded-xl border border-stone-700 bg-stone-900 px-3 py-1.5 text-xs font-mono text-stone-300 hover:text-white"
             >
               Inject Telemetry Packet
-            </button>
+            </Button>
           </div>
 
-          {/* Serial Terminal View */}
-          <div className="h-32 overflow-y-auto rounded-xl border border-stone-900 bg-black p-3 font-mono text-[11px] text-emerald-400 space-y-1">
+          <div className="h-32 overflow-y-auto rounded-xl border border-hairline bg-sunken p-3 font-mono text-[11px] text-accent-fg space-y-1">
             {serialLog.length === 0 ? (
-              <span className="text-stone-600">// No serial packets received yet. Click &apos;Open Serial Port&apos; to listen.</span>
+              <span className="text-fg-subtle">{`// No serial packets received yet. Click 'Open Serial Port' to listen.`}</span>
             ) : (
               serialLog.map((log, idx) => <div key={`log-${idx}`}>{log}</div>)
             )}
@@ -325,19 +328,24 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
 
       {/* CSV Import Modal */}
       {showCsvModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-xl rounded-2xl border border-stone-800 bg-stone-950 p-6 shadow-2xl space-y-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-fg/35 backdrop-blur-sm p-4"
+        >
+          <div className="w-full max-w-xl rounded-2xl border border-hairline bg-surface-1 p-6 shadow-overlay space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">Import Telemetry CSV Log</h3>
+              <h3 className="font-display text-lg font-bold text-fg">Import Telemetry CSV Log</h3>
               <button
+                type="button"
                 onClick={() => setShowCsvModal(false)}
-                className="text-stone-400 hover:text-white font-mono text-sm"
+                className="text-fg-subtle hover:text-fg font-mono text-sm"
               >
                 ✕
               </button>
             </div>
-            <p className="text-xs text-stone-400">
-              Paste standard CSV timeseries. The first column can be <code className="text-amber-400 font-mono">time_ms</code> or <code className="text-amber-400 font-mono">timestamp</code>, followed by numerical sensor channels.
+            <p className="text-xs text-fg-muted">
+              Paste standard CSV timeseries. The first column can be <code className="text-accent-fg font-mono">time_ms</code> or <code className="text-accent-fg font-mono">timestamp</code>, followed by numerical sensor channels.
             </p>
 
             <textarea
@@ -345,105 +353,90 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
               value={csvInput}
               onChange={(e) => setCsvInput(e.target.value)}
               placeholder="time_ms,altitude_m,speed_mps,current_a&#10;0,10.2,4.5,12.0&#10;1000,15.8,7.2,18.4&#10;2000,22.1,9.8,24.1"
-              className="w-full rounded-xl border border-stone-800 bg-stone-900 p-3 font-mono text-xs text-stone-200 placeholder:text-stone-600 focus:border-amber-500 focus:outline-none"
+              className="w-full rounded-xl border border-line bg-sunken p-3 font-mono text-xs text-fg placeholder:text-fg-subtle focus:border-accent focus:outline-none"
             />
 
             {csvError && (
-              <div className="rounded-xl border border-red-500/40 bg-red-950/30 p-2 text-xs font-mono text-red-300">
+              <div className="rounded-xl border border-danger/35 bg-danger/10 p-2 text-xs font-mono text-danger-fg">
                 {csvError}
               </div>
             )}
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <button
+                type="button"
                 onClick={() => {
                   setCsvInput(
-                    `time_ms,voltage_v,current_a,temp_c\n0,12.4,1.2,28.4\n1000,12.2,2.8,31.2\n2000,11.9,4.5,35.6\n3000,11.5,5.8,39.1\n4000,11.1,6.2,42.5`
+                    `time_ms,voltage_v,current_a,temp_c\n0,12.4,1.2,28.4\n1000,12.2,2.8,31.2\n2000,11.9,4.5,35.6\n3000,11.5,5.8,39.1\n4000,11.1,6.2,42.5`,
                   );
                 }}
-                className="text-xs font-mono text-amber-400 hover:underline"
+                className="text-xs font-mono font-semibold text-accent-fg hover:underline"
               >
                 Load Sample Drone Flight Log
               </button>
-              <div className="space-x-2">
-                <button
-                  onClick={() => setShowCsvModal(false)}
-                  className="rounded-xl border border-stone-800 px-4 py-2 text-xs font-mono text-stone-400 hover:text-white"
-                >
+              <div className="flex items-center gap-2">
+                <Button type="button" size="sm" variant="ghost" onClick={() => setShowCsvModal(false)}>
                   Cancel
-                </button>
-                <button
-                  onClick={handleImportCsv}
-                  className="rounded-xl bg-amber-500 px-4 py-2 text-xs font-mono font-bold text-stone-950 hover:bg-amber-400"
-                >
+                </Button>
+                <Button type="button" size="sm" variant="primary" onClick={handleImportCsv}>
                   Parse &amp; Visualize
-                </button>
+                </Button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Main Mission Control Playback Scrubber Bar */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-stone-800 bg-stone-950 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
+      {/* Playback Scrubber Bar */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-hairline bg-surface-1 p-4 shadow-xs md:flex-row md:items-center md:justify-between">
         <div className="flex items-center space-x-2">
-          {/* Play/Pause */}
-          <button
+          <Button
+            type="button"
+            size="sm"
+            variant="primary"
             onClick={() => setIsPlaying(!isPlaying)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-stone-950 hover:bg-stone-200 transition-all"
             title={isPlaying ? 'Pause stream' : 'Play stream'}
           >
-            {isPlaying ? (
-              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                <rect x="6" y="4" width="4" height="16" />
-                <rect x="14" y="4" width="4" height="16" />
-              </svg>
-            ) : (
-              <svg className="h-4 w-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            )}
-          </button>
+            {isPlaying ? 'Pause' : 'Play'}
+          </Button>
 
-          {/* Reset / Rewind */}
           <button
+            type="button"
             onClick={() => setCurrentIndex(0)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-stone-800 bg-stone-900 text-stone-400 hover:text-white"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-hairline bg-sunken text-fg-muted hover:text-fg"
             title="Rewind to start"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            </svg>
+            «
           </button>
 
-          {/* Step Back */}
           <button
+            type="button"
             onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-stone-800 bg-stone-900 text-stone-400 hover:text-white"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-hairline bg-sunken text-fg-muted hover:text-fg"
             title="Step 1 frame back"
           >
             ‹
           </button>
 
-          {/* Step Forward */}
           <button
+            type="button"
             onClick={() => setCurrentIndex((prev) => Math.min(samples.length - 1, prev + 1))}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-stone-800 bg-stone-900 text-stone-400 hover:text-white"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-hairline bg-sunken text-fg-muted hover:text-fg"
             title="Step 1 frame forward"
           >
             ›
           </button>
 
-          {/* Speed Selector */}
-          <div className="flex items-center space-x-1 rounded-xl border border-stone-800 bg-stone-900 p-1">
+          <div className="flex items-center space-x-1 rounded-xl border border-hairline bg-sunken p-1">
             {[0.5, 1, 2, 5].map((speed) => (
               <button
+                type="button"
                 key={speed}
                 onClick={() => setPlaybackSpeed(speed)}
                 className={`rounded-lg px-2 py-0.5 text-xs font-mono font-medium transition-all ${
                   playbackSpeed === speed
-                    ? 'bg-stone-800 text-white font-bold'
-                    : 'text-stone-400 hover:text-stone-200'
+                    ? 'bg-accent text-on-solid font-bold'
+                    : 'text-fg-muted hover:text-fg'
                 }`}
               >
                 {speed}x
@@ -452,7 +445,6 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
           </div>
         </div>
 
-        {/* Timeline Slider and Timestamp Readout */}
         <div className="flex flex-1 items-center space-x-4 max-w-xl">
           <input
             type="range"
@@ -460,23 +452,21 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
             max={Math.max(0, samples.length - 1)}
             value={currentIndex}
             onChange={(e) => setCurrentIndex(Number(e.target.value))}
-            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-stone-800 accent-amber-500"
+            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-surface-2 accent-accent"
           />
-          <span className="font-mono text-xs text-stone-400 whitespace-nowrap">
+          <span className="font-mono text-xs text-fg-muted whitespace-nowrap">
             {((currentSample?.timestampMs ?? 0) / 1000).toFixed(1)}s /{' '}
             {((samples[samples.length - 1]?.timestampMs ?? 0) / 1000).toFixed(1)}s
           </span>
         </div>
 
-        {/* Frame Count */}
-        <div className="font-mono text-xs text-stone-500">
-          Sample: <strong className="text-white">{currentIndex + 1}</strong> / {samples.length}
+        <div className="font-mono text-xs text-fg-muted">
+          Sample: <strong className="text-fg">{currentIndex + 1}</strong> / {samples.length}
         </div>
       </div>
 
-      {/* Main Grid: Telemetry Graph & Domain Visualizer */}
+      {/* Main Twin Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Main Timeseries Oscilloscope */}
         <div className="lg:col-span-2 space-y-4">
           <TelemetryChart
             channels={activeProfile.channels}
@@ -485,7 +475,6 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
             onSelectIndex={setCurrentIndex}
           />
 
-          {/* Channel Stats Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {activeProfile.channels.slice(0, 4).map((ch) => {
               const stats = computeTelemetryStats(samples, ch.id);
@@ -494,17 +483,17 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
               return (
                 <div
                   key={`stat-${ch.id}`}
-                  className="rounded-2xl border border-stone-800 bg-stone-950 p-3.5 shadow-sm"
+                  className="rounded-2xl border border-hairline bg-surface-1 p-3.5 shadow-xs"
                 >
-                  <div className="flex items-center justify-between text-[11px] font-mono text-stone-400">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-fg-muted">
                     <span className="truncate">{ch.name}</span>
-                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: ch.color }} />
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ch.color }} />
                   </div>
-                  <div className="mt-2 text-xl font-bold font-mono text-white tracking-tight">
+                  <div className="mt-2 text-xl font-bold font-mono text-fg tracking-tight">
                     {currentVal.toFixed(1)}
-                    <span className="text-xs font-normal text-stone-400 ml-1">{ch.unit}</span>
+                    <span className="text-xs font-normal text-fg-subtle ml-1">{ch.unit}</span>
                   </div>
-                  <div className="mt-2 flex items-center justify-between border-t border-stone-800/80 pt-1.5 text-[10px] font-mono text-stone-500">
+                  <div className="mt-2 flex items-center justify-between border-t border-hairline pt-1.5 text-[10px] font-mono text-fg-subtle">
                     <span>MIN: {stats.min}</span>
                     <span>AVG: {stats.mean}</span>
                     <span>MAX: {stats.max}</span>
@@ -515,7 +504,6 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
           </div>
         </div>
 
-        {/* Right 1 Col: Dynamic Hardware Physical Twin Visualizers */}
         <div className="space-y-4">
           {activeProfile.deviceType === 'drone_uav' && (
             <div className="space-y-4">
@@ -527,31 +515,30 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
                 />
               </div>
 
-              {/* Avionics Info */}
-              <div className="rounded-2xl border border-stone-800 bg-stone-950 p-4 space-y-2">
-                <h4 className="text-xs font-mono font-bold text-stone-300 uppercase tracking-wider">
+              <div className="rounded-2xl border border-hairline bg-surface-1 p-4 space-y-2 shadow-xs">
+                <h4 className="font-display text-xs font-bold text-fg uppercase tracking-wider">
                   Avionics &amp; GNSS RTK Lock
                 </h4>
                 <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                  <div className="rounded-xl border border-stone-800 bg-stone-900/60 p-2">
-                    <span className="text-stone-500 block text-[10px]">FLIGHT STACK</span>
-                    <span className="text-white font-bold">{activeProfile.firmwareStack}</span>
+                  <div className="rounded-xl border border-hairline bg-sunken p-2.5">
+                    <span className="text-fg-subtle block text-[10px]">FLIGHT STACK</span>
+                    <span className="text-fg font-bold">{activeProfile.firmwareStack}</span>
                   </div>
-                  <div className="rounded-xl border border-stone-800 bg-stone-900/60 p-2">
-                    <span className="text-stone-500 block text-[10px]">RTK SATELLITES</span>
-                    <span className="text-emerald-400 font-bold">
+                  <div className="rounded-xl border border-hairline bg-sunken p-2.5">
+                    <span className="text-fg-subtle block text-[10px]">RTK SATELLITES</span>
+                    <span className="text-success-fg font-bold">
                       {currentSample?.values['gps_sats'] ?? 24} Fixed (F9P)
                     </span>
                   </div>
-                  <div className="rounded-xl border border-stone-800 bg-stone-900/60 p-2">
-                    <span className="text-stone-500 block text-[10px]">BARO ALTITUDE</span>
-                    <span className="text-sky-400 font-bold">
+                  <div className="rounded-xl border border-hairline bg-sunken p-2.5">
+                    <span className="text-fg-subtle block text-[10px]">BARO ALTITUDE</span>
+                    <span className="text-info-fg font-bold">
                       {currentSample?.values['altitude_m'] ?? 0} m
                     </span>
                   </div>
-                  <div className="rounded-xl border border-stone-800 bg-stone-900/60 p-2">
-                    <span className="text-stone-500 block text-[10px]">PAYLOAD SPRAY</span>
-                    <span className="text-cyan-400 font-bold">
+                  <div className="rounded-xl border border-hairline bg-sunken p-2.5">
+                    <span className="text-fg-subtle block text-[10px]">PAYLOAD SPRAY</span>
+                    <span className="text-accent-fg font-bold">
                       {currentSample?.values['payload_liters'] ?? 16} L
                     </span>
                   </div>
@@ -568,20 +555,20 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
                 cellCount={16}
               />
 
-              <div className="rounded-2xl border border-stone-800 bg-stone-950 p-4 space-y-2">
-                <h4 className="text-xs font-mono font-bold text-stone-300 uppercase tracking-wider">
+              <div className="rounded-2xl border border-hairline bg-surface-1 p-4 space-y-2 shadow-xs">
+                <h4 className="font-display text-xs font-bold text-fg uppercase tracking-wider">
                   Powertrain Thermal Safety
                 </h4>
                 <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                  <div className="rounded-xl border border-stone-800 bg-stone-900/60 p-2">
-                    <span className="text-stone-500 block text-[10px]">INVERTER MOSFET</span>
-                    <span className="text-rose-400 font-bold">
+                  <div className="rounded-xl border border-hairline bg-sunken p-2.5">
+                    <span className="text-fg-subtle block text-[10px]">INVERTER MOSFET</span>
+                    <span className="text-accent-fg font-bold">
                       {currentSample?.values['inverter_temp_c'] ?? 36} °C
                     </span>
                   </div>
-                  <div className="rounded-xl border border-stone-800 bg-stone-900/60 p-2">
-                    <span className="text-stone-500 block text-[10px]">MOTOR SPEED</span>
-                    <span className="text-purple-400 font-bold">
+                  <div className="rounded-xl border border-hairline bg-sunken p-2.5">
+                    <span className="text-fg-subtle block text-[10px]">MOTOR SPEED</span>
+                    <span className="text-info-fg font-bold">
                       {currentSample?.values['motor_rpm'] ?? 0} RPM
                     </span>
                   </div>
@@ -591,21 +578,21 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
           )}
 
           {activeProfile.deviceType === 'iot_sensor' && (
-            <div className="rounded-2xl border border-stone-800 bg-stone-950 p-4 space-y-4">
-              <h4 className="text-xs font-mono font-bold text-stone-300 uppercase tracking-wider">
+            <div className="rounded-2xl border border-hairline bg-surface-1 p-4 space-y-4 shadow-xs">
+              <h4 className="font-display text-xs font-bold text-fg uppercase tracking-wider">
                 RF Link &amp; Energy Harvester
               </h4>
               <div className="space-y-3 font-mono text-xs">
                 <div>
-                  <div className="flex justify-between text-stone-400 mb-1">
+                  <div className="flex justify-between text-fg-muted mb-1">
                     <span>LoRa IN865 Signal (RSSI)</span>
-                    <span className="text-purple-400 font-bold">
+                    <span className="text-accent-fg font-bold">
                       {currentSample?.values['lora_rssi_dbm'] ?? -90} dBm
                     </span>
                   </div>
-                  <div className="h-1.5 w-full bg-stone-800 rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-sunken rounded-full overflow-hidden border border-hairline">
                     <div
-                      className="h-full bg-purple-500"
+                      className="h-full bg-accent"
                       style={{
                         width: `${Math.min(100, Math.max(10, ((Number(currentSample?.values['lora_rssi_dbm'] ?? -90) + 125) / 85) * 100))}%`,
                       }}
@@ -614,15 +601,15 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-stone-400 mb-1">
+                  <div className="flex justify-between text-fg-muted mb-1">
                     <span>Supercapacitor Buffer</span>
-                    <span className="text-emerald-400 font-bold">
+                    <span className="text-success-fg font-bold">
                       {currentSample?.values['supercap_v'] ?? 2.8} V
                     </span>
                   </div>
-                  <div className="h-1.5 w-full bg-stone-800 rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-sunken rounded-full overflow-hidden border border-hairline">
                     <div
-                      className="h-full bg-emerald-500"
+                      className="h-full bg-success"
                       style={{
                         width: `${Math.min(100, Math.max(10, ((Number(currentSample?.values['supercap_v'] ?? 2.8) - 2.0) / 1.6) * 100))}%`,
                       }}
@@ -630,10 +617,10 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-stone-800 bg-stone-900/60 p-3">
-                  <div className="text-[10px] text-stone-500">INDIGENOUS SILICON</div>
-                  <div className="text-white font-bold">{activeProfile.hardwareBoard}</div>
-                  <div className="text-[11px] text-amber-400 mt-1">
+                <div className="rounded-xl border border-hairline bg-sunken p-3">
+                  <div className="text-[10px] text-fg-subtle">INDIGENOUS SILICON</div>
+                  <div className="text-fg font-bold">{activeProfile.hardwareBoard}</div>
+                  <div className="text-[11px] text-accent-fg mt-1">
                     Solar Harvest: {currentSample?.values['solar_pv_mv'] ?? 0} mV
                   </div>
                 </div>
@@ -642,26 +629,26 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
           )}
 
           {activeProfile.deviceType === 'cubesat_satellite' && (
-            <div className="rounded-2xl border border-stone-800 bg-stone-950 p-4 space-y-4">
-              <h4 className="text-xs font-mono font-bold text-stone-300 uppercase tracking-wider">
-                ADCS &amp; In-Orbit Solar Orbit
+            <div className="rounded-2xl border border-hairline bg-surface-1 p-4 space-y-4 shadow-xs">
+              <h4 className="font-display text-xs font-bold text-fg uppercase tracking-wider">
+                ADCS &amp; Orbital Power
               </h4>
               <div className="space-y-2 font-mono text-xs">
-                <div className="rounded-xl border border-stone-800 bg-stone-900/60 p-2.5">
-                  <span className="text-[10px] text-stone-500 block">SUN ILLUMINATION FLUX</span>
-                  <span className="text-amber-400 font-bold text-sm">
+                <div className="rounded-xl border border-hairline bg-sunken p-2.5">
+                  <span className="text-[10px] text-fg-subtle block">SUN ILLUMINATION FLUX</span>
+                  <span className="text-warning-fg font-bold text-sm">
                     {(currentSample?.values['sun_sensor_lux'] ?? 0).toLocaleString()} lux
                   </span>
                 </div>
-                <div className="rounded-xl border border-stone-800 bg-stone-900/60 p-2.5">
-                  <span className="text-[10px] text-stone-500 block">REACTION WHEEL MOMENTUM</span>
-                  <span className="text-purple-400 font-bold text-sm">
+                <div className="rounded-xl border border-hairline bg-sunken p-2.5">
+                  <span className="text-[10px] text-fg-subtle block">REACTION WHEEL MOMENTUM</span>
+                  <span className="text-info-fg font-bold text-sm">
                     {currentSample?.values['reaction_wheel_rpm'] ?? 0} RPM
                   </span>
                 </div>
-                <div className="rounded-xl border border-stone-800 bg-stone-900/60 p-2.5">
-                  <span className="text-[10px] text-stone-500 block">S-BAND TRANSMITTER PA TEMP</span>
-                  <span className="text-red-400 font-bold text-sm">
+                <div className="rounded-xl border border-hairline bg-sunken p-2.5">
+                  <span className="text-[10px] text-fg-subtle block">S-BAND TRANSMITTER PA TEMP</span>
+                  <span className="text-danger-fg font-bold text-sm">
                     {currentSample?.values['pa_rf_temp_c'] ?? 0} °C
                   </span>
                 </div>
@@ -670,50 +657,49 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
           )}
 
           {activeProfile.deviceType === 'custom' && (
-            <div className="rounded-2xl border border-stone-800 bg-stone-950 p-4 space-y-2">
-              <h4 className="text-xs font-mono font-bold text-stone-300 uppercase tracking-wider">
+            <div className="rounded-2xl border border-hairline bg-surface-1 p-4 space-y-2 shadow-xs">
+              <h4 className="font-display text-xs font-bold text-fg uppercase tracking-wider">
                 Imported Telemetry Log
               </h4>
-              <p className="text-xs text-stone-400">
-                Playing back user imported CSV trace with {activeProfile.channels.length} channels.
+              <p className="text-xs text-fg-muted">
+                Playing back imported CSV trace with {activeProfile.channels.length} channels.
               </p>
             </div>
           )}
 
-          {/* Hardware & Spec Card */}
-          <div className="rounded-2xl border border-stone-800 bg-stone-950 p-4 text-xs font-mono space-y-2">
-            <div className="text-[10px] font-bold tracking-wider text-stone-500 uppercase">
+          <div className="rounded-2xl border border-hairline bg-surface-1 p-4 text-xs font-mono space-y-2 shadow-xs">
+            <div className="text-[10px] font-bold tracking-wider text-fg-subtle uppercase">
               HARDWARE TESTBENCH
             </div>
-            <div className="text-stone-300">
-              Board: <span className="text-white font-semibold">{activeProfile.hardwareBoard}</span>
+            <div className="text-fg-muted">
+              Board: <span className="text-fg font-semibold">{activeProfile.hardwareBoard}</span>
             </div>
-            <div className="text-stone-300">
-              Stack: <span className="text-white font-semibold">{activeProfile.firmwareStack}</span>
+            <div className="text-fg-muted">
+              Stack: <span className="text-fg font-semibold">{activeProfile.firmwareStack}</span>
             </div>
-            <div className="text-stone-400 text-[11px] leading-relaxed pt-1 border-t border-stone-900">
+            <div className="text-fg-subtle text-[11px] leading-relaxed pt-1 border-t border-hairline font-sans">
               {activeProfile.description}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Real-time Anomaly Detection Audit Feed */}
-      <div className="rounded-2xl border border-stone-800 bg-stone-950 p-4 shadow-sm space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-800/80 pb-3">
+      {/* Anomaly Engine */}
+      <div className="rounded-2xl border border-hairline bg-surface-1 p-4 sm:p-5 shadow-xs space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-3">
           <div className="flex items-center space-x-2">
-            <span className={`h-2 w-2 rounded-full ${anomalies.length > 0 ? 'bg-amber-400' : 'bg-emerald-400'}`} />
-            <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">
+            <span className={`h-2.5 w-2.5 rounded-full ${anomalies.length > 0 ? 'bg-warning' : 'bg-success'}`} />
+            <h3 className="font-display text-sm font-bold text-fg uppercase tracking-wider">
               Automated Anomaly &amp; Threshold Excursion Engine
             </h3>
           </div>
-          <span className="text-xs font-mono text-stone-400">
+          <span className="text-xs font-mono text-fg-muted">
             {anomalies.length} Anomaly Events Detected
           </span>
         </div>
 
         {anomalies.length === 0 ? (
-          <div className="py-6 text-center text-xs font-mono text-stone-500">
+          <div className="py-6 text-center text-xs font-mono text-success-fg">
             ✓ All channels within nominal operating boundaries. Zero safety violations logged.
           </div>
         ) : (
@@ -721,29 +707,32 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
             {anomalies.map((anom, idx) => (
               <div
                 key={`anom-${idx}`}
-                className={`flex items-start justify-between rounded-xl border p-2.5 text-xs font-mono transition-all ${
+                className={`flex items-start justify-between rounded-xl border p-3 text-xs font-mono transition-all ${
                   anom.severity === 'critical'
-                    ? 'border-red-900/50 bg-red-950/20 text-red-300'
-                    : 'border-amber-900/50 bg-amber-950/20 text-amber-300'
+                    ? 'border-danger/35 bg-danger/10 text-danger-fg'
+                    : 'border-warning/35 bg-warning/10 text-warning-fg'
                 }`}
               >
                 <div className="space-y-0.5">
                   <div className="flex items-center space-x-2">
                     <span
-                      className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${
-                        anom.severity === 'critical' ? 'bg-red-800/60 text-white' : 'bg-amber-800/60 text-stone-200'
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                        anom.severity === 'critical'
+                          ? 'bg-danger text-on-solid'
+                          : 'bg-warning text-on-solid'
                       }`}
                     >
                       {anom.severity}
                     </span>
-                    <span className="font-semibold">{anom.channelName}</span>
-                    <span className="text-stone-400 text-[10px]">
+                    <span className="font-semibold text-fg">{anom.channelName}</span>
+                    <span className="text-fg-subtle text-[10px]">
                       @ {(anom.timestampMs / 1000).toFixed(1)}s
                     </span>
                   </div>
                   <p className="text-[11px] opacity-90">{anom.message}</p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => {
                     const sampleIdx = samples.findIndex((s) => s.timestampMs >= anom.timestampMs);
                     if (sampleIdx !== -1) {
@@ -751,7 +740,7 @@ export function TelemetryStudio({ initialProfiles }: TelemetryStudioProps) {
                       setIsPlaying(false);
                     }
                   }}
-                  className="rounded border border-stone-700/80 bg-stone-900/60 px-2 py-1 text-[10px] text-stone-300 hover:text-white"
+                  className="rounded-lg border border-hairline bg-surface-1 px-2.5 py-1 text-[10px] text-fg hover:border-accent"
                 >
                   Seek
                 </button>

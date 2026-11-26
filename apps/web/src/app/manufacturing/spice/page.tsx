@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import { ActualHardwareSimulator } from '@/components/manufacturing/hardware-simulator/actual-hardware-simulator';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
+import { SocialCommunityProvider } from '@/components/social/social-context';
 
 export const metadata: Metadata = {
   title: 'Actual SPICE Hardware Simulator & Oscilloscope · Hackerland',
@@ -9,14 +11,24 @@ export const metadata: Metadata = {
 
 export default function SpiceStudioPage() {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6 min-w-0">
-      <StudioBreadcrumb
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="spice"
         title="Actual SPICE Hardware Simulator"
+        subtitle="True MNA nodal matrix physics solver, bench DMM & 2-channel storage scope"
         category="Analog & Component Physics"
         badge="SPICE Nodal Matrix & Oscilloscope"
-        activeId="spice"
-      />
-      <ActualHardwareSimulator />
-    </div>
+        currentRoute="/manufacturing/spice"
+        edgeToEdge
+      >
+        <ActualHardwareSimulator />
+        <StudioBreadcrumb
+          title="Actual SPICE Hardware Simulator"
+          category="Analog & Component Physics"
+          badge="SPICE Nodal Matrix & Oscilloscope"
+          activeId="spice"
+        />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

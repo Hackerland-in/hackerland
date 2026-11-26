@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import { CarPhysicsSimulator } from '@/components/manufacturing/physics/car-simulator';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
+import { SocialCommunityProvider } from '@/components/social/social-context';
 
 export const metadata: Metadata = {
   title: 'Automotive Vehicle Dynamics & Powertrain Studio | Hackerland',
@@ -10,14 +12,24 @@ export const metadata: Metadata = {
 
 export default function CarStudioPage() {
   return (
-    <div className="container max-w-7xl mx-auto px-4 py-8 space-y-6">
-      <StudioBreadcrumb
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="physics"
         title="Car Dynamics Studio"
+        subtitle="Engine torque curves, gearbox ratios, chassis squat/dive & G-G friction circle"
         category="Automotive Physics"
         badge="Pacejka Tires & G-G Circle"
-        activeId="car"
-      />
-      <CarPhysicsSimulator />
-    </div>
+        currentRoute="/manufacturing/physics/car"
+        edgeToEdge
+      >
+        <CarPhysicsSimulator />
+        <StudioBreadcrumb
+          title="Car Dynamics Studio"
+          category="Automotive Physics"
+          badge="Pacejka Tires & G-G Circle"
+          activeId="car"
+        />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

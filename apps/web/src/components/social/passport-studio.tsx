@@ -15,12 +15,14 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
+import { DEFAULT_BUILDER_IDENTITY, useBuilderIdentity } from '@/lib/builder-identity';
 import { useSocialCommunity } from './social-context';
 
 export function PassportStudio() {
-  const [profileHandle, setProfileHandle] = useState('innovator');
-  const [displayName, setDisplayName] = useState('Innovator');
-  const [headline, setHeadline] = useState('Open Hardware & Embedded Systems Builder');
+  const { identity } = useBuilderIdentity();
+  const [profileHandle, setProfileHandle] = useState(DEFAULT_BUILDER_IDENTITY.handle);
+  const [displayName, setDisplayName] = useState(DEFAULT_BUILDER_IDENTITY.name);
+  const [headline, setHeadline] = useState(DEFAULT_BUILDER_IDENTITY.headline);
   const [copySuccess, setCopySuccess] = useState(false);
   const [verifiedHash, setVerifiedHash] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(true);
@@ -28,18 +30,14 @@ export function PassportStudio() {
   const { followingHandles, bookmarkedPostIds, savedItemIds } = useSocialCommunity();
 
   useEffect(() => {
+    setProfileHandle(identity.handle);
+    setDisplayName(identity.name);
+    setHeadline(identity.headline);
     try {
-      const cached = localStorage.getItem('hackerland_user_profile');
-      if (cached) {
-        const p = JSON.parse(cached);
-        if (p.handle) setProfileHandle(p.handle);
-        if (p.displayName || p.name) setDisplayName(p.displayName || p.name);
-        if (p.headline) setHeadline(p.headline);
-      }
       const vis = localStorage.getItem('hackerland_passport_public');
       if (vis === 'false') setIsPublic(false);
     } catch {}
-  }, []);
+  }, [identity]);
 
   const togglePublic = () => {
     setIsPublic((prev) => {

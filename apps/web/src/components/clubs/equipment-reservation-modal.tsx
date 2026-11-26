@@ -84,6 +84,21 @@ export function EquipmentReservationModal({
       const prev = prevRaw ? (JSON.parse(prevRaw) as StoredEquipmentBooking[]) : [];
       localStorage.setItem('hackerland_club_bookings', JSON.stringify([record, ...prev]));
     } catch {}
+    if (typeof fetch === 'function') {
+      void fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'club_equipment_booking',
+          clubSlug: club.slug,
+          equipmentId: equipment.id,
+          equipmentName: equipment.name,
+          slotWindow: `${requestedDate} ${timeSlot}`,
+          actorName: applicantName.trim(),
+          actorHandle: applicantName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+        }),
+      }).catch(() => {});
+    }
     setPassCode(generatedPass);
     setIsBooked(true);
     onConfirmed?.(record);

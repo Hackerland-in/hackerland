@@ -23,7 +23,7 @@ export function Pcb3DViewer({
   boardHeightMm = 90,
 }: Pcb3DViewerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [solderMaskColor, setSolderMaskColor] = useState<'green' | 'black' | 'blue' | 'purple'>('green');
+  const [solderMaskColor, setSolderMaskColor] = useState<'rosepaper' | 'green' | 'black' | 'blue' | 'purple'>('rosepaper');
   const controlsRef = useRef<OrbitControls | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
 
@@ -33,7 +33,7 @@ export function Pcb3DViewer({
 
     // Scene, Camera, Renderer
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0f19);
+    scene.background = new THREE.Color(0xfcf9fb);
 
     const camera = new THREE.PerspectiveCamera(
       45,
@@ -79,10 +79,11 @@ export function Pcb3DViewer({
     const boardGeo = new THREE.BoxGeometry(boardWidthMm, boardThickness, boardHeightMm);
 
     const maskColors = {
-      green: 0x064e3b,
-      black: 0x111827,
-      blue: 0x1e3a8a,
-      purple: 0x4c1d95,
+      rosepaper: 0xdb2777,
+      green: 0x065f46,
+      black: 0x18181b,
+      blue: 0x1d4ed8,
+      purple: 0x6d28d9,
     };
 
     const boardMat = new THREE.MeshStandardMaterial({
@@ -262,48 +263,55 @@ export function Pcb3DViewer({
   };
 
   return (
-    <div className="relative w-full h-full bg-slate-950 overflow-hidden">
+    <div className="relative w-full h-full bg-sunken overflow-hidden">
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       {/* Floating 3D Controls */}
-      <div className="absolute top-3 left-3 bg-slate-900/90 backdrop-blur border border-slate-700/60 rounded-lg p-2.5 flex items-center space-x-2 text-xs text-slate-300">
-        <span className="font-semibold text-slate-400">View:</span>
+      <div className="absolute top-3 left-3 bg-surface-1/95 backdrop-blur border border-hairline rounded-xl p-2.5 flex items-center space-x-2 text-xs text-fg shadow-md">
+        <span className="font-semibold text-fg-muted">View:</span>
         <button
+          type="button"
           onClick={() => resetCamera('iso')}
-          className="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-200"
+          className="px-2.5 py-1 bg-sunken hover:bg-surface-2 rounded-lg text-fg border border-hairline font-medium"
         >
           Perspective
         </button>
         <button
+          type="button"
           onClick={() => resetCamera('top')}
-          className="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-200"
+          className="px-2.5 py-1 bg-sunken hover:bg-surface-2 rounded-lg text-fg border border-hairline font-medium"
         >
           Top
         </button>
         <button
+          type="button"
           onClick={() => resetCamera('bottom')}
-          className="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-200"
+          className="px-2.5 py-1 bg-sunken hover:bg-surface-2 rounded-lg text-fg border border-hairline font-medium"
         >
           Bottom
         </button>
 
-        <span className="font-semibold text-slate-400 ml-2">Solder Mask:</span>
-        {(['green', 'black', 'blue', 'purple'] as const).map((color) => (
+        <span className="font-semibold text-fg-muted ml-2">Solder Mask:</span>
+        {(['rosepaper', 'green', 'black', 'blue', 'purple'] as const).map((color) => (
           <button
+            type="button"
             key={color}
+            aria-label={`Solder mask ${color}`}
             onClick={() => setSolderMaskColor(color)}
-            className={`w-4 h-4 rounded-full border ${
-              solderMaskColor === color ? 'ring-2 ring-amber-400' : 'opacity-70'
+            className={`w-4 h-4 rounded-full border border-hairline transition ${
+              solderMaskColor === color ? 'ring-2 ring-accent scale-110' : 'opacity-75 hover:opacity-100'
             }`}
             style={{
               backgroundColor:
-                color === 'green'
-                  ? '#064e3b'
+                color === 'rosepaper'
+                  ? '#db2777'
+                  : color === 'green'
+                  ? '#065f46'
                   : color === 'black'
-                  ? '#111827'
+                  ? '#18181b'
                   : color === 'blue'
-                  ? '#1e3a8a'
-                  : '#4c1d95',
+                  ? '#1d4ed8'
+                  : '#6d28d9',
             }}
           />
         ))}

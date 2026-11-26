@@ -72,6 +72,7 @@ export function YoungInnovatorsHub() {
   };
 
   const handleToggleEnroll = (challengeId: string) => {
+    const enrolling = !enrolledChallenges.includes(challengeId);
     setEnrolledChallenges((prev) => {
       const next = prev.includes(challengeId)
         ? prev.filter((id) => id !== challengeId)
@@ -81,6 +82,16 @@ export function YoungInnovatorsHub() {
       } catch {}
       return next;
     });
+    if (enrolling && typeof fetch === 'function') {
+      void fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'young_innovator_join',
+          details: { challengeId },
+        }),
+      }).catch(() => {});
+    }
   };
 
   return (

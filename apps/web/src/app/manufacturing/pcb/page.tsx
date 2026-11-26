@@ -4,27 +4,38 @@ import React from 'react';
 import Link from 'next/link';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import { PcbStudio } from '@/components/manufacturing/pcb/pcb-studio';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
+import { SocialCommunityProvider } from '@/components/social/social-context';
 import { Badge, Card } from '@hackerland/ui';
 import { Layers, Cpu, Zap, Activity, ShieldCheck, Download, Sparkles, BookOpen } from 'lucide-react';
 
 export default function PcbStudioPage() {
   return (
-    <div className="min-h-screen bg-canvas text-fg">
-      {/* 1. STUDIO BREADCRUMB */}
-      <StudioBreadcrumb
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="pcb"
         title="A-Z PCB Design & Real-Time Circuit Studio"
         category="Hardware & Electronics"
-        badge="Real-Time SPICE"
-        activeId="pcb"
-      />
+        badge="Real-Time SPICE & RS-274X"
+        currentRoute="/manufacturing/pcb"
+        edgeToEdge
+      >
+        {/* MAIN INTERACTIVE FULL-SCREEN STUDIO */}
+        <section className="border border-hairline rounded-2xl overflow-hidden bg-surface-1 shadow-xs">
+          <PcbStudio />
+        </section>
 
-      {/* 2. MAIN INTERACTIVE STUDIO */}
-      <section className="border-b border-hairline bg-sunken">
-        <PcbStudio />
-      </section>
+        <div className="pt-2">
+          <StudioBreadcrumb
+            title="A-Z PCB Design & Real-Time Circuit Studio"
+            category="Hardware & Electronics"
+            badge="Real-Time SPICE"
+            activeId="pcb"
+          />
+        </div>
 
-      {/* 3. TECHNICAL DOCUMENTATION & CAPABILITIES */}
-      <div className="container mx-auto px-4 py-12 max-w-7xl space-y-12">
+        {/* TECHNICAL DOCUMENTATION & CAPABILITIES */}
+        <div className="mx-auto px-2 py-8 max-w-7xl space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <Badge variant="outline" className="text-accent-fg border-accent/30 font-mono">
             Full-Stack Electronic Design Automation (EDA)
@@ -122,6 +133,7 @@ export default function PcbStudioPage() {
           </div>
         </div>
       </div>
-    </div>
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

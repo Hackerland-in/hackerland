@@ -128,9 +128,16 @@ export function PcbDesignerCanvas({
     ctx.resetTransform();
     ctx.scale(dpr, dpr);
 
-    // 1. Background clear
-    ctx.fillStyle = '#090d16';
+    // 1. Background clear (Crisp Rosepaper drafting sheet)
+    ctx.fillStyle = '#fcf9fb';
     ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = 'rgba(250, 22, 129, 0.08)';
+    for (let gx = panX % (10 * scale); gx < width; gx += 10 * scale) {
+      for (let gy = panY % (10 * scale); gy < height; gy += 10 * scale) {
+        ctx.fillRect(gx - 0.5, gy - 0.5, 1, 1);
+      }
+    }
 
     // Board bounding rectangle
     const bOrigin = boardToScreen(0, 0);
@@ -605,7 +612,7 @@ export function PcbDesignerCanvas({
   };
 
   return (
-    <div className="relative w-full h-full select-none overflow-hidden bg-slate-950">
+    <div className="relative w-full h-full select-none overflow-hidden bg-sunken">
       <canvas
         ref={canvasRef}
         className="w-full h-full block cursor-crosshair"
@@ -616,9 +623,9 @@ export function PcbDesignerCanvas({
       />
 
       {/* Floating Canvas Quick HUD */}
-      <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur border border-slate-700/60 rounded px-2.5 py-1.5 text-xs text-slate-300 flex items-center space-x-3 pointer-events-none">
-        <span>Substrate: <strong className="text-amber-400 capitalize">{substrate}</strong></span>
-        <span>Layer: <strong className={activeLayer === 'top_copper' ? 'text-red-400' : 'text-blue-400'}>{activeLayer}</strong></span>
+      <div className="absolute bottom-3 left-3 bg-surface-1/95 backdrop-blur border border-hairline rounded-full px-3.5 py-1.5 text-xs text-fg-muted shadow-xs flex items-center space-x-3 pointer-events-none">
+        <span>Substrate: <strong className="text-accent-fg capitalize">{substrate}</strong></span>
+        <span>Layer: <strong className={activeLayer === 'top_copper' ? 'text-accent-fg' : 'text-info-fg'}>{activeLayer}</strong></span>
         <span>Cursor: ({mouseBoardPos.x}mm, {mouseBoardPos.y}mm)</span>
         <span>Zoom: {Math.round(scale * 10)}%</span>
       </div>

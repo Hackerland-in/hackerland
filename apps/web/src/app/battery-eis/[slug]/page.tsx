@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { BATTERY_EIS_REGISTRY } from '@/lib/data/battery-eis-data';
 import { BatteryEisDetailView } from '@/components/battery-eis/battery-eis-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface BatteryEisPageProps {
   params: Promise<{ slug: string }>;
@@ -78,14 +80,23 @@ export default async function BatteryEisDetailPage({ params }: BatteryEisPagePro
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12 space-y-8">
-      {/* Schema.org Article Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-
-      <BatteryEisDetailView project={project} />
-    </div>
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="battery_eis"
+        title={project.title}
+        subtitle={`${project.cellModel} (${project.chemistry}) · Nyquist & Bode EIS Fitter`}
+        category="Battery EIS Lab"
+        badge={`SoH ${project.diagnostics.sohPercent}%`}
+        backHref="/battery-eis"
+        backLabel="All Battery EIS"
+        currentRoute={`/battery-eis/${project.slug}`}
+      >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <BatteryEisDetailView project={project} />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

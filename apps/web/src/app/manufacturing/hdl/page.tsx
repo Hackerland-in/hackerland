@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import { HdlSimulator } from '@/components/manufacturing/hdl/hdl-simulator';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
+import { SocialCommunityProvider } from '@/components/social/social-context';
 
 export const metadata: Metadata = {
   title: 'Digital Logic HDL Simulator & GTKWave Timing Studio · Hackerland',
@@ -9,14 +11,24 @@ export const metadata: Metadata = {
 
 export default function HdlStudioPage() {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6 min-w-0">
-      <StudioBreadcrumb
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="eda"
         title="Digital Logic HDL & GTKWave Waveform Studio"
+        subtitle="Cycle-accurate Verilog RTL synthesis & IEEE 1364 VCD timing analyzer"
         category="Hardware Description Languages"
-        badge="Verilog RTL & IEEE 1364 VCD"
-        activeId="hdl"
-      />
-      <HdlSimulator />
-    </div>
+        badge="Verilog RTL & VCD"
+        currentRoute="/manufacturing/hdl"
+        edgeToEdge
+      >
+        <HdlSimulator />
+        <StudioBreadcrumb
+          title="Digital Logic HDL & GTKWave Waveform Studio"
+          category="Hardware Description Languages"
+          badge="Verilog RTL & IEEE 1364 VCD"
+          activeId="hdl"
+        />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FirmwareRegistryItem, FirmwareRelease } from '@hackerland/core';
 import { formatFirmwareBytes } from '@hackerland/core';
+import { X } from 'lucide-react';
+import { Button } from '@hackerland/ui';
 
 interface WebSerialFlasherModalProps {
   item: FirmwareRegistryItem;
@@ -49,7 +51,6 @@ export function WebSerialFlasherModal({
     logMessage(`Initiating WebSerial connection at ${baudRate} baud...`);
     logMessage(`Target Architecture: ${item.targetArch.toUpperCase()}`);
 
-    // If running in browser with native WebSerial
     if (typeof window !== 'undefined' && 'serial' in navigator) {
       try {
         logMessage(`Requesting USB serial port access from user prompt...`);
@@ -64,8 +65,7 @@ export function WebSerialFlasherModal({
       logMessage(`WebSerial API not supported in this browser. Running hardware flasher emulator.`);
     }
 
-    // Step 1: Chip Detection
-    await new Promise((r) => setTimeout(r, 600));
+    await new Promise((r) => setTimeout(r, 500));
     const detectedChip =
       item.targetArch === 'esp32s3'
         ? 'ESP32-S3 (revision v0.2, 16MB Octal SPI Flash)'
@@ -81,13 +81,11 @@ export function WebSerialFlasherModal({
     logMessage(`Chip identified: ${detectedChip}`);
     logMessage(`MAC / Device Unique ID: 7C:DF:A1:${Math.floor(Math.random() * 89 + 10)}:4B:${Math.floor(Math.random() * 89 + 10)}`);
 
-    // Step 2: Erasing Flash
     setStage('erasing');
     logMessage(`Erasing target flash sectors for binary image (${formatFirmwareBytes(release.fileSizeBytes)})...`);
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 700));
     logMessage(`Sectors erased successfully.`);
 
-    // Step 3: Writing Flash Blocks
     setStage('writing');
     logMessage(`Streaming binary blocks to flash memory...`);
 
@@ -104,7 +102,6 @@ export function WebSerialFlasherModal({
         setProgressPercent(100);
         setFlashSpeedKbps(Math.round(46.5 + Math.random() * 8));
 
-        // Step 4: Verification
         setStage('verifying');
         logMessage(`All ${formatFirmwareBytes(totalBytes)} written. Verifying SHA-256 digest...`);
 
@@ -114,7 +111,7 @@ export function WebSerialFlasherModal({
           logMessage(`Signature: Verified (Ed25519 valid).`);
           logMessage(`Hardware soft reset triggered. Booting ${release.version}...`);
           setStage('success');
-        }, 800);
+        }, 600);
       } else {
         setBytesWritten(written);
         const pct = Math.round((written / totalBytes) * 100);
@@ -124,46 +121,50 @@ export function WebSerialFlasherModal({
           logMessage(`Writing 0x${written.toString(16)} (${pct}%)...`);
         }
       }
-    }, 120);
+    }, 100);
 
     timerRef.current = interval;
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl rounded-2xl border border-stone-800 bg-stone-950 p-6 shadow-2xl space-y-4">
-        {/* Header */}
-        <div className="flex items-start justify-between border-b border-stone-800/80 pb-3">
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-fg/35 backdrop-blur-sm p-4"
+    >
+      <div className="w-full max-w-2xl rounded-2xl border border-hairline bg-surface-1 p-6 shadow-overlay space-y-4">
+        <div className="flex items-start justify-between border-b border-hairline pb-3">
           <div>
             <div className="flex items-center space-x-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-mono font-medium tracking-wider text-emerald-400 uppercase">
+              <span className="h-2.5 w-2.5 rounded-full bg-accent animate-pulse" />
+              <span className="text-xs font-mono font-semibold tracking-wider text-accent-fg uppercase">
                 WebSerial Firmware Programmer
               </span>
             </div>
-            <h3 className="mt-1 text-lg font-bold text-white">{item.title}</h3>
-            <p className="text-xs text-stone-400 font-mono">
-              Release: <strong className="text-amber-400">{release.version}</strong> ({release.channel}) //{' '}
+            <h3 className="mt-1 font-display text-lg font-bold text-fg">{item.title}</h3>
+            <p className="text-xs text-fg-muted font-mono">
+              Release: <strong className="text-accent-fg">{release.version}</strong> ({release.channel}) //{' '}
               {formatFirmwareBytes(release.fileSizeBytes)}
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-stone-400 hover:text-white font-mono text-sm p-1"
+            aria-label="Close programmer modal"
+            className="text-fg-subtle hover:text-fg rounded-full p-1 hover:bg-surface-2"
           >
-            ✕
+            <X className="size-4" />
           </button>
         </div>
 
-        {/* Baud & Target Config */}
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
           <div className="flex items-center space-x-2">
-            <span className="text-stone-400">Baud Rate:</span>
+            <span className="text-fg-muted">Baud Rate:</span>
             <select
               value={baudRate}
               onChange={(e) => setBaudRate(Number(e.target.value))}
               disabled={stage !== 'idle' && stage !== 'success' && stage !== 'error'}
-              className="rounded-lg border border-stone-700 bg-stone-900 px-2 py-1 text-white text-xs"
+              className="rounded-lg border border-line bg-sunken px-2.5 py-1 text-fg text-xs focus:border-accent focus:outline-none"
             >
               <option value={115200}>115200 baud</option>
               <option value={460800}>460800 baud</option>
@@ -172,18 +173,17 @@ export function WebSerialFlasherModal({
           </div>
 
           {chipInfo && (
-            <div className="rounded-lg border border-stone-800 bg-stone-900/60 px-2.5 py-1 text-[11px] text-stone-300">
-              Target: <span className="text-emerald-400 font-semibold">{chipInfo}</span>
+            <div className="rounded-full border border-success/30 bg-success/10 px-3 py-1 text-[11px] text-success-fg font-semibold">
+              Target: {chipInfo}
             </div>
           )}
         </div>
 
-        {/* Progress Bar & Speed */}
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs font-mono">
-            <span className="text-stone-400">
+            <span className="text-fg-muted">
               Stage:{' '}
-              <strong className="text-white uppercase">
+              <strong className="text-fg uppercase">
                 {stage === 'idle'
                   ? 'Ready to Program'
                   : stage === 'connecting'
@@ -199,25 +199,25 @@ export function WebSerialFlasherModal({
                   : 'Error'}
               </strong>
             </span>
-            <span className="text-stone-400">
+            <span className="text-accent-fg font-semibold">
               {stage === 'writing' ? `${flashSpeedKbps} KB/s` : ''}
             </span>
           </div>
 
-          <div className="h-3 w-full bg-stone-900 rounded-full overflow-hidden border border-stone-800">
+          <div className="h-3 w-full bg-sunken rounded-full overflow-hidden border border-hairline">
             <div
               className={`h-full transition-all duration-150 ${
                 stage === 'success'
-                  ? 'bg-emerald-500'
+                  ? 'bg-success'
                   : stage === 'error'
-                  ? 'bg-red-500'
-                  : 'bg-gradient-to-r from-amber-500 to-emerald-500'
+                  ? 'bg-danger'
+                  : 'bg-accent'
               }`}
               style={{ width: `${progressPercent}%` }}
             />
           </div>
 
-          <div className="flex justify-between text-[11px] font-mono text-stone-500">
+          <div className="flex justify-between text-[11px] font-mono text-fg-subtle">
             <span>
               {formatFirmwareBytes(bytesWritten)} of {formatFirmwareBytes(release.fileSizeBytes)}
             </span>
@@ -225,45 +225,42 @@ export function WebSerialFlasherModal({
           </div>
         </div>
 
-        {/* Live Terminal Log */}
-        <div className="h-44 overflow-y-auto rounded-xl border border-stone-900 bg-black p-3 font-mono text-[11px] text-emerald-400 space-y-1">
+        <div className="h-44 overflow-y-auto rounded-xl border border-hairline bg-sunken p-3 font-mono text-[11px] text-fg space-y-1">
           {terminalLogs.length === 0 ? (
-            <span className="text-stone-600">
-              // Plug in your board over USB and click &apos;Connect &amp; Flash Firmware&apos; below.
+            <span className="text-fg-subtle">
+              {`// Plug in your board over USB and click 'Connect & Flash Firmware' below.`}
             </span>
           ) : (
             terminalLogs.map((log, idx) => <div key={`log-${idx}`}>{log}</div>)
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-between border-t border-stone-800/80 pt-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-hairline pt-3">
           <a
             href={release.binaryUrl}
             download
-            className="text-xs font-mono text-stone-400 hover:text-white underline"
+            className="text-xs font-mono text-accent-fg hover:underline"
           >
             Download Raw Binary ({release.binaryFormat.toUpperCase()})
           </a>
 
-          <div className="space-x-2">
-            <button
-              onClick={onClose}
-              className="rounded-xl border border-stone-800 px-4 py-2 text-xs font-mono text-stone-400 hover:text-white"
-            >
+          <div className="flex items-center gap-2">
+            <Button type="button" size="sm" variant="ghost" onClick={onClose}>
               Close
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="primary"
               onClick={startFlashProcess}
               disabled={stage === 'connecting' || stage === 'erasing' || stage === 'writing' || stage === 'verifying'}
-              className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-mono font-bold text-white hover:bg-emerald-500 disabled:opacity-50 transition-all shadow-md"
             >
               {stage === 'idle'
                 ? 'Connect & Flash Firmware'
                 : stage === 'success'
                 ? 'Re-Flash Board'
                 : 'Flashing...'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

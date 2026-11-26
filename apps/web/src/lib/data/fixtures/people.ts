@@ -6,7 +6,7 @@ export const PERSON_MEERA: PersonRef = {
   headline: 'Ex-ISRO Propulsion Scientist · Visiting Professor at IISc',
   avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&h=256&q=80',
   badges: [
-    { label: '40+ yrs aerospace', tone: 'make' },
+    { label: 'Propulsion Lead', tone: 'make' },
     { label: 'Mentor', tone: 'neutral' },
   ],
 };
@@ -75,7 +75,7 @@ export const PROFILE_MEERA: ProfileView = {
   handle: 'meera-iyer',
   name: 'Dr. Meera Iyer',
   headline: 'Ex-ISRO Propulsion Scientist · Visiting Professor at IISc',
-  bio: 'Spent 42 years designing propulsion feeds, cryogenic combustion stages, and satellite thermal envelopes. Now mentoring the next generation of aerospace tinkerers and high-school rocketry clubs across India.',
+  bio: 'Spent 24 years designing propulsion feeds, cryogenic combustion stages, and satellite thermal envelopes. Now mentoring aerospace tinkerers and high-school rocketry clubs across India.',
   location: 'Bengaluru, India',
   avatarUrl: PERSON_MEERA.avatarUrl,
   tracks: ['make', 'research'],

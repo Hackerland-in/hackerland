@@ -6,8 +6,7 @@ import { Badge, Button, Card } from '@hackerland/ui';
 import { TEARDOWNS_DATA } from '@/lib/data/teardowns-data';
 import { PcbPinoutAnnotator } from '@/components/teardowns/pcb-pinout-annotator';
 import { SocialCommunityProvider } from '@/components/social/social-context';
-import { SocialShell } from '@/components/social/social-shell';
-import { CommunityRailServer } from '@/components/social/community-rail-server';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -40,7 +39,16 @@ export default async function TeardownDetailPage({ params }: Props) {
 
   return (
     <SocialCommunityProvider>
-      <SocialShell rightRail={<CommunityRailServer />}>
+      <FullScreenLabShell
+        labKind="teardown"
+        title={item.title}
+        subtitle={`${item.manufacturer} ${item.deviceType} · Reverse Engineering BOM & Pinouts`}
+        category="Hardware Teardown"
+        badge={item.category}
+        backHref="/teardowns"
+        backLabel="Teardowns Library"
+        currentRoute={`/teardowns/${item.slug}`}
+      >
         <div className="space-y-6 min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-hairline bg-surface-1 px-4 py-3 text-body-xs">
             <Link href="/teardowns" className="text-fg-muted hover:text-accent-fg transition flex items-center gap-1.5 font-medium">
@@ -211,7 +219,7 @@ export default async function TeardownDetailPage({ params }: Props) {
             </div>
           </Card>
         </div>
-      </SocialShell>
+      </FullScreenLabShell>
     </SocialCommunityProvider>
   );
 }

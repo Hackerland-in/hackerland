@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { SOLAR_MPPT_PROJECTS_REGISTRY, getSolarMpptProjectBySlug } from '@/lib/data/solar-mppt-data';
 import { simulateSolarMppt } from '@hackerland/core';
 import { SolarDetailView } from '@/components/solar-mppt/solar-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface SolarDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -135,14 +137,25 @@ export default async function SolarDetailPage({ params }: SolarDetailPageProps) 
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12 space-y-8">
-      {/* Schema.org Microdata */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="solar_mppt"
+        title={project.title}
+        subtitle={`${project.application} · I-V / P-V Sweeps & Buck Sizing`}
+        category="Solar MPPT Lab"
+        badge={project.mpptAlgorithm}
+        backHref="/solar-mppt"
+        backLabel="All Solar MPPT"
+        currentRoute={`/solar-mppt/${project.slug}`}
+      >
+        {/* Schema.org Microdata */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
 
-      <SolarDetailView project={project} />
-    </div>
+        <SolarDetailView project={project} />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

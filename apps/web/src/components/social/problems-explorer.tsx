@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { Problem } from '@hackerland/core';
 import { Badge, Button, Card, FilterChip, cn } from '@hackerland/ui';
 import { Target, ArrowRight, Coins, Users, Search, Bookmark, Check } from 'lucide-react';
+import { getActiveBuilderIdentity } from '@/lib/builder-identity';
 import { useSocialCommunity } from './social-context';
 
 export interface ProblemsExplorerProps {
@@ -28,6 +29,10 @@ export function ProblemsExplorer({ initialProblems }: ProblemsExplorerProps) {
   }, []);
 
   const toggleClaim = (id: string) => {
+    const identity = getActiveBuilderIdentity();
+    const targetProblem = initialProblems.find((p) => p.id === id);
+    const willClaim = !claimedIds.includes(id);
+
     setClaimedIds((prev) => {
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
       try {
@@ -35,6 +40,21 @@ export function ProblemsExplorer({ initialProblems }: ProblemsExplorerProps) {
       } catch {}
       return next;
     });
+
+    if (willClaim && typeof fetch === 'function') {
+      void fetch('/api/ideas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'claim_problem',
+          problemId: id,
+          problemSlug: targetProblem?.slug ?? id,
+          problemTitle: targetProblem?.title ?? 'Problem Investigation',
+          claimantHandle: identity.handle,
+          claimantName: identity.name,
+        }),
+      }).catch(() => {});
+    }
   };
 
   const domains = useMemo(() => {

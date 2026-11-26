@@ -9,12 +9,10 @@ interface BmsCellMatrixProps {
 }
 
 export function BmsCellMatrix({ packVoltage, cellDeltaMv, cellCount = 16 }: BmsCellMatrixProps) {
-  // Synthesize realistic 16S cell voltages around average with given delta
   const nominalCellV = packVoltage / cellCount;
   const spreadFraction = cellDeltaMv / 1000;
 
   const cells = Array.from({ length: cellCount }, (_, i) => {
-    // Generate pseudo-deterministic variations based on cell position (inner cells run hotter/slightly lower V)
     const offset = Math.sin((i / (cellCount - 1)) * Math.PI) * spreadFraction;
     const v = nominalCellV - spreadFraction / 2 + offset;
     return Number(v.toFixed(3));
@@ -23,23 +21,27 @@ export function BmsCellMatrix({ packVoltage, cellDeltaMv, cellCount = 16 }: BmsC
   const spreadInfo = calculateBmsCellSpread(cells);
 
   return (
-    <div className="rounded-2xl border border-stone-800 bg-stone-950 p-4 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-800/80 pb-3">
+    <div className="rounded-2xl border border-hairline bg-surface-1 p-4 sm:p-5 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-3">
         <div>
-          <h4 className="text-sm font-semibold text-white">AIS-156 Phase 2: 16S Cell Voltage Balance</h4>
-          <p className="text-xs text-stone-400">Individual cell tap equalization & thermal runaway precursor audit</p>
+          <h4 className="font-display text-sm font-bold text-fg">
+            AIS-156 Phase 2: 16S Cell Voltage Balance
+          </h4>
+          <p className="text-xs text-fg-muted">
+            Individual cell tap equalization &amp; thermal runaway precursor audit
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           {spreadInfo.isHazardous ? (
-            <span className="rounded-full bg-red-950/80 border border-red-500/50 px-2.5 py-1 text-xs font-mono font-medium text-red-300">
+            <span className="rounded-full bg-danger/10 border border-danger/35 px-2.5 py-1 text-xs font-mono font-semibold text-danger-fg">
               CRITICAL: Δ {spreadInfo.deltaMv} mV (Over 150mV Limit)
             </span>
           ) : spreadInfo.isBalancingNeeded ? (
-            <span className="rounded-full bg-amber-950/80 border border-amber-500/50 px-2.5 py-1 text-xs font-mono font-medium text-amber-300">
+            <span className="rounded-full bg-warning/15 border border-warning/40 px-2.5 py-1 text-xs font-mono font-semibold text-warning-fg">
               BALANCING ACTIVE: Δ {spreadInfo.deltaMv} mV (&gt;40mV)
             </span>
           ) : (
-            <span className="rounded-full bg-emerald-950/80 border border-emerald-500/50 px-2.5 py-1 text-xs font-mono font-medium text-emerald-300">
+            <span className="rounded-full bg-success/10 border border-success/35 px-2.5 py-1 text-xs font-mono font-semibold text-success-fg">
               BALANCED: Δ {spreadInfo.deltaMv} mV (Nominal)
             </span>
           )}
@@ -56,25 +58,25 @@ export function BmsCellMatrix({ packVoltage, cellDeltaMv, cellCount = 16 }: BmsC
               key={`cell-${idx}`}
               className={`flex flex-col items-center justify-between rounded-xl border p-2 text-center transition-all ${
                 isMin
-                  ? 'border-blue-500/60 bg-blue-950/30 ring-1 ring-blue-500/30'
+                  ? 'border-info/50 bg-info/10 ring-1 ring-info/25'
                   : isMax
-                  ? 'border-amber-500/60 bg-amber-950/30 ring-1 ring-amber-500/30'
-                  : 'border-stone-800 bg-stone-900/60'
+                  ? 'border-accent/50 bg-accent-soft/80 ring-1 ring-accent/25'
+                  : 'border-hairline bg-sunken/70'
               }`}
             >
-              <div className="flex w-full items-center justify-between text-[10px] font-mono text-stone-400">
+              <div className="flex w-full items-center justify-between text-[10px] font-mono text-fg-muted">
                 <span>C{idx + 1}</span>
-                {isMin && <span className="text-blue-400 font-bold">MIN</span>}
-                {isMax && <span className="text-amber-400 font-bold">MAX</span>}
+                {isMin && <span className="text-info-fg font-bold">MIN</span>}
+                {isMax && <span className="text-accent-fg font-bold">MAX</span>}
               </div>
-              <div className="my-1 text-xs font-mono font-bold text-white tracking-tight">
+              <div className="my-1 text-xs font-mono font-bold text-fg tracking-tight">
                 {v.toFixed(3)}
-                <span className="text-[10px] font-normal text-stone-400 ml-0.5">V</span>
+                <span className="text-[10px] font-normal text-fg-subtle ml-0.5">V</span>
               </div>
-              <div className="w-full bg-stone-800 rounded-full h-1 overflow-hidden">
+              <div className="w-full bg-surface-2 rounded-full h-1.5 overflow-hidden border border-hairline/50">
                 <div
                   className={`h-full rounded-full ${
-                    v >= 4.2 ? 'bg-red-500' : v <= 3.0 ? 'bg-amber-500' : 'bg-emerald-500'
+                    v >= 4.2 ? 'bg-danger' : v <= 3.0 ? 'bg-warning' : 'bg-accent'
                   }`}
                   style={{ width: `${Math.min(100, Math.max(10, ((v - 3.0) / 1.2) * 100))}%` }}
                 />
@@ -84,18 +86,18 @@ export function BmsCellMatrix({ packVoltage, cellDeltaMv, cellCount = 16 }: BmsC
         })}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-stone-400 pt-2 border-t border-stone-800/60">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-fg-muted pt-2.5 border-t border-hairline">
         <div>
-          Pack Total: <span className="text-white font-bold">{packVoltage.toFixed(2)} V</span>
+          Pack Total: <span className="text-fg font-bold">{packVoltage.toFixed(2)} V</span>
         </div>
         <div>
-          Min Cell: <span className="text-blue-400 font-bold">{spreadInfo.minCell} V</span>
+          Min Cell: <span className="text-info-fg font-bold">{spreadInfo.minCell} V</span>
         </div>
         <div>
-          Max Cell: <span className="text-amber-400 font-bold">{spreadInfo.maxCell} V</span>
+          Max Cell: <span className="text-accent-fg font-bold">{spreadInfo.maxCell} V</span>
         </div>
         <div>
-          Delta (Δ): <span className="text-white font-bold">{spreadInfo.deltaMv} mV</span>
+          Delta (Δ): <span className="text-fg font-bold">{spreadInfo.deltaMv} mV</span>
         </div>
       </div>
     </div>

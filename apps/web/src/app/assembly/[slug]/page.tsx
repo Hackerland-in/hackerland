@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { PCBA_ASSEMBLY_CATALOG } from '@/lib/data/assembly-data';
 import { AssemblyDetailView } from '@/components/assembly/assembly-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface AssemblyPageProps {
   params: Promise<{ slug: string }>;
@@ -75,14 +77,26 @@ export default async function AssemblyDetailPage({ params }: AssemblyPageProps) 
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12">
-      <AssemblyDetailView project={project} />
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="pcb"
+        title={project.name}
+        subtitle={`${project.layerCount}-Layer SMT Pick & Place Centroid & Stencil Inspector`}
+        category="PCBA Assembly"
+        badge={`${project.placements.length} Placements`}
+        backHref="/assembly"
+        backLabel="All Assemblies"
+        currentRoute={`/assembly/${project.slug}`}
+        edgeToEdge
+      >
+        <AssemblyDetailView project={project} />
 
-      {/* JSON-LD Technical Article Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-    </div>
+        {/* JSON-LD Technical Article Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

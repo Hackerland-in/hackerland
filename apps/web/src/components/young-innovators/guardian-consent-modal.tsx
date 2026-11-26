@@ -51,6 +51,26 @@ export function GuardianConsentModal({
     setConsentPassId(pass);
     setIsConfirmed(true);
 
+    if (typeof fetch === 'function') {
+      void fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'guardian_consent',
+          actorName: studentName.trim(),
+          details: {
+            passId: pass,
+            studentAge,
+            guardianName,
+            guardianEmail,
+            guardianRelationship,
+            schoolName,
+            city,
+          },
+        }),
+      }).catch(() => {});
+    }
+
     if (onConsentGranted) {
       onConsentGranted({
         id: pass,

@@ -1,20 +1,36 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Activity,
+  CheckCircle2,
+  Download,
+  Layers,
+  Pause,
+  Play,
+  RotateCw,
+  Save,
+  ShieldAlert,
+  Trash2,
+  X,
+  Zap,
+} from 'lucide-react';
+import { Badge, Button, cn } from '@hackerland/ui';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
 import type {
   BoardSubstrate,
-  PcbLayer,
-  PlacedComponent,
   CopperTraceSegment,
-  PcbVia,
-  VeroboardTrackCut,
   DrcViolation,
+  PcbLayer,
+  PcbVia,
+  PlacedComponent,
+  VeroboardTrackCut,
 } from './pcb-types';
 import { COMPONENT_CATALOG, getComponentCatalogItem } from './pcb-catalog';
 import {
   type CircuitSimulationState,
-  stepCircuitSimulation,
   resolveCircuitNets,
+  stepCircuitSimulation,
 } from './pcb-sim-engine';
 import { runDesignRuleCheck } from './pcb-drc-checker';
 import { buildCompleteManufacturingExport } from './pcb-export-engine';
@@ -29,7 +45,6 @@ export interface StarterCircuit {
   trackCuts: VeroboardTrackCut[];
 }
 
-// Curated starter circuits
 const STARTER_CIRCUITS: Record<'ne555_flasher' | 'veroboard_audio', StarterCircuit> = {
   ne555_flasher: {
     name: '555 Timer Astable LED Flasher',
@@ -136,9 +151,9 @@ const STARTER_CIRCUITS: Record<'ne555_flasher' | 'veroboard_audio', StarterCircu
       },
     ],
     traces: [
-      { id: 't1', netId: 'vcc', layer: 'top_copper', startX: 18, startY: 20, endX: 52.38, endY: 41.19, widthMm: 0.6 }, // V1 to Pin 8
-      { id: 't2', netId: 'gnd', layer: 'bottom_copper', startX: 18, startY: 75, endX: 52.38, endY: 48.81, widthMm: 0.6 }, // G1 to Pin 1
-      { id: 't3', netId: 'out', layer: 'top_copper', startX: 67.62, endY: 45, endX: 95, startY: 43.73, widthMm: 0.35 }, // Pin 3 to LED
+      { id: 't1', netId: 'vcc', layer: 'top_copper', startX: 18, startY: 20, endX: 52.38, endY: 41.19, widthMm: 0.6 },
+      { id: 't2', netId: 'gnd', layer: 'bottom_copper', startX: 18, startY: 75, endX: 52.38, endY: 48.81, widthMm: 0.6 },
+      { id: 't3', netId: 'out', layer: 'top_copper', startX: 67.62, endY: 45, endX: 95, startY: 43.73, widthMm: 0.35 },
     ],
     trackCuts: [],
   },
@@ -227,19 +242,19 @@ const STARTER_CIRCUITS: Record<'ne555_flasher' | 'veroboard_audio', StarterCircu
 };
 
 export function PcbStudio() {
+  const labShell = useLabShell();
+  const [boardTitle, setBoardTitle] = useState('555 Astable Flasher Rev B');
   const [substrate, setSubstrate] = useState<BoardSubstrate>('fr4');
   const [activeLayer, setActiveLayer] = useState<PcbLayer>('top_copper');
   const [activeTool, setActiveTool] = useState<'select' | 'route' | 'cut' | 'via' | 'delete'>('select');
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
-  // Circuit entities
   const [components, setComponents] = useState<PlacedComponent[]>(STARTER_CIRCUITS.ne555_flasher.components);
   const [traces, setTraces] = useState<CopperTraceSegment[]>(STARTER_CIRCUITS.ne555_flasher.traces);
   const [vias, setVias] = useState<PcbVia[]>([]);
   const [trackCuts, setTrackCuts] = useState<VeroboardTrackCut[]>([]);
   const [selectedCompId, setSelectedCompId] = useState<string | null>(null);
 
-  // Simulation State
   const [isSimRunning, setIsSimRunning] = useState(true);
   const [simState, setSimState] = useState<CircuitSimulationState>({
     components: STARTER_CIRCUITS.ne555_flasher.components,
@@ -253,16 +268,39 @@ export function PcbStudio() {
     statusMessage: 'Ready',
   });
 
-  // UI state for panels and exports
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [showDrcModal, setShowDrcModal] = useState(false);
   const [drcViolations, setDrcViolations] = useState<DrcViolation[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [exportPackage, setExportPackage] = useState<any>(null);
+  const [exportPackage, setExportPackage] = useState<ReturnType<typeof buildCompleteManufacturingExport> | null>(null);
+  const [boardSaveStatus, setBoardSaveStatus] = useState<string | null>(null);
 
   const scopeCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Simulation loop tick (every 40ms = 25Hz)
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: boardTitle.trim() || 'Untitled PCB Revision',
+        summary: `${substrate.toUpperCase()} layout · ${components.length} components · ${traces.length} copper traces`,
+        tags: ['pcb', substrate, 'kicad-ready'],
+        payload: { boardTitle, substrate, components, traces, vias, trackCuts },
+      }),
+      onLoad: (ws) => {
+        const p = ws.payload;
+        if (typeof p.boardTitle === 'string') setBoardTitle(p.boardTitle);
+        else setBoardTitle(ws.title);
+        if (p.substrate === 'fr4' || p.substrate === 'veroboard' || p.substrate === 'breadboard') {
+          setSubstrate(p.substrate);
+        }
+        if (Array.isArray(p.components)) setComponents(p.components as PlacedComponent[]);
+        if (Array.isArray(p.traces)) setTraces(p.traces as CopperTraceSegment[]);
+        if (Array.isArray(p.vias)) setVias(p.vias as PcbVia[]);
+        if (Array.isArray(p.trackCuts)) setTrackCuts(p.trackCuts as VeroboardTrackCut[]);
+        setSelectedCompId(null);
+      },
+    });
+  }, [labShell, boardTitle, substrate, components, traces, vias, trackCuts]);
+
   useEffect(() => {
     if (!isSimRunning) return;
     const interval = setInterval(() => {
@@ -275,9 +313,8 @@ export function PcbStudio() {
             trackCuts,
             substrate,
           },
-          20
+          20,
         );
-        // Sync back updated component states (LED glow, 555 output)
         setComponents(next.components);
         return next;
       });
@@ -285,7 +322,7 @@ export function PcbStudio() {
     return () => clearInterval(interval);
   }, [isSimRunning, components, traces, trackCuts, substrate]);
 
-  // Live Oscilloscope Canvas Renderer
+  // Crisp Rosepaper White & Pink Oscilloscope Renderer
   useEffect(() => {
     const canvas = scopeCanvasRef.current;
     if (!canvas) return;
@@ -295,12 +332,10 @@ export function PcbStudio() {
     const w = canvas.width;
     const h = canvas.height;
 
-    // Dark screen
-    ctx.fillStyle = '#020617';
+    ctx.fillStyle = '#fcf8fa';
     ctx.fillRect(0, 0, w, h);
 
-    // Oscilloscope Grid Lines
-    ctx.strokeStyle = '#1e293b';
+    ctx.strokeStyle = 'rgba(250, 22, 129, 0.10)';
     ctx.lineWidth = 1;
     for (let x = 0; x < w; x += 25) {
       ctx.beginPath();
@@ -315,21 +350,18 @@ export function PcbStudio() {
       ctx.stroke();
     }
 
-    // Zero Volt Baseline
-    const zeroY = h - 15;
-    ctx.strokeStyle = '#475569';
+    const zeroY = h - 16;
+    ctx.strokeStyle = '#cbd5e1';
     ctx.beginPath();
     ctx.moveTo(0, zeroY);
     ctx.lineTo(w, zeroY);
     ctx.stroke();
 
-    // Scale: 5V corresponds to approx 60px height
-    const vScale = 12; // px per volt
+    const vScale = 12;
 
-    // Plot Channel A (Yellow)
     if (simState.channelAData.length > 1) {
-      ctx.strokeStyle = '#eab308';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#e11d74';
+      ctx.lineWidth = 2.2;
       ctx.beginPath();
       simState.channelAData.forEach((pt, i) => {
         const x = (i / 100) * w;
@@ -340,9 +372,8 @@ export function PcbStudio() {
       ctx.stroke();
     }
 
-    // Plot Channel B (Cyan)
     if (simState.channelBData.length > 1) {
-      ctx.strokeStyle = '#06b6d4';
+      ctx.strokeStyle = '#2563eb';
       ctx.lineWidth = 2;
       ctx.beginPath();
       simState.channelBData.forEach((pt, i) => {
@@ -355,10 +386,10 @@ export function PcbStudio() {
     }
   }, [simState.channelAData, simState.channelBData]);
 
-  // Load Preset Circuit
   const loadPreset = (key: 'ne555_flasher' | 'veroboard_audio') => {
     const preset = STARTER_CIRCUITS[key];
     if (!preset) return;
+    setBoardTitle(preset.name);
     setSubstrate(preset.substrate);
     setComponents(preset.components);
     setTraces(preset.traces);
@@ -366,21 +397,31 @@ export function PcbStudio() {
     setSelectedCompId(null);
   };
 
-  // Run DRC
   const handleRunDrc = () => {
     const violations = runDesignRuleCheck(components, traces);
     setDrcViolations(violations);
     setShowDrcModal(true);
   };
 
-  // Build Exports
   const handleExport = () => {
     const pkg = buildCompleteManufacturingExport(components, traces, vias);
     setExportPackage(pkg);
     setShowExportModal(true);
   };
 
-  // Add Component from Catalog
+  const handleSaveBoard = async () => {
+    if (labShell) {
+      await labShell.saveWorkspace({
+        title: boardTitle.trim() || 'Untitled PCB Design',
+        summary: `${substrate.toUpperCase()} PCB · ${components.length} parts · ${traces.length} traces`,
+        tags: ['pcb', substrate],
+        payload: { boardTitle, substrate, components, traces, vias, trackCuts },
+      });
+      setBoardSaveStatus('Saved!');
+      setTimeout(() => setBoardSaveStatus(null), 2500);
+    }
+  };
+
   const handleAddComponent = (typeId: string) => {
     const item = getComponentCatalogItem(typeId);
     if (!item) return;
@@ -406,17 +447,15 @@ export function PcbStudio() {
     setSelectedCompId(newComp.id);
   };
 
-  // Rotate selected component
   const handleRotateSelected = () => {
     if (!selectedCompId) return;
     setComponents(
       components.map((c) =>
-        c.id === selectedCompId ? { ...c, rotationDeg: (c.rotationDeg + 90) % 360 } : c
-      )
+        c.id === selectedCompId ? { ...c, rotationDeg: (c.rotationDeg + 90) % 360 } : c,
+      ),
     );
   };
 
-  // Delete selected component
   const handleDeleteSelected = () => {
     if (!selectedCompId) return;
     setComponents(components.filter((c) => c.id !== selectedCompId));
@@ -427,184 +466,214 @@ export function PcbStudio() {
   const nets = resolveCircuitNets(components, traces, substrate, trackCuts);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] w-full bg-slate-950 text-slate-100 overflow-hidden font-sans">
-      {/* 1. TOP STUDIO TOOLBAR */}
-      <header className="h-14 border-b border-slate-800 bg-slate-900/80 px-4 flex items-center justify-between shrink-0">
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded bg-gradient-to-tr from-amber-500 to-emerald-500 flex items-center justify-center font-bold text-slate-950 shadow">
-              ⚡
+    <div className="flex flex-col h-[calc(100vh-8.25rem)] min-h-[640px] w-full bg-surface-1 text-fg overflow-hidden font-sans">
+      {/* 1. TOP ROSEPAPER STUDIO TOOLBAR */}
+      <header className="min-h-14 border-b border-hairline bg-surface-1 px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-on-solid shadow-xs">
+              <Zap className="size-4" aria-hidden="true" />
             </div>
-            <div>
-              <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
-                PCB & Real-Time Circuit Studio
-                <span className="text-[10px] font-medium bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/30">
-                  LIVE SPICE
-                </span>
-              </h1>
-            </div>
+            <input
+              type="text"
+              aria-label="PCB Project Name"
+              value={boardTitle}
+              onChange={(e) => setBoardTitle(e.target.value)}
+              className="w-44 sm:w-52 rounded-lg border border-hairline bg-sunken px-2.5 py-1 text-xs font-display font-bold text-fg focus:border-accent focus:bg-surface-1 focus:outline-none"
+            />
+            <span className="text-[10px] font-mono font-semibold bg-accent/10 text-accent-fg px-2 py-0.5 rounded-full border border-accent/25">
+              LIVE SPICE
+            </span>
           </div>
 
-          <div className="h-5 w-px bg-slate-700 mx-2" />
-
           {/* Substrate Selector */}
-          <div className="flex items-center bg-slate-800 p-0.5 rounded border border-slate-700 text-xs">
+          <div className="flex items-center bg-sunken p-0.5 rounded-full border border-hairline text-xs">
             {(['fr4', 'veroboard', 'breadboard'] as const).map((s) => (
               <button
                 key={s}
+                type="button"
                 onClick={() => setSubstrate(s)}
-                className={`px-2.5 py-1 rounded font-medium transition ${
+                className={cn(
+                  'px-2.5 py-1 rounded-full font-medium transition',
                   substrate === s
-                    ? 'bg-amber-500 text-slate-950 shadow font-semibold'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
+                    ? 'bg-accent text-on-solid shadow-xs font-semibold'
+                    : 'text-fg-muted hover:text-fg',
+                )}
               >
-                {s === 'fr4' ? 'FR4 Multi-Layer' : s === 'veroboard' ? 'Veroboard' : 'Breadboard'}
+                {s === 'fr4' ? 'FR4 PCB' : s === 'veroboard' ? 'Veroboard' : 'Breadboard'}
               </button>
             ))}
           </div>
 
-          {/* Presets */}
           <select
-            onChange={(e) => e.target.value && loadPreset(e.target.value as any)}
-            className="text-xs bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none"
+            aria-label="Circuit Preset"
+            onChange={(e) => e.target.value && loadPreset(e.target.value as 'ne555_flasher' | 'veroboard_audio')}
+            className="text-xs bg-sunken border border-hairline rounded-lg px-2.5 py-1.5 text-fg focus:border-accent focus:outline-none"
             defaultValue="ne555_flasher"
           >
-            <option value="ne555_flasher">Preset: 555 Astable LED Flasher</option>
-            <option value="veroboard_audio">Preset: Veroboard BJT Switch & Buzzer</option>
+            <option value="ne555_flasher">Preset: 555 Astable Flasher</option>
+            <option value="veroboard_audio">Preset: Veroboard Buzzer</option>
           </select>
         </div>
 
-        {/* Center Tool Buttons */}
-        <div className="flex items-center space-x-1 bg-slate-800/80 p-1 rounded-lg border border-slate-700/60">
+        {/* Center CAD Tools */}
+        <div className="flex flex-wrap items-center gap-1 bg-sunken p-1 rounded-xl border border-hairline">
           <button
+            type="button"
             onClick={() => setActiveTool('select')}
             title="Select & Move (V)"
-            className={`px-2.5 py-1 text-xs rounded transition flex items-center space-x-1 ${
-              activeTool === 'select' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300 hover:bg-slate-700'
-            }`}
+            className={cn(
+              'px-2.5 py-1 text-xs rounded-lg transition font-medium',
+              activeTool === 'select'
+                ? 'bg-accent text-on-solid font-semibold shadow-xs'
+                : 'text-fg-muted hover:bg-surface-1 hover:text-fg',
+            )}
           >
-            <span>↖ Select</span>
+            Select
           </button>
           <button
+            type="button"
             onClick={() => setActiveTool('route')}
             title="Route Copper Trace (W)"
-            className={`px-2.5 py-1 text-xs rounded transition flex items-center space-x-1 ${
-              activeTool === 'route' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300 hover:bg-slate-700'
-            }`}
+            className={cn(
+              'px-2.5 py-1 text-xs rounded-lg transition font-medium',
+              activeTool === 'route'
+                ? 'bg-accent text-on-solid font-semibold shadow-xs'
+                : 'text-fg-muted hover:bg-surface-1 hover:text-fg',
+            )}
           >
-            <span>〰 Route</span>
+            Route Trace
           </button>
           {substrate === 'veroboard' && (
             <button
+              type="button"
               onClick={() => setActiveTool('cut')}
               title="Track Cut / Break (C)"
-              className={`px-2.5 py-1 text-xs rounded transition flex items-center space-x-1 ${
-                activeTool === 'cut' ? 'bg-red-500 text-white font-bold' : 'text-slate-300 hover:bg-slate-700'
-              }`}
+              className={cn(
+                'px-2.5 py-1 text-xs rounded-lg transition font-medium',
+                activeTool === 'cut'
+                  ? 'bg-danger text-on-solid font-semibold shadow-xs'
+                  : 'text-fg-muted hover:bg-surface-1 hover:text-fg',
+              )}
             >
-              <span>✂ Track Cut</span>
+              Track Cut
             </button>
           )}
           <button
+            type="button"
             onClick={() => setActiveTool('via')}
             title="Place Via (T)"
-            className={`px-2.5 py-1 text-xs rounded transition flex items-center space-x-1 ${
-              activeTool === 'via' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300 hover:bg-slate-700'
-            }`}
+            className={cn(
+              'px-2.5 py-1 text-xs rounded-lg transition font-medium',
+              activeTool === 'via'
+                ? 'bg-accent text-on-solid font-semibold shadow-xs'
+                : 'text-fg-muted hover:bg-surface-1 hover:text-fg',
+            )}
           >
-            <span>◎ Via</span>
+            Via
           </button>
 
-          <div className="h-4 w-px bg-slate-700 mx-1" />
+          <div className="h-4 w-px bg-hairline mx-1" />
 
-          {/* Active Copper Layer Switcher */}
           <button
+            type="button"
             onClick={() => setActiveLayer('top_copper')}
-            className={`px-2 py-0.5 text-xs rounded font-medium ${
-              activeLayer === 'top_copper' ? 'bg-red-600 text-white font-semibold' : 'text-red-400 hover:bg-slate-700'
-            }`}
+            className={cn(
+              'px-2 py-1 text-xs rounded-lg font-medium transition',
+              activeLayer === 'top_copper'
+                ? 'bg-accent/15 text-accent-fg border border-accent/30 font-semibold'
+                : 'text-fg-subtle hover:text-fg',
+            )}
           >
             Top Cu
           </button>
           <button
+            type="button"
             onClick={() => setActiveLayer('bottom_copper')}
-            className={`px-2 py-0.5 text-xs rounded font-medium ${
-              activeLayer === 'bottom_copper' ? 'bg-blue-600 text-white font-semibold' : 'text-blue-400 hover:bg-slate-700'
-            }`}
+            className={cn(
+              'px-2 py-1 text-xs rounded-lg font-medium transition',
+              activeLayer === 'bottom_copper'
+                ? 'bg-info/15 text-info-fg border border-info/30 font-semibold'
+                : 'text-fg-subtle hover:text-fg',
+            )}
           >
             Bottom Cu
           </button>
         </div>
 
-        {/* Right Action Controls */}
-        <div className="flex items-center space-x-2">
-          {/* View Mode Toggle */}
-          <div className="flex bg-slate-800 p-0.5 rounded border border-slate-700 text-xs">
+        {/* Right Actions */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex bg-sunken p-0.5 rounded-full border border-hairline text-xs">
             <button
+              type="button"
               onClick={() => setViewMode('2d')}
-              className={`px-2.5 py-1 rounded font-medium transition ${
-                viewMode === '2d' ? 'bg-slate-700 text-white font-semibold' : 'text-slate-400'
-              }`}
+              className={cn(
+                'px-2.5 py-1 rounded-full font-medium transition',
+                viewMode === '2d' ? 'bg-surface-1 text-fg font-semibold shadow-xs' : 'text-fg-muted',
+              )}
             >
               2D Canvas
             </button>
             <button
+              type="button"
               onClick={() => setViewMode('3d')}
-              className={`px-2.5 py-1 rounded font-medium transition ${
-                viewMode === '3d' ? 'bg-slate-700 text-white font-semibold' : 'text-slate-400'
-              }`}
+              className={cn(
+                'px-2.5 py-1 rounded-full font-medium transition',
+                viewMode === '3d' ? 'bg-surface-1 text-fg font-semibold shadow-xs' : 'text-fg-muted',
+              )}
             >
               3D WebGL
             </button>
           </div>
 
-          {/* Simulation Toggle */}
-          <button
+          <Button
+            size="sm"
+            variant={isSimRunning ? 'soft' : 'secondary'}
             onClick={() => setIsSimRunning(!isSimRunning)}
-            className={`px-3 py-1 text-xs font-semibold rounded flex items-center space-x-1 transition ${
-              isSimRunning
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                : 'bg-amber-600 hover:bg-amber-500 text-slate-950'
-            }`}
           >
-            <span>{isSimRunning ? '⏸ Pause Sim' : '▶ Run Sim'}</span>
-          </button>
+            {isSimRunning ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+            <span>{isSimRunning ? 'Pause Sim' : 'Run Sim'}</span>
+          </Button>
 
-          {/* DRC Checker */}
-          <button
-            onClick={handleRunDrc}
-            className="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded font-medium"
-          >
-            DRC Check
-          </button>
+          <Button size="sm" variant="secondary" onClick={handleRunDrc}>
+            <ShieldAlert className="size-3.5" />
+            <span>DRC Check</span>
+          </Button>
 
-          {/* Export Fabrication */}
-          <button
-            onClick={handleExport}
-            className="px-3 py-1 text-xs bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded shadow transition"
-          >
-            Export Gerber/BOM
-          </button>
+          {labShell && (
+            <Button size="sm" variant="secondary" onClick={() => void handleSaveBoard()}>
+              <Save className="size-3.5" />
+              <span>{boardSaveStatus ?? 'Save Board'}</span>
+            </Button>
+          )}
+
+          <Button size="sm" variant="primary" onClick={handleExport}>
+            <Download className="size-3.5" />
+            <span>Export Gerber/BOM</span>
+          </Button>
         </div>
       </header>
 
-      {/* 2. MAIN WORKSPACE AREA */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* LEFT COMPONENT CATALOG PALETTE */}
-        <aside className="w-64 border-r border-slate-800 bg-slate-900/60 flex flex-col shrink-0">
-          <div className="p-3 border-b border-slate-800">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+      {/* 2. MAIN WORKSPACE */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        {/* LEFT COMPONENT CATALOG */}
+        <aside className="w-60 sm:w-64 border-r border-hairline bg-surface-1 flex flex-col shrink-0">
+          <div className="p-3 border-b border-hairline">
+            <h2 className="font-display text-xs font-bold uppercase tracking-wider text-fg-muted mb-2">
               Component Library
             </h2>
             <div className="flex flex-wrap gap-1">
               {['All', 'Passives', 'Diodes & Opto', 'Transistors', 'ICs', 'Electro'].map((cat) => (
                 <button
+                  type="button"
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`text-[10px] px-2 py-0.5 rounded transition ${
-                    activeCategory === cat ? 'bg-amber-500 text-slate-950 font-semibold' : 'bg-slate-800 text-slate-400'
-                  }`}
+                  className={cn(
+                    'text-[10px] px-2 py-0.5 rounded-full transition font-medium border',
+                    activeCategory === cat
+                      ? 'bg-accent text-on-solid border-accent font-semibold'
+                      : 'bg-sunken border-hairline text-fg-muted hover:text-fg',
+                  )}
                 >
                   {cat}
                 </button>
@@ -612,33 +681,35 @@ export function PcbStudio() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+          <div className="flex-1 overflow-y-auto p-2.5 space-y-1.5">
             {COMPONENT_CATALOG.filter((item) =>
-              activeCategory === 'All' ? true : item.category.toLowerCase().includes(activeCategory.toLowerCase().slice(0, 4))
+              activeCategory === 'All'
+                ? true
+                : item.category.toLowerCase().includes(activeCategory.toLowerCase().slice(0, 4)),
             ).map((item) => (
               <div
                 key={item.typeId}
                 onClick={() => handleAddComponent(item.typeId)}
-                className="group p-2 rounded-lg bg-slate-800/40 hover:bg-slate-800 border border-slate-800/80 hover:border-amber-500/50 cursor-pointer transition flex items-center justify-between"
+                className="group p-2.5 rounded-xl bg-sunken/70 hover:bg-accent-soft/70 border border-hairline hover:border-accent/40 cursor-pointer transition flex items-center justify-between gap-2"
               >
-                <div>
-                  <div className="text-xs font-semibold text-slate-200 group-hover:text-amber-400">
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-fg group-hover:text-accent-fg truncate">
                     {item.name}
                   </div>
-                  <div className="text-[10px] text-slate-400">
-                    {item.defaultValue} • {item.standardFootprint.packageType}
+                  <div className="text-[10px] text-fg-subtle truncate">
+                    {item.defaultValue} · {item.standardFootprint.packageType}
                   </div>
                 </div>
-                <button className="text-[10px] px-1.5 py-0.5 bg-slate-700 group-hover:bg-amber-500 group-hover:text-slate-950 text-slate-300 rounded font-semibold">
+                <span className="text-[10px] px-2 py-0.5 bg-surface-1 border border-hairline group-hover:bg-accent group-hover:text-on-solid group-hover:border-accent text-fg-muted rounded-full font-semibold shrink-0">
                   + Add
-                </button>
+                </span>
               </div>
             ))}
           </div>
         </aside>
 
-        {/* CENTER STAGE (2D Canvas or 3D WebGL Viewer) */}
-        <main className="flex-1 relative bg-slate-950 flex flex-col overflow-hidden">
+        {/* CENTER CANVAS / 3D VIEWER */}
+        <main className="flex-1 relative bg-sunken flex flex-col overflow-hidden min-w-0">
           {viewMode === '2d' ? (
             <PcbDesignerCanvas
               substrate={substrate}
@@ -679,8 +750,8 @@ export function PcbStudio() {
               onToggleComponentParam={(id, key, val) => {
                 setComponents(
                   components.map((c) =>
-                    c.id === id ? { ...c, userParams: { ...c.userParams, [key]: val } } : c
-                  )
+                    c.id === id ? { ...c, userParams: { ...c.userParams, [key]: val } } : c,
+                  ),
                 );
               }}
             />
@@ -693,110 +764,110 @@ export function PcbStudio() {
             />
           )}
 
-          {/* Floating Selected Component Quick Toolbar */}
           {selectedComp && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-lg px-3 py-1.5 shadow-xl flex items-center space-x-3 text-xs">
-              <span className="font-semibold text-amber-400">
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-surface-1/95 backdrop-blur border border-hairline rounded-full px-3.5 py-1.5 shadow-md flex items-center space-x-2.5 text-xs">
+              <span className="font-semibold text-accent-fg">
                 {selectedComp.id}: {selectedComp.name}
               </span>
               <button
+                type="button"
                 onClick={handleRotateSelected}
-                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded"
+                className="px-2 py-0.5 bg-sunken hover:bg-surface-2 border border-hairline text-fg rounded-full inline-flex items-center gap-1"
               >
-                ↻ Rotate 90°
+                <RotateCw className="size-3" /> Rotate 90°
               </button>
               <button
+                type="button"
                 onClick={handleDeleteSelected}
-                className="px-2 py-0.5 bg-red-950 hover:bg-red-900 text-red-300 rounded border border-red-800"
+                className="px-2 py-0.5 bg-danger/10 hover:bg-danger/20 text-danger-fg rounded-full border border-danger/30 inline-flex items-center gap-1"
               >
-                ✕ Delete
+                <Trash2 className="size-3" /> Delete
               </button>
             </div>
           )}
         </main>
 
-        {/* RIGHT SIDEBAR: INSPECTOR & OSCILLOSCOPE */}
-        <aside className="w-80 border-l border-slate-800 bg-slate-900/60 flex flex-col shrink-0">
-          {/* Real-time 2-Channel Oscilloscope */}
-          <div className="p-3 border-b border-slate-800">
+        {/* RIGHT INSPECTOR & OSCILLOSCOPE */}
+        <aside className="w-72 xl:w-80 border-l border-hairline bg-surface-1 flex flex-col shrink-0">
+          {/* 2-Channel Oscilloscope */}
+          <div className="p-3.5 border-b border-hairline">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Live 2-CH Oscilloscope
+              <span className="font-display text-xs font-bold uppercase tracking-wider text-fg flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                Live 2-CH Scope
               </span>
-              <div className="flex items-center space-x-2 text-[10px]">
-                <span className="text-yellow-400 font-mono">CH A (Out)</span>
-                <span className="text-cyan-400 font-mono">CH B (Cap/LED)</span>
+              <div className="flex items-center space-x-2 text-[10px] font-mono">
+                <span className="text-accent-fg font-semibold">CH A (Out)</span>
+                <span className="text-info-fg font-semibold">CH B (Cap)</span>
               </div>
             </div>
-            <div className="w-full h-32 rounded bg-slate-950 border border-slate-800 overflow-hidden relative">
+            <div className="w-full h-32 rounded-xl bg-sunken border border-hairline overflow-hidden relative">
               <canvas
                 ref={scopeCanvasRef}
                 width={300}
                 height={128}
                 className="w-full h-full block"
               />
-              <div className="absolute bottom-1 right-2 text-[9px] font-mono text-slate-500">
-                20ms/div • 1V/div
+              <div className="absolute bottom-1 right-2 text-[9px] font-mono text-fg-subtle">
+                20ms/div · 1V/div
               </div>
             </div>
           </div>
 
-          {/* Digital Multimeter / Node Telemetry */}
-          <div className="p-3 border-b border-slate-800">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block">
-              Digital Multimeter & Telemetry
+          {/* Bus & Net Stats */}
+          <div className="p-3.5 border-b border-hairline">
+            <span className="font-display text-xs font-bold uppercase tracking-wider text-fg-muted mb-2 block">
+              Digital Multimeter &amp; Telemetry
             </span>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-slate-800/60 p-2 rounded border border-slate-800">
-                <div className="text-[10px] text-slate-400">VCC Bus</div>
-                <div className="text-base font-bold text-amber-400 font-mono">5.00 V</div>
+              <div className="bg-sunken p-2.5 rounded-xl border border-hairline">
+                <div className="text-[10px] text-fg-subtle">VCC Bus</div>
+                <div className="text-base font-bold text-accent-fg font-mono">5.00 V</div>
               </div>
-              <div className="bg-slate-800/60 p-2 rounded border border-slate-800">
-                <div className="text-[10px] text-slate-400">Total Nets</div>
-                <div className="text-base font-bold text-emerald-400 font-mono">{nets.length}</div>
+              <div className="bg-sunken p-2.5 rounded-xl border border-hairline">
+                <div className="text-[10px] text-fg-subtle">Total Nets</div>
+                <div className="text-base font-bold text-success-fg font-mono">{nets.length}</div>
               </div>
             </div>
           </div>
 
-          {/* Component Parameter Inspector */}
-          <div className="flex-1 overflow-y-auto p-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block">
+          {/* Component Inspector */}
+          <div className="flex-1 overflow-y-auto p-3.5">
+            <span className="font-display text-xs font-bold uppercase tracking-wider text-fg-muted mb-2.5 block">
               Component Inspector
             </span>
 
             {selectedComp ? (
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="text-[10px] text-slate-400">Designator</label>
+                  <label className="text-[10px] font-semibold text-fg-muted">Designator</label>
                   <input
                     type="text"
                     value={selectedComp.id}
                     disabled
-                    className="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-300 font-mono"
+                    className="w-full mt-1 bg-sunken border border-hairline rounded-lg px-2.5 py-1.5 text-fg font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-400">Nominal Value</label>
+                  <label className="text-[10px] font-semibold text-fg-muted">Nominal Value</label>
                   <input
                     type="text"
                     value={selectedComp.value}
                     onChange={(e) => {
                       setComponents(
                         components.map((c) =>
-                          c.id === selectedComp.id ? { ...c, value: e.target.value } : c
-                        )
+                          c.id === selectedComp.id ? { ...c, value: e.target.value } : c,
+                        ),
                       );
                     }}
-                    className="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-amber-400 font-mono"
+                    className="w-full mt-1 bg-sunken border border-line rounded-lg px-2.5 py-1.5 text-accent-fg font-mono focus:border-accent focus:outline-none"
                   />
                 </div>
 
-                {/* Interactive Controls based on component type */}
                 {selectedComp.typeId === 'pot_10k' && (
                   <div>
-                    <label className="text-[10px] text-slate-400">
+                    <label className="text-[10px] font-semibold text-fg-muted">
                       Wiper Position: {Math.round(Number(selectedComp.userParams?.wiperRatio ?? 0.5) * 100)}%
                     </label>
                     <input
@@ -810,18 +881,18 @@ export function PcbStudio() {
                           components.map((c) =>
                             c.id === selectedComp.id
                               ? { ...c, userParams: { ...c.userParams, wiperRatio: parseFloat(e.target.value) } }
-                              : c
-                          )
+                              : c,
+                          ),
                         );
                       }}
-                      className="w-full mt-1 accent-amber-500"
+                      className="w-full mt-1 accent-accent"
                     />
                   </div>
                 )}
 
                 {selectedComp.typeId === 'ldr_gl5528' && (
                   <div>
-                    <label className="text-[10px] text-slate-400">
+                    <label className="text-[10px] font-semibold text-fg-muted">
                       Ambient Lux: {selectedComp.userParams?.lux ?? 500} Lux
                     </label>
                     <input
@@ -834,23 +905,24 @@ export function PcbStudio() {
                         setComponents(
                           components.map((c) =>
                             c.id === selectedComp.id
-                              ? { ...c, userParams: { ...c.userParams, lux: parseInt(e.target.value) } }
-                              : c
-                          )
+                              ? { ...c, userParams: { ...c.userParams, lux: parseInt(e.target.value, 10) } }
+                              : c,
+                          ),
                         );
                       }}
-                      className="w-full mt-1 accent-amber-500"
+                      className="w-full mt-1 accent-accent"
                     />
                   </div>
                 )}
 
-                {/* Live Node Voltage Readings */}
-                <div className="bg-slate-800/40 p-2 rounded border border-slate-800 space-y-1">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Live Dynamic State</div>
+                <div className="bg-sunken p-2.5 rounded-xl border border-hairline space-y-1.5">
+                  <div className="text-[10px] font-bold text-fg-muted uppercase flex items-center gap-1">
+                    <Activity className="size-3 text-accent" /> Live Dynamic State
+                  </div>
                   {selectedComp.simState.illumination !== undefined && (
                     <div className="flex justify-between font-mono">
                       <span>Brightness:</span>
-                      <span className="text-amber-400">
+                      <span className="text-accent-fg font-semibold">
                         {Math.round(selectedComp.simState.illumination * 100)}%
                       </span>
                     </div>
@@ -858,108 +930,112 @@ export function PcbStudio() {
                   {selectedComp.simState.currentMa !== undefined && (
                     <div className="flex justify-between font-mono">
                       <span>Current:</span>
-                      <span className="text-emerald-400">{selectedComp.simState.currentMa} mA</span>
+                      <span className="text-success-fg font-semibold">{selectedComp.simState.currentMa} mA</span>
                     </div>
                   )}
                   {selectedComp.simState.oscillatorFreqHz !== undefined && (
                     <div className="flex justify-between font-mono">
                       <span>Freq:</span>
-                      <span className="text-cyan-400">{selectedComp.simState.oscillatorFreqHz} Hz</span>
+                      <span className="text-info-fg font-semibold">{selectedComp.simState.oscillatorFreqHz} Hz</span>
                     </div>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-slate-500 italic p-4 text-center">
-                Select any component to inspect pins, configure parameters, or interact with dials and buttons.
+              <div className="text-xs text-fg-subtle p-4 text-center rounded-xl border border-dashed border-hairline bg-sunken/50">
+                Click any component on the canvas to inspect pins, edit values, or toggle switches.
               </div>
             )}
           </div>
         </aside>
       </div>
 
-      {/* 3. DRC VIOLATIONS MODAL */}
+      {/* 3. DRC MODAL */}
       {showDrcModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-lg w-full p-5 shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-fg/35 backdrop-blur-sm p-4"
+        >
+          <div className="bg-surface-1 border border-hairline rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-overlay space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-base font-bold text-fg flex items-center gap-2">
                 <span>Design Rule Check (DRC)</span>
-                <span
-                  className={`text-xs px-2 py-0.5 rounded font-semibold ${
-                    drcViolations.length === 0
-                      ? 'bg-emerald-500/20 text-emerald-400'
-                      : 'bg-amber-500/20 text-amber-400'
-                  }`}
-                >
+                <Badge tone={drcViolations.length === 0 ? 'success' : 'warning'} variant="solid">
                   {drcViolations.length} Violations
-                </span>
+                </Badge>
               </h3>
               <button
+                type="button"
                 onClick={() => setShowDrcModal(false)}
-                className="text-slate-400 hover:text-white"
+                className="rounded-full p-1 text-fg-subtle hover:bg-surface-2 hover:text-fg"
+                aria-label="Close DRC results"
               >
-                ✕
+                <X className="size-4" />
               </button>
             </div>
 
-            <div className="max-h-60 overflow-y-auto space-y-2 mb-4">
+            <div className="max-h-60 overflow-y-auto space-y-2">
               {drcViolations.length === 0 ? (
-                <div className="p-4 bg-emerald-950/40 border border-emerald-800 rounded-lg text-emerald-300 text-xs flex items-center gap-2">
-                  <span>✓</span>
-                  <span>Board passed all DRC checks! Clearance, trace widths, and vias are production ready.</span>
+                <div className="p-4 bg-success/10 border border-success/30 rounded-xl text-success-fg text-xs flex items-center gap-2 font-medium">
+                  <CheckCircle2 className="size-4 shrink-0" />
+                  <span>Board passed all DRC checks! Clearance, trace widths, and vias are fab-ready.</span>
                 </div>
               ) : (
                 drcViolations.map((v) => (
                   <div
                     key={v.id}
-                    className="p-2.5 rounded bg-slate-800 border border-slate-700 text-xs flex items-start space-x-2"
+                    className="p-3 rounded-xl bg-sunken border border-hairline text-xs flex items-start gap-2.5"
                   >
-                    <span className={v.severity === 'error' ? 'text-red-400' : 'text-amber-400'}>
+                    <span className={v.severity === 'error' ? 'text-danger-fg font-bold' : 'text-warning-fg font-bold'}>
                       {v.severity === 'error' ? '✖' : '⚠'}
                     </span>
                     <div>
-                      <div className="font-semibold text-slate-200">{v.code}</div>
-                      <div className="text-slate-400 text-[11px]">{v.message}</div>
+                      <div className="font-semibold text-fg">{v.code}</div>
+                      <div className="text-fg-muted text-[11px]">{v.message}</div>
                     </div>
                   </div>
                 ))
               )}
             </div>
 
-            <button
-              onClick={() => setShowDrcModal(false)}
-              className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs rounded transition"
-            >
+            <Button variant="secondary" className="w-full" onClick={() => setShowDrcModal(false)}>
               Close
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {/* 4. MANUFACTURING EXPORTS MODAL */}
       {showExportModal && exportPackage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-2xl w-full p-5 shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <span>Manufacturing & Fabrication Package</span>
-                <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-mono">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-fg/35 backdrop-blur-sm p-4"
+        >
+          <div className="bg-surface-1 border border-hairline rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-overlay space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-base font-bold text-fg flex items-center gap-2">
+                <Layers className="size-4 text-accent" />
+                <span>Manufacturing &amp; Fabrication Package</span>
+                <Badge tone="accent" variant="outline" className="font-mono text-[11px]">
                   RS-274X + Excellon + BOM
-                </span>
+                </Badge>
               </h3>
               <button
+                type="button"
                 onClick={() => setShowExportModal(false)}
-                className="text-slate-400 hover:text-white"
+                className="rounded-full p-1 text-fg-subtle hover:bg-surface-2 hover:text-fg"
+                aria-label="Close export modal"
               >
-                ✕
+                <X className="size-4" />
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
-              <div className="p-3 bg-slate-800/60 rounded-lg border border-slate-700">
-                <div className="font-bold text-slate-200 mb-1">Gerber RS-274X Layers</div>
-                <ul className="text-slate-400 space-y-0.5 text-[11px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-3.5 bg-sunken rounded-xl border border-hairline">
+                <div className="font-bold text-fg mb-1.5">Gerber RS-274X Layers</div>
+                <ul className="text-fg-muted space-y-1 text-[11px]">
                   <li>• Top Copper (.GTL)</li>
                   <li>• Bottom Copper (.GBL)</li>
                   <li>• Top Silkscreen (.GTO)</li>
@@ -967,52 +1043,55 @@ export function PcbStudio() {
                 </ul>
               </div>
 
-              <div className="p-3 bg-slate-800/60 rounded-lg border border-slate-700">
-                <div className="font-bold text-slate-200 mb-1">Assembly & Netlist Files</div>
-                <ul className="text-slate-400 space-y-0.5 text-[11px]">
+              <div className="p-3.5 bg-sunken rounded-xl border border-hairline">
+                <div className="font-bold text-fg mb-1.5">Assembly &amp; Netlist Files</div>
+                <ul className="text-fg-muted space-y-1 text-[11px]">
                   <li>• Excellon NC Drill (.DRL)</li>
                   <li>• Bill of Materials (.CSV)</li>
-                  <li>• Pick & Place Centroid (.CSV)</li>
+                  <li>• Pick &amp; Place Centroid (.CSV)</li>
                   <li>• KiCad PCB Netlist (.NET)</li>
                 </ul>
               </div>
             </div>
 
-            {/* Quick BOM Preview */}
-            <div className="mb-4">
-              <div className="text-xs font-semibold text-slate-300 mb-1">BOM Preview:</div>
-              <pre className="p-2.5 bg-slate-950 rounded border border-slate-800 text-[10px] font-mono text-emerald-400 max-h-36 overflow-y-auto">
+            <div>
+              <div className="text-xs font-semibold text-fg-muted mb-1">BOM Preview:</div>
+              <pre className="p-3 bg-sunken rounded-xl border border-hairline text-[10px] font-mono text-fg max-h-36 overflow-y-auto">
                 {exportPackage.bomCsv}
               </pre>
             </div>
 
-            <div className="flex space-x-2">
-              <button
+            <div className="flex flex-wrap gap-2.5">
+              <Button
+                variant="secondary"
+                className="flex-1"
                 onClick={() => {
                   const blob = new Blob([exportPackage.bomCsv], { type: 'text/csv' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = 'PCB_BOM.csv';
+                  a.download = `${boardTitle.replace(/\s+/g, '-')}-BOM.csv`;
                   a.click();
+                  URL.revokeObjectURL(url);
                 }}
-                className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs rounded transition"
               >
                 Download BOM.csv
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                className="flex-1"
                 onClick={() => {
                   const blob = new Blob([exportPackage.gerberTopCopper], { type: 'text/plain' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = 'TopCopper.gtl';
+                  a.download = `${boardTitle.replace(/\s+/g, '-')}-TopCopper.gtl`;
                   a.click();
+                  URL.revokeObjectURL(url);
                 }}
-                className="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded transition shadow"
               >
                 Download Gerber TopCopper
-              </button>
+              </Button>
             </div>
           </div>
         </div>

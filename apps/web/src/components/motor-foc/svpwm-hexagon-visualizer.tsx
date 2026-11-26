@@ -21,13 +21,11 @@ export function SvpwmHexagonVisualizer({
   dcBusVoltageV,
   title = 'Space Vector PWM (SVPWM) Voltage Hexagon',
 }: SvpwmHexagonVisualizerProps) {
-  // SVG dimensions
   const size = 380;
   const center = size / 2;
-  const radius = 135; // Hexagon radius
-  const inscribedRadius = radius * Math.cos(Math.PI / 6); // Max linear modulation circle = R * sqrt(3)/2
+  const radius = 135;
+  const inscribedRadius = radius * Math.cos(Math.PI / 6);
 
-  // 6 Active Voltage Vectors at 0, 60, 120, 180, 240, 300 degrees
   const vectors = [
     { name: 'V1 (100)', angleDeg: 0, rad: 0 },
     { name: 'V2 (110)', angleDeg: 60, rad: Math.PI / 3 },
@@ -37,7 +35,6 @@ export function SvpwmHexagonVisualizer({
     { name: 'V6 (101)', angleDeg: 300, rad: (5 * Math.PI) / 3 },
   ];
 
-  // Coordinates of the 6 vertices
   const vertices = vectors.map((v) => ({
     x: center + radius * Math.cos(v.rad),
     y: center - radius * Math.sin(v.rad),
@@ -45,21 +42,17 @@ export function SvpwmHexagonVisualizer({
 
   const hexagonPoints = vertices.map((v) => `${v.x.toFixed(1)},${v.y.toFixed(1)}`).join(' ');
 
-  // Reference Vector Angle based on currentSector
-  // Sector 1: 0 to 60 deg -> Midpoint 30 deg
   const sectorMidDeg = (currentSector - 1) * 60 + 30;
   const refRad = (sectorMidDeg * Math.PI) / 180;
   const refMagnitude = Math.min(1.15, modulationIndex) * inscribedRadius;
   const refX = center + refMagnitude * Math.cos(refRad);
   const refY = center - refMagnitude * Math.sin(refRad);
 
-  // Total PWM period
   const totalDwellUs = dwellTimeT1Us + dwellTimeT2Us + dwellTimeT0Us || 50;
   const t1Percent = Math.min(100, Math.round((dwellTimeT1Us / totalDwellUs) * 100));
   const t2Percent = Math.min(100, Math.round((dwellTimeT2Us / totalDwellUs) * 100));
   const t0Percent = Math.max(0, 100 - t1Percent - t2Percent);
 
-  // Switching States for each sector
   const sectorSwitchingStates = {
     1: { vAlpha: 'V1(100)', vBeta: 'V2(110)', pattern: '000 → 100 → 110 → 111 → 110 → 100 → 000' },
     2: { vAlpha: 'V2(110)', vBeta: 'V3(010)', pattern: '000 → 010 → 110 → 111 → 110 → 010 → 000' },
@@ -73,22 +66,22 @@ export function SvpwmHexagonVisualizer({
   const currentSectorInfo = sectorSwitchingStates[secKey];
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl text-slate-100 flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+    <div className="bg-surface-1 border border-hairline rounded-2xl p-5 shadow-xs text-fg flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-hairline pb-3">
         <div>
-          <h3 className="text-base font-semibold text-emerald-400 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <h3 className="font-display text-base font-semibold text-accent-fg flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
             {title}
           </h3>
-          <p className="text-xs text-slate-400">
-            Active 8-state switching sectors and reference voltage synthesis $\vec{'{'}V{'}'}_{'{'}ref{'}'}$
+          <p className="text-xs text-fg-muted mt-0.5">
+            Active 8-state switching sectors and reference voltage synthesis V_ref
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono">
-          <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+          <span className="px-2.5 py-0.5 rounded-full bg-accent-soft text-accent-fg border border-accent/25 font-semibold">
             Sector {currentSector}
           </span>
-          <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
+          <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
             m = {modulationIndex.toFixed(2)}
           </span>
         </div>
@@ -96,9 +89,8 @@ export function SvpwmHexagonVisualizer({
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
         {/* SVG Hexagon Visualizer (7 cols) */}
-        <div className="md:col-span-7 flex justify-center bg-slate-950/80 rounded-xl p-3 border border-slate-800/80">
+        <div className="md:col-span-7 flex justify-center bg-sunken rounded-xl p-3 border border-hairline">
           <svg viewBox={`0 0 ${size} ${size}`} className="w-full max-w-[340px] h-auto select-none">
-            {/* Sector Background Wedges */}
             {[1, 2, 3, 4, 5, 6].map((sec) => {
               const vStart = vertices[sec - 1]!;
               const vEnd = vertices[sec % 6]!;
@@ -107,42 +99,36 @@ export function SvpwmHexagonVisualizer({
                 <polygon
                   key={`sec-wedge-${sec}`}
                   points={`${center},${center} ${vStart.x},${vStart.y} ${vEnd.x},${vEnd.y}`}
-                  className={
-                    isSelected
-                      ? 'fill-emerald-500/25 stroke-emerald-400'
-                      : 'fill-slate-900/60 stroke-slate-800/80'
-                  }
+                  fill={isSelected ? 'rgba(250, 22, 129, 0.14)' : '#ffffff'}
+                  stroke={isSelected ? '#FA1681' : '#E2E8F0'}
                   strokeWidth={isSelected ? '2' : '1'}
                 />
               );
             })}
 
-            {/* Inscribed Maximum Linear Modulation Circle */}
             <circle
               cx={center}
               cy={center}
               r={inscribedRadius}
               fill="none"
-              stroke="#38bdf8"
+              stroke="#0284C7"
               strokeDasharray="4,4"
               strokeWidth="1.2"
             />
 
-            {/* Outer Hexagon Outline */}
             <polygon
               points={hexagonPoints}
               fill="none"
-              stroke="#64748b"
-              strokeWidth="2"
+              stroke="#94A3B8"
+              strokeWidth="1.75"
             />
 
-            {/* Axes */}
             <line
               x1={center - radius - 15}
               y1={center}
               x2={center + radius + 15}
               y2={center}
-              stroke="#475569"
+              stroke="#CBD5E1"
               strokeWidth="1"
             />
             <line
@@ -150,11 +136,10 @@ export function SvpwmHexagonVisualizer({
               y1={center - radius - 15}
               x2={center}
               y2={center + radius + 15}
-              stroke="#475569"
+              stroke="#CBD5E1"
               strokeWidth="1"
             />
 
-            {/* Vector Spokes and Labels */}
             {vectors.map((v, idx) => {
               const pt = vertices[idx]!;
               const labelRadius = radius + 22;
@@ -163,30 +148,28 @@ export function SvpwmHexagonVisualizer({
 
               return (
                 <g key={v.name}>
-                  {/* Spoke */}
                   <line
                     x1={center}
                     y1={center}
                     x2={pt.x}
                     y2={pt.y}
-                    stroke="#94a3b8"
-                    strokeWidth="1.5"
+                    stroke="#94A3B8"
+                    strokeWidth="1.25"
                   />
-                  {/* Vertex Dot */}
                   <circle
                     cx={pt.x}
                     cy={pt.y}
                     r="4"
-                    fill="#38bdf8"
-                    className="stroke-slate-900"
+                    fill="#0284C7"
+                    stroke="#FFFFFF"
                     strokeWidth="1.5"
                   />
-                  {/* Vector Name Label */}
                   <text
                     x={labelX}
                     y={labelY + 4}
                     textAnchor="middle"
-                    className="text-[10px] fill-slate-300 font-mono font-bold"
+                    fill="#334155"
+                    className="text-[10px] font-mono font-bold"
                   >
                     {v.name}
                   </text>
@@ -194,7 +177,6 @@ export function SvpwmHexagonVisualizer({
               );
             })}
 
-            {/* Sector Numbers */}
             {[1, 2, 3, 4, 5, 6].map((sec) => {
               const secAngleRad = ((sec - 1) * 60 + 30) * (Math.PI / 180);
               const secR = radius * 0.62;
@@ -207,33 +189,31 @@ export function SvpwmHexagonVisualizer({
                   x={sx}
                   y={sy + 4}
                   textAnchor="middle"
-                  className={`text-[12px] font-mono font-bold ${
-                    isSelected ? 'fill-emerald-300' : 'fill-slate-500'
-                  }`}
+                  fill={isSelected ? '#D10D69' : '#64748B'}
+                  className="text-[11px] font-mono font-bold"
                 >
                   Sec {sec}
                 </text>
               );
             })}
 
-            {/* Origin (Zero Vectors V0(000) & V7(111)) */}
-            <circle cx={center} cy={center} r="5" fill="#f59e0b" />
+            <circle cx={center} cy={center} r="5" fill="#D97706" />
             <text
               x={center}
               y={center + 16}
               textAnchor="middle"
-              className="text-[9px] fill-amber-400 font-mono"
+              fill="#B45309"
+              className="text-[9px] font-mono font-semibold"
             >
               V0/V7
             </text>
 
-            {/* Reference Voltage Vector V_ref */}
             <line
               x1={center}
               y1={center}
               x2={refX}
               y2={refY}
-              stroke="#10b981"
+              stroke="#FA1681"
               strokeWidth="3.5"
               strokeLinecap="round"
             />
@@ -241,16 +221,16 @@ export function SvpwmHexagonVisualizer({
               cx={refX}
               cy={refY}
               r="5.5"
-              fill="#10b981"
-              className="stroke-slate-900"
+              fill="#FA1681"
+              stroke="#FFFFFF"
               strokeWidth="2"
             />
 
-            {/* Inscribed limit text */}
             <text
               x={center + inscribedRadius - 8}
               y={center - 8}
-              className="text-[9px] fill-sky-400 font-mono"
+              fill="#0369A1"
+              className="text-[9px] font-mono font-semibold"
             >
               V_max (Vdc/√3)
             </text>
@@ -259,60 +239,57 @@ export function SvpwmHexagonVisualizer({
 
         {/* Dwell Times & Switching Sequence (5 cols) */}
         <div className="md:col-span-5 flex flex-col gap-3 font-mono text-xs">
-          <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
-            <span className="text-slate-400 text-[11px] block uppercase tracking-wider">
+          <div className="bg-sunken p-3.5 rounded-xl border border-hairline space-y-2.5">
+            <span className="text-fg-subtle text-[11px] block uppercase tracking-wider font-semibold">
               SVPWM Dwell Times (PWM Period)
             </span>
 
-            {/* T1 Bar */}
             <div className="space-y-1">
               <div className="flex justify-between text-[11px]">
-                <span className="text-sky-300">T1 ({currentSectorInfo.vAlpha}):</span>
-                <span className="font-bold">{dwellTimeT1Us} μs ({t1Percent}%)</span>
+                <span className="text-sky-700 font-semibold">T1 ({currentSectorInfo.vAlpha}):</span>
+                <span className="font-bold text-fg">{dwellTimeT1Us} μs ({t1Percent}%)</span>
               </div>
-              <div className="w-full bg-slate-800 h-2 rounded overflow-hidden">
-                <div className="bg-sky-400 h-full" style={{ width: `${t1Percent}%` }} />
+              <div className="w-full bg-surface-2 h-2 rounded-full overflow-hidden border border-hairline">
+                <div className="bg-sky-500 h-full" style={{ width: `${t1Percent}%` }} />
               </div>
             </div>
 
-            {/* T2 Bar */}
             <div className="space-y-1">
               <div className="flex justify-between text-[11px]">
-                <span className="text-emerald-300">T2 ({currentSectorInfo.vBeta}):</span>
-                <span className="font-bold">{dwellTimeT2Us} μs ({t2Percent}%)</span>
+                <span className="text-accent-fg font-semibold">T2 ({currentSectorInfo.vBeta}):</span>
+                <span className="font-bold text-fg">{dwellTimeT2Us} μs ({t2Percent}%)</span>
               </div>
-              <div className="w-full bg-slate-800 h-2 rounded overflow-hidden">
-                <div className="bg-emerald-400 h-full" style={{ width: `${t2Percent}%` }} />
+              <div className="w-full bg-surface-2 h-2 rounded-full overflow-hidden border border-hairline">
+                <div className="bg-accent h-full" style={{ width: `${t2Percent}%` }} />
               </div>
             </div>
 
-            {/* T0 Bar (Zero vector) */}
             <div className="space-y-1">
               <div className="flex justify-between text-[11px]">
-                <span className="text-amber-300">T0 / T7 (Zero Vectors):</span>
-                <span className="font-bold">{dwellTimeT0Us} μs ({t0Percent}%)</span>
+                <span className="text-amber-700 font-semibold">T0 / T7 (Zero Vectors):</span>
+                <span className="font-bold text-fg">{dwellTimeT0Us} μs ({t0Percent}%)</span>
               </div>
-              <div className="w-full bg-slate-800 h-2 rounded overflow-hidden">
-                <div className="bg-amber-400 h-full" style={{ width: `${t0Percent}%` }} />
+              <div className="w-full bg-surface-2 h-2 rounded-full overflow-hidden border border-hairline">
+                <div className="bg-amber-500 h-full" style={{ width: `${t0Percent}%` }} />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-1">
-            <span className="text-slate-400 text-[11px] block uppercase tracking-wider">
+          <div className="bg-sunken p-3.5 rounded-xl border border-hairline space-y-1">
+            <span className="text-fg-subtle text-[11px] block uppercase tracking-wider font-semibold">
               7-Segment Center-Aligned Pattern
             </span>
-            <div className="text-[11px] text-emerald-400 font-bold break-words">
+            <div className="text-[11px] text-accent-fg font-bold break-words">
               {currentSectorInfo.pattern}
             </div>
-            <p className="text-[10px] text-slate-500 pt-1">
+            <p className="text-[10px] text-fg-subtle pt-1 leading-relaxed">
               Guarantees single MOSFET state transition per step, cutting inverter switching loss by 33% vs sine PWM.
             </p>
           </div>
 
-          <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 flex justify-between items-center text-[11px]">
-            <span className="text-slate-400">Max Linear Voltage:</span>
-            <span className="text-sky-300 font-bold">
+          <div className="bg-sunken p-3.5 rounded-xl border border-hairline flex justify-between items-center text-[11px]">
+            <span className="text-fg-muted">Max Linear Voltage:</span>
+            <span className="text-sky-700 font-bold">
               {(dcBusVoltageV / Math.sqrt(3)).toFixed(1)} Vrms ({dcBusVoltageV}V DC Bus)
             </span>
           </div>

@@ -4,9 +4,14 @@ import {
   replyToReverseRfc,
   voteReverseRfc,
 } from '@/lib/data/community-workflows-store';
+import {
+  hydrateReverseRfcs,
+  persistReverseRfcs,
+} from '@/lib/data/community-workflows-server';
 
 export async function GET() {
-  return Response.json({ success: true, rfcs: listReverseRfcs() });
+  const rfcs = await hydrateReverseRfcs();
+  return Response.json({ success: true, rfcs });
 }
 
 export async function POST(request: Request) {
@@ -26,13 +31,17 @@ export async function POST(request: Request) {
     if (!updated) {
       return Response.json({ error: 'rfc_not_found' }, { status: 404 });
     }
+    await persistReverseRfcs();
     return Response.json({ success: true, rfc: updated, rfcs: listReverseRfcs() });
   }
 
   if (action === 'reply') {
     const id = typeof body.id === 'string' ? body.id : '';
     const replyBody = typeof body.body === 'string' ? body.body.trim() : '';
-    const authorName = typeof body.authorName === 'string' ? body.authorName : 'Community Maker';
+    const authorName =
+      typeof body.authorName === 'string' && body.authorName.trim()
+        ? body.authorName.trim()
+        : 'Rohan Kulkarni';
     if (replyBody.length < 3) {
       return Response.json({ error: 'reply_too_short' }, { status: 400 });
     }
@@ -40,13 +49,14 @@ export async function POST(request: Request) {
     if (!updated) {
       return Response.json({ error: 'rfc_not_found' }, { status: 404 });
     }
+    await persistReverseRfcs();
     return Response.json({ success: true, rfc: updated, rfcs: listReverseRfcs() });
   }
 
   const title = typeof body.title === 'string' ? body.title.trim() : '';
   const description = typeof body.description === 'string' ? body.description.trim() : '';
   const domain = typeof body.domain === 'string' ? body.domain.trim() : 'Clean Water';
-  const sponsor = typeof body.sponsor === 'string' ? body.sponsor.trim() : 'Community Partner';
+  const sponsor = typeof body.sponsor === 'string' ? body.sponsor.trim() : 'IndiMaker Partner';
   const bountyAmount = Number(body.bountyAmount) || 25000;
   const urgency =
     body.urgency === 'critical' || body.urgency === 'high' || body.urgency === 'medium'
@@ -70,6 +80,7 @@ export async function POST(request: Request) {
     urgency,
     shareToFeed,
   });
+  await persistReverseRfcs();
 
   return Response.json({ success: true, rfc, rfcs: listReverseRfcs() }, { status: 201 });
 }

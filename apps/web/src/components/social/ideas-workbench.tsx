@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Bookmark,
 } from 'lucide-react';
+import { useBuilderIdentity } from '@/lib/builder-identity';
 import { useSocialCommunity } from './social-context';
 
 const STAGES: { stage: IdeaStage; number: number; name: string; desc: string }[] = [
@@ -57,6 +58,7 @@ export function IdeasWorkbench() {
   const [newDomain, setNewDomain] = useState('Agriculture');
 
   const { isItemSaved, toggleSaveItem } = useSocialCommunity();
+  const { identity } = useBuilderIdentity();
 
   useEffect(() => {
     try {
@@ -80,15 +82,24 @@ export function IdeasWorkbench() {
     } catch {}
   };
 
+  const syncIdeaToServer = (idea: Idea) => {
+    if (typeof fetch !== 'function') return;
+    void fetch('/api/ideas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'save_idea', idea }),
+    }).catch(() => {});
+  };
+
   const handleCreateIdea = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
     const created: Idea = {
       id: `idea_${Date.now()}`,
-      creatorId: 'u_current',
-      creatorHandle: 'innovator',
-      creatorName: 'You (Innovator)',
+      creatorId: identity.handle,
+      creatorHandle: identity.handle,
+      creatorName: identity.name,
       title: newTitle.trim(),
       slug: newTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       summary: newSummary.trim() || 'A newly proposed hardware & software idea.',
@@ -107,6 +118,7 @@ export function IdeasWorkbench() {
     };
 
     persistIdeas([created, ...ideas]);
+    syncIdeaToServer(created);
     setShowWorkbookModal(false);
     setNewTitle('');
     setNewSummary('');
@@ -124,25 +136,27 @@ export function IdeasWorkbench() {
       localStorage.setItem('hackerland_idea_cheers', JSON.stringify(nextCheers));
     } catch {}
 
-    persistIdeas(
-      ideas.map((item) =>
-        item.id === id
-          ? { ...item, cheersCount: Math.max(0, item.cheersCount + (alreadyCheered ? -1 : 1)) }
-          : item,
-      ),
+    const nextList = ideas.map((item) =>
+      item.id === id
+        ? { ...item, cheersCount: Math.max(0, item.cheersCount + (alreadyCheered ? -1 : 1)) }
+        : item,
     );
+    persistIdeas(nextList);
+    const target = nextList.find((item) => item.id === id);
+    if (target) syncIdeaToServer(target);
   };
 
   const handleAdvanceStage = (id: string) => {
     const order: IdeaStage[] = ['notice', 'choose', 'understand', 'define', 'prototype', 'test', 'plan'];
-    persistIdeas(
-      ideas.map((item) => {
-        if (item.id !== id) return item;
-        const idx = order.indexOf(item.currentStage);
-        const nextStage = idx >= 0 && idx < order.length - 1 ? order[idx + 1]! : item.currentStage;
-        return { ...item, currentStage: nextStage, updatedAt: new Date().toISOString() };
-      }),
-    );
+    const nextList = ideas.map((item) => {
+      if (item.id !== id) return item;
+      const idx = order.indexOf(item.currentStage);
+      const nextStage = idx >= 0 && idx < order.length - 1 ? order[idx + 1]! : item.currentStage;
+      return { ...item, currentStage: nextStage, updatedAt: new Date().toISOString() };
+    });
+    persistIdeas(nextList);
+    const target = nextList.find((item) => item.id === id);
+    if (target) syncIdeaToServer(target);
   };
 
   const filteredIdeas = useMemo(() => {
@@ -168,7 +182,7 @@ export function IdeasWorkbench() {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
             <Lightbulb className="size-3.5" aria-hidden="true" />
-            <span>Stage Zero On-Ramp</span>
+            <span>Early Idea Workshop</span>
           </div>
           <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
             IdeaLab: From Spark to Squad

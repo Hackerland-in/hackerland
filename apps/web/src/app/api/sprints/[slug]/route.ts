@@ -1,10 +1,13 @@
 import { validateMilestoneSubmission } from '@hackerland/core';
-import { SPRINTS_CATALOG } from '@/lib/data/sprints-data';
 import {
   addSprintCheckin,
-  getSprintState,
   toggleSprintRegistration,
 } from '@/lib/data/community-workflows-store';
+import {
+  hydrateSprintState,
+  persistSprintState,
+} from '@/lib/data/community-workflows-server';
+import { SPRINTS_CATALOG } from '@/lib/data/sprints-data';
 
 export async function GET(
   _request: Request,
@@ -15,7 +18,8 @@ export async function GET(
   if (!sprint) {
     return Response.json({ error: 'sprint_not_found' }, { status: 404 });
   }
-  return Response.json({ success: true, state: getSprintState(slug) });
+  const state = await hydrateSprintState(slug);
+  return Response.json({ success: true, state });
 }
 
 export async function POST(
@@ -40,6 +44,7 @@ export async function POST(
   if (action === 'register' || action === 'toggle_register') {
     const squadName = typeof body.squadName === 'string' ? body.squadName : undefined;
     const state = toggleSprintRegistration(slug, squadName);
+    await persistSprintState(slug);
     return Response.json({ success: true, state });
   }
 
@@ -79,6 +84,7 @@ export async function POST(
       notes,
       shareToFeed: Boolean(body.shareToFeed),
     });
+    await persistSprintState(slug);
 
     return Response.json({ success: true, ...result }, { status: 201 });
   }

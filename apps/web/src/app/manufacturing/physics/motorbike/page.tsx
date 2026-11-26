@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import { MotorbikePhysicsSimulator } from '@/components/manufacturing/physics/motorbike-simulator';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
+import { SocialCommunityProvider } from '@/components/social/social-context';
 
 export const metadata: Metadata = {
   title: 'Motorcycle Leaning & Wheelie Dynamics Studio | Hackerland',
@@ -10,14 +12,24 @@ export const metadata: Metadata = {
 
 export default function MotorbikeStudioPage() {
   return (
-    <div className="container max-w-7xl mx-auto px-4 py-8 space-y-6">
-      <StudioBreadcrumb
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="physics"
         title="Superbike Leaning Studio"
+        subtitle="Roll-yaw-steer counter-steering kinematics, lean angle grip & anti-wheelie control"
         category="Two-Wheel Physics"
         badge="60°+ Lean & Anti-Wheelie"
-        activeId="motorbike"
-      />
-      <MotorbikePhysicsSimulator />
-    </div>
+        currentRoute="/manufacturing/physics/motorbike"
+        edgeToEdge
+      >
+        <MotorbikePhysicsSimulator />
+        <StudioBreadcrumb
+          title="Superbike Leaning Studio"
+          category="Two-Wheel Physics"
+          badge="60°+ Lean & Anti-Wheelie"
+          activeId="motorbike"
+        />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import { Simulator3DLab, type Lab3DModelType } from '@/components/manufacturing/physics/3d/simulator-3d-lab';
 import { TelemetryExporter } from '@/components/manufacturing/physics/telemetry-exporter';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
+import { SocialCommunityProvider } from '@/components/social/social-context';
 import { Badge, Button, Card, cn } from '@hackerland/ui';
 import {
   Box,
@@ -139,13 +141,16 @@ export default function Simulator3DLabPage() {
   const calculatedPower = (throttle * 9.5 + 45);
 
   return (
-    <div className="container max-w-7xl mx-auto px-4 py-8 space-y-6">
-      <StudioBreadcrumb
-        title="3D Virtual Simulator Labs"
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="physics"
+        title="Interactive 3D Virtual Simulator Labs"
+        subtitle="Multicopter drones, rockets, EV powertrains, superbikes & MCU boards in WebGL 3D"
         category="Simulation Studio"
         badge="WebGL 2.0 · 60 FPS"
-        activeId="3d"
-      />
+        currentRoute="/manufacturing/physics/3d"
+        edgeToEdge
+      >
 
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border border-hairline bg-gradient-to-r from-surface-1 via-surface-2 to-surface-1 shadow-sm">
@@ -361,6 +366,7 @@ export default function Simulator3DLabPage() {
         vehicleType={activeDomain === 'mcu' ? 'drone' : activeDomain}
         vehicleName={currentDomain.name}
       />
-    </div>
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

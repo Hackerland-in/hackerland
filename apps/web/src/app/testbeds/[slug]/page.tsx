@@ -3,8 +3,7 @@ import { notFound } from 'next/navigation';
 import { TESTBED_FACILITIES } from '@/lib/data/testbeds-data';
 import { TestbedDetailView } from '@/components/testbeds/testbed-detail-view';
 import { SocialCommunityProvider } from '@/components/social/social-context';
-import { SocialShell } from '@/components/social/social-shell';
-import { CommunityRailServer } from '@/components/social/community-rail-server';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface TestbedPageProps {
   params: Promise<{ slug: string }>;
@@ -44,9 +43,18 @@ export default async function TestbedDetailPage({ params }: TestbedPageProps) {
 
   return (
     <SocialCommunityProvider>
-      <SocialShell rightRail={<CommunityRailServer />}>
+      <FullScreenLabShell
+        labKind="sim_preset"
+        title={item.name}
+        subtitle="Hardware-in-the-Loop SCPI Bench Console & Slot Booking"
+        category="Remote Testbed"
+        badge={item.hostLab.city}
+        backHref="/testbeds"
+        backLabel="All Testbeds"
+        currentRoute={`/testbeds/${item.slug}`}
+      >
         <TestbedDetailView testbed={item} />
-      </SocialShell>
+      </FullScreenLabShell>
     </SocialCommunityProvider>
   );
 }

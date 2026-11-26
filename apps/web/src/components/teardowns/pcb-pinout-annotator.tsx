@@ -2,19 +2,15 @@
 
 import { useState, useRef } from 'react';
 import {
-  Cpu,
-  Layers,
   Sparkles,
-  ExternalLink,
   Plus,
   Trash2,
   Download,
-  Info,
-  CheckCircle2,
   X,
   Crosshair,
 } from 'lucide-react';
 import type { TeardownPinoutAnnotation } from '@hackerland/core';
+import { Button } from '@hackerland/ui';
 
 interface PcbPinoutAnnotatorProps {
   initialAnnotations: TeardownPinoutAnnotation[];
@@ -29,12 +25,11 @@ export function PcbPinoutAnnotator({
 }: PcbPinoutAnnotatorProps) {
   const [annotations, setAnnotations] = useState<TeardownPinoutAnnotation[]>(initialAnnotations);
   const [selectedPinId, setSelectedPinId] = useState<string | null>(
-    initialAnnotations[0]?.id || null
+    initialAnnotations[0]?.id || null,
   );
   const [isAnnotatorMode, setIsAnnotatorMode] = useState<boolean>(false);
   const [activeSubsystemFilter, setActiveSubsystemFilter] = useState<string>('all');
 
-  // New Pin form draft
   const [newPinDraft, setNewPinDraft] = useState<{
     label: string;
     partNumber: string;
@@ -98,7 +93,8 @@ export function PcbPinoutAnnotator({
   };
 
   const handleExportJson = () => {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(annotations, null, 2));
+    const dataStr =
+      'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(annotations, null, 2));
     const dlAnchor = document.createElement('a');
     dlAnchor.setAttribute('href', dataStr);
     dlAnchor.setAttribute('download', `${deviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-pinouts.json`);
@@ -106,73 +102,73 @@ export function PcbPinoutAnnotator({
   };
 
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5 md:p-6 space-y-6">
+    <div className="rounded-2xl border border-hairline bg-surface-1 p-5 md:p-6 space-y-5 shadow-xs">
       {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-hairline pb-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded mb-1">
+          <div className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-accent-fg bg-accent/10 px-2.5 py-0.5 rounded-full mb-1">
             <Crosshair className="size-3.5" />
             <span>INTERACTIVE CHIP-LEVEL PINOUT EXPLORER</span>
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-white">
-            Silicon Architecture & Subsystem Hotspots
+          <h3 className="font-display text-base sm:text-lg font-bold text-fg">
+            Silicon Architecture &amp; Subsystem Hotspots
           </h3>
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-fg-muted">
             Click any labeled IC hotspot on the PCB layout to inspect part numbers, voltage ratings, and open-source drop-in alternatives.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           {allowEditing && (
-            <button
+            <Button
               type="button"
+              size="sm"
+              variant={isAnnotatorMode ? 'primary' : 'secondary'}
               onClick={() => {
                 setIsAnnotatorMode(!isAnnotatorMode);
                 setNewPinDraft(null);
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                isAnnotatorMode
-                  ? 'border-emerald-500 bg-emerald-500 text-neutral-950 shadow-sm'
-                  : 'border-neutral-700 bg-neutral-800 text-neutral-300 hover:text-white'
-              }`}
             >
               <Plus className="size-3.5" />
               <span>{isAnnotatorMode ? 'Active Annotator Mode' : 'Add Custom Pin'}</span>
-            </button>
+            </Button>
           )}
 
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant="secondary"
             onClick={handleExportJson}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-neutral-700 bg-neutral-800 text-neutral-300 hover:text-white transition-colors"
             title="Export Pinout Annotations as JSON"
           >
             <Download className="size-3.5" />
             <span className="hidden sm:inline">Export</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Subsystem Filters */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
         <button
+          type="button"
           onClick={() => setActiveSubsystemFilter('all')}
-          className={`px-3 py-1 rounded-full text-xs font-mono transition-colors shrink-0 ${
+          className={`px-3 py-1 rounded-full text-xs font-mono transition-colors shrink-0 border ${
             activeSubsystemFilter === 'all'
-              ? 'bg-emerald-500 text-neutral-950 font-bold'
-              : 'bg-neutral-800 text-neutral-400 hover:text-white'
+              ? 'border-accent bg-accent text-on-solid font-bold'
+              : 'border-hairline bg-sunken text-fg-muted hover:text-fg'
           }`}
         >
           All Subsystems ({annotations.length})
         </button>
         {subsystems.map((sub) => (
           <button
+            type="button"
             key={sub}
             onClick={() => setActiveSubsystemFilter(sub)}
-            className={`px-3 py-1 rounded-full text-xs font-mono transition-colors shrink-0 ${
+            className={`px-3 py-1 rounded-full text-xs font-mono transition-colors shrink-0 border ${
               activeSubsystemFilter === sub
-                ? 'bg-emerald-500 text-neutral-950 font-bold'
-                : 'bg-neutral-800 text-neutral-400 hover:text-white'
+                ? 'border-accent bg-accent text-on-solid font-bold'
+                : 'border-hairline bg-sunken text-fg-muted hover:text-fg'
             }`}
           >
             {sub}
@@ -180,62 +176,58 @@ export function PcbPinoutAnnotator({
         ))}
       </div>
 
-      {/* PCB Visual Canvas & Hotspot Overlay */}
+      {/* PCB Board Visual & Inspector */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* PCB Board Container (8 cols) */}
         <div className="lg:col-span-8 space-y-2">
           <div
             ref={boardRef}
             onClick={handleBoardClick}
-            className={`relative aspect-[16/10] w-full rounded-xl overflow-hidden border border-emerald-500/30 select-none ${
-              isAnnotatorMode ? 'cursor-crosshair ring-2 ring-emerald-500/40' : 'cursor-default'
+            className={`relative aspect-[16/10] w-full rounded-2xl overflow-hidden border border-emerald-700/40 select-none shadow-sm ${
+              isAnnotatorMode ? 'cursor-crosshair ring-2 ring-accent/50' : 'cursor-default'
             }`}
             style={{
-              backgroundColor: '#071610',
+              backgroundColor: '#064e3b',
               backgroundImage: `
-                radial-gradient(circle at 50% 50%, #0d281e 0%, #050d0a 100%),
-                linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px)
+                radial-gradient(circle at 50% 50%, #047857 0%, #064e3b 100%),
+                linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px)
               `,
               backgroundSize: '100% 100%, 20px 20px, 20px 20px',
             }}
           >
-            {/* PCB Silkscreen Decorative Traces */}
             <svg
-              className="absolute inset-0 w-full h-full pointer-events-none opacity-30"
+              className="absolute inset-0 w-full h-full pointer-events-none opacity-35"
               xmlns="http://www.w3.org/2000/svg"
             >
               <defs>
                 <pattern id="pcb-copper" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 0 20 L 20 20 L 25 15 L 40 15" fill="none" stroke="#34d399" strokeWidth="1" />
-                  <path d="M 10 40 L 10 30 L 20 20" fill="none" stroke="#34d399" strokeWidth="1" />
-                  <circle cx="20" cy="20" r="2" fill="#fbbf24" />
-                  <circle cx="25" cy="15" r="1.5" fill="#34d399" />
+                  <path d="M 0 20 L 20 20 L 25 15 L 40 15" fill="none" stroke="#a7f3d0" strokeWidth="1" />
+                  <path d="M 10 40 L 10 30 L 20 20" fill="none" stroke="#a7f3d0" strokeWidth="1" />
+                  <circle cx="20" cy="20" r="2" fill="#fde047" />
+                  <circle cx="25" cy="15" r="1.5" fill="#a7f3d0" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#pcb-copper)" />
             </svg>
 
-            {/* PCB Gold Mounting Holes */}
-            <div className="absolute top-3 left-3 size-4 rounded-full border-2 border-amber-400/80 bg-neutral-950 flex items-center justify-center">
-              <div className="size-1.5 rounded-full bg-neutral-800" />
+            {/* Plated Mounting Holes */}
+            <div className="absolute top-3 left-3 size-4 rounded-full border-2 border-amber-300 bg-surface-1 flex items-center justify-center">
+              <div className="size-1.5 rounded-full bg-fg-muted/40" />
             </div>
-            <div className="absolute top-3 right-3 size-4 rounded-full border-2 border-amber-400/80 bg-neutral-950 flex items-center justify-center">
-              <div className="size-1.5 rounded-full bg-neutral-800" />
+            <div className="absolute top-3 right-3 size-4 rounded-full border-2 border-amber-300 bg-surface-1 flex items-center justify-center">
+              <div className="size-1.5 rounded-full bg-fg-muted/40" />
             </div>
-            <div className="absolute bottom-3 left-3 size-4 rounded-full border-2 border-amber-400/80 bg-neutral-950 flex items-center justify-center">
-              <div className="size-1.5 rounded-full bg-neutral-800" />
+            <div className="absolute bottom-3 left-3 size-4 rounded-full border-2 border-amber-300 bg-surface-1 flex items-center justify-center">
+              <div className="size-1.5 rounded-full bg-fg-muted/40" />
             </div>
-            <div className="absolute bottom-3 right-3 size-4 rounded-full border-2 border-amber-400/80 bg-neutral-950 flex items-center justify-center">
-              <div className="size-1.5 rounded-full bg-neutral-800" />
+            <div className="absolute bottom-3 right-3 size-4 rounded-full border-2 border-amber-300 bg-surface-1 flex items-center justify-center">
+              <div className="size-1.5 rounded-full bg-fg-muted/40" />
             </div>
 
-            {/* Board Silkscreen Label */}
-            <div className="absolute top-3 left-10 font-mono text-[10px] text-emerald-400/70 tracking-widest uppercase">
+            <div className="absolute top-3 left-10 font-mono text-[10px] text-emerald-100/85 tracking-widest uppercase">
               REV-3.2 // {deviceTitle.slice(0, 24)} // FR4 4-LAYER COPPER
             </div>
 
-            {/* Interactive Pins */}
             {filteredAnnotations.map((pin, idx) => {
               const isSelected = pin.id === selectedPinId;
               return (
@@ -251,58 +243,50 @@ export function PcbPinoutAnnotator({
                   }`}
                   style={{ left: `${pin.xPercent}%`, top: `${pin.yPercent}%` }}
                 >
-                  {/* Pin IC Chip Silhouette */}
                   <div
-                    className={`relative flex items-center justify-center rounded border shadow-lg transition-all ${
+                    className={`relative flex items-center justify-center rounded border shadow-md transition-all ${
                       isSelected
-                        ? 'border-amber-400 bg-amber-400/20 shadow-amber-500/30'
-                        : 'border-emerald-400 bg-neutral-950 shadow-emerald-500/20 group-hover:border-white'
+                        ? 'border-accent bg-accent text-on-solid'
+                        : 'border-emerald-200 bg-surface-1 text-fg group-hover:border-accent'
                     } px-2 py-1`}
                   >
-                    <span
-                      className={`font-mono text-[10px] font-bold ${
-                        isSelected ? 'text-amber-300' : 'text-emerald-400 group-hover:text-white'
-                      }`}
-                    >
+                    <span className="font-mono text-[10px] font-bold">
                       {idx + 1}
                     </span>
 
-                    {/* Ping Radar Animation on active pin */}
                     {isSelected && (
-                      <span className="absolute -inset-1 rounded-md animate-ping bg-amber-400/30 pointer-events-none" />
+                      <span className="absolute -inset-1 rounded-md animate-ping bg-accent/40 pointer-events-none" />
                     )}
                   </div>
 
-                  {/* Tooltip Hover Pill */}
-                  <div className="absolute left-1/2 -bottom-6 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-950 border border-white/20 rounded px-1.5 py-0.5 text-[9px] font-mono text-white whitespace-nowrap pointer-events-none">
+                  <div className="absolute left-1/2 -bottom-6 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-1 border border-hairline rounded px-2 py-0.5 text-[10px] font-mono font-semibold text-fg whitespace-nowrap pointer-events-none shadow-sm">
                     {pin.label}
                   </div>
                 </button>
               );
             })}
 
-            {/* Active Click Cursor in Annotator Mode */}
             {isAnnotatorMode && !newPinDraft && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-emerald-500/90 text-neutral-950 font-mono text-[11px] font-bold px-3 py-1 rounded-full shadow pointer-events-none">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-accent text-on-solid font-mono text-[11px] font-bold px-3.5 py-1 rounded-full shadow pointer-events-none">
                 Click anywhere on board to place new IC annotation
               </div>
             )}
           </div>
         </div>
 
-        {/* Pin Inspector Card (4 cols) */}
+        {/* Pin Inspector */}
         <div className="lg:col-span-4">
           {selectedAnnotation ? (
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950/80 p-5 space-y-4">
-              <div className="flex items-start justify-between gap-2 border-b border-neutral-800 pb-3">
+            <div className="rounded-2xl border border-hairline bg-sunken/70 p-5 space-y-4">
+              <div className="flex items-start justify-between gap-2 border-b border-hairline pb-3">
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-mono uppercase font-semibold text-accent-fg bg-accent/10 px-2 py-0.5 rounded-full">
                     {selectedAnnotation.subsystem}
                   </span>
-                  <h4 className="text-base font-bold text-white mt-1.5">
+                  <h4 className="font-display text-base font-bold text-fg mt-1.5">
                     {selectedAnnotation.label}
                   </h4>
-                  <span className="text-xs font-mono text-neutral-400 block">
+                  <span className="text-xs font-mono text-fg-muted block">
                     MPN: {selectedAnnotation.partNumber} ({selectedAnnotation.manufacturer})
                   </span>
                 </div>
@@ -310,7 +294,7 @@ export function PcbPinoutAnnotator({
                   <button
                     type="button"
                     onClick={() => handleDeletePin(selectedAnnotation.id)}
-                    className="text-neutral-500 hover:text-red-400 p-1"
+                    className="text-fg-subtle hover:text-danger-fg p-1 rounded"
                     title="Remove Pin"
                   >
                     <Trash2 className="size-4" />
@@ -318,58 +302,55 @@ export function PcbPinoutAnnotator({
                 )}
               </div>
 
-              <p className="text-xs text-neutral-300 leading-relaxed">
+              <p className="text-xs text-fg-muted leading-relaxed">
                 {selectedAnnotation.function}
               </p>
 
-              {/* Specs Grid */}
               <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
-                <div className="bg-neutral-900/60 p-2 rounded border border-neutral-800">
-                  <span className="text-neutral-500 text-[10px] block">PACKAGE</span>
-                  <span className="text-white font-medium">{selectedAnnotation.package}</span>
+                <div className="bg-surface-1 p-2.5 rounded-xl border border-hairline">
+                  <span className="text-fg-subtle text-[10px] block">PACKAGE</span>
+                  <span className="text-fg font-semibold">{selectedAnnotation.package}</span>
                 </div>
-                <div className="bg-neutral-900/60 p-2 rounded border border-neutral-800">
-                  <span className="text-neutral-500 text-[10px] block">EST. SILICON COST</span>
-                  <span className="text-emerald-400 font-bold">
+                <div className="bg-surface-1 p-2.5 rounded-xl border border-hairline">
+                  <span className="text-fg-subtle text-[10px] block">EST. SILICON COST</span>
+                  <span className="text-success-fg font-bold">
                     ${selectedAnnotation.estimatedCostUsd.toFixed(2)} (~₹{Math.round(selectedAnnotation.estimatedCostUsd * 86)})
                   </span>
                 </div>
               </div>
 
-              {/* Open-Source Drop-in Replacement Callout */}
-              <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 space-y-1">
-                <span className="text-[10px] font-mono font-bold text-emerald-400 flex items-center gap-1">
+              <div className="rounded-xl border border-accent/25 bg-accent-soft/60 p-3.5 space-y-1">
+                <span className="text-[10px] font-mono font-bold text-accent-fg flex items-center gap-1">
                   <Sparkles className="size-3" />
                   <span>OPEN-SOURCE PROTOTYPING ALTERNATIVE:</span>
                 </span>
-                <p className="text-xs text-white font-medium">
+                <p className="text-xs text-fg font-semibold">
                   {selectedAnnotation.openSourceAlternative}
                 </p>
-                <span className="text-[10px] text-neutral-400 block pt-0.5">
-                  Allows indie squads to replicate functionality without proprietary chip NDA restrictions.
+                <span className="text-[10px] text-fg-muted block pt-0.5">
+                  Lets builders replicate functionality without proprietary chip NDA restrictions.
                 </span>
               </div>
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center p-6 text-center text-xs text-neutral-500 border border-neutral-800 rounded-xl bg-neutral-950/40">
-              Select any labeled chip hotspot on the PCB to view architectural parameters.
+            <div className="h-full flex items-center justify-center p-6 text-center text-xs text-fg-subtle border border-dashed border-hairline rounded-2xl bg-sunken/50">
+              Select any labeled chip hotspot on the PCB to inspect silicon details.
             </div>
           )}
         </div>
       </div>
 
-      {/* New Pin Draft Modal/Drawer if Annotator active */}
       {newPinDraft && (
-        <div className="rounded-xl border border-emerald-500 bg-neutral-950 p-5 space-y-4 shadow-2xl">
-          <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
-            <h4 className="text-sm font-bold text-white flex items-center gap-2">
-              <Plus className="size-4 text-emerald-400" />
+        <div className="rounded-2xl border border-accent bg-surface-1 p-5 space-y-4 shadow-overlay">
+          <div className="flex items-center justify-between border-b border-hairline pb-2">
+            <h4 className="font-display text-sm font-bold text-fg flex items-center gap-2">
+              <Plus className="size-4 text-accent" />
               <span>Configure New Chip Annotation at ({newPinDraft.xPercent}%, {newPinDraft.yPercent}%)</span>
             </h4>
             <button
               type="button"
               onClick={() => setNewPinDraft(null)}
-              className="text-neutral-400 hover:text-white"
+              className="text-fg-subtle hover:text-fg"
             >
               <X className="size-4" />
             </button>
@@ -377,101 +358,93 @@ export function PcbPinoutAnnotator({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div>
-              <label className="text-neutral-400 block mb-1">Chip Label / Subsystem Ref:</label>
+              <label className="text-fg-muted font-semibold block mb-1">Chip Label / Subsystem Ref:</label>
               <input
                 type="text"
                 value={newPinDraft.label}
                 onChange={(e) => setNewPinDraft({ ...newPinDraft, label: e.target.value })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-white"
+                className="w-full bg-sunken border border-line rounded-lg px-2.5 py-1.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-neutral-400 block mb-1">Manufacturer Part Number (MPN):</label>
+              <label className="text-fg-muted font-semibold block mb-1">Manufacturer Part Number (MPN):</label>
               <input
                 type="text"
                 value={newPinDraft.partNumber}
                 onChange={(e) => setNewPinDraft({ ...newPinDraft, partNumber: e.target.value })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-white"
+                className="w-full bg-sunken border border-line rounded-lg px-2.5 py-1.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-neutral-400 block mb-1">Manufacturer:</label>
+              <label className="text-fg-muted font-semibold block mb-1">Manufacturer:</label>
               <input
                 type="text"
                 value={newPinDraft.manufacturer}
                 onChange={(e) => setNewPinDraft({ ...newPinDraft, manufacturer: e.target.value })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-white"
+                className="w-full bg-sunken border border-line rounded-lg px-2.5 py-1.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div>
-              <label className="text-neutral-400 block mb-1">Subsystem Domain:</label>
+              <label className="text-fg-muted font-semibold block mb-1">Subsystem Domain:</label>
               <input
                 type="text"
                 value={newPinDraft.subsystem}
                 onChange={(e) => setNewPinDraft({ ...newPinDraft, subsystem: e.target.value })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-white"
+                className="w-full bg-sunken border border-line rounded-lg px-2.5 py-1.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-neutral-400 block mb-1">Package (e.g. QFN-32, SOIC-8):</label>
+              <label className="text-fg-muted font-semibold block mb-1">Package (e.g. QFN-32, SOIC-8):</label>
               <input
                 type="text"
                 value={newPinDraft.package}
                 onChange={(e) => setNewPinDraft({ ...newPinDraft, package: e.target.value })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-white"
+                className="w-full bg-sunken border border-line rounded-lg px-2.5 py-1.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-neutral-400 block mb-1">Est Cost (USD):</label>
+              <label className="text-fg-muted font-semibold block mb-1">Est Cost (USD):</label>
               <input
                 type="number"
                 step="0.1"
                 value={newPinDraft.estimatedCostUsd}
                 onChange={(e) => setNewPinDraft({ ...newPinDraft, estimatedCostUsd: Number(e.target.value) })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-white"
+                className="w-full bg-sunken border border-line rounded-lg px-2.5 py-1.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="text-neutral-400 block mb-1">Functional Description:</label>
+              <label className="text-fg-muted font-semibold block mb-1">Functional Description:</label>
               <input
                 type="text"
                 value={newPinDraft.function}
                 onChange={(e) => setNewPinDraft({ ...newPinDraft, function: e.target.value })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-white"
+                className="w-full bg-sunken border border-line rounded-lg px-2.5 py-1.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-neutral-400 block mb-1">Open-Source Alternative Drop-in:</label>
+              <label className="text-fg-muted font-semibold block mb-1">Open-Source Alternative Drop-in:</label>
               <input
                 type="text"
                 value={newPinDraft.openSourceAlternative}
                 onChange={(e) => setNewPinDraft({ ...newPinDraft, openSourceAlternative: e.target.value })}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-white"
+                className="w-full bg-sunken border border-line rounded-lg px-2.5 py-1.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={() => setNewPinDraft(null)}
-              className="px-3 py-1.5 rounded text-xs text-neutral-400 hover:text-white"
-            >
+            <Button type="button" size="sm" variant="ghost" onClick={() => setNewPinDraft(null)}>
               Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSaveDraft}
-              className="px-4 py-1.5 bg-emerald-500 text-neutral-950 font-semibold text-xs rounded hover:bg-emerald-400 transition-colors"
-            >
+            </Button>
+            <Button type="button" size="sm" variant="primary" onClick={handleSaveDraft}>
               Save Pin Annotation
-            </button>
+            </Button>
           </div>
         </div>
       )}

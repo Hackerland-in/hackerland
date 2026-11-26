@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { MOTOR_FOC_PROJECTS_REGISTRY, getMotorFocProjectBySlug } from '@/lib/data/motor-foc-data';
 import { simulateMotorFoc } from '@hackerland/core';
 import { MotorDetailView } from '@/components/motor-foc/motor-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface MotorDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -137,14 +139,25 @@ export default async function MotorDetailPage({ params }: MotorDetailPageProps) 
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12 space-y-8">
-      {/* Schema.org Microdata */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="motor_foc"
+        title={project.title}
+        subtitle={`${project.vehicleApplication} · SVPWM & Clarke/Park Control`}
+        category="Motor FOC Studio"
+        badge={`${project.recommendedPwmKhz} kHz PWM`}
+        backHref="/motor-foc"
+        backLabel="All Motor FOC"
+        currentRoute={`/motor-foc/${project.slug}`}
+      >
+        {/* Schema.org Microdata */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
 
-      <MotorDetailView project={project} />
-    </div>
+        <MotorDetailView project={project} />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

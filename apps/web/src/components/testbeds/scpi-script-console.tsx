@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { TestbedScriptRunner } from '@hackerland/core';
 import { validateScpiCommandScript } from '@hackerland/core';
+import { Button } from '@hackerland/ui';
 
 interface ScpiScriptConsoleProps {
   scriptRunner: TestbedScriptRunner;
@@ -31,7 +32,6 @@ export function ScpiScriptConsole({ scriptRunner, equipmentName }: ScpiScriptCon
     for (const line of lines) {
       await new Promise((r) => setTimeout(r, 200));
 
-      // Generate realistic instrument response based on SCPI query
       let response = '';
       const upper = line.toUpperCase();
 
@@ -68,42 +68,41 @@ export function ScpiScriptConsole({ scriptRunner, equipmentName }: ScpiScriptCon
   };
 
   return (
-    <div className="rounded-2xl border border-stone-800 bg-stone-950 p-5 shadow-sm space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-800/80 pb-3">
+    <div className="rounded-2xl border border-hairline bg-surface-1 p-5 shadow-xs space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-3">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            <h3 className="text-xs font-mono font-bold tracking-wider text-white uppercase">
+            <span className="h-2.5 w-2.5 rounded-full bg-accent" />
+            <h3 className="font-display text-xs font-bold tracking-wider text-fg uppercase">
               REMOTE INSTRUMENTATION SCRIPT RUNNER (SCPI / PyVISA)
             </h3>
           </div>
-          <p className="text-[11px] text-stone-400">
+          <p className="text-[11px] text-fg-muted mt-0.5">
             Automate frequency sweeps, battery cycling loops, and waveform captures via standardized SCPI socket
           </p>
         </div>
 
         <div className="flex items-center space-x-2">
           {validation.isValid ? (
-            <span className="rounded-md border border-emerald-500/50 bg-emerald-950/40 px-2.5 py-0.5 text-[10px] font-mono text-emerald-300">
+            <span className="rounded-full border border-success/35 bg-success/10 px-2.5 py-0.5 text-[10px] font-mono font-semibold text-success-fg">
               SYNTAX VALID ✓ ({validation.commandCount} Cmds)
             </span>
           ) : (
-            <span className="rounded-md border border-red-500/50 bg-red-950/40 px-2.5 py-0.5 text-[10px] font-mono text-red-300">
+            <span className="rounded-full border border-danger/35 bg-danger/10 px-2.5 py-0.5 text-[10px] font-mono font-semibold text-danger-fg">
               SYNTAX ERROR ({validation.errors.length})
             </span>
           )}
         </div>
       </div>
 
-      {/* Editor & Terminal Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Left: Code Editor */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-[11px] font-mono text-stone-400">
+          <div className="flex items-center justify-between text-[11px] font-mono text-fg-muted">
             <span>SCPI SCRIPT COMMANDS</span>
             <button
+              type="button"
               onClick={() => setScriptCode(scriptRunner.sampleScript)}
-              className="text-amber-400 hover:underline text-[10px]"
+              className="text-accent-fg hover:underline font-semibold text-[10px]"
             >
               Reset to Preset
             </button>
@@ -112,13 +111,13 @@ export function ScpiScriptConsole({ scriptRunner, equipmentName }: ScpiScriptCon
             rows={10}
             value={scriptCode}
             onChange={(e) => setScriptCode(e.target.value)}
-            className="w-full rounded-xl border border-stone-800 bg-stone-900/80 p-3 font-mono text-xs text-stone-200 focus:border-amber-500 focus:outline-none"
+            className="w-full rounded-xl border border-line bg-sunken p-3 font-mono text-xs text-fg focus:border-accent focus:outline-none"
             spellCheck={false}
           />
           {validation.errors.map((err, idx) => (
             <div
               key={`err-${idx}`}
-              className="rounded-lg border border-red-500/40 bg-red-950/30 p-2 text-xs font-mono text-red-300"
+              className="rounded-lg border border-danger/35 bg-danger/10 p-2 text-xs font-mono text-danger-fg"
             >
               {err}
             </div>
@@ -126,34 +125,34 @@ export function ScpiScriptConsole({ scriptRunner, equipmentName }: ScpiScriptCon
           {validation.warnings.map((w, idx) => (
             <div
               key={`warn-${idx}`}
-              className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-2 text-[11px] font-mono text-amber-300"
+              className="rounded-lg border border-warning/35 bg-warning/10 p-2 text-[11px] font-mono text-warning-fg"
             >
               {w}
             </div>
           ))}
         </div>
 
-        {/* Right: Live Terminal Reply Window */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-[11px] font-mono text-stone-400">
+          <div className="flex items-center justify-between text-[11px] font-mono text-fg-muted">
             <span>INSTRUMENT ASCII RESPONSE BUS</span>
             <button
+              type="button"
               onClick={() => setTerminalOutput([])}
-              className="text-stone-500 hover:text-stone-300 text-[10px]"
+              className="text-fg-subtle hover:text-fg text-[10px]"
             >
               Clear
             </button>
           </div>
-          <div className="h-[210px] overflow-y-auto rounded-xl border border-stone-900 bg-black p-3 font-mono text-[11px] text-emerald-400 space-y-1">
+          <div className="h-[210px] overflow-y-auto rounded-xl border border-hairline bg-sunken p-3 font-mono text-[11px] space-y-1">
             {terminalOutput.length === 0 ? (
-              <span className="text-stone-600">
-                // Click &apos;Execute SCPI Sequence&apos; below to query instrument over socket.
+              <span className="text-fg-subtle">
+                {`// Click 'Execute SCPI Sequence' below to query instrument over socket.`}
               </span>
             ) : (
               terminalOutput.map((log, idx) => (
                 <div
                   key={`out-${idx}`}
-                  className={log.startsWith('>>') ? 'text-stone-400' : 'text-emerald-400 font-semibold'}
+                  className={log.startsWith('>>') ? 'text-fg-muted' : 'text-accent-fg font-semibold'}
                 >
                   {log}
                 </div>
@@ -163,18 +162,19 @@ export function ScpiScriptConsole({ scriptRunner, equipmentName }: ScpiScriptCon
         </div>
       </div>
 
-      {/* Action Footer */}
-      <div className="flex items-center justify-between border-t border-stone-800/80 pt-3">
-        <div className="text-[11px] font-mono text-stone-500">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-hairline pt-3">
+        <div className="text-[11px] font-mono text-fg-subtle">
           Supported Protocols: {scriptRunner.supportedInterfaces.map((i) => i.toUpperCase()).join(', ')}
         </div>
-        <button
+        <Button
+          type="button"
+          size="sm"
+          variant="primary"
           onClick={runSimulation}
           disabled={isRunning || !validation.isValid}
-          className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-mono font-bold text-white hover:bg-emerald-500 disabled:opacity-50 transition-all shadow-md"
         >
           {isRunning ? 'Streaming SCPI...' : 'Execute SCPI Sequence ⚡'}
-        </button>
+        </Button>
       </div>
     </div>
   );

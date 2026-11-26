@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Badge, Button, Card, CardBody, CardFooter, CardHeader, Input, cn } from '@hackerland/ui';
 import { formatMoney } from '@hackerland/core';
+import { getActiveBuilderIdentity } from '@/lib/builder-identity';
 import { useSocialCommunity } from '@/components/social/social-context';
 import {
   INITIAL_REVERSE_RFCS,
@@ -123,10 +124,11 @@ export function ReverseRFCSection() {
     e.preventDefault();
     const text = (replyDrafts[id] || '').trim();
     if (text.length < 3) return;
+    const identity = getActiveBuilderIdentity();
 
     const newReply = {
       id: `rfc-reply-${Date.now()}`,
-      authorName: 'You (Maker)',
+      authorName: identity.name,
       body: text,
       createdAt: new Date().toISOString(),
     };
@@ -144,7 +146,7 @@ export function ReverseRFCSection() {
       await fetch('/api/rfcs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'reply', id, authorName: 'You (Maker)', body: text }),
+        body: JSON.stringify({ action: 'reply', id, authorName: identity.name, body: text }),
       });
     } catch {}
   };
@@ -152,12 +154,13 @@ export function ReverseRFCSection() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newDesc.trim()) return;
+    const identity = getActiveBuilderIdentity();
 
     const rfc: ReverseRfcRecord = {
       id: `rfc-${Date.now()}`,
       title: newTitle.trim(),
       domain: newDomain,
-      sponsor: newSponsor.trim() || 'Community Partner',
+      sponsor: newSponsor.trim() || identity.name,
       bountyAmount: Number(newBounty) || 25000,
       description: newDesc.trim(),
       upvotes: 1,

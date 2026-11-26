@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { RF_PRESETS } from '@/lib/data/rf-data';
 import { RfPresetDetail } from '@/components/rf/rf-preset-detail';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface RfPresetPageProps {
   params: Promise<{ slug: string }>;
@@ -75,14 +77,25 @@ export default async function RfPresetPage({ params }: RfPresetPageProps) {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12 space-y-8">
-      {/* Schema.org Article Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="rf"
+        title={preset.title}
+        subtitle={`${preset.application} · Smith Chart & Matching Network`}
+        category="RF & Antenna Lab"
+        badge={`${preset.targetImpedance}Ω @ ${preset.frequencyGHz}GHz`}
+        backHref="/rf-calc"
+        backLabel="All RF Presets"
+        currentRoute={`/rf-calc/${preset.slug}`}
+      >
+        {/* Schema.org Article Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
 
-      <RfPresetDetail preset={preset} />
-    </div>
+        <RfPresetDetail preset={preset} />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

@@ -16,6 +16,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { Avatar, Badge, Button, Card, CardBody, Panel, cn } from '@hackerland/ui';
+import { getActiveBuilderIdentity } from '@/lib/builder-identity';
 import { EquipmentReservationModal, type StoredEquipmentBooking } from './equipment-reservation-modal';
 
 interface ClubDetailViewProps {
@@ -55,6 +56,22 @@ export function ClubDetailView({ club }: ClubDetailViewProps) {
         : prev.filter((id) => id !== club.id);
       localStorage.setItem('hackerland_joined_clubs', JSON.stringify(updated));
     } catch {}
+
+    if (typeof fetch === 'function') {
+      const identity = getActiveBuilderIdentity();
+      void fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'club_membership',
+          clubSlug: club.slug,
+          clubName: club.name,
+          joined: nextJoined,
+          actorName: identity.name,
+          actorHandle: identity.handle,
+        }),
+      }).catch(() => {});
+    }
   };
 
   return (

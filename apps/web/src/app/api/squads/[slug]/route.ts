@@ -1,15 +1,16 @@
 import type { KanbanTask } from '@hackerland/core';
+import { mutateSquadWorkflow } from '@/lib/data/community-workflows-store';
 import {
-  getSquadWorkflowState,
-  mutateSquadWorkflow,
-} from '@/lib/data/community-workflows-store';
+  hydrateSquadWorkflowState,
+  persistSquadWorkflowState,
+} from '@/lib/data/community-workflows-server';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  const state = getSquadWorkflowState(slug);
+  const state = await hydrateSquadWorkflowState(slug);
   if (!state) {
     return Response.json({ error: 'squad_not_found' }, { status: 404 });
   }
@@ -42,6 +43,7 @@ export async function POST(
     }
     const state = mutateSquadWorkflow(slug, { type: 'add_task', title, priority });
     if (!state) return Response.json({ error: 'squad_not_found' }, { status: 404 });
+    await persistSquadWorkflowState(slug);
     return Response.json({ success: true, state }, { status: 201 });
   }
 
@@ -49,6 +51,7 @@ export async function POST(
     const taskId = typeof body.taskId === 'string' ? body.taskId : '';
     const state = mutateSquadWorkflow(slug, { type: 'cycle_task', taskId });
     if (!state) return Response.json({ error: 'squad_not_found' }, { status: 404 });
+    await persistSquadWorkflowState(slug);
     return Response.json({ success: true, state });
   }
 
@@ -56,6 +59,7 @@ export async function POST(
     const milestoneId = typeof body.milestoneId === 'string' ? body.milestoneId : '';
     const proofUrl = typeof body.proofUrl === 'string' ? body.proofUrl.trim() : '';
     const summary = typeof body.summary === 'string' ? body.summary : '';
+    const submittedBy = typeof body.submittedBy === 'string' ? body.submittedBy : undefined;
     if (!milestoneId || !proofUrl) {
       return Response.json({ error: 'proof_url_required' }, { status: 400 });
     }
@@ -64,8 +68,10 @@ export async function POST(
       milestoneId,
       proofUrl,
       summary,
+      submittedBy,
     });
     if (!state) return Response.json({ error: 'squad_not_found' }, { status: 404 });
+    await persistSquadWorkflowState(slug);
     return Response.json({ success: true, state });
   }
 
@@ -78,6 +84,7 @@ export async function POST(
       shareToFeed,
     });
     if (!state) return Response.json({ error: 'squad_not_found' }, { status: 404 });
+    await persistSquadWorkflowState(slug);
     return Response.json({ success: true, state });
   }
 

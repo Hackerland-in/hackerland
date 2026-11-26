@@ -21,9 +21,16 @@ export async function connectDb(
   }
 
   if (!globalThis.__hackerlandMongoose) {
-    globalThis.__hackerlandMongoose = mongoose.connect(uri, {
-      bufferCommands: false,
-    });
+    globalThis.__hackerlandMongoose = mongoose
+      .connect(uri, {
+        bufferCommands: false,
+        serverSelectionTimeoutMS: 2500,
+        connectTimeoutMS: 2500,
+      })
+      .catch((error) => {
+        globalThis.__hackerlandMongoose = undefined;
+        throw error;
+      });
   }
 
   return globalThis.__hackerlandMongoose;

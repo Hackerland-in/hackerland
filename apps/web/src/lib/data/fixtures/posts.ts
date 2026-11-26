@@ -22,7 +22,7 @@ export const POST_UPDATE_AEROGLIDE: FeedPost = {
     title: PROJECT_AEROGLIDE_DETAIL.title,
   },
   title: 'Wind Tunnel Foil Test #3 telemetry logs published',
-  body: 'Completed the 18 m/s low-Reynolds laminar flow foil evaluation in the IISc open-circuit wind tunnel. Boundary layer separation occurs 4% later than predicted by XFLR5. Full sensor datasets and raw high-speed pressure tap telemetry logs are mirrored at https://hackerland.in/telemetry/reports/2026/stratospheric-glider-flight-envelope-cfd-analysis-dataset-v2-full-raw-sensor-logs-bangalore-iisc-test-track-archive-release.json for anyone reproducing the lift curves.',
+  body: 'Ran three 18 m/s passes in the IISc low-speed open-circuit tunnel this morning — boundary layer separation crept ~4% further aft than XFLR5 predicted. Uploaded the 200Hz pitot and pressure-tap CSV to Telemetry Studio (hackerland.in/telemetry) so anyone cross-checking lift curves can replay the raw numbers.',
   tags: ['aerospace', 'wind-tunnel', 'open-hardware', 'telemetry'],
   createdAt: '2026-11-12T10:30:00Z',
   reactions: 42,

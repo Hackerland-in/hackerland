@@ -4,12 +4,39 @@ import React from 'react';
 
 interface CanBusLoadSimulatorProps {
   busLoadPercent: number;
-  busUtilizationHealth: 'optimal_safe' | 'heavy_traffic' | 'overloaded_hazard';
+  busUtilizationHealth: 'optimal_safe' | 'heavy_traffic' | 'overloaded_hazard' | string;
   frameTotalBits: number;
   maxFrameTransferTimeUs: number;
   totalMessageFrequencyHz: number;
   actualBaudRateKbps: number;
 }
+
+const ARBITRATION_FRAMES = [
+  {
+    idHex: '0x080',
+    sourceEcu: 'BMS Master (Pack Protection)',
+    signal: 'BMS Cell Over-Temp Cutoff',
+    binaryId: '000 1000 0000',
+    result: 'Wins Arbitration (Highest Priority)',
+    statusTone: 'win' as const,
+  },
+  {
+    idHex: '0x1C4',
+    sourceEcu: 'MCU Traction Inverter',
+    signal: 'Motor Torque & RPM Command',
+    binaryId: '001 1100 0100',
+    result: 'Defers after dominant bit 0',
+    statusTone: 'yield' as const,
+  },
+  {
+    idHex: '0x380',
+    sourceEcu: 'Instrument Cluster / TCU',
+    signal: 'Telemetry / Cluster SOC Broadcast',
+    binaryId: '011 1000 0000',
+    result: 'Queues until bus idle (11 recessive bits)',
+    statusTone: 'queue' as const,
+  },
+];
 
 export function CanBusLoadSimulator({
   busLoadPercent,
@@ -19,155 +46,132 @@ export function CanBusLoadSimulator({
   totalMessageFrequencyHz,
   actualBaudRateKbps,
 }: CanBusLoadSimulatorProps) {
-  // Arbitration demonstration frames
-  const arbitrationFrames = [
-    {
-      idHex: '0x080',
-      idBin: '00010000000',
-      priority: 'Highest (Emergency)',
-      node: 'BMS Cell Over-Temp Cutoff',
-      outcome: 'Wins Arbitration (Transmits Immediately)',
-      badgeClass: 'bg-emerald-950 text-emerald-300 border-emerald-800',
-    },
-    {
-      idHex: '0x1C4',
-      idBin: '00111000100',
-      priority: 'High (Powertrain)',
-      node: 'Inverter FOC Torque Cmd',
-      outcome: 'Backed Off at Bit 2 (Dominant 0 Overwrite)',
-      badgeClass: 'bg-amber-950 text-amber-300 border-amber-800',
-    },
-    {
-      idHex: '0x380',
-      idBin: '01110000000',
-      priority: 'Normal (Telematics)',
-      node: 'GPS & Dashboard Speedo',
-      outcome: 'Backed Off at Bit 1 (Waits Next Interframe)',
-      badgeClass: 'bg-slate-900 text-slate-300 border-slate-700',
-    },
-  ];
+  const clampedLoad = Math.min(100, Math.max(0, busLoadPercent));
+
+  const healthBanner =
+    busUtilizationHealth === 'optimal_safe'
+      ? {
+          label: 'Optimal Safe (< 50%) — Deterministic delivery guaranteed',
+          badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+          barClass: 'bg-emerald-500',
+        }
+      : busUtilizationHealth === 'heavy_traffic'
+        ? {
+            label: 'Heavy Traffic (50–75%) — Monitor low-priority frame jitter',
+            badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
+            barClass: 'bg-amber-500',
+          }
+        : {
+            label: 'Overloaded Hazard (> 75%) — Risk of arbitration starvation & latency spikes',
+            badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
+            barClass: 'bg-rose-500',
+          };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl text-slate-100 flex flex-col gap-4">
-      <div className="border-b border-slate-800 pb-3">
-        <h3 className="text-base font-semibold text-amber-400 flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-          Bus Traffic Load &amp; Multi-Master Arbitration Simulator
-        </h3>
-        <p className="text-xs text-slate-400">
-          Deterministic non-destructive bitwise arbitration (CSMA/CD + NBA) and bus bandwidth saturation
-        </p>
+    <div className="bg-surface-1 border border-hairline rounded-2xl p-5 shadow-xs text-fg flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-hairline pb-3">
+        <div>
+          <h3 className="font-display text-base font-semibold text-accent-fg flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-accent" />
+            Bus Load &amp; Bitwise Arbitration Resolution
+          </h3>
+          <p className="text-xs text-fg-muted mt-0.5">
+            ISO 11898 bandwidth headroom and CSMA/CR non-destructive arbitration priority matrix
+          </p>
+        </div>
+        <span className="px-2.5 py-1 rounded-full bg-sunken border border-hairline font-mono text-[11px] font-semibold text-fg capitalize">
+          {busUtilizationHealth.replace(/_/g, ' ')}
+        </span>
       </div>
 
-      {/* Bus Load Meter */}
-      <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 font-mono">
-        <div className="flex justify-between items-center text-xs">
-          <span className="text-slate-400">Total Bus Bandwidth Utilization:</span>
-          <span className="text-lg font-bold">
-            <span className={
-              busUtilizationHealth === 'optimal_safe'
-                ? 'text-emerald-400'
-                : busUtilizationHealth === 'heavy_traffic'
-                ? 'text-amber-400'
-                : 'text-rose-400'
-            }>
-              {busLoadPercent}%
-            </span>{' '}
-            <span className="text-xs text-slate-500 font-normal">
-              ({totalMessageFrequencyHz} msgs/sec @ {actualBaudRateKbps} kbps)
-            </span>
+      {/* Bandwidth Meter */}
+      <div className="bg-sunken rounded-xl p-4 border border-hairline space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <span className="text-xs font-medium text-fg-muted">
+            Total Bus Bandwidth Utilization:
+          </span>
+          <span className="font-mono text-lg font-bold text-accent-fg">
+            {busLoadPercent.toFixed(1)}%
           </span>
         </div>
 
-        {/* Progress Bar */}
-        <div className="relative w-full bg-slate-800 h-4 rounded-full overflow-hidden p-0.5">
+        <div className="w-full h-3 rounded-full bg-surface-2 border border-hairline overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              busUtilizationHealth === 'optimal_safe'
-                ? 'bg-gradient-to-r from-emerald-600 to-emerald-400'
-                : busUtilizationHealth === 'heavy_traffic'
-                ? 'bg-gradient-to-r from-amber-600 to-amber-400'
-                : 'bg-gradient-to-r from-rose-600 to-rose-400'
-            }`}
-            style={{ width: `${Math.min(100, busLoadPercent)}%` }}
-          />
-          {/* Safe threshold marker line at 65% */}
-          <div
-            className="absolute top-0 bottom-0 w-0.5 bg-rose-500 z-10"
-            style={{ left: '65%' }}
-            title="Max Recommended Automotive Load (65%)"
+            className={`h-full transition-all duration-300 ${healthBanner.barClass}`}
+            style={{ width: `${clampedLoad}%` }}
           />
         </div>
 
-        <div className="flex justify-between text-[10px] text-slate-500">
-          <span>0% (Idle)</span>
-          <span className="text-amber-400">50% (CiA Recommended)</span>
-          <span className="text-rose-400">65% (Automotive Ceiling)</span>
-          <span>100% (Bus Saturated)</span>
+        <div className={`text-xs font-mono px-3 py-2 rounded-lg border ${healthBanner.badgeClass}`}>
+          {healthBanner.label}
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 font-mono text-xs">
+          <div className="bg-surface-1 border border-hairline rounded-lg p-2.5">
+            <span className="text-[10px] text-fg-subtle block">Worst-Case Frame Bits</span>
+            <span className="font-bold text-fg">{frameTotalBits} bits</span>
+          </div>
+          <div className="bg-surface-1 border border-hairline rounded-lg p-2.5">
+            <span className="text-[10px] text-fg-subtle block">Max Frame Time</span>
+            <span className="font-bold text-sky-700">{maxFrameTransferTimeUs.toFixed(1)} μs</span>
+          </div>
+          <div className="bg-surface-1 border border-hairline rounded-lg p-2.5">
+            <span className="text-[10px] text-fg-subtle block">Aggregate Rate</span>
+            <span className="font-bold text-fg">{totalMessageFrequencyHz} fps</span>
+          </div>
+          <div className="bg-surface-1 border border-hairline rounded-lg p-2.5">
+            <span className="text-[10px] text-fg-subtle block">Effective Baud</span>
+            <span className="font-bold text-accent-fg">{actualBaudRateKbps} kbps</span>
+          </div>
         </div>
       </div>
 
-      {/* Frame Transfer Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-        <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
-          <span className="text-slate-400 text-[11px] block">Frame Length (Stuffed)</span>
-          <span className="text-sky-400 font-bold text-sm mt-0.5 block">{frameTotalBits} bits</span>
-          <span className="text-[10px] text-slate-500 mt-0.5 block">~1.15x Bit Stuffing factor</span>
-        </div>
-        <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
-          <span className="text-slate-400 text-[11px] block">Transfer Time Per Frame</span>
-          <span className="text-emerald-400 font-bold text-sm mt-0.5 block">{maxFrameTransferTimeUs} μs</span>
-          <span className="text-[10px] text-slate-500 mt-0.5 block">Payload delivery latency</span>
-        </div>
-        <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
-          <span className="text-slate-400 text-[11px] block">Network Health Status</span>
-          <span className={`font-bold text-sm mt-0.5 block uppercase ${
-            busUtilizationHealth === 'optimal_safe'
-              ? 'text-emerald-400'
-              : busUtilizationHealth === 'heavy_traffic'
-              ? 'text-amber-400'
-              : 'text-rose-400'
-          }`}>
-            {busUtilizationHealth.replace(/_/g, ' ')}
-          </span>
-          <span className="text-[10px] text-slate-500 mt-0.5 block">
-            {busLoadPercent < 65 ? 'Deterministic delivery guaranteed' : 'Arbitration queue delay warning'}
-          </span>
-        </div>
-      </div>
-
-      {/* Bitwise Arbitration Priority Resolution Demonstration */}
-      <div className="space-y-2 pt-2">
-        <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono">
+      {/* Arbitration Table */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-fg-muted">
           Non-Destructive Bitwise Arbitration (CAN ID Priority)
         </h4>
-        <div className="space-y-2 font-mono text-xs">
-          {arbitrationFrames.map((f, idx) => (
-            <div
-              key={f.idHex}
-              className="bg-slate-950 p-3 rounded-lg border border-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-            >
-              <div className="flex items-center gap-3">
-                <span className="px-2 py-0.5 rounded text-amber-300 bg-amber-950/40 border border-amber-800/60 font-bold text-[11px]">
-                  {f.idHex}
-                </span>
-                <div>
-                  <span className="text-slate-200 font-semibold block">{f.node}</span>
-                  <span className="text-[10px] text-slate-400">ID Bits: <code className="text-sky-300">{f.idBin}</code></span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${f.badgeClass}`}>
-                  {f.outcome}
-                </span>
-              </div>
-            </div>
-          ))}
+        <div className="overflow-x-auto rounded-xl border border-hairline">
+          <table className="w-full text-left font-mono text-xs border-collapse">
+            <thead className="bg-sunken text-fg-subtle border-b border-hairline">
+              <tr>
+                <th className="py-2 px-3 font-semibold">ID</th>
+                <th className="py-2 px-3 font-semibold">ECU / Signal</th>
+                <th className="py-2 px-3 font-semibold hidden sm:table-cell">11-Bit Field</th>
+                <th className="py-2 px-3 font-semibold">Arbitration Outcome</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-hairline bg-surface-1">
+              {ARBITRATION_FRAMES.map((row) => (
+                <tr key={row.idHex}>
+                  <td className="py-2.5 px-3 font-bold text-accent-fg whitespace-nowrap">
+                    {row.idHex}
+                  </td>
+                  <td className="py-2.5 px-3">
+                    <div className="font-semibold text-fg">{row.signal}</div>
+                    <div className="text-[10px] text-fg-subtle">{row.sourceEcu}</div>
+                  </td>
+                  <td className="py-2.5 px-3 text-fg-muted hidden sm:table-cell whitespace-nowrap">
+                    {row.binaryId}
+                  </td>
+                  <td className="py-2.5 px-3">
+                    <span
+                      className={
+                        row.statusTone === 'win'
+                          ? 'inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : row.statusTone === 'yield'
+                            ? 'inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200'
+                            : 'inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sunken text-fg-muted border border-hairline'
+                      }
+                    >
+                      {row.result}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        <p className="text-[11px] text-slate-500 font-mono">
-          CAN transceivers listen while transmitting. When a recessive bit (1) encounters a dominant bit (0) from another node on the bus, the recessive node halts immediately without corrupting the winning frame.
-        </p>
       </div>
     </div>
   );

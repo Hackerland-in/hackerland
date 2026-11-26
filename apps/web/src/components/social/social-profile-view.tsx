@@ -34,6 +34,7 @@ import { PostCard } from '@/components/domain/post-card';
 import { TrackBadge } from '@/components/domain/track-badge';
 import { Money } from '@/components/domain/money';
 import { ProfileActions } from '@/components/domain/profile-actions';
+import { getActiveBuilderIdentity } from '@/lib/builder-identity';
 import { useSocialCommunity } from './social-context';
 
 export interface SocialProfileViewProps {
@@ -59,13 +60,14 @@ export function SocialProfileView({ profile, posts }: SocialProfileViewProps) {
     e.preventDefault();
     const quote = endorseQuote.trim();
     if (!quote) return;
+    const identity = getActiveBuilderIdentity();
 
     setEndorsements((prev) => [
       {
         author: {
-          handle: 'community-builder',
-          name: 'You (Builder)',
-          badges: [{ label: 'Maker', tone: 'design' }],
+          handle: identity.handle,
+          name: identity.name,
+          badges: [{ label: identity.badgeLabel, tone: 'design' }],
         },
         quote,
       },

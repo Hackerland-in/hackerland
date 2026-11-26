@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import type {
-  CanProtocolStandard,
-  TerminationTopology,
-} from '@hackerland/core';
+import { useState, useMemo, useEffect } from 'react';
+import type { CanProtocolStandard, TerminationTopology } from '@hackerland/core';
 import { simulateCanBus } from '@hackerland/core';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
 import { CanBitTimingDiagram } from './can-bit-timing-diagram';
 import { CanBusLoadSimulator } from './can-bus-load-simulator';
 
@@ -14,28 +12,27 @@ interface CanBusWorkbenchProps {
   initialBaudRateKbps?: number;
   initialBusLengthM?: number;
   initialNodes?: number;
-  initialPayloadBytes?: number;
   initialTermination?: TerminationTopology;
 }
 
 export function CanBusWorkbench({
   initialStandard = 'can_2_0b_standard',
   initialBaudRateKbps = 500,
-  initialBusLengthM = 15,
+  initialBusLengthM = 10,
   initialNodes = 8,
-  initialPayloadBytes = 8,
   initialTermination = 'split_termination_filtered',
 }: CanBusWorkbenchProps) {
+  const labShell = useLabShell();
+
   const [standard, setStandard] = useState<CanProtocolStandard>(initialStandard);
   const [baudRateKbps, setBaudRateKbps] = useState<number>(initialBaudRateKbps);
   const [clockFreqMhz, setClockFreqMhz] = useState<number>(40);
   const [busLengthM, setBusLengthM] = useState<number>(initialBusLengthM);
   const [nodeCount, setNodeCount] = useState<number>(initialNodes);
-  const [payloadBytes, setPayloadBytes] = useState<number>(initialPayloadBytes);
-  const [messageFreqHz, setMessageFreqHz] = useState<number>(400);
+  const [payloadBytes, setPayloadBytes] = useState<number>(8);
+  const [messageFreqHz, setMessageFreqHz] = useState<number>(500);
   const [termination, setTermination] = useState<TerminationTopology>(initialTermination);
 
-  // Compute live CAN simulation
   const simResult = useMemo(() => {
     return simulateCanBus({
       standard,
@@ -47,11 +44,66 @@ export function CanBusWorkbench({
       totalMessageFrequencyHz: messageFreqHz,
       termination,
     });
-  }, [standard, baudRateKbps, clockFreqMhz, busLengthM, nodeCount, payloadBytes, messageFreqHz, termination]);
+  }, [
+    standard,
+    baudRateKbps,
+    clockFreqMhz,
+    busLengthM,
+    nodeCount,
+    payloadBytes,
+    messageFreqHz,
+    termination,
+  ]);
 
-  const applyPreset = (preset: 'ather' | 'nexon' | 'telecom' | 'drone' | 'ladakh') => {
+  useEffect(() => {
+    if (!labShell) return;
+    labShell.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: `CAN Timing (${standard.toUpperCase()} @ ${baudRateKbps} kbps)`,
+        summary: `${busLengthM}m bus, ${nodeCount} nodes, sample point ${simResult.samplePointPercent}%, load ${simResult.busLoadPercent}%`,
+        tags: ['can-bus', standard],
+        payload: {
+          standard,
+          baudRateKbps,
+          clockFreqMhz,
+          busLengthM,
+          nodeCount,
+          payloadBytes,
+          messageFreqHz,
+          termination,
+        },
+      }),
+      onLoad: (ws) => {
+        const p = ws.payload ?? {};
+        if (typeof p.standard === 'string') setStandard(p.standard as CanProtocolStandard);
+        if (typeof p.baudRateKbps === 'number') setBaudRateKbps(p.baudRateKbps);
+        if (typeof p.clockFreqMhz === 'number') setClockFreqMhz(p.clockFreqMhz);
+        if (typeof p.busLengthM === 'number') setBusLengthM(p.busLengthM);
+        if (typeof p.nodeCount === 'number') setNodeCount(p.nodeCount);
+        if (typeof p.payloadBytes === 'number') setPayloadBytes(p.payloadBytes);
+        if (typeof p.messageFreqHz === 'number') setMessageFreqHz(p.messageFreqHz);
+        if (typeof p.termination === 'string') setTermination(p.termination as TerminationTopology);
+      },
+    });
+  }, [
+    labShell,
+    standard,
+    baudRateKbps,
+    clockFreqMhz,
+    busLengthM,
+    nodeCount,
+    payloadBytes,
+    messageFreqHz,
+    termination,
+    simResult.samplePointPercent,
+    simResult.busLoadPercent,
+  ]);
+
+  const applyPreset = (
+    preset: 'ather_450x' | 'nexon_ev' | 'uavcan_drone' | 'telecom_bms' | 'ladakh_post',
+  ) => {
     switch (preset) {
-      case 'ather':
+      case 'ather_450x':
         setStandard('can_2_0b_standard');
         setBaudRateKbps(500);
         setClockFreqMhz(40);
@@ -61,269 +113,260 @@ export function CanBusWorkbench({
         setMessageFreqHz(450);
         setTermination('split_termination_filtered');
         break;
-      case 'nexon':
+      case 'nexon_ev':
         setStandard('can_fd_iso');
         setBaudRateKbps(500);
         setClockFreqMhz(80);
-        setBusLengthM(9.5);
-        setNodeCount(12);
+        setBusLengthM(12);
+        setNodeCount(14);
         setPayloadBytes(32);
-        setMessageFreqHz(750);
+        setMessageFreqHz(850);
         setTermination('split_termination_filtered');
         break;
-      case 'telecom':
-        setStandard('can_2_0b_standard');
-        setBaudRateKbps(250);
-        setClockFreqMhz(24);
-        setBusLengthM(25);
-        setNodeCount(16);
-        setPayloadBytes(8);
-        setMessageFreqHz(200);
-        setTermination('split_termination_filtered');
-        break;
-      case 'drone':
-        setStandard('can_2_0b_extended');
+      case 'uavcan_drone':
+        setStandard('can_fd_iso');
         setBaudRateKbps(1000);
-        setClockFreqMhz(40);
-        setBusLengthM(2.8);
+        setClockFreqMhz(80);
+        setBusLengthM(2.5);
         setNodeCount(8);
-        setPayloadBytes(8);
-        setMessageFreqHz(900);
+        setPayloadBytes(16);
+        setMessageFreqHz(1200);
         setTermination('standard_120_ohm');
         break;
-      case 'ladakh':
+      case 'telecom_bms':
         setStandard('can_2_0b_extended');
+        setBaudRateKbps(250);
+        setClockFreqMhz(24);
+        setBusLengthM(35);
+        setNodeCount(18);
+        setPayloadBytes(8);
+        setMessageFreqHz(300);
+        setTermination('standard_120_ohm');
+        break;
+      case 'ladakh_post':
+        setStandard('can_2_0b_standard');
         setBaudRateKbps(125);
         setClockFreqMhz(16);
-        setBusLengthM(120);
-        setNodeCount(14);
+        setBusLengthM(180);
+        setNodeCount(10);
         setPayloadBytes(8);
-        setMessageFreqHz(80);
+        setMessageFreqHz(140);
         setTermination('split_termination_filtered');
         break;
     }
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full text-slate-100">
+    <div className="flex flex-col gap-6 w-full text-fg">
       {/* Quick Presets Bar */}
-      <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-900 border border-slate-800 rounded-xl">
-        <span className="text-xs font-semibold text-slate-400 mr-2 flex items-center gap-1">
-          <span>⚡</span> Real-World Automotive Presets:
+      <div className="flex flex-wrap items-center gap-2 p-3.5 bg-surface-1 border border-hairline rounded-2xl shadow-xs">
+        <span className="text-xs font-semibold text-fg-muted mr-2 flex items-center gap-1.5">
+          <span className="text-accent-fg">⚡</span> Real-World Automotive Presets:
         </span>
         <button
-          onClick={() => applyPreset('ather')}
-          className="px-3 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+          type="button"
+          onClick={() => applyPreset('ather_450x')}
+          className="px-3 py-1.5 text-xs rounded-xl bg-sunken hover:bg-accent-soft hover:text-accent-fg hover:border-accent/30 text-fg border border-hairline transition cursor-pointer"
         >
-          Ather 450X (500 kbps, 4.2m)
+          Ather 450X (500 kbps)
         </button>
         <button
-          onClick={() => applyPreset('nexon')}
-          className="px-3 py-1 text-xs rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-800/60 transition"
+          type="button"
+          onClick={() => applyPreset('nexon_ev')}
+          className="px-3 py-1.5 text-xs rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 transition cursor-pointer"
         >
-          Tata Nexon EV CAN-FD (500k/2M)
+          Tata Nexon EV CAN-FD
         </button>
         <button
-          onClick={() => applyPreset('drone')}
-          className="px-3 py-1 text-xs rounded-lg bg-sky-950/40 hover:bg-sky-900/60 text-sky-300 border border-sky-800/60 transition"
+          type="button"
+          onClick={() => applyPreset('uavcan_drone')}
+          className="px-3 py-1.5 text-xs rounded-xl bg-accent-soft hover:bg-accent/15 text-accent-fg border border-accent/25 transition cursor-pointer"
         >
-          Agri Drone UAVCAN (1 Mbps, 2.8m)
+          Agri Drone UAVCAN (1000 kbps)
         </button>
         <button
-          onClick={() => applyPreset('telecom')}
-          className="px-3 py-1 text-xs rounded-lg bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-800/60 transition"
+          type="button"
+          onClick={() => applyPreset('telecom_bms')}
+          className="px-3 py-1.5 text-xs rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition cursor-pointer"
         >
-          Telecom Tower BMS (250 kbps, 25m)
+          Telecom Tower BMS (250 kbps)
         </button>
         <button
-          onClick={() => applyPreset('ladakh')}
-          className="px-3 py-1 text-xs rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 transition"
+          type="button"
+          onClick={() => applyPreset('ladakh_post')}
+          className="px-3 py-1.5 text-xs rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition cursor-pointer"
         >
-          Ladakh Border Post (125 kbps, 120m)
+          Ladakh Border Post (125 kbps Long Bus)
         </button>
       </div>
 
-      {/* Main Grid: Controls vs Visualizers */}
+      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Controls Column (5 cols) */}
-        <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col gap-5">
-          <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-base font-semibold text-slate-100 flex items-center gap-2">
-              <span className="text-emerald-400">⚙</span> Physical Layer &amp; Timing Controls
+        <div className="lg:col-span-5 bg-surface-1 border border-hairline rounded-2xl p-5 shadow-xs flex flex-col gap-5">
+          <div className="border-b border-hairline pb-3">
+            <h3 className="font-display text-base font-semibold text-fg flex items-center gap-2">
+              ⚙ Physical Layer &amp; Timing Controls
             </h3>
-            <p className="text-xs text-slate-400">
-              Tune bit quanta, sample point, cable harness length, and termination filter
+            <p className="text-xs text-fg-muted mt-0.5">
+              Synthesize CiA 301 time quanta prescalers, loop delay margin, and differential impedance
             </p>
           </div>
 
-          {/* Standard & Baud Rate */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="standard-select" className="text-xs font-medium text-fg-muted">
+              Protocol Standard
+            </label>
+            <select
+              id="standard-select"
+              value={standard}
+              onChange={(e) => setStandard(e.target.value as CanProtocolStandard)}
+              className="bg-sunken border border-line rounded-xl px-3 py-2 text-xs font-mono text-fg focus:outline-none focus:border-accent"
+            >
+              <option value="can_2_0b_standard">CAN 2.0B Standard (11-bit ID, 8B Max)</option>
+              <option value="can_2_0b_extended">CAN 2.0B Extended (29-bit J1939, 8B Max)</option>
+              <option value="can_fd_iso">ISO 11898-1 CAN-FD (64B Payload, Fast Data Phase)</option>
+              <option value="can_fd_non_iso">Non-ISO Legacy CAN-FD</option>
+            </select>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="standard-select" className="text-xs font-medium text-slate-300">
-                Protocol Standard
-              </label>
-              <select
-                id="standard-select"
-                value={standard}
-                onChange={(e) => setStandard(e.target.value as CanProtocolStandard)}
-                className="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-400"
-              >
-                <option value="can_2_0b_standard">CAN 2.0B (11-bit ID)</option>
-                <option value="can_2_0b_extended">CAN 2.0B Extended (29-bit)</option>
-                <option value="can_fd_iso">ISO CAN-FD</option>
-                <option value="can_fd_non_iso">Non-ISO CAN-FD (Bosch)</option>
-              </select>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="baud-select" className="text-xs font-medium text-slate-300">
+              <label htmlFor="baud-select" className="text-xs font-medium text-fg-muted">
                 Nominal Baud Rate
               </label>
               <select
                 id="baud-select"
                 value={baudRateKbps}
                 onChange={(e) => setBaudRateKbps(Number(e.target.value))}
-                className="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-400"
+                className="bg-sunken border border-line rounded-xl px-3 py-2 text-xs font-mono text-fg focus:outline-none focus:border-accent"
               >
-                <option value={1000}>1000 kbps (1 Mbps)</option>
-                <option value={500}>500 kbps (Standard)</option>
-                <option value={250}>250 kbps (Commercial)</option>
-                <option value={125}>125 kbps (Long Range)</option>
+                <option value={125}>125 kbps</option>
+                <option value={250}>250 kbps</option>
+                <option value={500}>500 kbps</option>
+                <option value={1000}>1000 kbps</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="clock-select" className="text-xs font-medium text-fg-muted">
+                CAN Controller Clock
+              </label>
+              <select
+                id="clock-select"
+                value={clockFreqMhz}
+                onChange={(e) => setClockFreqMhz(Number(e.target.value))}
+                className="bg-sunken border border-line rounded-xl px-3 py-2 text-xs font-mono text-fg focus:outline-none focus:border-accent"
+              >
+                <option value={16}>16 MHz</option>
+                <option value={24}>24 MHz</option>
+                <option value={40}>40 MHz</option>
+                <option value={80}>80 MHz</option>
               </select>
             </div>
           </div>
 
-          {/* Clock Frequency */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="clock-select" className="text-xs font-medium text-slate-300">
-              CAN Controller Peripheral Clock (f_clk)
-            </label>
-            <select
-              id="clock-select"
-              value={clockFreqMhz}
-              onChange={(e) => setClockFreqMhz(Number(e.target.value))}
-              className="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-400"
-            >
-              <option value={80}>80 MHz (Infineon TriCore / NXP S32K3)</option>
-              <option value={40}>40 MHz (STM32F4 / ESP32-S3 TWAI)</option>
-              <option value={24}>24 MHz (Microchip MCP2515 External SPI)</option>
-              <option value={16}>16 MHz (Automotive 8/16-bit ECU)</option>
-            </select>
-          </div>
-
-          {/* Bus Length Slider */}
           <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center text-xs">
-              <label htmlFor="bus-length-slider" className="font-medium text-slate-300">
-                Total Bus Harness Length
+              <label htmlFor="bus-length-slider" className="font-medium text-fg-muted">
+                Bus Harness Length
               </label>
-              <span className="font-mono text-emerald-400 font-bold">{busLengthM} meters</span>
+              <span className="font-mono text-accent-fg font-bold">{busLengthM} m</span>
             </div>
             <input
               id="bus-length-slider"
               type="range"
               min="1"
-              max="150"
+              max="300"
               step="1"
               value={busLengthM}
               onChange={(e) => setBusLengthM(Number(e.target.value))}
-              className="accent-emerald-400 cursor-pointer"
+              className="accent-accent cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-              <span>1m (Local Bench)</span>
-              <span>15m (Passenger Car)</span>
-              <span>150m (Plant / Outpost)</span>
+            <div className="flex justify-between text-[10px] text-fg-subtle font-mono">
+              <span>1m (PCB/Drone)</span>
+              <span>Max Safe: {simResult.maxAllowableBusLengthMeters.toFixed(1)}m</span>
+              <span>300m (Stationary)</span>
             </div>
           </div>
 
-          {/* Number of Nodes Slider */}
           <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center text-xs">
-              <label htmlFor="nodes-slider" className="font-medium text-slate-300">
-                Connected Nodes (ECUs)
+              <label htmlFor="nodes-slider" className="font-medium text-fg-muted">
+                Connected ECU Nodes
               </label>
-              <span className="font-mono text-sky-400 font-bold">{nodeCount} Nodes</span>
+              <span className="font-mono text-sky-700 font-bold">{nodeCount} nodes</span>
             </div>
             <input
               id="nodes-slider"
               type="range"
               min="2"
-              max="32"
+              max="48"
               step="1"
               value={nodeCount}
               onChange={(e) => setNodeCount(Number(e.target.value))}
-              className="accent-sky-400 cursor-pointer"
+              className="accent-accent cursor-pointer"
             />
           </div>
 
-          {/* Message Frequency Slider */}
           <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center text-xs">
-              <label htmlFor="freq-slider" className="font-medium text-slate-300">
-                Aggregate Broadcast Message Rate
+              <label htmlFor="freq-slider" className="font-medium text-fg-muted">
+                Aggregate Bus Traffic Rate
               </label>
-              <span className="font-mono text-amber-400 font-bold">{messageFreqHz} frames/sec</span>
+              <span className="font-mono text-fg font-bold">{messageFreqHz} frames/s</span>
             </div>
             <input
               id="freq-slider"
               type="range"
               min="50"
-              max="2000"
-              step="25"
+              max="3000"
+              step="50"
               value={messageFreqHz}
               onChange={(e) => setMessageFreqHz(Number(e.target.value))}
-              className="accent-amber-400 cursor-pointer"
+              className="accent-accent cursor-pointer"
             />
           </div>
 
-          {/* Termination Selection */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="term-select" className="text-xs font-medium text-slate-300">
-              Bus End Termination Topology
+            <label htmlFor="term-select" className="text-xs font-medium text-fg-muted">
+              Termination Network Topology
             </label>
             <select
               id="term-select"
               value={termination}
               onChange={(e) => setTermination(e.target.value as TerminationTopology)}
-              className="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-400"
+              className="bg-sunken border border-line rounded-xl px-3 py-2 text-xs font-mono text-fg focus:outline-none focus:border-accent"
             >
-              <option value="split_termination_filtered">Split Termination (2x 60Ω + 4.7nF to GND)</option>
-              <option value="standard_120_ohm">Standard 120Ω Non-Filtered</option>
-              <option value="single_end_high_z_unterminated">Unterminated / Missing End Resistor</option>
+              <option value="split_termination_filtered">Split Termination (2×60Ω + 4.7nF CMC Filter)</option>
+              <option value="standard_120_ohm">Standard Dual 120Ω End Resistors</option>
+              <option value="single_end_high_z_unterminated">Single-End / Reflection Risk (Unterminated)</option>
             </select>
           </div>
 
-          {/* Physical Layer Delay Sizing Card */}
-          <div className="bg-slate-950/80 rounded-lg p-3.5 border border-slate-800 flex flex-col gap-2.5 font-mono text-xs">
-            <h4 className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
-              Propagation Delay &amp; Arbitration Margin
-            </h4>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
+          {/* Physical Timing Metrics */}
+          <div className="bg-sunken rounded-xl p-3.5 border border-hairline font-mono text-xs space-y-2.5">
+            <div className="text-[11px] font-bold text-accent-fg uppercase tracking-wider">
+              Propagation &amp; Physical Layer Margins
+            </div>
+            <div className="grid grid-cols-2 gap-2.5 text-[11px]">
               <div>
-                <span className="text-slate-400 block">Round-Trip Delay:</span>
-                <span className="font-bold text-slate-100">{simResult.roundTripDelayNs} ns</span>
+                <span className="text-fg-subtle block">Effective Baud:</span>
+                <span className="font-bold text-fg">{simResult.actualBaudRateKbps} kbps</span>
               </div>
               <div>
-                <span className="text-slate-400 block">Max Allowable Bus:</span>
-                <span className={`font-bold ${busLengthM > simResult.maxAllowableBusLengthMeters ? 'text-rose-400' : 'text-emerald-400'}`}>
-                  {simResult.maxAllowableBusLengthMeters} meters
-                </span>
+                <span className="text-fg-subtle block">Round-Trip Delay:</span>
+                <span className="font-bold text-sky-700">{simResult.roundTripDelayNs.toFixed(0)} ns</span>
               </div>
               <div>
-                <span className="text-slate-400 block">Termination:</span>
-                <span className="font-bold text-slate-100">{simResult.terminationImpedanceOhms} Ω</span>
+                <span className="text-fg-subtle block">Termination Req:</span>
+                <span className="font-bold text-fg">{simResult.terminationImpedanceOhms} Ω</span>
               </div>
               <div>
-                <span className="text-slate-400 block">CM Filter Cutoff:</span>
-                <span className="font-bold text-sky-400">{simResult.commonModeFilterCutoffKhz} kHz</span>
+                <span className="text-fg-subtle block">CM Filter Cutoff:</span>
+                <span className="font-bold text-emerald-700">{simResult.commonModeFilterCutoffKhz} kHz</span>
               </div>
             </div>
-
-            {busLengthM > simResult.maxAllowableBusLengthMeters && (
-              <div className="mt-1 pt-1.5 border-t border-slate-800 text-[10px] text-rose-400 font-bold">
-                ⚠ WARNING: Cable delay exceeds Propagation Segment window. Increase Prop_Seg or lower baud rate to avoid arbitration bit corruption.
-              </div>
-            )}
           </div>
         </div>
 

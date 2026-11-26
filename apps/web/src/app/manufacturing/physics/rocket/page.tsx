@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import { RocketTrajectorySimulator } from '@/components/manufacturing/physics/rocket-simulator';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
+import { SocialCommunityProvider } from '@/components/social/social-context';
 
 export const metadata: Metadata = {
   title: 'Multi-Stage Rocket Launch & Orbital Trajectory Studio | Hackerland',
@@ -10,14 +12,24 @@ export const metadata: Metadata = {
 
 export default function RocketStudioPage() {
   return (
-    <div className="container max-w-7xl mx-auto px-4 py-8 space-y-6">
-      <StudioBreadcrumb
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="physics"
         title="Rocket Trajectory Studio"
+        subtitle="Tsiolkovsky propellant burn, Max-Q dynamic pressure & orbital gravity turn"
         category="Aerospace Physics"
         badge="Tsiolkovsky & Max-Q"
-        activeId="rocket"
-      />
-      <RocketTrajectorySimulator />
-    </div>
+        currentRoute="/manufacturing/physics/rocket"
+        edgeToEdge
+      >
+        <RocketTrajectorySimulator />
+        <StudioBreadcrumb
+          title="Rocket Trajectory Studio"
+          category="Aerospace Physics"
+          badge="Tsiolkovsky & Max-Q"
+          activeId="rocket"
+        />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

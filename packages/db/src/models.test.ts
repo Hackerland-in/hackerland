@@ -6,6 +6,8 @@ import {
   ReportModel,
   NotificationModel,
   ReputationEventModel,
+  WorkflowStateModel,
+  LabWorkspaceModel,
 } from './index';
 
 describe('ProfileModel validation and indexes', () => {
@@ -153,5 +155,62 @@ describe('NotificationModel validation', () => {
     const err = doc.validateSync();
     expect(err).toBeUndefined();
     expect(doc.read).toBe(false);
+  });
+});
+
+describe('WorkflowStateModel validation and indexes', () => {
+  it('rejects unknown namespace and missing key', () => {
+    const doc = new WorkflowStateModel({
+      namespace: 'invalid_ns',
+      payload: {},
+    });
+    const err = doc.validateSync();
+    expect(err?.errors.namespace).toBeDefined();
+    expect(err?.errors.key).toBeDefined();
+  });
+
+  it('defines unique compound index on namespace + key', () => {
+    const indexes = WorkflowStateModel.schema.indexes();
+    const hasCompound = indexes.some(
+      ([fields, opts]) =>
+        fields.namespace === 1 && fields.key === 1 && opts?.unique === true,
+    );
+    expect(hasCompound).toBe(true);
+  });
+});
+
+describe('LabWorkspaceModel validation and indexes', () => {
+  it('rejects invalid kind and lowercases ownerHandle', () => {
+    const doc = new LabWorkspaceModel({
+      workspaceId: 'pcb-foc-rev2',
+      kind: 'unknown_lab',
+      slugOrRoute: '/manufacturing/pcb',
+      title: 'BLDC ESC v2',
+      ownerHandle: 'Aarav-Patel',
+      ownerName: 'Aarav Patel',
+      payload: {},
+    });
+    expect(doc.ownerHandle).toBe('aarav-patel');
+    const err = doc.validateSync();
+    expect(err?.errors.kind).toBeDefined();
+  });
+
+  it('accepts valid workspace and defines unique workspaceId index', () => {
+    const doc = new LabWorkspaceModel({
+      workspaceId: 'pcb-foc-rev2',
+      kind: 'pcb',
+      slugOrRoute: '/manufacturing/pcb',
+      title: 'BLDC ESC v2',
+      ownerHandle: 'aarav-patel',
+      ownerName: 'Aarav Patel',
+      payload: { layers: 4 },
+    });
+    expect(doc.validateSync()).toBeUndefined();
+    expect(doc.isPublic).toBe(true);
+    const indexes = LabWorkspaceModel.schema.indexes();
+    const hasUniqueId = indexes.some(
+      ([fields, opts]) => fields.workspaceId === 1 && opts?.unique === true,
+    );
+    expect(hasUniqueId).toBe(true);
   });
 });

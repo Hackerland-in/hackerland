@@ -3,8 +3,7 @@ import { notFound } from 'next/navigation';
 import { FIRMWARE_REGISTRY } from '@/lib/data/firmware-data';
 import { FirmwareDetailView } from '@/components/firmware/firmware-detail-view';
 import { SocialCommunityProvider } from '@/components/social/social-context';
-import { SocialShell } from '@/components/social/social-shell';
-import { CommunityRailServer } from '@/components/social/community-rail-server';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface FirmwarePageProps {
   params: Promise<{ slug: string }>;
@@ -44,9 +43,18 @@ export default async function FirmwareDetailPage({ params }: FirmwarePageProps) 
 
   return (
     <SocialCommunityProvider>
-      <SocialShell rightRail={<CommunityRailServer />}>
+      <FullScreenLabShell
+        labKind="firmware"
+        title={item.title}
+        subtitle={item.tagline}
+        category="Firmware Image"
+        badge="WebSerial Ready"
+        backHref="/firmware"
+        backLabel="Firmware Registry"
+        currentRoute={`/firmware/${item.slug}`}
+      >
         <FirmwareDetailView item={item} />
-      </SocialShell>
+      </FullScreenLabShell>
     </SocialCommunityProvider>
   );
 }

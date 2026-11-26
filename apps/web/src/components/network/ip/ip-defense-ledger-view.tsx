@@ -92,6 +92,16 @@ export function IpDefenseLedgerView({ initialPublications }: IpDefenseLedgerView
       const custom = next.filter((p) => !initialIds.has(p.id));
       localStorage.setItem('hackerland_ip_publications', JSON.stringify(custom));
     } catch {}
+    if (typeof fetch === 'function') {
+      void fetch('/api/ideas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'publish_ip_disclosure',
+          publication: newPub,
+        }),
+      }).catch(() => {});
+    }
   };
 
   return (

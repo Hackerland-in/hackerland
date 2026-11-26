@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { EMC_SCAN_REGISTRY } from '@/lib/data/emc-data';
 import { evaluateEmcCompliance } from '@hackerland/core';
 import { EmcDetailView } from '@/components/emc/emc-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 interface EmcPageProps {
   params: Promise<{ slug: string }>;
@@ -74,14 +76,25 @@ export default async function EmcDetailPage({ params }: EmcPageProps) {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12">
-      <EmcDetailView project={project} />
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="risk_audit"
+        title={project.title}
+        subtitle={`${project.deviceUnderTesting} · ${project.standard} Pre-Compliance Scan`}
+        category="EMC / EMI Lab"
+        badge={project.standard}
+        backHref="/emc"
+        backLabel="All EMC Scans"
+        currentRoute={`/emc/${project.slug}`}
+      >
+        <EmcDetailView project={project} />
 
-      {/* JSON-LD Technical Article Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-    </div>
+        {/* JSON-LD Technical Article Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

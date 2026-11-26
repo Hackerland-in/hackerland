@@ -6,25 +6,23 @@ import {
   Compass,
   Cpu,
   Layers,
-  Banknote,
   CheckCircle2,
-  AlertCircle,
   Plus,
   Trash2,
   Sparkles,
   ChevronRight,
   ChevronLeft,
   ArrowRight,
-  ShieldCheck,
 } from 'lucide-react';
-import type { TeardownCategory, TeardownPinoutAnnotation, TeardownSubsystem, TeardownBOMItem } from '@hackerland/core';
+import type { TeardownCategory, TeardownPinoutAnnotation, TeardownSubsystem } from '@hackerland/core';
 import { calculateBomMarkup } from '@hackerland/core';
+import { Button } from '@hackerland/ui';
+import { getActiveBuilderIdentity } from '@/lib/builder-identity';
 import { PcbPinoutAnnotator } from './pcb-pinout-annotator';
 
 export function TeardownSubmitStudio() {
   const [currentStep, setCurrentStep] = useState<number>(1);
 
-  // Form State
   const [title, setTitle] = useState('Ultraviolette F77 Battery Management System & Inverter');
   const [manufacturer, setManufacturer] = useState('Ultraviolette Automotive (India)');
   const [deviceType, setDeviceType] = useState('High-Performance Electric Motorcycle Powertrain');
@@ -32,10 +30,9 @@ export function TeardownSubmitStudio() {
   const [retailPriceInr, setRetailPriceInr] = useState<number>(380000);
   const [estimatedBomInr, setEstimatedBomInr] = useState<number>(85000);
   const [summary, setSummary] = useState(
-    'Architectural autopsy of the 10.3 kWh SRB77 battery pack and dual CAN-FD telematics cluster engineered for 30kW peak power delivery.'
+    'Architectural autopsy of the 10.3 kWh SRB77 battery pack and dual CAN-FD telematics cluster engineered for 30kW peak power delivery.',
   );
 
-  // Subsystems
   const [subsystems, setSubsystems] = useState<TeardownSubsystem[]>([
     {
       name: 'High-Voltage Traction BMS',
@@ -49,8 +46,7 @@ export function TeardownSubmitStudio() {
     },
   ]);
 
-  // Pinout Annotations
-  const [annotations, setAnnotations] = useState<TeardownPinoutAnnotation[]>([
+  const [annotations] = useState<TeardownPinoutAnnotation[]>([
     {
       id: 'pin-1',
       xPercent: 45,
@@ -81,20 +77,6 @@ export function TeardownSubmitStudio() {
     },
   ]);
 
-  // BOM items
-  const [bomItems, setBomItems] = useState<TeardownBOMItem[]>([
-    {
-      component: 'Battery Stack Monitor',
-      partNumber: 'ADBMS6815',
-      manufacturer: 'Analog Devices',
-      function: 'Monitors up to 18 cells with <1.5mV error',
-      package: 'eTQFP-64',
-      estCost: '$8.50 (₹730)',
-      openAlternative: 'LTC6811',
-    },
-  ]);
-
-  // Lessons & Failure modes
   const [lessons, setLessons] = useState<string[]>([
     'Direct copper busbar laser-welding eliminates crimp contact resistance in high-amp EV discharge.',
     'Silicon Carbide (SiC) MOSFETs reduce switching losses by 65% compared to legacy IGBT modules.',
@@ -102,7 +84,6 @@ export function TeardownSubmitStudio() {
 
   const [submitted, setSubmitted] = useState<boolean>(false);
 
-  // Markup & Margins
   const margins = useMemo(() => {
     return calculateBomMarkup(retailPriceInr, estimatedBomInr);
   }, [retailPriceInr, estimatedBomInr]);
@@ -125,62 +106,81 @@ export function TeardownSubmitStudio() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+    const identity = getActiveBuilderIdentity();
+    if (typeof fetch === 'function') {
+      void fetch('/api/workbenches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'teardown',
+          slugOrRoute: '/teardowns/submit',
+          title,
+          summary,
+          ownerHandle: identity.handle,
+          ownerName: identity.name,
+          tags: ['teardown', category],
+          payload: {
+            title,
+            manufacturer,
+            deviceType,
+            category,
+            retailPriceInr,
+            estimatedBomInr,
+            margins,
+            subsystems,
+            annotations,
+            lessons,
+          },
+          publishToFeed: true,
+        }),
+      }).catch(() => {});
+    }
   };
 
   if (submitted) {
     return (
-      <div className="rounded-2xl border border-emerald-500/40 bg-emerald-950/20 p-8 md:p-12 text-center space-y-6 max-w-3xl mx-auto">
-        <div className="size-16 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center mx-auto text-emerald-400">
+      <div className="rounded-2xl border border-success/35 bg-success/10 p-8 md:p-12 text-center space-y-6 max-w-3xl mx-auto shadow-xs">
+        <div className="size-16 rounded-2xl bg-success/15 border border-success/35 flex items-center justify-center mx-auto text-success-fg">
           <CheckCircle2 className="size-8" />
         </div>
         <div className="space-y-2">
-          <span className="text-xs font-mono uppercase text-emerald-400 tracking-wider">
-            TEARDOWN AUTOPSY SUBMITTED TO PEER REVIEW
+          <span className="text-xs font-mono uppercase font-bold text-success-fg tracking-wider">
+            TEARDOWN AUTOPSY PUBLISHED
           </span>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-white">{title}</h2>
-          <p className="text-sm text-neutral-300 max-w-xl mx-auto leading-relaxed">
-            Your chip-level autopsy and interactive pinout annotations have been recorded. You have been awarded
-            <span className="text-emerald-400 font-bold font-mono"> +150 Reputation XP</span> in your Innovation Passport!
+          <h2 className="font-display text-2xl md:text-3xl font-extrabold text-fg">{title}</h2>
+          <p className="text-sm text-fg-muted max-w-xl mx-auto leading-relaxed">
+            Your chip-level autopsy and interactive pinout annotations have been saved to the workspace archive and shared to the community stream. Earned{' '}
+            <span className="text-accent-fg font-bold font-mono">+150 Reputation XP</span>!
           </p>
         </div>
 
-        <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href="/teardowns"
-            className="px-5 py-2.5 rounded-lg bg-emerald-500 text-neutral-950 font-bold text-xs hover:bg-emerald-400 transition-colors"
-          >
-            Explore Teardown Library
-          </Link>
-          <button
-            type="button"
-            onClick={() => setSubmitted(false)}
-            className="px-5 py-2.5 rounded-lg border border-neutral-700 bg-neutral-800 text-white font-semibold text-xs hover:bg-neutral-700 transition-colors"
-          >
+        <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+          <Button asChild variant="primary" size="md">
+            <Link href="/teardowns">Explore Teardown Library</Link>
+          </Button>
+          <Button type="button" variant="secondary" size="md" onClick={() => setSubmitted(false)}>
             Submit Another Teardown
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Top Banner */}
-      <div className="rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-950 via-neutral-900 to-black p-6 md:p-8 space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-6 md:p-7 space-y-3 shadow-xs">
+        <div className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent-fg">
           <Compass className="size-3.5" />
-          <span>Hardware Reverse Engineering & Autopsy Studio</span>
+          <span>Hardware Reverse Engineering &amp; Autopsy Studio</span>
         </div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+        <h1 className="font-display text-2xl md:text-3xl font-extrabold text-fg tracking-tight">
           Submit a Hardware Teardown
         </h1>
-        <p className="text-neutral-400 text-xs md:text-sm max-w-3xl leading-relaxed">
-          Document the silicon chips, pinout schematics, subsystem trees, and true Bill of Materials costs of
-          commercial products. Help the community design better open hardware without reinventing the wheel.
+        <p className="text-fg-muted text-xs md:text-sm max-w-3xl leading-relaxed">
+          Document silicon chips, pinout schematics, subsystem trees, and true Bill of Materials costs of commercial products to accelerate open-source alternatives.
         </p>
 
-        {/* Wizard Steps Bar */}
-        <div className="grid grid-cols-4 gap-2 pt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3">
           {[
             { num: 1, label: 'Device & Margins' },
             { num: 2, label: 'Subsystems' },
@@ -191,153 +191,147 @@ export function TeardownSubmitStudio() {
               key={s.num}
               type="button"
               onClick={() => setCurrentStep(s.num)}
-              className={`p-2.5 rounded-lg border text-left transition-all ${
+              className={`p-2.5 rounded-xl border text-left transition-all ${
                 currentStep === s.num
-                  ? 'border-emerald-500 bg-emerald-500/15 text-emerald-400 font-bold'
+                  ? 'border-accent bg-accent text-on-solid font-bold shadow-xs'
                   : currentStep > s.num
-                  ? 'border-neutral-700 bg-neutral-900 text-neutral-300'
-                  : 'border-neutral-800 bg-neutral-950 text-neutral-500'
+                  ? 'border-accent/30 bg-accent-soft text-fg'
+                  : 'border-hairline bg-surface-1 text-fg-muted hover:border-accent/35'
               }`}
             >
-              <span className="text-[10px] font-mono block">STEP 0{s.num}</span>
+              <span className="text-[10px] font-mono block opacity-80">STEP 0{s.num}</span>
               <span className="text-xs truncate block">{s.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* STEP 1: DEVICE & MARGINS */}
+      {/* STEP 1 */}
       {currentStep === 1 && (
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-6 space-y-6">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Cpu className="size-4 text-emerald-400" />
-            <span>Device Profile & Retail vs BOM Margins</span>
+        <div className="rounded-2xl border border-hairline bg-surface-1 p-6 space-y-6 shadow-xs">
+          <h2 className="font-display text-base font-bold text-fg flex items-center gap-2">
+            <Cpu className="size-4 text-accent" />
+            <span>Device Profile &amp; Retail vs BOM Margins</span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div className="space-y-1">
-              <label className="text-neutral-400 font-medium">Teardown Title:</label>
+              <label className="text-fg-muted font-semibold">Teardown Title:</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-700 rounded-lg p-2.5 text-white"
+                className="w-full bg-sunken border border-line rounded-xl p-2.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-neutral-400 font-medium">Manufacturer (Brand):</label>
+              <label className="text-fg-muted font-semibold">Manufacturer (Brand):</label>
               <input
                 type="text"
                 value={manufacturer}
                 onChange={(e) => setManufacturer(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-700 rounded-lg p-2.5 text-white"
+                className="w-full bg-sunken border border-line rounded-xl p-2.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div className="space-y-1">
-              <label className="text-neutral-400 font-medium">Device Category:</label>
+              <label className="text-fg-muted font-semibold">Device Category:</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as TeardownCategory)}
-                className="w-full bg-neutral-950 border border-neutral-700 rounded-lg p-2.5 text-white"
+                className="w-full bg-sunken border border-line rounded-xl p-2.5 text-fg focus:border-accent focus:outline-none"
               >
-                <option value="ev_automotive">EV & Automotive Electronics</option>
-                <option value="drones_robotics">Drones & Robotics</option>
-                <option value="smart_grid_iot">Smart Grid & Industrial IoT</option>
-                <option value="medical_assistive">Medical Devices & Assistive Tech</option>
-                <option value="consumer_edge_ai">Consumer & Edge AI Hardware</option>
+                <option value="ev_automotive">EV &amp; Automotive Electronics</option>
+                <option value="drones_robotics">Drones &amp; Robotics</option>
+                <option value="smart_grid_iot">Smart Grid &amp; Industrial IoT</option>
+                <option value="medical_assistive">Medical Devices &amp; Assistive Tech</option>
+                <option value="consumer_edge_ai">Consumer &amp; Edge AI Hardware</option>
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-neutral-400 font-medium">Device Class / Form Factor:</label>
+              <label className="text-fg-muted font-semibold">Device Class / Form Factor:</label>
               <input
                 type="text"
                 value={deviceType}
                 onChange={(e) => setDeviceType(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-700 rounded-lg p-2.5 text-white"
+                className="w-full bg-sunken border border-line rounded-xl p-2.5 text-fg focus:border-accent focus:outline-none"
               />
             </div>
           </div>
 
-          {/* Pricing & Real-Time Margin Evaluator */}
-          <div className="pt-4 border-t border-neutral-800 space-y-4">
+          <div className="pt-4 border-t border-hairline space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-neutral-400 font-medium">Retail Price (₹ INR):</label>
+                <label className="text-fg-muted font-semibold text-xs">Retail Price (₹ INR):</label>
                 <input
                   type="number"
                   step="1000"
                   value={retailPriceInr}
                   onChange={(e) => setRetailPriceInr(Number(e.target.value))}
-                  className="w-full bg-neutral-950 border border-neutral-700 rounded-lg p-2.5 text-white font-mono text-sm"
+                  className="w-full bg-sunken border border-line rounded-xl p-2.5 text-fg font-mono text-sm focus:border-accent focus:outline-none"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-neutral-400 font-medium">Estimated Electronics BOM (₹ INR):</label>
+                <label className="text-fg-muted font-semibold text-xs">Estimated Electronics BOM (₹ INR):</label>
                 <input
                   type="number"
                   step="500"
                   value={estimatedBomInr}
                   onChange={(e) => setEstimatedBomInr(Number(e.target.value))}
-                  className="w-full bg-neutral-950 border border-neutral-700 rounded-lg p-2.5 text-white font-mono text-sm"
+                  className="w-full bg-sunken border border-line rounded-xl p-2.5 text-fg font-mono text-sm focus:border-accent focus:outline-none"
                 />
               </div>
             </div>
 
-            {/* Margin Metrics Display */}
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 grid grid-cols-2 gap-4 text-center">
+            <div className="rounded-2xl border border-accent/25 bg-accent-soft/60 p-4 grid grid-cols-2 gap-4 text-center">
               <div>
-                <span className="text-xs text-neutral-400 font-mono block">MARKUP RATIO</span>
-                <span className="text-2xl font-black text-white font-mono">{margins.markupRatio}x</span>
-                <span className="text-[10px] text-neutral-500 block">Retail / BOM Factor</span>
+                <span className="text-xs text-fg-muted font-mono block">MARKUP RATIO</span>
+                <span className="text-2xl font-black text-fg font-mono">{margins.markupRatio}x</span>
+                <span className="text-[10px] text-fg-subtle block">Retail / BOM Factor</span>
               </div>
               <div>
-                <span className="text-xs text-neutral-400 font-mono block">EST. GROSS MARGIN</span>
-                <span className="text-2xl font-black text-emerald-400 font-mono">
+                <span className="text-xs text-fg-muted font-mono block">EST. GROSS MARGIN</span>
+                <span className="text-2xl font-black text-accent-fg font-mono">
                   {margins.grossMarginPercent}%
                 </span>
-                <span className="text-[10px] text-neutral-500 block">Standard Hardware ~60-75%</span>
+                <span className="text-[10px] text-fg-subtle block">Standard Hardware ~60-75%</span>
               </div>
             </div>
           </div>
 
           <div className="space-y-1 pt-2">
-            <label className="text-neutral-400 font-medium">Autopsy Abstract / Summary:</label>
+            <label className="text-fg-muted font-semibold text-xs">Autopsy Abstract / Summary:</label>
             <textarea
               rows={3}
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-700 rounded-lg p-2.5 text-xs text-white"
+              className="w-full bg-sunken border border-line rounded-xl p-2.5 text-xs text-fg focus:border-accent focus:outline-none"
             />
           </div>
 
-          <div className="flex justify-end pt-4">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(2)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-neutral-950 font-bold text-xs rounded-lg hover:bg-emerald-400 transition-colors"
-            >
+          <div className="flex justify-end pt-2">
+            <Button type="button" variant="primary" size="sm" onClick={() => setCurrentStep(2)}>
               <span>Next: Subsystems</span>
               <ChevronRight className="size-4" />
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
-      {/* STEP 2: SUBSYSTEMS MAPPING */}
+      {/* STEP 2 */}
       {currentStep === 2 && (
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-6 space-y-6">
+        <div className="rounded-2xl border border-hairline bg-surface-1 p-6 space-y-6 shadow-xs">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Layers className="size-4 text-emerald-400" />
-              <span>Subsystems & Functional Tree</span>
+            <h2 className="font-display text-base font-bold text-fg flex items-center gap-2">
+              <Layers className="size-4 text-accent" />
+              <span>Subsystems &amp; Functional Tree</span>
             </h2>
             <button
               type="button"
               onClick={handleAddSubsystem}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-accent-fg hover:underline"
             >
               <Plus className="size-3.5" />
               <span>Add Subsystem</span>
@@ -348,17 +342,17 @@ export function TeardownSubmitStudio() {
             {subsystems.map((sub, idx) => (
               <div
                 key={idx}
-                className="rounded-xl border border-neutral-800 bg-neutral-950/80 p-4 space-y-3"
+                className="rounded-xl border border-hairline bg-sunken/70 p-4 space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-emerald-400">
+                  <span className="text-xs font-mono font-bold text-accent-fg">
                     SUBSYSTEM #{idx + 1}
                   </span>
                   {subsystems.length > 1 && (
                     <button
                       type="button"
                       onClick={() => setSubsystems(subsystems.filter((_, i) => i !== idx))}
-                      className="text-neutral-500 hover:text-red-400 p-1"
+                      className="text-fg-subtle hover:text-danger-fg p-1"
                     >
                       <Trash2 className="size-4" />
                     </button>
@@ -367,7 +361,7 @@ export function TeardownSubmitStudio() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="text-neutral-400 block mb-1">Subsystem Name:</label>
+                    <label className="text-fg-muted font-semibold block mb-1">Subsystem Name:</label>
                     <input
                       type="text"
                       value={sub.name}
@@ -376,11 +370,11 @@ export function TeardownSubmitStudio() {
                         copy[idx]!.name = e.target.value;
                         setSubsystems(copy);
                       }}
-                      className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-white"
+                      className="w-full bg-surface-1 border border-line rounded-lg px-2.5 py-1.5 text-fg focus:border-accent focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-neutral-400 block mb-1">Identified Silicon Chips (comma separated):</label>
+                    <label className="text-fg-muted font-semibold block mb-1">Identified Silicon Chips (comma separated):</label>
                     <input
                       type="text"
                       value={sub.chips.join(', ')}
@@ -389,13 +383,13 @@ export function TeardownSubmitStudio() {
                         copy[idx]!.chips = e.target.value.split(',').map((c) => c.trim()).filter(Boolean);
                         setSubsystems(copy);
                       }}
-                      className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-white font-mono"
+                      className="w-full bg-surface-1 border border-line rounded-lg px-2.5 py-1.5 text-fg font-mono focus:border-accent focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-neutral-400 text-xs block mb-1">Functional Description:</label>
+                  <label className="text-fg-muted font-semibold text-xs block mb-1">Functional Description:</label>
                   <textarea
                     rows={2}
                     value={sub.description}
@@ -404,35 +398,27 @@ export function TeardownSubmitStudio() {
                       copy[idx]!.description = e.target.value;
                       setSubsystems(copy);
                     }}
-                    className="w-full bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs text-white"
+                    className="w-full bg-surface-1 border border-line rounded-lg px-2.5 py-1.5 text-xs text-fg focus:border-accent focus:outline-none"
                   />
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="flex justify-between pt-4 border-t border-neutral-800">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(1)}
-              className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-white"
-            >
+          <div className="flex justify-between pt-4 border-t border-hairline">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setCurrentStep(1)}>
               <ChevronLeft className="size-4" />
               <span>Back</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrentStep(3)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-neutral-950 font-bold text-xs rounded-lg hover:bg-emerald-400 transition-colors"
-            >
+            </Button>
+            <Button type="button" variant="primary" size="sm" onClick={() => setCurrentStep(3)}>
               <span>Next: Visual Pinout Annotator</span>
               <ChevronRight className="size-4" />
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
-      {/* STEP 3: VISUAL PINOUT ANNOTATOR */}
+      {/* STEP 3 */}
       {currentStep === 3 && (
         <div className="space-y-6">
           <PcbPinoutAnnotator
@@ -441,33 +427,25 @@ export function TeardownSubmitStudio() {
             allowEditing={true}
           />
 
-          <div className="flex justify-between pt-4">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(2)}
-              className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-white"
-            >
+          <div className="flex justify-between pt-2">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setCurrentStep(2)}>
               <ChevronLeft className="size-4" />
               <span>Back</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrentStep(4)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-neutral-950 font-bold text-xs rounded-lg hover:bg-emerald-400 transition-colors"
-            >
-              <span>Next: Lessons & Submit</span>
+            </Button>
+            <Button type="button" variant="primary" size="sm" onClick={() => setCurrentStep(4)}>
+              <span>Next: Lessons &amp; Submit</span>
               <ChevronRight className="size-4" />
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
-      {/* STEP 4: LESSONS & FINAL REVIEW */}
+      {/* STEP 4 */}
       {currentStep === 4 && (
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-6 space-y-6">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Sparkles className="size-4 text-emerald-400" />
-            <span>Engineering Lessons & Pre-Mortem Takeaways</span>
+        <div className="rounded-2xl border border-hairline bg-surface-1 p-6 space-y-6 shadow-xs">
+          <h2 className="font-display text-base font-bold text-fg flex items-center gap-2">
+            <Sparkles className="size-4 text-accent" />
+            <span>Engineering Lessons &amp; Pre-Mortem Takeaways</span>
           </h2>
 
           <div className="space-y-3">
@@ -481,13 +459,13 @@ export function TeardownSubmitStudio() {
                     copy[idx] = e.target.value;
                     setLessons(copy);
                   }}
-                  className="flex-1 bg-neutral-950 border border-neutral-700 rounded-lg p-2.5 text-xs text-white"
+                  className="flex-1 bg-sunken border border-line rounded-xl p-2.5 text-xs text-fg focus:border-accent focus:outline-none"
                 />
                 {lessons.length > 1 && (
                   <button
                     type="button"
                     onClick={() => setLessons(lessons.filter((_, i) => i !== idx))}
-                    className="text-neutral-500 hover:text-red-400 p-1"
+                    className="text-fg-subtle hover:text-danger-fg p-1"
                   >
                     <Trash2 className="size-4" />
                   </button>
@@ -497,57 +475,50 @@ export function TeardownSubmitStudio() {
             <button
               type="button"
               onClick={handleAddLesson}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-accent-fg hover:underline"
             >
               <Plus className="size-3.5" />
               <span>Add Another Engineering Lesson</span>
             </button>
           </div>
 
-          {/* Review Summary Box */}
-          <div className="rounded-xl border border-white/10 bg-neutral-950/80 p-5 space-y-3 text-xs">
-            <span className="text-[10px] font-mono text-neutral-500 uppercase block">SUBMISSION SUMMARY</span>
+          <div className="rounded-xl border border-hairline bg-sunken p-5 space-y-2.5 text-xs">
+            <span className="text-[10px] font-mono text-fg-subtle uppercase font-semibold block">
+              SUBMISSION SUMMARY
+            </span>
             <div className="flex justify-between">
-              <span className="text-neutral-400">Device:</span>
-              <span className="font-bold text-white">{title}</span>
+              <span className="text-fg-muted">Device:</span>
+              <span className="font-bold text-fg">{title}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-neutral-400">Manufacturer & Class:</span>
-              <span className="text-white">{manufacturer} ({deviceType})</span>
+              <span className="text-fg-muted">Manufacturer &amp; Class:</span>
+              <span className="text-fg">{manufacturer} ({deviceType})</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-neutral-400">Gross Margin Evaluation:</span>
-              <span className="text-emerald-400 font-bold font-mono">
+              <span className="text-fg-muted">Gross Margin Evaluation:</span>
+              <span className="text-success-fg font-bold font-mono">
                 {margins.grossMarginPercent}% ({margins.markupRatio}x Markup)
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-neutral-400">Subsystems Analyzed:</span>
-              <span className="text-white font-mono">{subsystems.length} Functional Blocks</span>
+              <span className="text-fg-muted">Subsystems Analyzed:</span>
+              <span className="text-fg font-mono">{subsystems.length} Functional Blocks</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-neutral-400">Reputation Reward:</span>
-              <span className="text-emerald-400 font-bold font-mono">+150 XP</span>
+              <span className="text-fg-muted">Reputation Reward:</span>
+              <span className="text-accent-fg font-bold font-mono">+150 XP</span>
             </div>
           </div>
 
-          <div className="flex justify-between pt-4 border-t border-neutral-800">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(3)}
-              className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-white"
-            >
+          <div className="flex justify-between pt-4 border-t border-hairline">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setCurrentStep(3)}>
               <ChevronLeft className="size-4" />
               <span>Back</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-emerald-500 text-neutral-950 font-bold text-xs rounded-lg hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20"
-            >
+            </Button>
+            <Button type="button" variant="primary" size="md" onClick={handleSubmit}>
               <span>Publish Hardware Teardown (+150 XP)</span>
               <ArrowRight className="size-4" />
-            </button>
+            </Button>
           </div>
         </div>
       )}

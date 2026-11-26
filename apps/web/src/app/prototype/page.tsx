@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
-import { Sparkles } from 'lucide-react';
 import { StatTile } from '@hackerland/ui';
 import { PrototypeArchitectStudio } from '@/components/prototype/prototype-architect-studio';
 import { SocialCommunityProvider } from '@/components/social/social-context';
-import { SocialShell } from '@/components/social/social-shell';
-import { CommunityRailServer } from '@/components/social/community-rail-server';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
 
 export const metadata: Metadata = {
   title: 'Idea-to-Prototype Hardware Simulator & Architect | Hackerland',
@@ -15,20 +13,14 @@ export const metadata: Metadata = {
 export default function PrototypePage() {
   return (
     <SocialCommunityProvider>
-      <SocialShell rightRail={<CommunityRailServer />}>
-        <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-2">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
-            <Sparkles className="size-3.5" aria-hidden="true" />
-            <span>Idea-to-Prototype Synthesizer</span>
-          </div>
-          <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
-            Idea-to-Prototype Hardware Architecture Simulator
-          </h1>
-          <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
-            Turn any hardware prompt into a complete architecture plan: system blocks, MCU pinouts, component BOM, squad roles, and direct handoff to PCB Studio.
-          </p>
-        </header>
-
+      <FullScreenLabShell
+        labKind="prototype"
+        title="Idea-to-Prototype Hardware Architecture Simulator"
+        subtitle="System block diagrams, MCU pin assignments, initial BOM & direct handoff to PCB Studio"
+        category="Architecture Studio"
+        badge="I2C / SPI / CAN Matrix"
+        currentRoute="/prototype"
+      >
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
           <StatTile label="Zero to BOM" value="Instant" hint="Component list & footprints" tone="accent" />
           <StatTile label="Pinout Matrix" value="I2C / SPI" hint="Verified bus interconnects" tone="code" />
@@ -37,7 +29,7 @@ export default function PrototypePage() {
         </div>
 
         <PrototypeArchitectStudio />
-      </SocialShell>
+      </FullScreenLabShell>
     </SocialCommunityProvider>
   );
 }

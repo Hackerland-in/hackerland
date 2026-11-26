@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { StudioBreadcrumb } from '@/components/manufacturing/studio-breadcrumb';
 import { FalstadSimulator } from '@/components/manufacturing/falstad/falstad-simulator';
+import { FullScreenLabShell } from '@/components/labs/full-screen-lab-shell';
+import { SocialCommunityProvider } from '@/components/social/social-context';
 
 export const metadata: Metadata = {
   title: 'Falstad & ngspice Circuit Simulator · Hackerland',
@@ -9,14 +11,24 @@ export const metadata: Metadata = {
 
 export default function FalstadStudioPage() {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6 min-w-0">
-      <StudioBreadcrumb
+    <SocialCommunityProvider>
+      <FullScreenLabShell
+        labKind="spice"
         title="Falstad & ngspice Circuit Simulator"
-        category="Free Electronics Simulation"
+        subtitle="Animated schematic solver, real-time branch currents & transient oscilloscope traces"
+        category="Electronics Simulation"
         badge="Moving Current Animation"
-        activeId="falstad"
-      />
-      <FalstadSimulator />
-    </div>
+        currentRoute="/manufacturing/falstad"
+        edgeToEdge
+      >
+        <FalstadSimulator />
+        <StudioBreadcrumb
+          title="Falstad & ngspice Circuit Simulator"
+          category="Free Electronics Simulation"
+          badge="Moving Current Animation"
+          activeId="falstad"
+        />
+      </FullScreenLabShell>
+    </SocialCommunityProvider>
   );
 }

@@ -23,6 +23,7 @@ import type { Campaign, CampaignMilestone, BackerTier } from '@hackerland/core';
 import { calculateCampaignProgress, calculateMilestonePayout } from '@hackerland/core';
 import { Avatar, Badge, Button, Card, CardBody, Input, Panel, ProgressBar, cn } from '@hackerland/ui';
 import { INDIAN_GOVT_GRANTS } from '@/lib/data/launchpad-data';
+import { getActiveBuilderIdentity } from '@/lib/builder-identity';
 import { useSocialCommunity } from '@/components/social/social-context';
 import type {
   LaunchpadCampaignState,
@@ -172,10 +173,11 @@ export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
     e.preventDefault();
     const trimmed = commentInput.trim();
     if (trimmed.length < 3) return;
+    const identity = getActiveBuilderIdentity();
     const nextComments: LaunchpadCommentRecord[] = [
       {
         id: `camp-qa-${Date.now()}`,
-        authorName: 'You (Backer)',
+        authorName: identity.name,
         body: trimmed,
         createdAt: new Date().toISOString(),
       },
@@ -196,7 +198,7 @@ export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
       await fetch(`/api/launchpad/${campaign.slug}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'comment', authorName: 'You (Backer)', body: trimmed }),
+        body: JSON.stringify({ action: 'comment', authorName: identity.name, body: trimmed }),
       });
     } catch {}
   };
