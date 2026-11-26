@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Input, Label } from '@hackerland/ui';
 import { authClient } from '@/lib/auth-client';
+import { Compass, Sparkles } from 'lucide-react';
 
 export type AuthFormProps = {
   mode: 'sign-in' | 'sign-up';
@@ -76,24 +77,42 @@ export function AuthForm({ mode, configured, providers }: AuthFormProps) {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full rounded-2xl border border-hairline bg-surface-1 p-6 sm:p-7 shadow-xs space-y-5">
       {!configured && (
         <div
           role="region"
           aria-label="Deployment notice"
-          className="mb-6 rounded-md border border-warning/40 bg-warning/10 p-4 text-body-sm text-warning-fg"
+          className="rounded-xl border border-accent/25 bg-accent-soft p-4 text-body-sm text-fg space-y-3"
         >
-          <p className="font-semibold">Sign-in isn&apos;t configured on this deployment yet.</p>
-          <p className="mt-1 text-fg-muted">
-            Database credentials or secrets are missing. You can explore public features without signing in.
-          </p>
+          <div>
+            <p className="font-display font-bold text-accent-fg">
+              Sign-in isn&apos;t configured on this deployment yet.
+            </p>
+            <p className="mt-1 text-body-xs text-fg-muted leading-relaxed">
+              You can explore the live community feed, claim your local maker persona, and run every interactive studio immediately without signing in.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="primary" size="sm">
+              <Link href="/feed">
+                <Compass className="size-3.5" />
+                <span>Explore Community Feed</span>
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/onboarding">
+                <Sparkles className="size-3.5" />
+                <span>Try Local Onboarding</span>
+              </Link>
+            </Button>
+          </div>
         </div>
       )}
 
       {error && (
         <div
           role="alert"
-          className="mb-6 rounded-md border border-danger/40 bg-danger/10 p-3 text-body-sm text-danger-fg"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-body-sm text-danger-fg"
         >
           {error}
         </div>
@@ -101,7 +120,7 @@ export function AuthForm({ mode, configured, providers }: AuthFormProps) {
 
       <fieldset disabled={!configured} className="space-y-4">
         {providers.length > 0 && (
-          <div className="space-y-2 pb-2">
+          <div className="space-y-2.5 pb-1">
             {providers.includes('github') && (
               <Button
                 type="button"
@@ -150,7 +169,9 @@ export function AuthForm({ mode, configured, providers }: AuthFormProps) {
                 <span className="w-full border-t border-hairline" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-canvas px-2 text-fg-subtle">Or continue with email</span>
+                <span className="bg-surface-1 px-2.5 text-fg-subtle font-mono">
+                  Or continue with email
+                </span>
               </div>
             </div>
           </div>
@@ -214,18 +235,18 @@ export function AuthForm({ mode, configured, providers }: AuthFormProps) {
         </form>
       </fieldset>
 
-      <p className="mt-6 text-center text-body-sm text-fg-muted">
+      <p className="pt-2 border-t border-hairline text-center text-body-sm text-fg-muted">
         {isSignUp ? (
           <>
             Already have an account?{' '}
-            <Link href="/sign-in" className="text-accent underline-offset-4 hover:underline">
+            <Link href="/sign-in" className="text-accent-fg font-semibold underline-offset-4 hover:underline">
               Sign in
             </Link>
           </>
         ) : (
           <>
             Don&apos;t have an account?{' '}
-            <Link href="/sign-up" className="text-accent underline-offset-4 hover:underline">
+            <Link href="/sign-up" className="text-accent-fg font-semibold underline-offset-4 hover:underline">
               Sign up
             </Link>
           </>

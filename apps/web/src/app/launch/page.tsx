@@ -1,36 +1,35 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Rocket, Share2, Sparkles, Globe, Download } from 'lucide-react';
+import { Rocket } from 'lucide-react';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 import { LaunchKit } from '@/components/launch/launch-kit';
 
 export const metadata: Metadata = {
-  title: 'Community Launch & Announcement Kit | Hackerland',
+  title: 'Community Launch & Syndication Kit | Hackerland',
   description:
-    'Ready-to-post announcement threads, Product Hunt launch packages, Show HN submissions, and press assets to announce Hackerland to the global hardware and engineering community.',
+    'Ready-to-post announcement threads, Product Hunt launch packages, Show HN submissions, and channel launch tracker for makers.',
 };
 
 export default function LaunchPage() {
   return (
-    <div className="min-h-screen bg-black text-white pb-24">
-      {/* Header Banner */}
-      <section className="relative overflow-hidden border-b border-neutral-800 bg-gradient-to-b from-neutral-950 via-neutral-900 to-black pt-16 pb-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            <Rocket className="w-3.5 h-3.5" /> Worldwide Announcement Hub
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-2">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
+            <Rocket className="size-3.5" aria-hidden="true" />
+            <span>Worldwide Announcement Hub</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white">
-            Community Launch & Syndication Kit
+          <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
+            Community Launch &amp; Syndication Kit
           </h1>
-          <p className="text-neutral-400 max-w-3xl text-base sm:text-lg leading-relaxed">
-            Everything you need to broadcast Hackerland to Product Hunt, Hacker News, Twitter / X, Reddit, and LinkedIn. One-click copy templates formatted to engage serious builders, students, and indie hardware engineers.
+          <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
+            Customize your announcement once and broadcast across Product Hunt, Hacker News, X, and Reddit while tracking every launched channel.
           </p>
-        </div>
-      </section>
+        </header>
 
-      {/* Interactive Launch Cards */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 space-y-8">
         <LaunchKit />
-      </section>
-    </div>
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

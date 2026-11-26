@@ -1,23 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  Copy,
-  Check,
-  Share2,
-  ExternalLink,
-  Sparkles,
-  Rocket,
-  MessageSquare,
-  Globe,
-} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Badge, Button, Card, Input, Label, cn } from '@hackerland/ui';
+import { Copy, Check, ExternalLink, CheckCircle2, Sparkles } from 'lucide-react';
 
 interface LaunchPlatform {
   id: string;
   name: string;
   badge: string;
-  title: string;
-  content: string;
+  buildTitle: (project: string) => string;
+  buildContent: (project: string, url: string, tagline: string) => string;
   shareUrl?: string;
 }
 
@@ -25,171 +17,238 @@ const LAUNCH_PLATFORMS: LaunchPlatform[] = [
   {
     id: 'product_hunt',
     name: 'Product Hunt Launch',
-    badge: 'Rank #1 of the Day',
-    title: 'Hackerland — The Global Innovation Operating System for Makers',
-    content: `🚀 Announcing Hackerland: From Imagination to Impact
+    badge: 'Maker Launch',
+    buildTitle: (project) => `${project} — Built Openly on Hackerland`,
+    buildContent: (project, url, tagline) => `🚀 Announcing ${project}: ${tagline}
 
-Most makerspaces and hacker communities are just forums where people talk about ideas.
-We built Hackerland so anyone—from a 10-year-old curious student to a deep-tech aerospace engineer—can actually BUILD.
+We built ${project} collaboratively in public squad rooms on Hackerland—combining open hardware schematics, live circuit simulation, and reproducible build logs.
 
-✨ What's inside Hackerland today:
-1. In-Browser PCB Studio: Zero-install schematic capture, live IPC-2221 DRC, 3D photorealistic viewer & Gerber RS-274X export.
-2. WebSerial Firmware Flasher: Plug your ESP32 or Raspberry Pi Pico into USB and flash code straight from Chrome.
-3. 3D Virtual Physics Labs: 60 FPS multibody physics for rockets, EVs, drones, and satellites.
-4. Stage Zero IdeaLab: 7-stage guided incubator with instant AI feasibility analysis.
-5. Decision Archaeology: Chapter-by-chapter case studies on how SpaceX, Ather Energy, and NVIDIA survived early failures.
-6. Personal Innovation Passport: Cryptographically verifiable proof-of-work for hardware builds.
+✨ Highlights:
+• Full BOM, schematics & browser-verified testbench specs
+• Built with peer reviews & community sprint check-ins
+• 100% Open Documentation & Proof-of-Ship Verification
 
-100% Free & Open Source. We'd love your feedback!
-🔗 Try it live: https://www.hackerland.in/`,
+We'd love your feedback & questions!
+🔗 Explore & test live: ${url}`,
     shareUrl: 'https://www.producthunt.com/posts/new',
   },
   {
     id: 'hacker_news',
     name: 'Show HN (Hacker News)',
-    badge: 'Frontpage Tech Audience',
-    title: 'Show HN: Hackerland – In-browser PCB studio, physics lab, and maker network',
-    content: `Show HN: Hackerland – In-browser PCB studio, physics lab, and maker network
+    badge: 'Deep Tech Audience',
+    buildTitle: (project) => `Show HN: ${project} – Open hardware & software build with live browser tools`,
+    buildContent: (project, url, tagline) => `Show HN: ${project}
 
 Hi HN,
 
-We built Hackerland (https://www.hackerland.in/) because hardware prototyping is still too fragmented. If you want to design a circuit, simulate aerodynamics, and find collaborators, you currently need to download KiCad, install Python toolchains, configure WebAssembly solvers, and browse disparate discord channels.
+We built ${project} (${url}): ${tagline}.
 
-Hackerland runs the entire innovation workflow in your browser:
+Instead of gating architecture notes behind PDFs, we documented the full subsystem architecture, trade-offs, BOM constraints, and test verification directly in open community workspaces.
 
-1. PCB & Circuit Studio: Client-side netlist routing, real-time Design Rule Checks (DRC), and Gerber export (https://www.hackerland.in/manufacturing/pcb).
-2. WebSerial Hardware Flasher: Flash ESP32/RP2040 microcontrollers directly over USB using the Web Serial API (https://www.hackerland.in/manufacturing/flasher).
-3. Physics Simulation Engine: 60 FPS multibody dynamics for drones, rockets, and EVs (https://www.hackerland.in/manufacturing/physics/3d).
-4. Reverse Engineering Teardowns: Chip-level schematics and BOM cost teardowns of Ather 450 BMS and DJI drones (https://www.hackerland.in/teardowns).
-
-The stack is a modular Next.js monorepo with Turborepo, pure client-side WebGL/Canvas rendering, and typed schemas.
-
-We'd love your honest feedback and critique!`,
-    shareUrl: 'https://news.ycombinator.com/submitlink?u=https%3A%2F%2Fwww.hackerland.in%2F&t=Show+HN%3A+Hackerland+%E2%80%93+In-browser+PCB+studio%2C+physics+lab%2C+and+maker+network',
+We'd genuinely appreciate technical critique on our design constraints, power budget, and fabrication path!`,
+    shareUrl: 'https://news.ycombinator.com/submitlink',
   },
   {
     id: 'twitter_thread',
-    name: 'Twitter / X Launch Thread',
-    badge: 'Viral Developer Reach',
-    title: '6-Tweet Announcement Thread',
-    content: `1/6 What if you could design a PCB, run 3D aerodynamics simulations, flash an ESP32 over USB, and find co-founders—all inside your browser with zero installs?
+    name: 'X / Social Launch Thread',
+    badge: 'Community Reach',
+    buildTitle: (project) => `3-Post Launch Thread for ${project}`,
+    buildContent: (project, url, tagline) => `1/3 Meet ${project}: ${tagline} 🧵👇
 
-Introducing Hackerland (@HackerlandHQ): The Global Innovation Operating System for human curiosity. 🧵👇
-https://www.hackerland.in/
+We shipped every milestone openly on @HackerlandHQ with interactive BOM, squad updates & live verification:
+${url}
 
-2/6 🛠️ In-Browser PCB Studio:
-Laying out circuits shouldn't require multi-gigabyte IDE downloads.
-Our canvas includes real-time DRC clearances, Veroboard/Breadboard modes, a photorealistic 3D renderer, and instant Gerber RS-274X export.
-Try: https://www.hackerland.in/manufacturing/pcb
+2/3 Key engineering breakthrough: open-source reference designs anyone can inspect, remix, and fork for local makerspaces without opaque setup.
 
-3/6 ⚡ WebSerial In-Browser Hardware Flasher:
-Plug in an ESP32, Raspberry Pi Pico, or Arduino via USB and flash firmware with 1 click using the Web Serial API. Live UART terminal included.
-Try: https://www.hackerland.in/manufacturing/flasher
-
-4/6 🚀 3D Multibody Physics Labs:
-Run 60 FPS aerodynamic & propulsion simulations for quadcopters, rockets, electric vehicles, and orbital mechanics.
-Try: https://www.hackerland.in/manufacturing/physics/3d
-
-5/6 🔍 Reverse Engineering & Teardowns:
-We tore down the Ather 450 EV Battery Management System, DJI drone flight controllers, and Smart Grid LoRa meters to publish exact component BOM costs.
-Explore: https://www.hackerland.in/teardowns
-
-6/6 Stop just discussing ideas. Start building.
-Hackerland is live, open, and free worldwide.
-Check it out and let us know what you build today: https://www.hackerland.in/`,
-    shareUrl: 'https://twitter.com/intent/tweet?text=Introducing%20Hackerland%3A%20In-browser%20PCB%20studio%2C%203D%20physics%20labs%2C%20and%20maker%20network%20https%3A%2F%2Fwww.hackerland.in%2F',
+3/3 Try it out, drop architecture feedback, or join the next sprint squad here: ${url}`,
+    shareUrl: 'https://twitter.com/intent/tweet',
   },
   {
     id: 'reddit_electronics',
-    name: 'Reddit (r/electronics & r/arduino)',
-    badge: 'Open Hardware Community',
-    title: 'I built an open-source in-browser PCB designer and WebSerial flasher for makers',
-    content: `Title: I built an open-source in-browser PCB designer and WebSerial flasher for makers
+    name: 'Reddit (r/electronics & r/opensource)',
+    badge: 'Open Hardware Peer Review',
+    buildTitle: (project) => `I shipped ${project} as an open-source hardware & software build`,
+    buildContent: (project, url, tagline) => `Title: I shipped ${project} (${tagline})
 
-Hey everyone!
+Hey makers!
 
-Over the past few months, we've been working on Hackerland (https://www.hackerland.in/), a platform designed to make electronics and hardware prototyping accessible without cumbersome local installations.
+Sharing our open build documentation and engineering breakdown for ${project} (${url}).
 
-Key features you might find handy:
-- PCB Design Studio: Interactive schematic canvas, real-time trace clearance DRC, and instant Gerber RS-274X export for JLCPCB, PCBWay, or domestic fab houses.
-- WebSerial Flasher: Flash ESP32 and RP2040 boards straight from Chrome via the Web Serial API with a built-in serial monitor.
-- Hardware Teardowns: Full BOM analysis and architectural teardown of devices like the Ather 450 BMS and DJI Mavic Mini.
-
-Everything runs client-side with zero tracking or paywalls. Would love to hear what components or ICs you'd like to see added to the library!`,
-    shareUrl: 'https://www.reddit.com/submit?url=https%3A%2F%2Fwww.hackerland.in%2F&title=I+built+an+open-source+in-browser+PCB+designer+and+WebSerial+flasher+for+makers',
+Everything is reproducible—complete with component sourcing tradeoffs, enclosure iterations, and firmware tests. Happy to share Gerbers / schematics or answer questions on component selection!`,
+    shareUrl: 'https://www.reddit.com/submit',
   },
 ];
 
 export function LaunchKit() {
+  const [projectName, setProjectName] = useState('Hackerland Innovation OS');
+  const [tagline, setTagline] = useState(
+    'In-browser PCB studio, WebSerial firmware flasher & open builder social network',
+  );
+  const [projectUrl, setProjectUrl] = useState('https://www.hackerland.in/');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [launchedIds, setLaunchedIds] = useState<string[]>([]);
 
-  const handleCopy = (id: string, text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2500);
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('hackerland_launch_channels');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setLaunchedIds(parsed);
+      }
+    } catch {}
+  }, []);
+
+  const toggleLaunched = (id: string) => {
+    setLaunchedIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      try {
+        localStorage.setItem('hackerland_launch_channels', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
+  const handleCopy = (id: string, text: string) => {
+    try {
+      navigator.clipboard?.writeText(text);
+    } catch {}
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const renderedPlatforms = useMemo(() => {
+    const cleanName = projectName.trim() || 'My Build';
+    const cleanUrl = projectUrl.trim() || 'https://www.hackerland.in/';
+    const cleanTagline = tagline.trim() || 'Open hardware & software innovation';
+    return LAUNCH_PLATFORMS.map((p) => ({
+      ...p,
+      title: p.buildTitle(cleanName),
+      content: p.buildContent(cleanName, cleanUrl, cleanTagline),
+    }));
+  }, [projectName, projectUrl, tagline]);
+
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {LAUNCH_PLATFORMS.map((platform) => {
+    <div className="space-y-6 min-w-0">
+      {/* Live Post Customizer */}
+      <Card className="p-5 border-hairline bg-surface-1 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline pb-3">
+          <div className="flex items-center gap-2 font-display font-bold text-headline-sm text-fg">
+            <Sparkles className="size-4 text-accent" />
+            <span>Customize Your Launch Post</span>
+          </div>
+          <span className="text-body-xs font-mono text-fg-subtle">
+            {launchedIds.length} / {LAUNCH_PLATFORMS.length} channels marked launched
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div className="space-y-1">
+            <Label htmlFor="launch-project-name">Project / Product Name</Label>
+            <Input
+              id="launch-project-name"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="launch-project-url">Canonical Build URL</Label>
+            <Input
+              id="launch-project-url"
+              value={projectUrl}
+              onChange={(e) => setProjectUrl(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="launch-project-tagline">One-line Hook</Label>
+          <Input
+            id="launch-project-tagline"
+            value={tagline}
+            onChange={(e) => setTagline(e.target.value)}
+          />
+        </div>
+      </Card>
+
+      {/* Channels Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {renderedPlatforms.map((platform) => {
           const isCopied = copiedId === platform.id;
+          const isLaunched = launchedIds.includes(platform.id);
+
           return (
-            <div
+            <Card
               key={platform.id}
-              className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-6 flex flex-col justify-between space-y-4"
+              className="border-hairline bg-surface-1 p-5 flex flex-col justify-between space-y-4 min-w-0 [overflow-wrap:anywhere]"
             >
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/30">
+                <div className="flex items-center justify-between gap-2">
+                  <Badge tone="accent" variant="outline">
                     {platform.badge}
-                  </span>
-                  <span className="text-sm font-bold text-white">{platform.name}</span>
+                  </Badge>
+                  <button
+                    type="button"
+                    onClick={() => toggleLaunched(platform.id)}
+                    aria-pressed={isLaunched}
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-display font-semibold border transition-colors',
+                      isLaunched
+                        ? 'border-success/40 bg-success/10 text-success-fg'
+                        : 'border-hairline bg-surface-2/60 text-fg-muted hover:text-accent-fg',
+                    )}
+                  >
+                    <CheckCircle2 className="size-3" />
+                    <span>{isLaunched ? 'Launched' : 'Mark Launched'}</span>
+                  </button>
                 </div>
 
-                <div className="text-xs font-semibold text-neutral-300 font-mono bg-neutral-950 p-2.5 rounded-lg border border-neutral-800/80">
+                <h2 className="font-display text-body-lg font-bold text-fg">{platform.name}</h2>
+
+                <div className="text-body-xs font-semibold text-fg font-mono bg-sunken p-2.5 rounded-xl border border-hairline">
                   {platform.title}
                 </div>
 
-                <div className="rounded-xl bg-neutral-950/80 border border-neutral-800 p-3.5 text-xs font-mono text-neutral-400 h-44 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                <div className="rounded-xl bg-sunken border border-hairline p-3.5 text-body-xs font-mono text-fg-muted h-44 overflow-y-auto whitespace-pre-wrap leading-relaxed">
                   {platform.content}
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-neutral-800 flex items-center justify-between gap-3">
-                <button
+              <div className="pt-3 border-t border-hairline flex items-center justify-between gap-2.5">
+                <Button
                   type="button"
+                  variant={isCopied ? 'primary' : 'secondary'}
+                  size="sm"
+                  className="flex-1"
                   onClick={() => handleCopy(platform.id, `${platform.title}\n\n${platform.content}`)}
-                  className={`flex-1 py-2 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-1.5 ${
-                    isCopied
-                      ? 'bg-emerald-500 text-black'
-                      : 'bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700'
-                  }`}
                 >
                   {isCopied ? (
                     <>
-                      <Check className="w-3.5 h-3.5" /> Copied to Clipboard!
+                      <Check className="size-3.5" />
+                      <span>Copied!</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5" /> Copy Post Text
+                      <Copy className="size-3.5" />
+                      <span>Copy Post Text</span>
                     </>
                   )}
-                </button>
+                </Button>
 
                 {platform.shareUrl && (
-                  <a
-                    href={platform.shareUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black transition flex items-center justify-center shrink-0"
-                    title={`Open ${platform.name}`}
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
+                  <Button asChild variant="soft" size="sm">
+                    <a
+                      href={platform.shareUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`Open ${platform.name}`}
+                    >
+                      <ExternalLink className="size-3.5" />
+                      <span>Open</span>
+                    </a>
+                  </Button>
                 )}
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>
