@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import { EntrepreneurshipHub } from '@/components/domain/entrepreneurship/entrepreneurship-hub';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 export const metadata: Metadata = {
   title: 'Open-Source Entrepreneurship & Founder Academy | Hackerland',
@@ -9,8 +12,10 @@ export const metadata: Metadata = {
 
 export default function EntrepreneurshipPage() {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 min-w-0">
-      <EntrepreneurshipHub />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <EntrepreneurshipHub />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

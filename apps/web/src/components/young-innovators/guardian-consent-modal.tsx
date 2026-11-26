@@ -6,11 +6,9 @@ import {
   X,
   ShieldCheck,
   CheckCircle2,
-  Lock,
   Download,
-  AlertTriangle,
 } from 'lucide-react';
-import { Button } from '@hackerland/ui';
+import { Badge, Button, Input } from '@hackerland/ui';
 
 interface GuardianConsentModalProps {
   onClose: () => void;
@@ -34,6 +32,7 @@ export function GuardianConsentModal({
 
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [consentPassId, setConsentPassId] = useState('');
+  const [copiedToken, setCopiedToken] = useState(false);
 
   const isValid =
     studentName.trim().length >= 2 &&
@@ -74,151 +73,165 @@ export function GuardianConsentModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="dpdp-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-fg/35 backdrop-blur-sm p-4 overflow-y-auto"
     >
-      <div className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-neutral-900 shadow-2xl p-6 sm:p-8 my-8 text-neutral-100 space-y-6">
+      <div className="relative w-full max-w-2xl rounded-2xl border border-hairline bg-surface-1 shadow-overlay p-6 sm:p-7 my-8 text-fg space-y-5">
         <button
           onClick={onClose}
           type="button"
           aria-label="Close dialog"
-          className="absolute top-4 right-4 text-neutral-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-neutral-800"
+          className="absolute top-4 right-4 text-fg-subtle hover:text-fg transition-colors p-1.5 rounded-full hover:bg-surface-2"
         >
-          <X className="size-5" />
+          <X className="size-4" aria-hidden="true" />
         </button>
 
         {isConfirmed ? (
-          <div className="space-y-6 text-center py-4">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-              <CheckCircle2 className="size-8" />
+          <div className="space-y-5 text-center py-3">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-success/10 border border-success/25 text-success-fg">
+              <CheckCircle2 className="size-8" aria-hidden="true" />
             </div>
 
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-2">
+              <Badge tone="success" variant="solid" className="mb-2">
                 VERIFIED GUARDIAN SAFETY TOKEN
-              </div>
-              <h2 className="text-2xl font-bold tracking-tight text-white">DPDP Safety Co-Sign Granted</h2>
-              <p className="text-sm text-neutral-400 mt-1 max-w-md mx-auto">
-                <span className="text-white font-medium">{studentName}</span> is authorized to access physical ATL tinkering labs and publish verified open-hardware project logs.
+              </Badge>
+              <h2 className="font-display text-headline-md font-bold tracking-tight text-fg">
+                DPDP Safety Co-Sign Granted
+              </h2>
+              <p className="text-body-sm text-fg-muted mt-1 max-w-md mx-auto">
+                <strong className="text-fg">{studentName}</strong> is authorized to access physical ATL tinkering labs and publish verified open-hardware project logs.
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-neutral-950/60 p-5 text-left space-y-3 font-mono text-xs">
-              <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                <span className="text-neutral-400">SAFETY TOKEN:</span>
-                <span className="text-emerald-400 font-bold text-sm tracking-wider">{consentPassId}</span>
+            <div className="rounded-xl border border-hairline bg-sunken p-4 text-left space-y-2.5 font-mono text-body-xs">
+              <div className="flex items-center justify-between border-b border-hairline pb-2">
+                <span className="text-fg-subtle">SAFETY TOKEN:</span>
+                <span className="text-accent-fg font-bold text-sm tracking-wider">{consentPassId}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400">STUDENT / AGE:</span>
-                <span className="text-white">{studentName} ({studentAge} years)</span>
+                <span className="text-fg-subtle">STUDENT / AGE:</span>
+                <span className="text-fg">{studentName} ({studentAge} years)</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400">CO-SIGNER:</span>
-                <span className="text-white">{guardianName} ({guardianRelationship})</span>
+                <span className="text-fg-subtle">CO-SIGNER:</span>
+                <span className="text-fg">{guardianName} ({guardianRelationship})</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400">INSTITUTION:</span>
-                <span className="text-white">{schoolName}, {city}</span>
+                <span className="text-fg-subtle">INSTITUTION:</span>
+                <span className="text-fg">{schoolName}, {city}</span>
               </div>
-              <div className="flex items-center justify-between border-t border-white/10 pt-2 text-emerald-400">
+              <div className="flex items-center justify-between border-t border-hairline pt-2 text-success-fg font-semibold">
                 <span className="flex items-center gap-1">
-                  <ShieldCheck className="size-3.5" /> STATUTORY COMPLIANCE:
+                  <ShieldCheck className="size-3.5" aria-hidden="true" /> STATUTORY COMPLIANCE:
                 </span>
                 <span>INDIA DPDP ACT 2023 SEC 9</span>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-1">
               <Button
                 variant="secondary"
-                className="text-xs font-mono"
-                onClick={() => alert(`Digital Safety Token ${consentPassId} copied.`)}
+                size="sm"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(consentPassId);
+                  } catch {}
+                  setCopiedToken(true);
+                  setTimeout(() => setCopiedToken(false), 2000);
+                }}
               >
-                <Download className="size-3.5 mr-1.5" />
-                Copy Digital Safety Token
+                <Download className="size-3.5" aria-hidden="true" />
+                <span>{copiedToken ? 'Copied Token!' : 'Copy Digital Safety Token'}</span>
               </Button>
-              <Button
-                variant="primary"
-                className="text-xs font-mono bg-emerald-600 hover:bg-emerald-500 text-white"
-                onClick={onClose}
-              >
+              <Button variant="primary" size="sm" onClick={onClose}>
                 Done
               </Button>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 mb-1">
-                <ShieldCheck className="size-3.5" />
-                <span>DIGITAL PERSONAL DATA PROTECTION ACT (DPDP) 2023 COMPLIANCE</span>
+            <div className="pr-8">
+              <div className="flex items-center gap-1.5 text-body-xs font-mono font-semibold text-accent-fg mb-1">
+                <ShieldCheck className="size-3.5" aria-hidden="true" />
+                <span>DIGITAL PERSONAL DATA PROTECTION ACT (DPDP) 2023</span>
               </div>
-              <h2 id="dpdp-modal-title" className="text-xl font-bold text-white">
-                Guardian & Educator Safety Co-Sign
+              <h2 id="dpdp-modal-title" className="font-display text-headline-sm font-bold text-fg">
+                Guardian &amp; Educator Safety Co-Sign
               </h2>
-              <p className="text-xs text-neutral-400 mt-1">
-                Under Indian law (DPDP Act 2023 § 9), makers under 18 require verifiable parental or teacher consent for physical lab access, equipment bookings, and public portfolio publishing.
+              <p className="text-body-xs text-fg-muted mt-1">
+                Under Indian law (DPDP Act 2023 § 9), makers under 18 require verifiable parental or teacher consent for lab bookings and public portfolio logs.
               </p>
             </div>
 
             <div className="space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Student / Maker Name *</label>
-                  <input
+                  <label className="block text-body-xs font-display font-medium text-fg mb-1">
+                    Student / Maker Name *
+                  </label>
+                  <Input
                     type="text"
                     required
                     placeholder="e.g. Aditya Sharma"
                     value={studentName}
                     onChange={(e) => setStudentName(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Age *</label>
-                  <input
+                  <label className="block text-body-xs font-display font-medium text-fg mb-1">
+                    Age *
+                  </label>
+                  <Input
                     type="number"
                     min={8}
                     max={17}
                     required
                     value={studentAge}
-                    onChange={(e) => setStudentAge(parseInt(e.target.value, 10))}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+                    onChange={(e) => setStudentAge(parseInt(e.target.value, 10) || 12)}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Guardian / Educator Name *</label>
-                  <input
+                  <label className="block text-body-xs font-display font-medium text-fg mb-1">
+                    Guardian / Educator Name *
+                  </label>
+                  <Input
                     type="text"
                     required
                     placeholder="e.g. Smt. Sunita Rao"
                     value={guardianName}
                     onChange={(e) => setGuardianName(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Guardian Email Address *</label>
-                  <input
+                  <label className="block text-body-xs font-display font-medium text-fg mb-1">
+                    Guardian Email Address *
+                  </label>
+                  <Input
                     type="email"
                     required
                     placeholder="e.g. sunita@school.edu"
                     value={guardianEmail}
                     onChange={(e) => setGuardianEmail(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">Relationship</label>
+                  <label className="block text-body-xs font-display font-medium text-fg mb-1">
+                    Relationship
+                  </label>
                   <select
                     value={guardianRelationship}
-                    onChange={(e) => setGuardianRelationship(e.target.value as any)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+                    onChange={(e) =>
+                      setGuardianRelationship(
+                        e.target.value as 'parent' | 'teacher_mentor' | 'school_principal',
+                      )
+                    }
+                    className="h-11 w-full rounded-xl border border-line bg-sunken px-3 text-body-sm text-fg focus:border-accent focus:bg-surface-1 focus:outline-none"
                   >
                     <option value="parent">Parent / Lawful Guardian</option>
                     <option value="teacher_mentor">Certified ATL Teacher / Mentor</option>
@@ -226,67 +239,63 @@ export function GuardianConsentModal({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">School / ATL Node *</label>
-                  <input
+                  <label className="block text-body-xs font-display font-medium text-fg mb-1">
+                    School / ATL Node *
+                  </label>
+                  <Input
                     type="text"
                     required
                     placeholder="e.g. DPS R.K. Puram ATL"
                     value={schoolName}
                     onChange={(e) => setSchoolName(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-neutral-400 mb-1">City *</label>
-                  <input
+                  <label className="block text-body-xs font-display font-medium text-fg mb-1">
+                    City *
+                  </label>
+                  <Input
                     type="text"
                     required
                     placeholder="e.g. New Delhi"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-600 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              {/* Safety & DPDP Checkboxes */}
-              <div className="p-4 rounded-xl border border-white/10 bg-neutral-950/60 space-y-3 text-xs">
-                <label className="flex items-start gap-2.5 cursor-pointer text-neutral-200">
+              <div className="p-4 rounded-xl border border-hairline bg-sunken space-y-3 text-body-xs text-fg-muted">
+                <label className="flex items-start gap-2.5 cursor-pointer hover:text-fg">
                   <input
                     type="checkbox"
                     checked={dpdpAgreed}
                     onChange={(e) => setDpdpAgreed(e.target.checked)}
-                    className="mt-0.5 rounded border-neutral-700 bg-neutral-900 text-emerald-500 focus:ring-emerald-500"
+                    className="mt-0.5 accent-accent"
                   />
                   <span>
-                    <strong>DPDP Act Data Protection Consent:</strong> I verify that I am the legal guardian or authorized educator. I permit this student to create build logs with zero behavioral ad profiling and zero public location tracking.
+                    <strong className="text-fg">DPDP Act Data Protection Consent:</strong> I verify that I am the legal guardian or authorized educator. I permit this student to create build logs with zero behavioral ad profiling.
                   </span>
                 </label>
 
-                <label className="flex items-start gap-2.5 cursor-pointer text-neutral-200">
+                <label className="flex items-start gap-2.5 cursor-pointer hover:text-fg">
                   <input
                     type="checkbox"
                     checked={safetyAgreed}
                     onChange={(e) => setSafetyAgreed(e.target.checked)}
-                    className="mt-0.5 rounded border-neutral-700 bg-neutral-900 text-emerald-500 focus:ring-emerald-500"
+                    className="mt-0.5 accent-accent"
                   />
                   <span>
-                    <strong>Physical Lab Supervision Agreement:</strong> I confirm that any hardware fabrication (soldering, power tools, 3D printing) will be conducted under adult supervision in a certified ATL or home lab.
+                    <strong className="text-fg">Physical Lab Supervision Agreement:</strong> I confirm hardware fabrication (soldering, power tools, 3D printing) will occur under adult supervision.
                   </span>
                 </label>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <Button type="button" variant="secondary" onClick={onClose} className="text-xs">
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-hairline">
+              <Button type="button" variant="secondary" size="sm" onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={!isValid}
-                variant="primary"
-                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono disabled:opacity-40"
-              >
+              <Button type="submit" disabled={!isValid} variant="primary" size="sm">
                 Sign Safety Authorization Token
               </Button>
             </div>

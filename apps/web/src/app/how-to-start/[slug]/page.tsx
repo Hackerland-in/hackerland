@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { ArrowLeft, MapPin, Wrench, Compass, ShieldCheck, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { Card, Badge, Button } from '@hackerland/ui';
 import { PLANT_BLUEPRINTS } from '@/components/domain/how-to-start/how-to-start-data';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -35,7 +38,9 @@ export default async function PlantBlueprintPage({ params }: PageProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 min-w-0">
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <div className="mx-auto w-full max-w-4xl py-2 sm:py-4 space-y-6 min-w-0">
       {/* Back button & Breadcrumb */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-hairline bg-surface-1">
         <div className="flex items-center gap-3">
@@ -290,6 +295,8 @@ export default async function PlantBlueprintPage({ params }: PageProps) {
           </ul>
         </Card>
       </div>
-    </div>
+        </div>
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

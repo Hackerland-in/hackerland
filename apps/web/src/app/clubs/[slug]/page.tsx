@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getClubBySlug, getAllClubSlugs } from '@/lib/data/clubs-data';
 import { ClubDetailView } from '@/components/clubs/club-detail-view';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 interface ClubDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -37,8 +40,10 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 min-w-0">
-      <ClubDetailView club={club} />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <ClubDetailView club={club} />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

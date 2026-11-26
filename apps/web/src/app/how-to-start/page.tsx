@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import { HowToStartHub } from '@/components/domain/how-to-start/how-to-start-hub';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { CommunityRailServer } from '@/components/social/community-rail-server';
 
 export const metadata: Metadata = {
   title: 'How to Start an Industrial Manufacturing Plant | Hackerland Hardware',
@@ -9,8 +12,10 @@ export const metadata: Metadata = {
 
 export default function HowToStartPage() {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 min-w-0">
-      <HowToStartHub />
-    </div>
+    <SocialCommunityProvider>
+      <SocialShell rightRail={<CommunityRailServer />}>
+        <HowToStartHub />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

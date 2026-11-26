@@ -1,28 +1,18 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import type { JuniorChallenge, JuniorShowcaseProject, AgeBracket } from '@hackerland/core';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  Sparkles,
   ShieldCheck,
   CheckCircle2,
   Cpu,
-  Layers,
   Code,
   Terminal,
-  Trophy,
-  Users,
   Play,
-  PlayCircle,
   Clock,
-  Wrench,
   ChevronRight,
   GraduationCap,
-  ExternalLink,
-  BookOpen,
 } from 'lucide-react';
-import { Button } from '@hackerland/ui';
+import { Badge, Button, Card, CardBody, Panel, cn } from '@hackerland/ui';
 import {
   VISUAL_BLOCK_PRESETS,
   JUNIOR_CHALLENGES,
@@ -38,9 +28,24 @@ export function YoungInnovatorsHub() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationLog, setSimulationLog] = useState<string>(selectedPreset.simulatedOutput);
 
-  // Modal
   const [showConsentModal, setShowConsentModal] = useState(false);
   const [verifiedConsentTokens, setVerifiedConsentTokens] = useState<string[]>([]);
+  const [enrolledChallenges, setEnrolledChallenges] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const savedTokens = localStorage.getItem('hackerland_dpdp_tokens');
+      if (savedTokens) {
+        const parsed = JSON.parse(savedTokens);
+        if (Array.isArray(parsed)) setVerifiedConsentTokens(parsed);
+      }
+      const savedEnrolled = localStorage.getItem('hackerland_junior_enrolled');
+      if (savedEnrolled) {
+        const parsed = JSON.parse(savedEnrolled);
+        if (Array.isArray(parsed)) setEnrolledChallenges(parsed);
+      }
+    } catch {}
+  }, []);
 
   const filteredChallenges = useMemo(() => {
     if (selectedAge === 'all') return JUNIOR_CHALLENGES;
@@ -58,7 +63,7 @@ export function YoungInnovatorsHub() {
     setTimeout(() => {
       setSimulationLog(selectedPreset.simulatedOutput);
       setIsSimulating(false);
-    }, 600);
+    }, 500);
   };
 
   const handleSelectPreset = (preset: VisualBlockPreset) => {
@@ -66,152 +71,152 @@ export function YoungInnovatorsHub() {
     setSimulationLog(preset.simulatedOutput);
   };
 
+  const handleToggleEnroll = (challengeId: string) => {
+    setEnrolledChallenges((prev) => {
+      const next = prev.includes(challengeId)
+        ? prev.filter((id) => id !== challengeId)
+        : [...prev, challengeId];
+      try {
+        localStorage.setItem('hackerland_junior_enrolled', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
   return (
-    <div className="space-y-8 min-w-0">
+    <div className="space-y-6 min-w-0">
       {/* Banner */}
-      <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-r from-cyan-950/40 via-neutral-900 to-indigo-950/30 p-6 sm:p-8 backdrop-blur-sm">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-              <GraduationCap className="size-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-mono font-semibold bg-accent/10 text-accent-fg">
+              <GraduationCap className="size-3.5" aria-hidden="true" />
               <span>SUPERVISED JUNIOR INNOVATOR TRACK · AGES 8 TO 17</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+            <h2 className="font-display text-headline-md sm:text-headline-lg font-bold tracking-tight text-fg">
               From Curiosity to Real Physical Hardware
             </h2>
-            <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
-              A 10-year-old with a dream, a 13-year-old building robotics, or a 16-year-old soldering satellite telemetry. Learn safely with visual logic blocks, MicroPython, verified educator mentors, and full DPDP Act child data safety.
+            <p className="text-body-sm text-fg-muted leading-relaxed">
+              A 10-year-old building circuits, a 13-year-old programming robotics, or a 16-year-old soldering satellite telemetry. Learn safely with visual logic blocks, MicroPython, verified mentors, and DPDP Act safety.
             </p>
+            {verifiedConsentTokens.length > 0 && (
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-success/10 border border-success/30 px-3 py-1 text-body-xs font-mono font-semibold text-success-fg">
+                <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                <span>Active DPDP Safety Token: {verifiedConsentTokens[0]}</span>
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setShowConsentModal(true)}
-              className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-mono"
-            >
-              <ShieldCheck className="size-3.5 mr-1.5" />
-              Guardian DPDP Co-Sign
-            </Button>
-          </div>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setShowConsentModal(true)}
+            className="shrink-0"
+          >
+            <ShieldCheck className="size-4" aria-hidden="true" />
+            <span>Guardian DPDP Co-Sign</span>
+          </Button>
         </div>
       </div>
 
-      {/* 3 Age Progression Pillars */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Tier 1: 8-11 */}
+      {/* 3 Age Progression Pillars (note: keep .cursor-pointer class on each card for test compatibility) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
           onClick={() => setSelectedAge(selectedAge === 'junior_8_11' ? 'all' : 'junior_8_11')}
-          className={`cursor-pointer rounded-2xl border p-5 space-y-3 transition-all ${
+          className={cn(
+            'cursor-pointer rounded-2xl border p-5 space-y-2.5 transition-all bg-surface-1 shadow-xs',
             selectedAge === 'junior_8_11'
-              ? 'border-cyan-500/60 bg-cyan-950/30 shadow-lg'
-              : 'border-white/10 bg-neutral-900/60 hover:border-white/20'
-          }`}
+              ? 'border-accent bg-accent-soft ring-1 ring-accent/25'
+              : 'border-hairline hover:border-accent/40',
+          )}
         >
-          <div className="flex items-center justify-between">
-            <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-              AGES 8 – 11
-            </span>
-            <span className="text-xs text-neutral-500 font-mono">STARTER TIER</span>
+          <div className="flex items-center justify-between gap-2">
+            <Badge tone="learn" variant="outline">AGES 8 – 11</Badge>
+            <span className="text-[11px] text-fg-subtle font-mono">STARTER TIER</span>
           </div>
-          <h3 className="text-base font-bold text-white">Junior Tinkerers</h3>
-          <p className="text-xs text-neutral-400 leading-relaxed">
-            Paper circuits, BBC Micro:bit v2, conductive tape, low-voltage 5V motors, and colorful block-based logic.
+          <h3 className="font-display text-body-lg font-bold text-fg">Junior Tinkerers</h3>
+          <p className="text-body-xs text-fg-muted leading-relaxed">
+            Paper circuits, BBC Micro:bit v2, conductive tape, low-voltage 5V motors, and block-based logic.
           </p>
-          <div className="text-[11px] font-mono text-cyan-300 pt-1 flex items-center gap-1">
-            <span>Filter challenges</span>
-            <ChevronRight className="size-3" />
+          <div className="text-[11px] font-display font-semibold text-accent-fg pt-1 flex items-center gap-1">
+            <span>{selectedAge === 'junior_8_11' ? 'Showing Junior filter' : 'Filter challenges'}</span>
+            <ChevronRight className="size-3" aria-hidden="true" />
           </div>
         </div>
 
-        {/* Tier 2: 12-14 */}
         <div
           onClick={() => setSelectedAge(selectedAge === 'intermediate_12_14' ? 'all' : 'intermediate_12_14')}
-          className={`cursor-pointer rounded-2xl border p-5 space-y-3 transition-all ${
+          className={cn(
+            'cursor-pointer rounded-2xl border p-5 space-y-2.5 transition-all bg-surface-1 shadow-xs',
             selectedAge === 'intermediate_12_14'
-              ? 'border-emerald-500/60 bg-emerald-950/30 shadow-lg'
-              : 'border-white/10 bg-neutral-900/60 hover:border-white/20'
-          }`}
+              ? 'border-accent bg-accent-soft ring-1 ring-accent/25'
+              : 'border-hairline hover:border-accent/40',
+          )}
         >
-          <div className="flex items-center justify-between">
-            <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              AGES 12 – 14
-            </span>
-            <span className="text-xs text-neutral-500 font-mono">BUILDER TIER</span>
+          <div className="flex items-center justify-between gap-2">
+            <Badge tone="earn" variant="outline">AGES 12 – 14</Badge>
+            <span className="text-[11px] text-fg-subtle font-mono">BUILDER TIER</span>
           </div>
-          <h3 className="text-base font-bold text-white">Intermediate Makers</h3>
-          <p className="text-xs text-neutral-400 leading-relaxed">
+          <h3 className="font-display text-body-lg font-bold text-fg">Intermediate Makers</h3>
+          <p className="text-body-xs text-fg-muted leading-relaxed">
             Raspberry Pi Pico (RP2040), MicroPython, 3D printing in PLA/PETG, ultrasonic sensors, and solar chargers.
           </p>
-          <div className="text-[11px] font-mono text-emerald-300 pt-1 flex items-center gap-1">
-            <span>Filter challenges</span>
-            <ChevronRight className="size-3" />
+          <div className="text-[11px] font-display font-semibold text-accent-fg pt-1 flex items-center gap-1">
+            <span>{selectedAge === 'intermediate_12_14' ? 'Showing Builder filter' : 'Filter challenges'}</span>
+            <ChevronRight className="size-3" aria-hidden="true" />
           </div>
         </div>
 
-        {/* Tier 3: 15-17 */}
         <div
           onClick={() => setSelectedAge(selectedAge === 'senior_15_17' ? 'all' : 'senior_15_17')}
-          className={`cursor-pointer rounded-2xl border p-5 space-y-3 transition-all ${
+          className={cn(
+            'cursor-pointer rounded-2xl border p-5 space-y-2.5 transition-all bg-surface-1 shadow-xs',
             selectedAge === 'senior_15_17'
-              ? 'border-indigo-500/60 bg-indigo-950/30 shadow-lg'
-              : 'border-white/10 bg-neutral-900/60 hover:border-white/20'
-          }`}
+              ? 'border-accent bg-accent-soft ring-1 ring-accent/25'
+              : 'border-hairline hover:border-accent/40',
+          )}
         >
-          <div className="flex items-center justify-between">
-            <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              AGES 15 – 17
-            </span>
-            <span className="text-xs text-neutral-500 font-mono">INNOVATOR TIER</span>
+          <div className="flex items-center justify-between gap-2">
+            <Badge tone="research" variant="outline">AGES 15 – 17</Badge>
+            <span className="text-[11px] text-fg-subtle font-mono">INNOVATOR TIER</span>
           </div>
-          <h3 className="text-base font-bold text-white">Junior Fellows</h3>
-          <p className="text-xs text-neutral-400 leading-relaxed">
+          <h3 className="font-display text-body-lg font-bold text-fg">Junior Fellows</h3>
+          <p className="text-body-xs text-fg-muted leading-relaxed">
             Custom 2-layer KiCad PCB routing, LoRa telemetry, CanSat probes, tendon-actuated bionics, and science fairs.
           </p>
-          <div className="text-[11px] font-mono text-indigo-300 pt-1 flex items-center gap-1">
-            <span>Filter challenges</span>
-            <ChevronRight className="size-3" />
+          <div className="text-[11px] font-display font-semibold text-accent-fg pt-1 flex items-center gap-1">
+            <span>{selectedAge === 'senior_15_17' ? 'Showing Fellow filter' : 'Filter challenges'}</span>
+            <ChevronRight className="size-3" aria-hidden="true" />
           </div>
         </div>
       </div>
 
       {/* Interactive Block-to-Hardware Micro-Simulator */}
-      <div className="rounded-2xl border border-white/10 bg-neutral-900/80 p-6 sm:p-8 backdrop-blur-sm space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 mb-1">
-              <Code className="size-3.5" />
-              <span>VISUAL BLOCK-TO-FIRMWARE BRIDGE</span>
-            </div>
-            <h3 className="text-lg font-bold text-white">
-              Visual Logic to Real MicroPython & C++ Simulator
-            </h3>
-            <p className="text-xs text-neutral-400 mt-0.5">
-              Connect visual logic blocks and watch them compile directly into real MCU firmware.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
+      <Panel
+        title="Visual Logic to Real MicroPython & C++ Simulator"
+        icon={<Code aria-hidden="true" />}
+        action={
+          <div className="flex flex-wrap items-center gap-1.5">
             {VISUAL_BLOCK_PRESETS.map((preset) => (
               <button
                 key={preset.id}
+                type="button"
                 onClick={() => handleSelectPreset(preset)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                className={cn(
+                  'px-3 py-1 rounded-full text-body-xs font-display font-semibold transition-all border',
                   selectedPreset.id === preset.id
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                    : 'bg-neutral-800/60 text-neutral-400 hover:text-white border border-transparent'
-                }`}
+                    ? 'border-accent bg-accent text-on-solid shadow-xs'
+                    : 'border-hairline bg-sunken text-fg-muted hover:text-fg',
+                )}
               >
                 {preset.title.split('(')[0]?.trim()}
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Visual Blocks Sequence Container */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
+        }
+      >
+        <div className="space-y-4">
+          <div className="flex items-center justify-between text-body-xs font-mono text-fg-subtle">
             <span>LOGIC FLOW FOR: {selectedPreset.targetBoard}</span>
             <span>AUTO-SYNTHESIZED</span>
           </div>
@@ -220,195 +225,206 @@ export function YoungInnovatorsHub() {
             {selectedPreset.blocks.map((block, idx) => (
               <div
                 key={block.id}
-                className={`p-3.5 rounded-xl border border-white/10 bg-gradient-to-br ${block.color} text-white shadow-md relative overflow-hidden`}
+                className="p-3.5 rounded-xl border border-accent/25 bg-accent-soft/60 text-fg space-y-1"
               >
-                <div className="text-[10px] font-mono uppercase tracking-wider opacity-80 mb-1">
+                <div className="text-[10px] font-mono uppercase font-bold text-accent-fg">
                   STAGE {idx + 1}: {block.type.replace('_', ' ')}
                 </div>
-                <div className="text-xs font-bold leading-snug">{block.label}</div>
+                <div className="font-display text-body-xs font-bold leading-snug">{block.label}</div>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* Code & Telemetry Preview Tabs */}
-        <div className="rounded-xl border border-white/10 bg-neutral-950 overflow-hidden text-xs font-mono">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 bg-neutral-900/60">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setActiveCodeTab('log')}
-                className={`px-2.5 py-1 rounded text-xs transition-colors flex items-center gap-1.5 ${
-                  activeCodeTab === 'log' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-neutral-400 hover:text-white'
-                }`}
+          {/* Code & Telemetry Preview Tabs */}
+          <div className="rounded-xl border border-hairline bg-sunken overflow-hidden text-xs font-mono">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline px-3.5 py-2.5 bg-surface-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setActiveCodeTab('log')}
+                  className={cn(
+                    'px-2.5 py-1 rounded-full text-xs transition-colors inline-flex items-center gap-1.5',
+                    activeCodeTab === 'log'
+                      ? 'bg-accent text-on-solid font-bold'
+                      : 'text-fg-muted hover:text-fg hover:bg-surface-2',
+                  )}
+                >
+                  <Terminal className="size-3" aria-hidden="true" /> Virtual Hardware Serial Monitor
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveCodeTab('python')}
+                  className={cn(
+                    'px-2.5 py-1 rounded-full text-xs transition-colors inline-flex items-center gap-1.5',
+                    activeCodeTab === 'python'
+                      ? 'bg-accent text-on-solid font-bold'
+                      : 'text-fg-muted hover:text-fg hover:bg-surface-2',
+                  )}
+                >
+                  <Code className="size-3" aria-hidden="true" /> MicroPython (RP2040)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveCodeTab('cpp')}
+                  className={cn(
+                    'px-2.5 py-1 rounded-full text-xs transition-colors inline-flex items-center gap-1.5',
+                    activeCodeTab === 'cpp'
+                      ? 'bg-accent text-on-solid font-bold'
+                      : 'text-fg-muted hover:text-fg hover:bg-surface-2',
+                  )}
+                >
+                  <Cpu className="size-3" aria-hidden="true" /> Arduino C++
+                </button>
+              </div>
+
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleRunSimulation}
+                disabled={isSimulating}
+                className="h-8 text-[11px] font-mono"
               >
-                <Terminal className="size-3" /> Virtual Hardware Serial Monitor
-              </button>
-              <button
-                onClick={() => setActiveCodeTab('python')}
-                className={`px-2.5 py-1 rounded text-xs transition-colors flex items-center gap-1.5 ${
-                  activeCodeTab === 'python' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-neutral-400 hover:text-white'
-                }`}
-              >
-                <Code className="size-3" /> MicroPython (RP2040)
-              </button>
-              <button
-                onClick={() => setActiveCodeTab('cpp')}
-                className={`px-2.5 py-1 rounded text-xs transition-colors flex items-center gap-1.5 ${
-                  activeCodeTab === 'cpp' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-neutral-400 hover:text-white'
-                }`}
-              >
-                <Cpu className="size-3" /> Arduino C++
-              </button>
+                <Play className="size-3 text-accent" aria-hidden="true" />
+                <span>{isSimulating ? 'Executing...' : 'Run Simulation'}</span>
+              </Button>
             </div>
 
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={handleRunSimulation}
-              disabled={isSimulating}
-              className="text-[11px] font-mono h-7"
-            >
-              <Play className="size-3 mr-1 text-cyan-400" />
-              {isSimulating ? 'Executing...' : 'Run Simulation'}
-            </Button>
-          </div>
-
-          <div className="p-4 max-h-60 overflow-y-auto leading-relaxed">
-            {activeCodeTab === 'log' && (
-              <pre className="text-emerald-400 whitespace-pre-wrap">{simulationLog}</pre>
-            )}
-            {activeCodeTab === 'python' && (
-              <pre className="text-cyan-300 whitespace-pre-wrap">{selectedPreset.generatedPython}</pre>
-            )}
-            {activeCodeTab === 'cpp' && (
-              <pre className="text-amber-300 whitespace-pre-wrap">{selectedPreset.generatedCpp}</pre>
-            )}
+            <div className="p-4 max-h-60 overflow-y-auto leading-relaxed">
+              {activeCodeTab === 'log' && (
+                <pre className="text-earn-fg whitespace-pre-wrap">{simulationLog}</pre>
+              )}
+              {activeCodeTab === 'python' && (
+                <pre className="text-code-fg whitespace-pre-wrap">{selectedPreset.generatedPython}</pre>
+              )}
+              {activeCodeTab === 'cpp' && (
+                <pre className="text-make-fg whitespace-pre-wrap">{selectedPreset.generatedCpp}</pre>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </Panel>
 
       {/* Junior Challenges Roster */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between text-xs text-neutral-400 px-1 font-mono">
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-body-xs text-fg-subtle px-1 font-mono">
           <span>JUNIOR HARDWARE CHALLENGES ({filteredChallenges.length})</span>
           <span>DPDP VERIFIED MENTORS</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredChallenges.map((challenge) => (
-            <div
-              key={challenge.id}
-              className="rounded-2xl border border-white/10 bg-neutral-900/70 p-6 flex flex-col justify-between hover:border-cyan-500/40 transition-all space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                    {challenge.ageBracket.replace('_', ' ').toUpperCase()}
-                  </span>
-                  <span className="text-xs font-mono text-neutral-400 flex items-center gap-1">
-                    <Clock className="size-3" /> {challenge.estimatedTimeHours} hrs build time
-                  </span>
-                </div>
-
-                <h3 className="text-base font-bold text-white">{challenge.title}</h3>
-                <p className="text-xs text-neutral-300 leading-relaxed">{challenge.summary}</p>
-
-                {/* Hardware Kit */}
-                <div className="p-3 rounded-xl border border-white/5 bg-neutral-950/40 space-y-1.5 text-xs">
-                  <span className="text-[11px] font-mono text-neutral-400 block">HARDWARE KIT REQUIRED:</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {challenge.hardwareKit.map((item) => (
-                      <span
-                        key={item}
-                        className="px-2 py-0.5 rounded bg-neutral-900 border border-white/5 text-[11px] font-mono text-neutral-300"
-                      >
-                        {item}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredChallenges.map((challenge) => {
+            const enrolled = enrolledChallenges.includes(challenge.id);
+            return (
+              <Card
+                key={challenge.id}
+                className="flex flex-col justify-between transition-all hover:border-accent/40 min-w-0 [overflow-wrap:anywhere]"
+              >
+                <CardBody className="p-5 flex flex-col justify-between h-full space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Badge tone="accent" variant="outline">
+                        {challenge.ageBracket.replace('_', ' ').toUpperCase()}
+                      </Badge>
+                      <span className="text-body-xs font-mono text-fg-subtle inline-flex items-center gap-1">
+                        <Clock className="size-3.5" aria-hidden="true" /> {challenge.estimatedTimeHours} hrs
                       </span>
-                    ))}
+                    </div>
+
+                    <h3 className="font-display text-body-lg font-bold text-fg">{challenge.title}</h3>
+                    <p className="text-body-sm text-fg-muted leading-relaxed">{challenge.summary}</p>
+
+                    <div className="p-3 rounded-xl border border-hairline bg-sunken space-y-1.5 text-body-xs">
+                      <span className="text-[10px] font-mono text-fg-subtle block">HARDWARE KIT REQUIRED</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {challenge.hardwareKit.map((item) => (
+                          <span
+                            key={item}
+                            className="px-2 py-0.5 rounded-full bg-surface-1 border border-hairline text-[11px] font-mono text-fg-muted"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 text-body-xs text-fg-muted">
+                      <span className="text-[11px] font-mono text-earn-fg block font-semibold">
+                        SKILLS UNLOCKED
+                      </span>
+                      <ul className="list-disc pl-4 space-y-0.5">
+                        {challenge.learningOutcomes.map((outcome, idx) => (
+                          <li key={idx}>{outcome}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
 
-                {/* Learning Outcomes */}
-                <div className="space-y-1 text-xs text-neutral-400">
-                  <span className="text-[11px] font-mono text-emerald-400 block font-medium">SKILLS UNLOCKED:</span>
-                  <ul className="list-disc list-inside space-y-0.5 text-[11px]">
-                    {challenge.learningOutcomes.map((outcome, idx) => (
-                      <li key={idx}>{outcome}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                <span className="text-xs font-mono text-amber-400 font-medium">
-                  {challenge.prizeOrBadge}
-                </span>
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={() => alert(`Enrolled in ${challenge.title}! Review safety instructions.`)}
-                  className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-mono"
-                >
-                  Start Challenge
-                  <ChevronRight className="size-3.5 ml-1" />
-                </Button>
-              </div>
-            </div>
-          ))}
+                  <div className="pt-3 border-t border-hairline flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-body-xs font-mono text-warning-fg font-semibold">
+                      {challenge.prizeOrBadge}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant={enrolled ? 'soft' : 'primary'}
+                      onClick={() => handleToggleEnroll(challenge.id)}
+                    >
+                      {enrolled ? '✓ Enrolled' : 'Start Challenge'}
+                      {!enrolled && <ChevronRight className="size-3.5" aria-hidden="true" />}
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
+            );
+          })}
         </div>
       </div>
 
       {/* Young Maker Showcase Grid */}
-      <div className="space-y-6 pt-4">
-        <div className="flex items-center justify-between text-xs text-neutral-400 px-1 font-mono">
+      <div className="space-y-4 pt-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-body-xs text-fg-subtle px-1 font-mono">
           <span>YOUNG INNOVATOR SHOWCASE ({filteredProjects.length} PHYSICAL BUILDS)</span>
-          <span>GUARDIAN & EDUCATOR CO-SIGNED</span>
+          <span>GUARDIAN &amp; EDUCATOR CO-SIGNED</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredProjects.map((project) => (
-            <div
-              key={project.id}
-              className="rounded-2xl border border-white/10 bg-neutral-900/70 p-6 space-y-4 hover:border-emerald-500/40 transition-all"
-            >
-              <div className="flex items-start justify-between gap-3">
+            <Card key={project.id} className="hover:border-accent/40 transition-all">
+              <CardBody className="p-5 space-y-3.5">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                      <CheckCircle2 className="size-3" /> DPDP CO-SIGNED
-                    </span>
-                    <span className="text-[11px] font-mono text-neutral-400">
+                    <Badge tone="success" variant="outline">
+                      <CheckCircle2 className="size-3" aria-hidden="true" />
+                      <span>DPDP CO-SIGNED</span>
+                    </Badge>
+                    <span className="text-[11px] font-mono text-fg-subtle">
                       AGE {project.builderAge} · {project.city}
                     </span>
                   </div>
-                  <h3 className="text-base font-bold text-white">{project.title}</h3>
-                  <p className="text-xs text-neutral-400">
-                    By <strong className="text-neutral-200">{project.builderName}</strong> · {project.schoolOrAtl}
+                  <h3 className="font-display text-body-lg font-bold text-fg">{project.title}</h3>
+                  <p className="text-body-xs text-fg-muted">
+                    By <strong className="text-fg">{project.builderName}</strong> · {project.schoolOrAtl}
                   </p>
                 </div>
-              </div>
 
-              <p className="text-xs text-neutral-300 leading-relaxed">
-                {project.summary}
-              </p>
+                <p className="text-body-sm text-fg-muted leading-relaxed">{project.summary}</p>
 
-              {/* Materials */}
-              <div className="flex flex-wrap gap-1.5">
-                {project.materialsUsed.map((m) => (
-                  <span
-                    key={m}
-                    className="px-2 py-0.5 rounded bg-neutral-950 border border-white/5 text-[11px] font-mono text-neutral-400"
-                  >
-                    {m}
-                  </span>
-                ))}
-              </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {project.materialsUsed.map((m) => (
+                    <span
+                      key={m}
+                      className="px-2.5 py-0.5 rounded-full bg-sunken border border-hairline text-[11px] font-mono text-fg-muted"
+                    >
+                      {m}
+                    </span>
+                  ))}
+                </div>
 
-              <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono">
-                <span className="text-neutral-500 text-[11px]">Mentor: {project.mentorName}</span>
-                <span className="text-cyan-400 font-medium">{project.unlockedBadge}</span>
-              </div>
-            </div>
+                <div className="pt-3 border-t border-hairline flex items-center justify-between text-body-xs font-mono">
+                  <span className="text-fg-subtle">Mentor: {project.mentorName}</span>
+                  <span className="text-accent-fg font-semibold">{project.unlockedBadge}</span>
+                </div>
+              </CardBody>
+            </Card>
           ))}
         </div>
       </div>
@@ -418,7 +434,13 @@ export function YoungInnovatorsHub() {
         <GuardianConsentModal
           onClose={() => setShowConsentModal(false)}
           onConsentGranted={(consent) => {
-            setVerifiedConsentTokens((prev) => [consent.id, ...prev]);
+            setVerifiedConsentTokens((prev) => {
+              const next = [consent.id, ...prev];
+              try {
+                localStorage.setItem('hackerland_dpdp_tokens', JSON.stringify(next));
+              } catch {}
+              return next;
+            });
           }}
         />
       )}
