@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Users,
@@ -23,12 +23,14 @@ import type {
   MilestoneEscrow,
   KanbanTask,
 } from '@hackerland/core';
+import type { SquadWorkflowState } from '@/lib/data/community-workflows-store';
 
 interface Props {
   squadRoom: ProjectSquadRoom;
 }
 
 export function SquadRoomWorkspace({ squadRoom }: Props) {
+  const storageKey = `hackerland_squad_${squadRoom.projectSlug}`;
   const [activeTab, setActiveTab] = useState<'escrow' | 'kanban' | 'roster'>('escrow');
   const [milestones, setMilestones] = useState<MilestoneEscrow[]>(squadRoom.milestones);
   const [tasks, setTasks] = useState<KanbanTask[]>(squadRoom.tasks);
@@ -37,9 +39,59 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
   const [proofSummary, setProofSummary] = useState<string>('');
   const [proofSuccessMsg, setProofSuccessMsg] = useState<string | null>(null);
   const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
+  const [shareReleaseToFeed, setShareReleaseToFeed] = useState<boolean>(true);
+  const [priorityFilter, setPriorityFilter] = useState<KanbanTask['priority'] | 'all'>('all');
 
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
   const [newTaskPriority, setNewTaskPriority] = useState<KanbanTask['priority']>('medium');
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as SquadWorkflowState;
+        if (Array.isArray(parsed.milestones)) setMilestones(parsed.milestones);
+        if (Array.isArray(parsed.tasks)) setTasks(parsed.tasks);
+      }
+    } catch {}
+
+    let active = true;
+    fetch(`/api/squads/${squadRoom.projectSlug}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data?.state) return;
+        const srv = data.state as SquadWorkflowState;
+        if (Array.isArray(srv.milestones) && srv.milestones.length > 0) {
+          setMilestones((prev) =>
+            prev.map((m) => srv.milestones.find((sm) => sm.id === m.id) ?? m),
+          );
+        }
+        if (Array.isArray(srv.tasks) && srv.tasks.length > 0) {
+          setTasks((prev) => {
+            const seen = new Set(prev.map((t) => t.id));
+            const merged = [...prev];
+            for (const st of srv.tasks) {
+              if (!seen.has(st.id)) merged.push(st);
+            }
+            return merged;
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, [squadRoom.projectSlug, storageKey]);
+
+  const persistLocal = (nextMilestones: MilestoneEscrow[], nextTasks: KanbanTask[]) => {
+    try {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({ milestones: nextMilestones, tasks: nextTasks }),
+      );
+    } catch {}
+  };
 
   const releasedEscrowInr = milestones
     .filter((m) => m.status === 'released')
@@ -49,45 +101,76 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
     .filter((m) => m.status === 'released')
     .reduce((acc, m) => acc + m.escrowAmountUsd, 0);
 
-  const handleSubmitProof = (e: React.FormEvent) => {
+  const handleSubmitProof = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedMilestone || !proofUrl.trim()) return;
 
-    setMilestones((prev) =>
-      prev.map((m) =>
-        m.id === selectedMilestone.id
-          ? {
-              ...m,
-              status: 'in_review',
-              submittedProof: {
-                proofUrl,
-                summary: proofSummary || 'Proof of work submitted for peer review.',
-                submittedAt: new Date().toISOString().split('T')[0] ?? '',
-                submittedBy: 'current_builder',
-              },
-            }
-          : m,
-      ),
+    const nextMilestones: MilestoneEscrow[] = milestones.map((m) =>
+      m.id === selectedMilestone.id
+        ? {
+            ...m,
+            status: 'in_review',
+            submittedProof: {
+              proofUrl,
+              summary: proofSummary || 'Proof of work submitted for peer review.',
+              submittedAt: new Date().toISOString().split('T')[0] ?? '',
+              submittedBy: 'current_builder',
+            },
+          }
+        : m,
     );
+
+    setMilestones(nextMilestones);
+    persistLocal(nextMilestones, tasks);
 
     setProofSuccessMsg(
       `Proof submitted for "${selectedMilestone.title}"! Funds unlock after peer review.`,
     );
+    const targetId = selectedMilestone.id;
+    const savedProofUrl = proofUrl;
+    const savedSummary = proofSummary;
     setSelectedMilestone(null);
     setProofUrl('');
     setProofSummary('');
     setTimeout(() => setProofSuccessMsg(null), 5000);
+
+    try {
+      await fetch(`/api/squads/${squadRoom.projectSlug}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'submit_proof',
+          milestoneId: targetId,
+          proofUrl: savedProofUrl,
+          summary: savedSummary,
+        }),
+      });
+    } catch {}
   };
 
-  const handleSimulateDisburse = (milestoneId: string) => {
-    setMilestones((prev) =>
-      prev.map((m) => (m.id === milestoneId ? { ...m, status: 'released' } : m)),
+  const handleSimulateDisburse = async (milestoneId: string) => {
+    const nextMilestones: MilestoneEscrow[] = milestones.map((m) =>
+      m.id === milestoneId ? { ...m, status: 'released' } : m,
     );
+    setMilestones(nextMilestones);
+    persistLocal(nextMilestones, tasks);
     setProofSuccessMsg('Escrow released! Verified badge credited to squad members.');
     setTimeout(() => setProofSuccessMsg(null), 5000);
+
+    try {
+      await fetch(`/api/squads/${squadRoom.projectSlug}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'release_escrow',
+          milestoneId,
+          shareToFeed: shareReleaseToFeed,
+        }),
+      });
+    } catch {}
   };
 
-  const handleAddTask = (e: React.FormEvent) => {
+  const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
     const task: KanbanTask = {
@@ -97,23 +180,45 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
       priority: newTaskPriority,
       tags: ['Squad'],
     };
-    setTasks((prev) => [task, ...prev]);
+    const nextTasks = [task, ...tasks];
+    setTasks(nextTasks);
+    persistLocal(milestones, nextTasks);
     setNewTaskTitle('');
+
+    try {
+      await fetch(`/api/squads/${squadRoom.projectSlug}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_task',
+          title: task.title,
+          priority: task.priority,
+        }),
+      });
+    } catch {}
   };
 
-  const handleCycleTaskStatus = (taskId: string) => {
-    setTasks((prev) =>
-      prev.map((t) => {
-        if (t.id !== taskId) return t;
-        const next: Record<KanbanTask['status'], KanbanTask['status']> = {
-          todo: 'in_progress',
-          in_progress: 'review',
-          review: 'done',
-          done: 'todo',
-        };
-        return { ...t, status: next[t.status] };
-      }),
-    );
+  const handleCycleTaskStatus = async (taskId: string) => {
+    const nextTasks = tasks.map((t) => {
+      if (t.id !== taskId) return t;
+      const next: Record<KanbanTask['status'], KanbanTask['status']> = {
+        todo: 'in_progress',
+        in_progress: 'review',
+        review: 'done',
+        done: 'todo',
+      };
+      return { ...t, status: next[t.status] };
+    });
+    setTasks(nextTasks);
+    persistLocal(milestones, nextTasks);
+
+    try {
+      await fetch(`/api/squads/${squadRoom.projectSlug}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'cycle_task', taskId }),
+      });
+    } catch {}
   };
 
   return (
@@ -255,7 +360,22 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
 
       {/* TAB 1: Milestone Proofs */}
       {activeTab === 'escrow' && (
-        <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-hairline bg-surface-1 px-4 py-2.5 shadow-xs">
+            <span className="text-body-xs text-fg-muted">
+              Milestone proofs and tranche disbursements persist across squad sessions.
+            </span>
+            <label className="flex items-center gap-2 text-body-xs font-display font-medium text-fg cursor-pointer">
+              <input
+                type="checkbox"
+                checked={shareReleaseToFeed}
+                onChange={(e) => setShareReleaseToFeed(e.target.checked)}
+                className="accent-accent"
+              />
+              <span>Broadcast tranche release to Live Feed</span>
+            </label>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {milestones.map((m, idx) => (
               <Card
@@ -474,6 +594,24 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
             </Button>
           </form>
 
+          <div className="flex flex-wrap items-center gap-1.5">
+            {(['all', 'critical', 'high', 'medium', 'low'] as const).map((pri) => (
+              <button
+                key={pri}
+                type="button"
+                onClick={() => setPriorityFilter(pri)}
+                className={cn(
+                  'rounded-full px-3 py-1 text-body-xs font-display font-semibold border transition-colors capitalize',
+                  priorityFilter === pri
+                    ? 'border-accent bg-accent text-on-solid'
+                    : 'border-hairline bg-surface-1 text-fg-muted hover:text-fg',
+                )}
+              >
+                {pri === 'all' ? 'All Priorities' : pri}
+              </button>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {(
               [
@@ -483,7 +621,11 @@ export function SquadRoomWorkspace({ squadRoom }: Props) {
                 { id: 'done', label: 'Completed' },
               ] as const
             ).map((col) => {
-              const colTasks = tasks.filter((t) => t.status === col.id);
+              const colTasks = tasks.filter(
+                (t) =>
+                  t.status === col.id &&
+                  (priorityFilter === 'all' || t.priority === priorityFilter),
+              );
               return (
                 <div
                   key={col.id}

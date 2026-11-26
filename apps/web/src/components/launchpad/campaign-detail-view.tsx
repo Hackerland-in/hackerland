@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
-  CheckCircle2,
   AlertCircle,
   ExternalLink,
   ChevronLeft,
@@ -17,50 +16,189 @@ import {
   Check,
   UserPlus,
   UserCheck,
+  MessageSquare,
+  Send,
 } from 'lucide-react';
 import type { Campaign, CampaignMilestone, BackerTier } from '@hackerland/core';
 import { calculateCampaignProgress, calculateMilestonePayout } from '@hackerland/core';
-import { Avatar, Badge, Button, Card, CardBody, Panel, ProgressBar, cn } from '@hackerland/ui';
+import { Avatar, Badge, Button, Card, CardBody, Input, Panel, ProgressBar, cn } from '@hackerland/ui';
 import { INDIAN_GOVT_GRANTS } from '@/lib/data/launchpad-data';
 import { useSocialCommunity } from '@/components/social/social-context';
+import type {
+  LaunchpadCampaignState,
+  LaunchpadCommentRecord,
+} from '@/lib/data/community-workflows-store';
 
 interface CampaignDetailViewProps {
   campaign: Campaign;
 }
 
-export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
-  const { percent } = calculateCampaignProgress(campaign.raisedInr, campaign.fundingGoalInr);
+const DEFAULT_COMMENT: LaunchpadCommentRecord = {
+  id: 'default-qa-1',
+  authorName: 'Rohan Deshmukh',
+  body: 'Will full KiCad manufacturing Gerbers be released at Milestone 2 even for standard hardware backers?',
+  createdAt: '2026-11-23T14:20:00Z',
+};
 
+export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
+  const storageKey = `hackerland_launchpad_${campaign.slug}`;
+
+  const [raisedInr, setRaisedInr] = useState<number>(campaign.raisedInr);
+  const [backersCount, setBackersCount] = useState<number>(campaign.backersCount);
   const [milestones, setMilestones] = useState<CampaignMilestone[]>(campaign.milestones);
-  const [userVotedMilestoneId, setUserVotedMilestoneId] = useState<string | null>(null);
-  const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
+  const [votedMilestoneIds, setVotedMilestoneIds] = useState<string[]>([]);
+  const [backedTierIds, setBackedTierIds] = useState<string[]>([]);
+  const [comments, setComments] = useState<LaunchpadCommentRecord[]>([DEFAULT_COMMENT]);
+  const [commentInput, setCommentInput] = useState('');
   const [pledgeSuccessMessage, setPledgeSuccessMessage] = useState<string | null>(null);
 
   const { isFollowing, toggleFollow } = useSocialCommunity();
   const following = isFollowing(campaign.creator.handle);
+  const { percent } = calculateCampaignProgress(raisedInr, campaign.fundingGoalInr);
 
-  const handleVote = (milestoneId: string, approve: boolean) => {
-    setMilestones((prev) =>
-      prev.map((m) => {
-        if (m.id === milestoneId) {
-          const delta = approve ? 1 : -1;
-          const newVote = Math.min(100, Math.max(0, m.backerApprovalVotePercent + delta));
-          return {
-            ...m,
-            backerApprovalVotePercent: newVote,
-          };
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as LaunchpadCampaignState;
+        if (typeof parsed.raisedInr === 'number') setRaisedInr(parsed.raisedInr);
+        if (typeof parsed.backersCount === 'number') setBackersCount(parsed.backersCount);
+        if (Array.isArray(parsed.milestones)) setMilestones(parsed.milestones);
+        if (Array.isArray(parsed.votedMilestoneIds)) setVotedMilestoneIds(parsed.votedMilestoneIds);
+        if (Array.isArray(parsed.backedTierIds)) setBackedTierIds(parsed.backedTierIds);
+        if (Array.isArray(parsed.comments)) setComments(parsed.comments);
+      }
+    } catch {}
+
+    let active = true;
+    fetch(`/api/launchpad/${campaign.slug}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data?.state) return;
+        const srv = data.state as LaunchpadCampaignState;
+        setRaisedInr((prev) => Math.max(prev, srv.raisedInr));
+        setBackersCount((prev) => Math.max(prev, srv.backersCount));
+        if (Array.isArray(srv.comments) && srv.comments.length > 0) {
+          setComments((prev) => {
+            const seen = new Set(prev.map((c) => c.id));
+            const merged = [...prev];
+            for (const c of srv.comments) {
+              if (!seen.has(c.id)) merged.push(c);
+            }
+            return merged;
+          });
         }
-        return m;
       })
-    );
-    setUserVotedMilestoneId(milestoneId);
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, [campaign.slug, storageKey]);
+
+  const persistLocal = (next: LaunchpadCampaignState) => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(next));
+    } catch {}
   };
 
-  const handlePledge = (tier: BackerTier) => {
-    setSelectedTierId(tier.id);
-    setPledgeSuccessMessage(
-      `Pledge simulated! ₹${tier.amountInr.toLocaleString('en-IN')} locked in milestone escrow for "${tier.title}".`
+  const handleVote = async (milestoneId: string, approve: boolean) => {
+    if (votedMilestoneIds.includes(milestoneId)) return;
+    const nextMilestones = milestones.map((m) =>
+      m.id === milestoneId
+        ? {
+            ...m,
+            backerApprovalVotePercent: Math.min(
+              100,
+              Math.max(0, m.backerApprovalVotePercent + (approve ? 2 : -2)),
+            ),
+          }
+        : m,
     );
+    const nextVoted = [...votedMilestoneIds, milestoneId];
+
+    setMilestones(nextMilestones);
+    setVotedMilestoneIds(nextVoted);
+    persistLocal({
+      raisedInr,
+      backersCount,
+      milestones: nextMilestones,
+      votedMilestoneIds: nextVoted,
+      backedTierIds,
+      comments,
+    });
+
+    try {
+      await fetch(`/api/launchpad/${campaign.slug}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'vote', milestoneId, approve }),
+      });
+    } catch {}
+  };
+
+  const handlePledge = async (tier: BackerTier) => {
+    const nextRaised = raisedInr + tier.amountInr;
+    const nextBackers = backersCount + 1;
+    const nextTiers = backedTierIds.includes(tier.id)
+      ? backedTierIds
+      : [...backedTierIds, tier.id];
+
+    setRaisedInr(nextRaised);
+    setBackersCount(nextBackers);
+    setBackedTierIds(nextTiers);
+    setPledgeSuccessMessage(
+      `Pledge verified! ₹${tier.amountInr.toLocaleString('en-IN')} locked in milestone escrow for "${tier.title}".`,
+    );
+    persistLocal({
+      raisedInr: nextRaised,
+      backersCount: nextBackers,
+      milestones,
+      votedMilestoneIds,
+      backedTierIds: nextTiers,
+      comments,
+    });
+
+    try {
+      await fetch(`/api/launchpad/${campaign.slug}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'pledge', tierId: tier.id }),
+      });
+    } catch {}
+  };
+
+  const handlePostComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = commentInput.trim();
+    if (trimmed.length < 3) return;
+    const nextComments: LaunchpadCommentRecord[] = [
+      {
+        id: `camp-qa-${Date.now()}`,
+        authorName: 'You (Backer)',
+        body: trimmed,
+        createdAt: new Date().toISOString(),
+      },
+      ...comments,
+    ];
+    setComments(nextComments);
+    setCommentInput('');
+    persistLocal({
+      raisedInr,
+      backersCount,
+      milestones,
+      votedMilestoneIds,
+      backedTierIds,
+      comments: nextComments,
+    });
+
+    try {
+      await fetch(`/api/launchpad/${campaign.slug}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'comment', authorName: 'You (Backer)', body: trimmed }),
+      });
+    } catch {}
   };
 
   const matchedGrantDetails = INDIAN_GOVT_GRANTS.filter((g) => campaign.matchedGrants.includes(g.id));
@@ -155,7 +293,7 @@ export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
                 </span>
                 <div className="flex items-baseline gap-2 mt-0.5">
                   <span className="font-display text-headline-lg font-bold text-fg tabular-nums">
-                    ₹{campaign.raisedInr.toLocaleString('en-IN')}
+                    ₹{raisedInr.toLocaleString('en-IN')}
                   </span>
                   <span className="text-body-xs text-fg-muted font-mono">
                     / ₹{campaign.fundingGoalInr.toLocaleString('en-IN')}
@@ -167,7 +305,7 @@ export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
                 <div>
                   <span className="text-fg-subtle block">BACKERS</span>
                   <span className="font-display text-headline-sm font-bold text-fg tabular-nums">
-                    {campaign.backersCount}
+                    {backersCount}
                   </span>
                 </div>
                 <div>
@@ -211,6 +349,7 @@ export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
             const payoutAmount = calculateMilestonePayout(campaign.fundingGoalInr, ms.percentageOfGoal);
             const isReleased = ms.status === 'funds_released' || ms.status === 'verified';
             const isReview = ms.status === 'submitted_for_review';
+            const hasVoted = votedMilestoneIds.includes(ms.id);
 
             return (
               <div
@@ -294,7 +433,7 @@ export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
 
                     <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                       <span className="text-body-xs text-fg-muted">
-                        {userVotedMilestoneId === ms.id
+                        {hasVoted
                           ? '✓ You have cast your backer vote for this tranche.'
                           : 'As a verified backer, cast your quorum vote to disburse or audit.'}
                       </span>
@@ -303,7 +442,7 @@ export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
                           size="sm"
                           variant="primary"
                           onClick={() => handleVote(ms.id, true)}
-                          disabled={userVotedMilestoneId === ms.id}
+                          disabled={hasVoted}
                         >
                           Approve Disbursal
                         </Button>
@@ -311,7 +450,7 @@ export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
                           size="sm"
                           variant="secondary"
                           onClick={() => handleVote(ms.id, false)}
-                          disabled={userVotedMilestoneId === ms.id}
+                          disabled={hasVoted}
                         >
                           Request Audit
                         </Button>
@@ -338,52 +477,96 @@ export function CampaignDetailView({ campaign }: CampaignDetailViewProps) {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {campaign.backerTiers.map((tier) => (
-              <div
-                key={tier.id}
-                className={cn(
-                  'rounded-2xl border p-4 flex flex-col justify-between transition-all',
-                  selectedTierId === tier.id
-                    ? 'border-accent bg-accent-soft'
-                    : 'border-hairline bg-sunken/70 hover:border-accent/35',
-                )}
-              >
-                <div className="space-y-2.5">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <h3 className="font-display text-body-md font-bold text-fg">{tier.title}</h3>
-                      <span className="text-body-xs text-fg-subtle block">
-                        Est. Delivery: {tier.estimatedDelivery}
-                      </span>
-                    </div>
-                    <div className="text-right shrink-0 font-mono">
-                      <span className="font-display text-body-lg font-bold text-earn-fg block tabular-nums">
-                        ₹{tier.amountInr.toLocaleString('en-IN')}
-                      </span>
-                      <span className="text-[11px] text-fg-subtle block">(${tier.amountUsd})</span>
-                    </div>
-                  </div>
-
-                  <p className="text-body-xs text-fg-muted">{tier.description}</p>
-
-                  <div className="space-y-1">
-                    {tier.perks.map((p, pIdx) => (
-                      <div key={pIdx} className="flex items-center gap-1.5 text-body-xs text-fg-muted">
-                        <span className="text-accent-fg font-bold">•</span>
-                        <span>{p}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => handlePledge(tier)}
-                  className="mt-4 w-full"
+            {campaign.backerTiers.map((tier) => {
+              const isBackedTier = backedTierIds.includes(tier.id);
+              return (
+                <div
+                  key={tier.id}
+                  className={cn(
+                    'rounded-2xl border p-4 flex flex-col justify-between transition-all',
+                    isBackedTier
+                      ? 'border-accent bg-accent-soft'
+                      : 'border-hairline bg-sunken/70 hover:border-accent/35',
+                  )}
                 >
-                  Back with ₹{tier.amountInr.toLocaleString('en-IN')}
-                </Button>
+                  <div className="space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-display text-body-md font-bold text-fg">{tier.title}</h3>
+                        <span className="text-body-xs text-fg-subtle block">
+                          Est. Delivery: {tier.estimatedDelivery}
+                        </span>
+                      </div>
+                      <div className="text-right shrink-0 font-mono">
+                        <span className="font-display text-body-lg font-bold text-earn-fg block tabular-nums">
+                          ₹{tier.amountInr.toLocaleString('en-IN')}
+                        </span>
+                        <span className="text-[11px] text-fg-subtle block">(${tier.amountUsd})</span>
+                      </div>
+                    </div>
+
+                    <p className="text-body-xs text-fg-muted">{tier.description}</p>
+
+                    <div className="space-y-1">
+                      {tier.perks.map((p, pIdx) => (
+                        <div key={pIdx} className="flex items-center gap-1.5 text-body-xs text-fg-muted">
+                          <span className="text-accent-fg font-bold">•</span>
+                          <span>{p}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button
+                    variant={isBackedTier ? 'secondary' : 'primary'}
+                    size="sm"
+                    onClick={() => handlePledge(tier)}
+                    className="mt-4 w-full"
+                  >
+                    {isBackedTier
+                      ? `✓ Backed (+₹${tier.amountInr.toLocaleString('en-IN')} again)`
+                      : `Back with ₹${tier.amountInr.toLocaleString('en-IN')}`}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </Panel>
+
+      {/* Interactive Backer Q&A & Verification Thread */}
+      <Panel
+        title={`Backer Q&A & Verification Discussion (${comments.length})`}
+        icon={<MessageSquare aria-hidden="true" />}
+      >
+        <div className="space-y-4">
+          <form onSubmit={handlePostComment} className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Ask the hardware team about Gerbers, BOM lead times, or QA tolerances..."
+              value={commentInput}
+              onChange={(e) => setCommentInput(e.target.value)}
+              className="flex-1"
+            />
+            <Button type="submit" variant="primary" size="md">
+              <Send className="size-4" aria-hidden="true" />
+              <span>Ask</span>
+            </Button>
+          </form>
+
+          <div className="space-y-2.5">
+            {comments.map((c) => (
+              <div
+                key={c.id}
+                className="rounded-xl border border-hairline bg-sunken/70 p-3.5 space-y-1 text-body-xs"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-display font-bold text-fg">{c.authorName}</span>
+                  <span className="text-[11px] text-fg-subtle font-mono">
+                    {new Date(c.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <p className="text-body-sm text-fg-muted">{c.body}</p>
               </div>
             ))}
           </div>

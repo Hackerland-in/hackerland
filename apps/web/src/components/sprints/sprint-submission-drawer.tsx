@@ -5,25 +5,30 @@ import { CheckCircle2, X } from 'lucide-react';
 import type { SprintEntry } from '@hackerland/core';
 import { validateMilestoneSubmission } from '@hackerland/core';
 import { Button, Input, Textarea } from '@hackerland/ui';
+import type { SprintCheckinRecord } from '@/lib/data/community-workflows-store';
 
 interface SprintSubmissionDrawerProps {
   sprint: SprintEntry;
   isOpen: boolean;
   onClose: () => void;
+  onCheckinSuccess?: (checkin: SprintCheckinRecord) => void;
 }
 
 export function SprintSubmissionDrawer({
   sprint,
   isOpen,
   onClose,
+  onCheckinSuccess,
 }: SprintSubmissionDrawerProps) {
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string>(
     sprint.milestones[0]?.id || ''
   );
+  const [squadName, setSquadName] = useState('');
   const [repoUrl, setRepoUrl] = useState('');
   const [cadUrl, setCadUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [notes, setNotes] = useState('');
+  const [shareToFeed, setShareToFeed] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedHash, setSubmittedHash] = useState<string | null>(null);
@@ -33,7 +38,7 @@ export function SprintSubmissionDrawer({
   const currentMilestone =
     sprint.milestones.find((m) => m.id === selectedMilestoneId) || sprint.milestones[0];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentMilestone) return;
 
@@ -52,13 +57,51 @@ export function SprintSubmissionDrawer({
     setErrors([]);
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      const randomHash = Array.from({ length: 16 }, () =>
+    let checkin: SprintCheckinRecord | null = null;
+    try {
+      const res = await fetch(`/api/sprints/${sprint.slug}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'submit_checkin',
+          milestoneId: currentMilestone.id,
+          squadName: squadName.trim() || undefined,
+          cadUrl,
+          repoUrl,
+          videoUrl,
+          notes,
+          shareToFeed,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.checkin) checkin = data.checkin as SprintCheckinRecord;
+      }
+    } catch {}
+
+    if (!checkin) {
+      const randomHash = Array.from({ length: 12 }, () =>
         Math.floor(Math.random() * 16).toString(16)
       ).join('');
-      setSubmittedHash(`hl_sprint_${randomHash}`);
-    }, 900);
+      checkin = {
+        id: `chk-${Date.now()}`,
+        sprintSlug: sprint.slug,
+        milestoneId: currentMilestone.id,
+        milestoneTitle: currentMilestone.title,
+        milestoneHour: currentMilestone.hour,
+        squadName: squadName.trim() || 'Community Squad',
+        cadUrl: cadUrl.trim() || undefined,
+        repoUrl: repoUrl.trim() || undefined,
+        videoUrl: videoUrl.trim() || undefined,
+        notes: notes.trim() || 'Artifact check-in anchored.',
+        ledgerHash: `hl_sprint_${randomHash}`,
+        submittedAt: new Date().toISOString(),
+      };
+    }
+
+    setIsSubmitting(false);
+    setSubmittedHash(checkin.ledgerHash);
+    onCheckinSuccess?.(checkin);
   };
 
   const handleReset = () => {
@@ -120,29 +163,41 @@ export function SprintSubmissionDrawer({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Select Milestone */}
-            <div>
-              <label htmlFor="milestone-select" className="block font-display text-label-md text-fg mb-1.5">
-                Target Milestone
-              </label>
-              <select
-                id="milestone-select"
-                value={selectedMilestoneId}
-                onChange={(e) => {
-                  setSelectedMilestoneId(e.target.value);
-                  setErrors([]);
-                }}
-                className="h-11 w-full rounded-xl border border-line bg-sunken px-3.5 text-body-sm text-fg focus:border-accent focus:bg-surface-1 focus:outline-none"
-              >
-                {sprint.milestones.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    H+{m.hour} — {m.title} ({m.points} pts)
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="milestone-select" className="block font-display text-label-md text-fg mb-1.5">
+                  Target Milestone
+                </label>
+                <select
+                  id="milestone-select"
+                  value={selectedMilestoneId}
+                  onChange={(e) => {
+                    setSelectedMilestoneId(e.target.value);
+                    setErrors([]);
+                  }}
+                  className="h-11 w-full rounded-xl border border-line bg-sunken px-3 text-body-sm text-fg focus:border-accent focus:bg-surface-1 focus:outline-none"
+                >
+                  {sprint.milestones.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      H+{m.hour} — {m.title} ({m.points} pts)
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="squad-name" className="block font-display text-label-md text-fg mb-1.5">
+                  Squad Name (optional)
+                </label>
+                <Input
+                  id="squad-name"
+                  type="text"
+                  placeholder="e.g. Garuda Avionics"
+                  value={squadName}
+                  onChange={(e) => setSquadName(e.target.value)}
+                />
+              </div>
             </div>
 
-            {/* Milestone Deliverables Checklist info */}
             {currentMilestone && (
               <div className="rounded-xl bg-sunken border border-hairline p-3.5 text-body-sm space-y-1">
                 <span className="font-display font-semibold text-fg block">
@@ -156,7 +211,6 @@ export function SprintSubmissionDrawer({
               </div>
             )}
 
-            {/* CAD URL */}
             <div>
               <label htmlFor="cad-url" className="block font-display text-label-md text-fg mb-1">
                 CAD / 3D STEP / Hardware Artifact URL
@@ -170,7 +224,6 @@ export function SprintSubmissionDrawer({
               />
             </div>
 
-            {/* Repo URL */}
             <div>
               <label htmlFor="repo-url" className="block font-display text-label-md text-fg mb-1">
                 Git Repository / Firmware Tree URL
@@ -184,7 +237,6 @@ export function SprintSubmissionDrawer({
               />
             </div>
 
-            {/* Video Demo URL */}
             <div>
               <label htmlFor="video-url" className="block font-display text-label-md text-fg mb-1">
                 Demo Video Walkthrough URL (Loom / YouTube / Drive)
@@ -198,7 +250,6 @@ export function SprintSubmissionDrawer({
               />
             </div>
 
-            {/* Technical Notes */}
             <div>
               <label htmlFor="sprint-notes" className="block font-display text-label-md text-fg mb-1">
                 Engineering Notes &amp; Verification Evidence
@@ -212,7 +263,16 @@ export function SprintSubmissionDrawer({
               />
             </div>
 
-            {/* Errors */}
+            <label className="flex items-center gap-2 text-body-xs text-fg-muted cursor-pointer">
+              <input
+                type="checkbox"
+                checked={shareToFeed}
+                onChange={(e) => setShareToFeed(e.target.checked)}
+                className="accent-accent"
+              />
+              <span>Cross-post verified milestone check-in to the Live Community Feed</span>
+            </label>
+
             {errors.length > 0 && (
               <div
                 role="alert"

@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Bookmark, Clock, Search, Trophy, Users, Zap } from 'lucide-react';
+import { Bookmark, CheckCircle2, Clock, Search, Trophy, Users, Zap } from 'lucide-react';
 import type { SprintEntry, SprintTrack, SprintStatus } from '@hackerland/core';
 import { filterSprints } from '@hackerland/core';
 import { Badge, Card, CardBody, FilterChip, StatTile, cn } from '@hackerland/ui';
 import { useSocialCommunity } from '@/components/social/social-context';
+import type { SprintStateRecord } from '@/lib/data/community-workflows-store';
 
 interface SprintCatalogProps {
   initialSprints: SprintEntry[];
@@ -33,24 +34,50 @@ const STATUS_LABELS: Record<SprintStatus | 'all', string> = {
 export function SprintCatalog({ initialSprints }: SprintCatalogProps) {
   const [selectedTrack, setSelectedTrack] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'all' | 'saved' | 'joined'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sprintStates, setSprintStates] = useState<Record<string, SprintStateRecord>>({});
   const { isItemSaved, toggleSaveItem } = useSocialCommunity();
 
+  useEffect(() => {
+    const next: Record<string, SprintStateRecord> = {};
+    for (const s of initialSprints) {
+      try {
+        const raw = localStorage.getItem(`hackerland_sprint_${s.slug}`);
+        if (raw) {
+          next[s.slug] = JSON.parse(raw) as SprintStateRecord;
+        }
+      } catch {}
+    }
+    setSprintStates(next);
+  }, [initialSprints]);
+
+  const savedCount = initialSprints.filter((s) => isItemSaved(`sprint:${s.slug}`)).length;
+  const joinedCount = initialSprints.filter((s) => sprintStates[s.slug]?.registered).length;
+
   const filtered = useMemo(() => {
-    return filterSprints(initialSprints, {
+    const base = filterSprints(initialSprints, {
       track: selectedTrack,
       status: selectedStatus,
       search: searchQuery,
     });
-  }, [initialSprints, selectedTrack, selectedStatus, searchQuery]);
+    return base.filter((s) => {
+      if (viewMode === 'saved') return isItemSaved(`sprint:${s.slug}`);
+      if (viewMode === 'joined') return Boolean(sprintStates[s.slug]?.registered);
+      return true;
+    });
+  }, [initialSprints, selectedTrack, selectedStatus, searchQuery, viewMode, isItemSaved, sprintStates]);
 
   const totalPrizePool = useMemo(() => {
     return initialSprints.reduce((sum, s) => sum + s.totalPrizePoolINR, 0);
   }, [initialSprints]);
 
   const totalTeams = useMemo(() => {
-    return initialSprints.reduce((sum, s) => sum + s.registeredTeamsCount, 0);
-  }, [initialSprints]);
+    return initialSprints.reduce(
+      (sum, s) => sum + s.registeredTeamsCount + (sprintStates[s.slug]?.registeredCountDelta ?? 0),
+      0,
+    );
+  }, [initialSprints, sprintStates]);
 
   return (
     <div className="space-y-6 min-w-0">
@@ -87,6 +114,41 @@ export function SprintCatalog({ initialSprints }: SprintCatalogProps) {
 
       {/* Filter and Search Bar */}
       <div className="rounded-2xl border border-hairline bg-surface-1 p-3.5 shadow-xs space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-hairline">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {(['all', 'joined', 'saved'] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setViewMode(mode)}
+                className={cn(
+                  'rounded-full px-3.5 py-1.5 text-body-xs font-display font-semibold transition-all',
+                  viewMode === mode
+                    ? 'bg-accent text-on-solid shadow-xs'
+                    : 'text-fg-muted hover:bg-surface-2 hover:text-fg',
+                )}
+              >
+                {mode === 'all'
+                  ? `All Sprints (${initialSprints.length})`
+                  : mode === 'joined'
+                  ? `Joined (${joinedCount})`
+                  : `Saved (${savedCount})`}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative w-full sm:w-56">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-fg-subtle" aria-hidden="true" />
+            <input
+              type="search"
+              placeholder="Search sprints, sponsors..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 w-full rounded-full border border-line bg-sunken pl-9 pr-3.5 text-body-sm text-fg placeholder:text-fg-subtle focus:border-accent focus:bg-surface-1 focus:outline-none"
+            />
+          </div>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
           <div className="flex flex-wrap items-center gap-2">
             {(['all', 'active', 'upcoming', 'completed'] as const).map((status) => (
@@ -101,31 +163,18 @@ export function SprintCatalog({ initialSprints }: SprintCatalogProps) {
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-            <select
-              aria-label="Filter sprint track"
-              value={selectedTrack}
-              onChange={(e) => setSelectedTrack(e.target.value)}
-              className="h-9 rounded-full border border-line bg-sunken px-3.5 text-body-sm text-fg focus:border-accent focus:bg-surface-1 focus:outline-none"
-            >
-              {Object.entries(TRACK_LABELS).map(([val, label]) => (
-                <option key={val} value={val}>
-                  {label}
-                </option>
-              ))}
-            </select>
-
-            <div className="relative w-full sm:w-56">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-fg-subtle" aria-hidden="true" />
-              <input
-                type="search"
-                placeholder="Search sprints, sponsors..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-full rounded-full border border-line bg-sunken pl-9 pr-3.5 text-body-sm text-fg placeholder:text-fg-subtle focus:border-accent focus:bg-surface-1 focus:outline-none"
-              />
-            </div>
-          </div>
+          <select
+            aria-label="Filter sprint track"
+            value={selectedTrack}
+            onChange={(e) => setSelectedTrack(e.target.value)}
+            className="h-9 rounded-full border border-line bg-sunken px-3.5 text-body-sm text-fg focus:border-accent focus:bg-surface-1 focus:outline-none"
+          >
+            {Object.entries(TRACK_LABELS).map(([val, label]) => (
+              <option key={val} value={val}>
+                {label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -145,6 +194,9 @@ export function SprintCatalog({ initialSprints }: SprintCatalogProps) {
             const trackLabel = TRACK_LABELS[sprint.track] || sprint.track;
             const prizeInLakhs = (sprint.totalPrizePoolINR / 100000).toFixed(1);
             const saved = isItemSaved(`sprint:${sprint.slug}`);
+            const localState = sprintStates[sprint.slug];
+            const isRegistered = Boolean(localState?.registered);
+            const checkinsCount = localState?.checkins?.length ?? 0;
             const statusTone =
               sprint.currentStatus === 'active'
                 ? 'success'
@@ -170,6 +222,12 @@ export function SprintCatalog({ initialSprints }: SprintCatalogProps) {
                         >
                           {sprint.currentStatus}
                         </Badge>
+                        {isRegistered && (
+                          <Badge tone="accent" variant="solid">
+                            <CheckCircle2 className="size-3" aria-hidden="true" />
+                            <span>Joined</span>
+                          </Badge>
+                        )}
                       </div>
 
                       <button
@@ -236,12 +294,15 @@ export function SprintCatalog({ initialSprints }: SprintCatalogProps) {
                   <div className="pt-3 border-t border-hairline flex items-center justify-between gap-2 text-body-xs">
                     <span className="text-fg-subtle truncate">
                       by <strong className="font-medium text-fg">{sprint.sponsor.name}</strong>
+                      {checkinsCount > 0 ? ` · ${checkinsCount} check-ins` : ''}
                     </span>
                     <Link
                       href={`/sprints/${sprint.slug}`}
                       className="shrink-0 inline-flex items-center gap-1.5 font-display font-semibold text-accent-fg hover:underline tabular-nums"
                     >
-                      <span>{sprint.registeredTeamsCount}/{sprint.maxTeams} Squads</span>
+                      <span>
+                        {sprint.registeredTeamsCount + (localState?.registeredCountDelta ?? 0)}/{sprint.maxTeams} Squads
+                      </span>
                       <span aria-hidden="true">→</span>
                     </Link>
                   </div>

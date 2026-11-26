@@ -2,12 +2,21 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
+export interface PersistedReply {
+  id: string;
+  authorName: string;
+  authorHandle: string;
+  body: string;
+  timeAgo: string;
+}
+
 interface SocialCommunityContextValue {
   followingHandles: string[];
   bookmarkedPostIds: string[];
   repostedPostIds: string[];
   starredProjectSlugs: string[];
   savedItemIds: string[];
+  postRepliesById: Record<string, PersistedReply[]>;
   isFollowing: (handle: string) => boolean;
   toggleFollow: (handle: string) => void;
   isBookmarked: (postId: string) => boolean;
@@ -18,6 +27,7 @@ interface SocialCommunityContextValue {
   toggleStarProject: (slug: string) => void;
   isItemSaved: (itemId: string) => boolean;
   toggleSaveItem: (itemId: string) => void;
+  addPostReply: (postId: string, body: string) => void;
 }
 
 const DEFAULT_FOLLOWING = ['meera-iyer', 'zoya-khan'];
@@ -31,6 +41,7 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
   const [repostedPostIds, setRepostedPostIds] = useState<string[]>([]);
   const [starredProjectSlugs, setStarredProjectSlugs] = useState<string[]>(DEFAULT_STARRED_PROJECTS);
   const [savedItemIds, setSavedItemIds] = useState<string[]>([]);
+  const [postRepliesById, setPostRepliesById] = useState<Record<string, PersistedReply[]>>({});
 
   useEffect(() => {
     try {
@@ -58,6 +69,11 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
       if (savedItems) {
         const parsed = JSON.parse(savedItems);
         if (Array.isArray(parsed)) setSavedItemIds(parsed);
+      }
+      const savedReplies = localStorage.getItem('hackerland_post_replies');
+      if (savedReplies) {
+        const parsed = JSON.parse(savedReplies);
+        if (parsed && typeof parsed === 'object') setPostRepliesById(parsed);
       }
     } catch {
       // Ignore storage errors in sandboxed contexts
@@ -114,6 +130,28 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const addPostReply = (postId: string, body: string) => {
+    const trimmed = body.trim();
+    if (!trimmed) return;
+    setPostRepliesById((prev) => {
+      const reply: PersistedReply = {
+        id: `${postId}-reply-${Date.now()}`,
+        authorName: 'You (Builder)',
+        authorHandle: 'community-builder',
+        body: trimmed,
+        timeAgo: 'Just now',
+      };
+      const next = {
+        ...prev,
+        [postId]: [...(prev[postId] ?? []), reply],
+      };
+      try {
+        localStorage.setItem('hackerland_post_replies', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
   return (
     <SocialCommunityContext.Provider
       value={{
@@ -122,6 +160,7 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
         repostedPostIds,
         starredProjectSlugs,
         savedItemIds,
+        postRepliesById,
         isFollowing: (handle) => followingHandles.includes(handle),
         toggleFollow,
         isBookmarked: (postId) => bookmarkedPostIds.includes(postId),
@@ -132,6 +171,7 @@ export function SocialCommunityProvider({ children }: { children: ReactNode }) {
         toggleStarProject,
         isItemSaved: (itemId) => savedItemIds.includes(itemId),
         toggleSaveItem,
+        addPostReply,
       }}
     >
       {children}
@@ -149,6 +189,7 @@ export function useSocialCommunity(): SocialCommunityContextValue {
   const [localReposts, setLocalReposts] = useState<string[]>([]);
   const [localStars, setLocalStars] = useState<string[]>(DEFAULT_STARRED_PROJECTS);
   const [localSavedItems, setLocalSavedItems] = useState<string[]>([]);
+  const [localReplies, setLocalReplies] = useState<Record<string, PersistedReply[]>>({});
 
   if (ctx) return ctx;
 
@@ -158,6 +199,7 @@ export function useSocialCommunity(): SocialCommunityContextValue {
     repostedPostIds: localReposts,
     starredProjectSlugs: localStars,
     savedItemIds: localSavedItems,
+    postRepliesById: localReplies,
     isFollowing: (handle) => localFollowing.includes(handle),
     toggleFollow: (handle) =>
       setLocalFollowing((prev) =>
@@ -183,5 +225,22 @@ export function useSocialCommunity(): SocialCommunityContextValue {
       setLocalSavedItems((prev) =>
         prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId],
       ),
+    addPostReply: (postId, body) => {
+      const trimmed = body.trim();
+      if (!trimmed) return;
+      setLocalReplies((prev) => ({
+        ...prev,
+        [postId]: [
+          ...(prev[postId] ?? []),
+          {
+            id: `${postId}-reply-${Date.now()}`,
+            authorName: 'You (Builder)',
+            authorHandle: 'community-builder',
+            body: trimmed,
+            timeAgo: 'Just now',
+          },
+        ],
+      }));
+    },
   };
 }

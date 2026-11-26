@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Briefcase,
@@ -18,6 +18,7 @@ import {
 import type { HardwareJobPosting } from '@hackerland/core';
 import { formatSalaryRangeInr } from '@hackerland/core';
 import { Avatar, Badge, Button, Card, CardBody, Input, Panel, Textarea } from '@hackerland/ui';
+import type { JobApplicationRecord } from '@/lib/data/community-workflows-store';
 
 interface JobDetailViewProps {
   job: HardwareJobPosting;
@@ -28,7 +29,7 @@ export function JobDetailView({ job }: JobDetailViewProps) {
   const [applicantEmail, setApplicantEmail] = useState('');
   const [proofUrl, setProofUrl] = useState('');
   const [hardwareBugStory, setHardwareBugStory] = useState('');
-  const [applied, setApplied] = useState(false);
+  const [submittedRecord, setSubmittedRecord] = useState<JobApplicationRecord | null>(null);
 
   const salaryText = formatSalaryRangeInr(
     job.salaryInr.minLakhs,
@@ -36,9 +37,81 @@ export function JobDetailView({ job }: JobDetailViewProps) {
     job.salaryInr.equityPercent
   );
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('hackerland_job_applications');
+      if (saved) {
+        const parsed = JSON.parse(saved) as Record<string, JobApplicationRecord>;
+        if (parsed[job.slug]) setSubmittedRecord(parsed[job.slug]!);
+      }
+    } catch {}
+
+    let active = true;
+    fetch(`/api/jobs/${job.slug}/apply`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data?.application) return;
+        setSubmittedRecord(data.application as JobApplicationRecord);
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, [job.slug]);
+
   const handleSubmitApplication = (e: React.FormEvent) => {
     e.preventDefault();
-    setApplied(true);
+
+    const record: JobApplicationRecord = {
+      id: `app-${Date.now()}`,
+      jobSlug: job.slug,
+      applicantName: applicantName.trim() || 'Candidate Maker',
+      applicantEmail: applicantEmail.trim() || 'builder@hackerland.in',
+      proofUrl: proofUrl.trim(),
+      hardwareBugStory: hardwareBugStory.trim(),
+      status: 'routed_to_lead',
+      submittedAt: new Date().toISOString(),
+    };
+
+    try {
+      const prevRaw = localStorage.getItem('hackerland_job_applications');
+      const prevMap = prevRaw ? (JSON.parse(prevRaw) as Record<string, JobApplicationRecord>) : {};
+      prevMap[job.slug] = record;
+      localStorage.setItem('hackerland_job_applications', JSON.stringify(prevMap));
+    } catch {}
+
+    setSubmittedRecord(record);
+
+    void (async () => {
+      try {
+        const res = await fetch(`/api/jobs/${job.slug}/apply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            applicantName: record.applicantName,
+            applicantEmail: record.applicantEmail,
+            proofUrl: record.proofUrl,
+            hardwareBugStory: record.hardwareBugStory,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.application) {
+            const persisted = data.application as JobApplicationRecord;
+            setSubmittedRecord(persisted);
+            try {
+              const prevRaw = localStorage.getItem('hackerland_job_applications');
+              const prevMap = prevRaw
+                ? (JSON.parse(prevRaw) as Record<string, JobApplicationRecord>)
+                : {};
+              prevMap[job.slug] = persisted;
+              localStorage.setItem('hackerland_job_applications', JSON.stringify(prevMap));
+            } catch {}
+          }
+        }
+      } catch {}
+    })();
   };
 
   return (
@@ -219,19 +292,47 @@ export function JobDetailView({ job }: JobDetailViewProps) {
         action={<Badge tone="accent" variant="outline">Direct to Engineering Lead</Badge>}
         className="border-accent/25"
       >
-        {applied ? (
+        {submittedRecord ? (
           <div
             role="status"
-            className="rounded-xl border border-success/40 bg-success/10 p-5 text-center space-y-2"
+            className="rounded-xl border border-success/40 bg-success/10 p-5 space-y-3"
           >
-            <CheckCircle2 className="size-8 text-success-fg mx-auto" aria-hidden="true" />
-            <h3 className="font-display text-headline-sm font-bold text-fg">
-              Application Received!
-            </h3>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="size-6 text-success-fg" aria-hidden="true" />
+                <h3 className="font-display text-headline-sm font-bold text-fg">
+                  Application Received!
+                </h3>
+              </div>
+              <Badge tone="success" variant="solid">Routed to Lead</Badge>
+            </div>
             <p className="text-body-sm text-fg-muted leading-relaxed">
-              Your proof-of-work submission has been routed directly to the engineering hiring team at{' '}
+              Your proof-of-work submission has been saved and routed directly to the engineering hiring team at{' '}
               <strong className="text-fg">{job.company.name}</strong>.
             </p>
+            {submittedRecord.proofUrl && (
+              <div className="rounded-xl bg-surface-1 border border-hairline p-3 text-body-xs space-y-1">
+                <div className="font-display font-semibold text-fg">
+                  Applicant: {submittedRecord.applicantName} ({submittedRecord.applicantEmail})
+                </div>
+                <a
+                  href={submittedRecord.proofUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 font-mono text-accent-fg hover:underline break-all"
+                >
+                  <span>{submittedRecord.proofUrl}</span>
+                  <ExternalLink className="size-3 shrink-0" />
+                </a>
+              </div>
+            )}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setSubmittedRecord(null)}
+            >
+              Update Proof-of-Work Submission
+            </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmitApplication} className="space-y-4">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Rocket,
@@ -19,6 +19,8 @@ import {
   Lock,
   Sparkles,
   Bookmark,
+  Copy,
+  Check,
 } from 'lucide-react';
 import type { CampaignCategory } from '@hackerland/core';
 import {
@@ -30,6 +32,7 @@ import {
 import { Avatar, Badge, Button, Card, CardBody, FilterChip, Panel, ProgressBar, cn } from '@hackerland/ui';
 import { INDIAN_GOVT_GRANTS, CAMPAIGN_REGISTRY } from '@/lib/data/launchpad-data';
 import { useSocialCommunity } from '@/components/social/social-context';
+import type { LaunchpadCampaignState } from '@/lib/data/community-workflows-store';
 
 const CATEGORY_TABS: { label: string; value: CampaignCategory | 'all'; icon: typeof Rocket }[] = [
   { label: 'All Projects', value: 'all', icon: Rocket },
@@ -55,13 +58,16 @@ const TRL_DESCRIPTIONS: Record<number, string> = {
 export function LaunchpadStudio() {
   const [activeTab, setActiveTab] = useState<'campaigns' | 'grant_matcher' | 'escrow_simulator'>('campaigns');
   const [selectedCategory, setSelectedCategory] = useState<CampaignCategory | 'all'>('all');
+  const [viewMode, setViewMode] = useState<'all' | 'saved' | 'backed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [campaignStates, setCampaignStates] = useState<Record<string, LaunchpadCampaignState>>({});
 
   // Grant Matcher State
   const [matcherCategory, setMatcherCategory] = useState<CampaignCategory>('defence_aerospace');
   const [matcherTrl, setMatcherTrl] = useState<number>(4);
   const [matcherDpiit, setMatcherDpiit] = useState<boolean>(true);
   const [matcherOwnership, setMatcherOwnership] = useState<number>(100);
+  const [copiedGrantBrief, setCopiedGrantBrief] = useState(false);
 
   // Escrow Simulator State
   const [simGoalInr, setSimGoalInr] = useState<number>(1000000);
@@ -71,6 +77,22 @@ export function LaunchpadStudio() {
 
   const { isItemSaved, toggleSaveItem } = useSocialCommunity();
 
+  useEffect(() => {
+    const next: Record<string, LaunchpadCampaignState> = {};
+    for (const c of CAMPAIGN_REGISTRY) {
+      try {
+        const raw = localStorage.getItem(`hackerland_launchpad_${c.slug}`);
+        if (raw) next[c.slug] = JSON.parse(raw) as LaunchpadCampaignState;
+      } catch {}
+    }
+    setCampaignStates(next);
+  }, []);
+
+  const savedCount = CAMPAIGN_REGISTRY.filter((c) => isItemSaved(`campaign:${c.slug}`)).length;
+  const backedCount = CAMPAIGN_REGISTRY.filter(
+    (c) => (campaignStates[c.slug]?.backedTierIds?.length ?? 0) > 0,
+  ).length;
+
   const filteredCampaigns = useMemo(() => {
     return CAMPAIGN_REGISTRY.filter((c) => {
       const matchesCategory = selectedCategory === 'all' || c.category === selectedCategory;
@@ -79,9 +101,15 @@ export function LaunchpadStudio() {
         c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.creator.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+      const matchesView =
+        viewMode === 'saved'
+          ? isItemSaved(`campaign:${c.slug}`)
+          : viewMode === 'backed'
+          ? (campaignStates[c.slug]?.backedTierIds?.length ?? 0) > 0
+          : true;
+      return matchesCategory && matchesSearch && matchesView;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, viewMode, isItemSaved, campaignStates]);
 
   const grantMatches = useMemo(() => {
     return matchGrantsForProject(
@@ -102,6 +130,24 @@ export function LaunchpadStudio() {
   const simPayout = useMemo(() => {
     return calculateMilestonePayout(simGoalInr, simTranchePercent);
   }, [simGoalInr, simTranchePercent]);
+
+  const handleCopyGrantBrief = async () => {
+    const eligible = grantMatches.filter((g) => g.isEligible);
+    const lines = [
+      `# Hackerland Non-Dilutive Grant Eligibility Brief`,
+      `Domain: ${matcherCategory} | TRL ${matcherTrl} | DPIIT: ${matcherDpiit ? 'Yes' : 'Pre-DPIIT'} | Indian Equity: ${matcherOwnership}%`,
+      '',
+      `## Eligible Schemes (${eligible.length})`,
+      ...eligible.map(
+        (m) => `- **${m.grant.name}** (${m.grant.agency}) — Up to ₹${(m.grant.maxFundingInr / 100000).toFixed(0)}L · ${m.grant.portalUrl}`,
+      ),
+    ];
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'));
+    } catch {}
+    setCopiedGrantBrief(true);
+    setTimeout(() => setCopiedGrantBrief(false), 2500);
+  };
 
   return (
     <div className="space-y-6 min-w-0">
@@ -201,33 +247,62 @@ export function LaunchpadStudio() {
       {/* VIEW 1: ACTIVE CAMPAIGNS DIRECTORY */}
       {activeTab === 'campaigns' && (
         <div className="space-y-5">
-          {/* Category Chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            {CATEGORY_TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isSelected = selectedCategory === tab.value;
-              return (
-                <FilterChip
-                  key={tab.value}
-                  selected={isSelected}
-                  tone="accent"
-                  onClick={() => setSelectedCategory(tab.value)}
+          {/* View Mode + Category Chips */}
+          <div className="space-y-2.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {(['all', 'saved', 'backed'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setViewMode(mode)}
+                  className={cn(
+                    'rounded-full px-3.5 py-1 text-body-xs font-display font-semibold border transition-colors',
+                    viewMode === mode
+                      ? 'border-accent bg-accent-soft text-accent-fg'
+                      : 'border-hairline bg-surface-1 text-fg-muted hover:text-fg',
+                  )}
                 >
-                  <Icon className="size-3.5" aria-hidden="true" />
-                  <span>{tab.label}</span>
-                </FilterChip>
-              );
-            })}
+                  {mode === 'all'
+                    ? `All (${CAMPAIGN_REGISTRY.length})`
+                    : mode === 'saved'
+                    ? `Saved (${savedCount})`
+                    : `Backed (${backedCount})`}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {CATEGORY_TABS.map((tab) => {
+                const Icon = tab.icon;
+                const isSelected = selectedCategory === tab.value;
+                return (
+                  <FilterChip
+                    key={tab.value}
+                    selected={isSelected}
+                    tone="accent"
+                    onClick={() => setSelectedCategory(tab.value)}
+                  >
+                    <Icon className="size-3.5" aria-hidden="true" />
+                    <span>{tab.label}</span>
+                  </FilterChip>
+                );
+              })}
+            </div>
           </div>
 
           {/* Campaign Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
             {filteredCampaigns.map((camp) => {
-              const { percent } = calculateCampaignProgress(camp.raisedInr, camp.fundingGoalInr);
+              const liveState = campaignStates[camp.slug];
+              const raised = liveState?.raisedInr ?? camp.raisedInr;
+              const backers = liveState?.backersCount ?? camp.backersCount;
+              const milestones = liveState?.milestones ?? camp.milestones;
+              const { percent } = calculateCampaignProgress(raised, camp.fundingGoalInr);
               const activeMilestone =
-                camp.milestones.find((m) => m.status === 'submitted_for_review' || m.status === 'pending') ||
-                camp.milestones[camp.milestones.length - 1];
+                milestones.find((m) => m.status === 'submitted_for_review' || m.status === 'pending') ||
+                milestones[milestones.length - 1];
               const saved = isItemSaved(`campaign:${camp.slug}`);
+              const hasBacked = (liveState?.backedTierIds?.length ?? 0) > 0;
 
               return (
                 <Card
@@ -236,7 +311,6 @@ export function LaunchpadStudio() {
                 >
                   <CardBody className="p-5 flex flex-col justify-between h-full space-y-4">
                     <div className="space-y-3.5">
-                      {/* Header */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                           <Badge tone="accent" variant="outline">
@@ -245,6 +319,11 @@ export function LaunchpadStudio() {
                           <Badge tone="neutral" variant="outline">
                             TRL {camp.trlLevel}
                           </Badge>
+                          {hasBacked && (
+                            <Badge tone="success" variant="solid">
+                              Backed
+                            </Badge>
+                          )}
                         </div>
                         <button
                           type="button"
@@ -262,7 +341,6 @@ export function LaunchpadStudio() {
                         </button>
                       </div>
 
-                      {/* Title & Tagline */}
                       <div>
                         <Link
                           href={`/launchpad/${camp.slug}`}
@@ -275,7 +353,6 @@ export function LaunchpadStudio() {
                         </p>
                       </div>
 
-                      {/* Creator Info */}
                       <div className="flex flex-wrap items-center gap-2 text-body-xs text-fg-muted">
                         <Avatar name={camp.creator.name} size="sm" />
                         <span className="font-display font-semibold text-fg">{camp.creator.name}</span>
@@ -288,11 +365,10 @@ export function LaunchpadStudio() {
                         )}
                       </div>
 
-                      {/* Funding Progress Bar */}
                       <div className="space-y-2 pt-3 border-t border-hairline">
                         <div className="flex justify-between items-baseline text-body-xs">
                           <span className="font-display font-bold text-fg text-body-md tabular-nums">
-                            ₹{(camp.raisedInr / 100000).toFixed(2)} Lakhs
+                            ₹{(raised / 100000).toFixed(2)} Lakhs
                           </span>
                           <span className="text-fg-subtle">
                             {percent}% of ₹{(camp.fundingGoalInr / 100000).toFixed(1)}L
@@ -305,12 +381,11 @@ export function LaunchpadStudio() {
                           label={`Funding progress for ${camp.title}`}
                         />
                         <div className="flex justify-between text-[11px] text-fg-subtle font-mono">
-                          <span>{camp.backersCount} Backers</span>
+                          <span>{backers} Backers</span>
                           <span>{camp.daysLeft} Days Left</span>
                         </div>
                       </div>
 
-                      {/* Milestone State Box */}
                       {activeMilestone && (
                         <div className="rounded-xl border border-hairline bg-sunken p-3 text-body-xs space-y-1">
                           <div className="flex items-center justify-between gap-2">
@@ -343,7 +418,6 @@ export function LaunchpadStudio() {
                       )}
                     </div>
 
-                    {/* Action Footer */}
                     <div className="pt-3 border-t border-hairline flex items-center justify-between gap-2">
                       <span className="text-body-xs text-fg-subtle">
                         {camp.backerTiers.length} Reward Tiers Available
@@ -369,7 +443,24 @@ export function LaunchpadStudio() {
           <Panel
             title="Project Eligibility Profile"
             icon={<Sparkles aria-hidden="true" />}
-            action={<Badge tone="accent" variant="solid">NON-DILUTIVE GRANT ENGINE</Badge>}
+            action={
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge tone="accent" variant="solid">NON-DILUTIVE GRANT ENGINE</Badge>
+                <Button variant="secondary" size="sm" onClick={handleCopyGrantBrief}>
+                  {copiedGrantBrief ? (
+                    <>
+                      <Check className="size-3.5 text-success" />
+                      <span>Copied Brief</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="size-3.5" />
+                      <span>Copy Brief</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            }
           >
             <div className="space-y-5">
               <p className="text-body-sm text-fg-muted">
@@ -594,7 +685,6 @@ export function LaunchpadStudio() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-hairline">
-              {/* Interactive Inputs */}
               <div className="space-y-5">
                 <h3 className="font-display text-body-md font-bold text-fg uppercase tracking-wider">
                   Simulate Milestone Quorum
@@ -660,7 +750,6 @@ export function LaunchpadStudio() {
                 </div>
               </div>
 
-              {/* Output / Result Card */}
               <div
                 className={cn(
                   'rounded-2xl border p-5 flex flex-col justify-between space-y-5',

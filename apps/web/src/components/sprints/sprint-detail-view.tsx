@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Award, Check, ChevronLeft, Clock, ShieldCheck, Users, Wrench } from 'lucide-react';
+import { Award, Check, ChevronLeft, Clock, ExternalLink, ShieldCheck, Users, Wrench } from 'lucide-react';
 import type { SprintEntry } from '@hackerland/core';
 import { calculatePrizeDistribution } from '@hackerland/core';
-import { Avatar, Badge, Button, Card, CardBody, Panel, cn } from '@hackerland/ui';
+import { Avatar, Badge, Button, Card, CardBody, Panel } from '@hackerland/ui';
+import type { SprintCheckinRecord, SprintStateRecord } from '@/lib/data/community-workflows-store';
 import { SprintCountdownTimer } from './sprint-countdown-timer';
 import { SprintSubmissionDrawer } from './sprint-submission-drawer';
 
@@ -16,8 +17,76 @@ interface SprintDetailViewProps {
 export function SprintDetailView({ sprint }: SprintDetailViewProps) {
   const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [checkins, setCheckins] = useState<SprintCheckinRecord[]>([]);
 
+  const storageKey = `hackerland_sprint_${sprint.slug}`;
   const prizes = calculatePrizeDistribution(sprint.totalPrizePoolINR);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as SprintStateRecord;
+        setIsRegistered(Boolean(parsed.registered));
+        if (Array.isArray(parsed.checkins)) setCheckins(parsed.checkins);
+      }
+    } catch {}
+
+    let active = true;
+    fetch(`/api/sprints/${sprint.slug}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data?.state) return;
+        const srv = data.state as SprintStateRecord;
+        setIsRegistered((prev) => prev || srv.registered);
+        if (Array.isArray(srv.checkins) && srv.checkins.length > 0) {
+          setCheckins((prev) => {
+            const seen = new Set(prev.map((c) => c.ledgerHash));
+            const merged = [...prev];
+            for (const c of srv.checkins) {
+              if (!seen.has(c.ledgerHash)) merged.push(c);
+            }
+            return merged;
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, [sprint.slug, storageKey]);
+
+  const persistLocal = (nextRegistered: boolean, nextCheckins: SprintCheckinRecord[]) => {
+    const payload: SprintStateRecord = {
+      registered: nextRegistered,
+      registeredCountDelta: nextRegistered ? 1 : 0,
+      checkins: nextCheckins,
+    };
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(payload));
+    } catch {}
+  };
+
+  const handleToggleRegister = async () => {
+    const next = !isRegistered;
+    setIsRegistered(next);
+    persistLocal(next, checkins);
+    try {
+      await fetch(`/api/sprints/${sprint.slug}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'register' }),
+      });
+    } catch {}
+  };
+
+  const handleCheckinSuccess = (checkin: SprintCheckinRecord) => {
+    const nextCheckins = [checkin, ...checkins];
+    setCheckins(nextCheckins);
+    setIsRegistered(true);
+    persistLocal(true, nextCheckins);
+  };
 
   return (
     <div className="space-y-6 min-w-0">
@@ -80,7 +149,7 @@ export function SprintDetailView({ sprint }: SprintDetailViewProps) {
                 </span>
                 <span className="inline-flex items-center gap-1.5 font-display text-body-md font-semibold text-fg tabular-nums">
                   <Users className="size-4 text-accent" aria-hidden="true" />
-                  <span>{sprint.registeredTeamsCount} / {sprint.maxTeams} Teams</span>
+                  <span>{sprint.registeredTeamsCount + (isRegistered ? 1 : 0)} / {sprint.maxTeams} Teams</span>
                 </span>
               </div>
             </div>
@@ -92,7 +161,7 @@ export function SprintDetailView({ sprint }: SprintDetailViewProps) {
               <Button
                 variant={isRegistered ? 'soft' : 'secondary'}
                 size="md"
-                onClick={() => setIsRegistered(!isRegistered)}
+                onClick={handleToggleRegister}
               >
                 {isRegistered ? (
                   <>
@@ -110,6 +179,53 @@ export function SprintDetailView({ sprint }: SprintDetailViewProps) {
 
       {/* Real-time Sprint Timeline Tracker */}
       <SprintCountdownTimer sprint={sprint} />
+
+      {/* Live Milestone Check-in Ledger */}
+      {checkins.length > 0 && (
+        <Panel
+          title={`Live Squad Check-in Ledger (${checkins.length})`}
+          action={<Badge tone="success">Verified Anchors</Badge>}
+        >
+          <div className="space-y-3">
+            {checkins.map((chk) => (
+              <div
+                key={chk.id}
+                className="rounded-xl border border-success/30 bg-success/5 p-4 space-y-2"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Badge tone="accent" variant="solid">H+{chk.milestoneHour}</Badge>
+                    <span className="font-display text-body-sm font-bold text-fg">
+                      {chk.milestoneTitle}
+                    </span>
+                  </div>
+                  <span className="font-mono text-[11px] text-success-fg font-semibold">
+                    {chk.ledgerHash}
+                  </span>
+                </div>
+                <p className="text-body-xs text-fg-muted">{chk.notes}</p>
+                <div className="flex flex-wrap items-center gap-3 text-body-xs">
+                  {chk.cadUrl && (
+                    <a href={chk.cadUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent-fg font-medium hover:underline">
+                      CAD Artifact <ExternalLink className="size-3" />
+                    </a>
+                  )}
+                  {chk.repoUrl && (
+                    <a href={chk.repoUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent-fg font-medium hover:underline">
+                      Firmware Repo <ExternalLink className="size-3" />
+                    </a>
+                  )}
+                  {chk.videoUrl && (
+                    <a href={chk.videoUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent-fg font-medium hover:underline">
+                      Demo Video <ExternalLink className="size-3" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      )}
 
       {/* Prize Distribution Breakdown */}
       <Panel
@@ -276,6 +392,7 @@ export function SprintDetailView({ sprint }: SprintDetailViewProps) {
         sprint={sprint}
         isOpen={isSubmissionOpen}
         onClose={() => setIsSubmissionOpen(false)}
+        onCheckinSuccess={handleCheckinSuccess}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   Briefcase,
@@ -16,12 +16,15 @@ import {
   ChevronRight,
   ShieldCheck,
   Bookmark,
+  CheckCircle2,
+  Download,
 } from 'lucide-react';
 import type { HardwareDomain, JobRoleType, LocationType } from '@hackerland/core';
 import { formatSalaryRangeInr, filterHardwareJobs, calculateHiringMatchScore } from '@hackerland/core';
 import { Avatar, Badge, Button, Card, CardBody, Chip, FilterChip, Input, Panel, cn } from '@hackerland/ui';
 import { HARDWARE_JOBS_REGISTRY } from '@/lib/data/jobs-data';
 import { useSocialCommunity } from '@/components/social/social-context';
+import type { JobApplicationRecord } from '@/lib/data/community-workflows-store';
 
 const DOMAIN_TABS: { label: string; value: HardwareDomain | 'all'; icon: typeof Cpu }[] = [
   { label: 'All Domains', value: 'all', icon: Briefcase },
@@ -54,23 +57,112 @@ export function JobsStudio() {
   const [selectedDomain, setSelectedDomain] = useState<HardwareDomain | 'all'>('all');
   const [selectedRoleType, setSelectedRoleType] = useState<JobRoleType | 'all'>('all');
   const [selectedLocationType, setSelectedLocationType] = useState<LocationType | 'all'>('all');
+  const [viewMode, setViewMode] = useState<'all' | 'saved' | 'applied'>('all');
+  const [sortBy, setSortBy] = useState<'featured' | 'salary' | 'match'>('featured');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Skill Matcher State
   const [userSkills, setUserSkills] = useState<string[]>(['STM32', 'FreeRTOS', 'CAN Bus', 'KiCad']);
   const [customSkillInput, setCustomSkillInput] = useState('');
   const [showSkillMatcher, setShowSkillMatcher] = useState(false);
+  const [syncedProfileNotice, setSyncedProfileNotice] = useState(false);
+  const [appliedJobs, setAppliedJobs] = useState<Record<string, JobApplicationRecord>>({});
 
   const { isItemSaved, toggleSaveItem } = useSocialCommunity();
 
+  useEffect(() => {
+    try {
+      const savedApps = localStorage.getItem('hackerland_job_applications');
+      if (savedApps) {
+        const parsed = JSON.parse(savedApps) as Record<string, JobApplicationRecord>;
+        if (parsed && typeof parsed === 'object') setAppliedJobs(parsed);
+      }
+      const cachedProfile = localStorage.getItem('hackerland_user_profile');
+      if (cachedProfile) {
+        const prof = JSON.parse(cachedProfile) as { skills?: string[] };
+        if (Array.isArray(prof.skills) && prof.skills.length > 0) {
+          setUserSkills((prev) => Array.from(new Set([...prev, ...prof.skills!])));
+        }
+      }
+    } catch {}
+
+    let active = true;
+    fetch('/api/jobs/_all/apply')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data?.applications) return;
+        setAppliedJobs((prev) => ({
+          ...(data.applications as Record<string, JobApplicationRecord>),
+          ...prev,
+        }));
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleSyncProfileSkills = async () => {
+    let imported: string[] = [];
+    try {
+      const cached = localStorage.getItem('hackerland_user_profile');
+      if (cached) {
+        const prof = JSON.parse(cached) as { skills?: string[] };
+        if (Array.isArray(prof.skills)) imported = prof.skills;
+      }
+      const res = await fetch('/api/me/profile');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data?.profile?.skills)) {
+          imported = Array.from(new Set([...imported, ...data.profile.skills]));
+        }
+      }
+    } catch {}
+    if (imported.length > 0) {
+      setUserSkills((prev) => Array.from(new Set([...prev, ...imported])));
+    }
+    setSyncedProfileNotice(true);
+    setTimeout(() => setSyncedProfileNotice(false), 2500);
+  };
+
+  const savedCount = HARDWARE_JOBS_REGISTRY.filter((j) => isItemSaved(`job:${j.slug}`)).length;
+  const appliedCount = HARDWARE_JOBS_REGISTRY.filter((j) => Boolean(appliedJobs[j.slug])).length;
+
   const filteredJobs = useMemo(() => {
-    return filterHardwareJobs(HARDWARE_JOBS_REGISTRY, {
+    const base = filterHardwareJobs(HARDWARE_JOBS_REGISTRY, {
       domain: selectedDomain,
       roleType: selectedRoleType,
       locationType: selectedLocationType,
       search: searchQuery,
+    }).filter((job) => {
+      if (viewMode === 'saved') return isItemSaved(`job:${job.slug}`);
+      if (viewMode === 'applied') return Boolean(appliedJobs[job.slug]);
+      return true;
     });
-  }, [selectedDomain, selectedRoleType, selectedLocationType, searchQuery]);
+
+    if (sortBy === 'salary') {
+      return [...base].sort((a, b) => b.salaryInr.maxLakhs - a.salaryInr.maxLakhs);
+    }
+    if (sortBy === 'match') {
+      return [...base].sort((a, b) => {
+        const mA = calculateHiringMatchScore(userSkills, a.prerequisites).matchPercent;
+        const mB = calculateHiringMatchScore(userSkills, b.prerequisites).matchPercent;
+        return mB - mA;
+      });
+    }
+    return [...base].sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
+  }, [
+    selectedDomain,
+    selectedRoleType,
+    selectedLocationType,
+    searchQuery,
+    viewMode,
+    sortBy,
+    userSkills,
+    isItemSaved,
+    appliedJobs,
+  ]);
 
   const handleToggleSkill = (skill: string) => {
     if (userSkills.includes(skill)) {
@@ -130,13 +222,25 @@ export function JobsStudio() {
         title="Proof-of-Work Skill Matcher"
         icon={<Sparkles aria-hidden="true" />}
         action={
-          <button
-            type="button"
-            onClick={() => setShowSkillMatcher(!showSkillMatcher)}
-            className="text-body-sm font-display font-semibold text-accent-fg hover:underline transition-colors"
-          >
-            {showSkillMatcher ? 'Hide Skill Matcher' : 'Match My Skills to Roles →'}
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {showSkillMatcher && (
+              <button
+                type="button"
+                onClick={handleSyncProfileSkills}
+                className="inline-flex items-center gap-1 text-body-xs font-display font-medium text-fg-muted hover:text-accent-fg transition-colors"
+              >
+                <Download className="size-3.5" aria-hidden="true" />
+                <span>{syncedProfileNotice ? 'Synced!' : 'Sync Profile Skills'}</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowSkillMatcher(!showSkillMatcher)}
+              className="text-body-sm font-display font-semibold text-accent-fg hover:underline transition-colors"
+            >
+              {showSkillMatcher ? 'Hide Skill Matcher' : 'Match My Skills to Roles →'}
+            </button>
+          </div>
         }
       >
         {showSkillMatcher ? (
@@ -183,7 +287,7 @@ export function JobsStudio() {
         ) : (
           <div className="flex flex-wrap items-center gap-1.5 text-body-xs text-fg-muted">
             <span>Matching against:</span>
-            {userSkills.slice(0, 5).map((s) => (
+            {userSkills.slice(0, 6).map((s) => (
               <Chip key={s} tone="accent">
                 {s}
               </Chip>
@@ -194,6 +298,41 @@ export function JobsStudio() {
 
       {/* Main Filter Bar */}
       <div className="rounded-2xl border border-hairline bg-surface-1 p-3.5 shadow-xs space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-hairline">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {(['all', 'saved', 'applied'] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setViewMode(mode)}
+                className={cn(
+                  'rounded-full px-3.5 py-1.5 text-body-xs font-display font-semibold transition-all',
+                  viewMode === mode
+                    ? 'bg-accent text-on-solid shadow-xs'
+                    : 'text-fg-muted hover:bg-surface-2 hover:text-fg',
+                )}
+              >
+                {mode === 'all'
+                  ? `All Roles (${HARDWARE_JOBS_REGISTRY.length})`
+                  : mode === 'saved'
+                  ? `Saved (${savedCount})`
+                  : `Applied (${appliedCount})`}
+              </button>
+            ))}
+          </div>
+
+          <select
+            aria-label="Sort hardware roles"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'featured' | 'salary' | 'match')}
+            className="h-9 rounded-full border border-line bg-sunken px-3.5 text-body-xs font-display font-semibold text-fg focus:border-accent focus:bg-surface-1 focus:outline-none"
+          >
+            <option value="featured">Sort: Featured</option>
+            <option value="match">Sort: Best Skill Match %</option>
+            <option value="salary">Sort: Highest Package</option>
+          </select>
+        </div>
+
         <div className="flex flex-wrap items-center gap-2">
           {DOMAIN_TABS.map((tab) => {
             const Icon = tab.icon;
@@ -260,134 +399,152 @@ export function JobsStudio() {
           <span>Verified DPIIT Indian Startups &amp; Research Labs</span>
         </div>
 
-        <div className="space-y-4">
-          {filteredJobs.map((job) => {
-            const salaryText = formatSalaryRangeInr(
-              job.salaryInr.minLakhs,
-              job.salaryInr.maxLakhs,
-              job.salaryInr.equityPercent
-            );
-            const match = calculateHiringMatchScore(userSkills, job.prerequisites);
-            const saved = isItemSaved(`job:${job.slug}`);
+        {filteredJobs.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-line bg-surface-1 p-10 text-center space-y-2">
+            <p className="font-display text-headline-sm font-semibold text-fg">
+              No roles match this filter yet
+            </p>
+            <Button variant="secondary" size="sm" onClick={() => setViewMode('all')}>
+              View all roles
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredJobs.map((job) => {
+              const salaryText = formatSalaryRangeInr(
+                job.salaryInr.minLakhs,
+                job.salaryInr.maxLakhs,
+                job.salaryInr.equityPercent
+              );
+              const match = calculateHiringMatchScore(userSkills, job.prerequisites);
+              const saved = isItemSaved(`job:${job.slug}`);
+              const isApplied = Boolean(appliedJobs[job.slug]);
 
-            return (
-              <Card
-                key={job.id}
-                className="group transition-all hover:border-accent/40 min-w-0 [overflow-wrap:anywhere]"
-              >
-                <CardBody className="p-5 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    {/* Left Info */}
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <Avatar name={job.company.name} size="md" className="shrink-0 mt-0.5" />
-                      <div className="space-y-2 min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <Badge tone="accent" variant="outline">
-                            {job.hardwareDomain.replace(/_/g, ' ')}
-                          </Badge>
-                          {job.featured && (
-                            <Badge tone="warning" variant="solid">
-                              FEATURED
+              return (
+                <Card
+                  key={job.id}
+                  className="group transition-all hover:border-accent/40 min-w-0 [overflow-wrap:anywhere]"
+                >
+                  <CardBody className="p-5 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      {/* Left Info */}
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <Avatar name={job.company.name} size="md" className="shrink-0 mt-0.5" />
+                        <div className="space-y-2 min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <Badge tone="accent" variant="outline">
+                              {job.hardwareDomain.replace(/_/g, ' ')}
                             </Badge>
-                          )}
-                          {job.company.verifiedDpiit && (
-                            <Badge tone="success" variant="outline">
-                              <ShieldCheck className="size-3" aria-hidden="true" />
-                              <span>DPIIT Startup India</span>
-                            </Badge>
+                            {job.featured && (
+                              <Badge tone="warning" variant="solid">
+                                FEATURED
+                              </Badge>
+                            )}
+                            {job.company.verifiedDpiit && (
+                              <Badge tone="success" variant="outline">
+                                <ShieldCheck className="size-3" aria-hidden="true" />
+                                <span>DPIIT Startup India</span>
+                              </Badge>
+                            )}
+                            {isApplied && (
+                              <Badge tone="success" variant="solid">
+                                <CheckCircle2 className="size-3" aria-hidden="true" />
+                                <span>Applied</span>
+                              </Badge>
+                            )}
+                          </div>
+
+                          <h2 className="font-display text-headline-sm font-bold text-fg group-hover:text-accent-fg transition-colors">
+                            <Link href={`/jobs/${job.slug}`}>{job.title}</Link>
+                          </h2>
+
+                          <div className="flex flex-wrap items-center gap-2.5 text-body-xs text-fg-muted">
+                            <span className="font-display font-semibold text-fg">{job.company.name}</span>
+                            <span>•</span>
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="size-3.5 text-fg-subtle" aria-hidden="true" />
+                              <span>{job.workLocation}</span>
+                            </span>
+                            <span>•</span>
+                            <span className="font-mono text-fg-subtle">{job.company.stage}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Compensation + Save */}
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0">
+                        <div className="text-left sm:text-right">
+                          <span className="font-display text-headline-sm font-bold text-earn-fg tabular-nums block">
+                            {salaryText}
+                          </span>
+                          {job.fellowshipGrantStipendInr && (
+                            <span className="text-[11px] font-mono text-fg-subtle block">
+                              Stipend: ₹{job.fellowshipGrantStipendInr.toLocaleString('en-IN')}/mo
+                            </span>
                           )}
                         </div>
 
-                        <h2 className="font-display text-headline-sm font-bold text-fg group-hover:text-accent-fg transition-colors">
-                          <Link href={`/jobs/${job.slug}`}>{job.title}</Link>
-                        </h2>
-
-                        <div className="flex flex-wrap items-center gap-2.5 text-body-xs text-fg-muted">
-                          <span className="font-display font-semibold text-fg">{job.company.name}</span>
-                          <span>•</span>
-                          <span className="inline-flex items-center gap-1">
-                            <MapPin className="size-3.5 text-fg-subtle" aria-hidden="true" />
-                            <span>{job.workLocation}</span>
-                          </span>
-                          <span>•</span>
-                          <span className="font-mono text-fg-subtle">{job.company.stage}</span>
+                        <div className="flex items-center gap-2">
+                          {(showSkillMatcher || sortBy === 'match') && (
+                            <Badge tone="accent" variant="solid">
+                              {match.matchPercent}% Skill Match
+                            </Badge>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => toggleSaveItem(`job:${job.slug}`)}
+                            aria-label={saved ? `Unsave ${job.title}` : `Save ${job.title}`}
+                            aria-pressed={saved}
+                            className={cn(
+                              'flex size-8 items-center justify-center rounded-full border transition-colors',
+                              saved
+                                ? 'border-accent/40 bg-accent-soft text-accent-fg'
+                                : 'border-hairline bg-surface-2/60 text-fg-subtle hover:border-accent/30 hover:text-accent-fg',
+                            )}
+                          >
+                            <Bookmark className={cn('size-3.5', saved && 'fill-current')} aria-hidden="true" />
+                          </button>
                         </div>
                       </div>
                     </div>
 
-                    {/* Right Compensation + Save */}
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0">
-                      <div className="text-left sm:text-right">
-                        <span className="font-display text-headline-sm font-bold text-earn-fg tabular-nums block">
-                          {salaryText}
-                        </span>
-                        {job.fellowshipGrantStipendInr && (
-                          <span className="text-[11px] font-mono text-fg-subtle block">
-                            Stipend: ₹{job.fellowshipGrantStipendInr.toLocaleString('en-IN')}/mo
+                    {/* Lab Equipment & Test Benches */}
+                    <div className="pt-3 border-t border-hairline space-y-1.5">
+                      <span className="font-display text-[11px] text-fg-subtle uppercase tracking-wider block">
+                        Physical Lab Benches &amp; Test Equipment
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {job.hardwareBenchesUsed.map((bench, bIdx) => (
+                          <span
+                            key={bIdx}
+                            className="rounded-lg border border-hairline bg-sunken px-2.5 py-1 text-[11px] font-mono text-fg-muted"
+                          >
+                            {bench}
                           </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {showSkillMatcher && (
-                          <Badge tone="accent" variant="solid">
-                            {match.matchPercent}% Skill Match
-                          </Badge>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => toggleSaveItem(`job:${job.slug}`)}
-                          aria-label={saved ? `Unsave ${job.title}` : `Save ${job.title}`}
-                          aria-pressed={saved}
-                          className={cn(
-                            'flex size-8 items-center justify-center rounded-full border transition-colors',
-                            saved
-                              ? 'border-accent/40 bg-accent-soft text-accent-fg'
-                              : 'border-hairline bg-surface-2/60 text-fg-subtle hover:border-accent/30 hover:text-accent-fg',
-                          )}
-                        >
-                          <Bookmark className={cn('size-3.5', saved && 'fill-current')} aria-hidden="true" />
-                        </button>
+                        ))}
                       </div>
                     </div>
-                  </div>
 
-                  {/* Lab Equipment & Test Benches */}
-                  <div className="pt-3 border-t border-hairline space-y-1.5">
-                    <span className="font-display text-[11px] text-fg-subtle uppercase tracking-wider block">
-                      Physical Lab Benches &amp; Test Equipment
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {job.hardwareBenchesUsed.map((bench, bIdx) => (
-                        <span
-                          key={bIdx}
-                          className="rounded-lg border border-hairline bg-sunken px-2.5 py-1 text-[11px] font-mono text-fg-muted"
-                        >
-                          {bench}
-                        </span>
-                      ))}
+                    {/* Proof of Work Checklist & Action CTA */}
+                    <div className="pt-3 border-t border-hairline flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-body-xs">
+                      <div className="flex items-start sm:items-center gap-2 text-fg-muted min-w-0">
+                        <span className="text-accent-fg font-display font-bold shrink-0">Proof-of-Work:</span>
+                        <span className="truncate">{job.proofOfWorkRequirements[0]}</span>
+                      </div>
+
+                      <Button asChild variant="soft" size="sm" className="shrink-0 self-start sm:self-auto">
+                        <Link href={`/jobs/${job.slug}`}>
+                          <span>{isApplied ? 'View Application' : 'View Bench Specs & Apply'}</span>
+                          <ChevronRight className="size-3.5" aria-hidden="true" />
+                        </Link>
+                      </Button>
                     </div>
-                  </div>
-
-                  {/* Proof of Work Checklist & Action CTA */}
-                  <div className="pt-3 border-t border-hairline flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-body-xs">
-                    <div className="flex items-start sm:items-center gap-2 text-fg-muted min-w-0">
-                      <span className="text-accent-fg font-display font-bold shrink-0">Proof-of-Work:</span>
-                      <span className="truncate">{job.proofOfWorkRequirements[0]}</span>
-                    </div>
-
-                    <Button asChild variant="soft" size="sm" className="shrink-0 self-start sm:self-auto">
-                      <Link href={`/jobs/${job.slug}`}>
-                        <span>View Bench Specs &amp; Apply</span>
-                        <ChevronRight className="size-3.5" aria-hidden="true" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
-            );
-          })}
-        </div>
+                  </CardBody>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

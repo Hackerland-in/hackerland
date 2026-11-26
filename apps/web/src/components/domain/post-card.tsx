@@ -99,13 +99,24 @@ function getInitialReplies(post: FeedPost): InlineReply[] {
 }
 
 export function PostCard({ post, className, onTagClick }: PostCardProps) {
-  const { isFollowing, toggleFollow, isBookmarked, toggleBookmark, isReposted, toggleRepost } =
-    useSocialCommunity();
+  const {
+    isFollowing,
+    toggleFollow,
+    isBookmarked,
+    toggleBookmark,
+    isReposted,
+    toggleRepost,
+    postRepliesById,
+    addPostReply,
+  } = useSocialCommunity();
 
   const [showComments, setShowComments] = useState(false);
-  const [replies, setReplies] = useState<InlineReply[]>(() => getInitialReplies(post));
   const [replyText, setReplyText] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
+
+  const initialReplies = getInitialReplies(post);
+  const persistedReplies = postRepliesById[post.id] ?? [];
+  const replies = [...initialReplies, ...persistedReplies];
 
   const projectSummary = post.project
     ? ALL_PROJECT_SUMMARIES.find((p) => p.slug === post.project?.slug)
@@ -116,23 +127,14 @@ export function PostCard({ post, className, onTagClick }: PostCardProps) {
   const bookmarked = isBookmarked(post.id);
   const reposted = isReposted(post.id);
 
-  const displayedCommentsCount = post.comments + (replies.length - getInitialReplies(post).length);
+  const displayedCommentsCount = post.comments + persistedReplies.length;
   const displayedRepostCount = (reposted ? 1 : 0) + Math.max(1, Math.floor(post.reactions / 6));
 
   const handleReplySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = replyText.trim();
     if (!trimmed) return;
-    setReplies((prev) => [
-      ...prev,
-      {
-        id: `${post.id}-reply-${Date.now()}`,
-        authorName: 'You (Builder)',
-        authorHandle: 'community-builder',
-        body: trimmed,
-        timeAgo: 'Just now',
-      },
-    ]);
+    addPostReply(post.id, trimmed);
     setReplyText('');
   };
 
