@@ -18,17 +18,17 @@ export function StatTile({ label, value, hint, tone, icon, className, children }
   return (
     <div
       className={cn(
-        'flex min-w-0 flex-col gap-2 rounded-lg border border-hairline bg-surface-1 p-4',
+        'flex min-w-0 flex-col gap-1.5 rounded-2xl border border-hairline bg-surface-1 p-4 shadow-xs',
         className,
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="font-display text-label-sm uppercase text-fg-subtle">{label}</span>
+        <span className="font-display text-label-sm text-fg-subtle">{label}</span>
         {icon ? <span className="text-fg-subtle [&_svg]:size-4">{icon}</span> : null}
       </div>
       <div
         className={cn(
-          'font-display text-headline-lg tabular-nums break-words',
+          'font-display text-headline-lg font-bold tabular-nums break-words',
           tone ? toneText[tone] : 'text-fg',
         )}
       >

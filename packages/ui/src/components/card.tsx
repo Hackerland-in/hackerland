@@ -16,7 +16,7 @@ const accentBar: Record<CardAccent, string> = {
 };
 
 export type CardProps = ComponentProps<'div'> & {
-  /** Shows a 2px top bar in this tone on hover / focus-within. */
+  /** Shows a subtle top highlight bar in this tone on hover / focus-within. */
   accent?: CardAccent;
   /** Hover elevation for clickable cards. */
   interactive?: boolean;
@@ -29,11 +29,11 @@ export function Card({ accent, interactive = false, asChild = false, className, 
     <Component
       data-accent={accent}
       className={cn(
-        'relative min-w-0 overflow-hidden rounded-lg border border-hairline bg-surface-1',
+        'relative min-w-0 overflow-hidden rounded-2xl border border-hairline bg-surface-1 shadow-xs',
         interactive &&
-          'transition-[border-color,box-shadow,background-color] duration-150 hover:border-accent/20 hover:bg-surface-2/60 hover:shadow-module',
+          'transition-[border-color,box-shadow,background-color,transform] duration-150 hover:border-accent/30 hover:shadow-module',
         accent && [
-          'before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:opacity-0',
+          'before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:opacity-0',
           'before:transition-opacity before:duration-150',
           'hover:before:opacity-100 focus-within:before:opacity-100',
           accentBar[accent],
@@ -57,7 +57,7 @@ export function CardFooter({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center gap-3 border-t border-hairline px-4 py-3 md:px-5',
+        'flex flex-wrap items-center gap-3 border-t border-hairline/80 px-4 py-3 md:px-5',
         className,
       )}
       {...props}

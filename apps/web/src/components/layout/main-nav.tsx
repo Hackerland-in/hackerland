@@ -5,35 +5,30 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   ChevronDown,
+  Home,
+  Flame,
+  FolderKanban,
+  Users,
+  Trophy,
   Cpu,
-  Atom,
-  Gauge,
-  Factory,
   GraduationCap,
   BookOpen,
   ArrowRight,
   Sparkles,
   Newspaper,
-  Trophy,
-  Users,
   ExternalLink,
-  Box,
-  Layers,
-  Lightbulb,
-  Target,
-  ShieldCheck,
-  Usb,
-  Calculator,
-  Compass,
   Rocket,
-  Skull,
-  Radar,
+  Layers,
+  Gauge,
+  Atom,
   Zap,
   Briefcase,
-  BatteryCharging,
-  Thermometer,
+  ShieldCheck,
+  Radar,
   Sun,
   Network,
+  Thermometer,
+  BatteryCharging,
 } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
@@ -53,335 +48,146 @@ interface NavDropdown {
   items: NavSubItem[];
 }
 
-const HARDWARE_DROPDOWN: NavDropdown = {
-  id: 'hardware',
-  label: 'Hardware & Labs',
-  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/clubs', '/network', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis', '/thermal', '/solar-mppt', '/motor-foc', '/can-bus'],
-  items: [
-    {
-      href: '/can-bus',
-      title: 'Automotive CAN Bus & ISO 11898',
-      description: 'Bit timing quanta, sample points, arbitration priority & bus bandwidth load',
-      icon: Network,
-      badge: 'CAN Bus',
-    },
-    {
-      href: '/motor-foc',
-      title: 'BLDC & PMSM FOC Simulator',
-      description: 'Clarke/Park transforms, Space Vector PWM (SVPWM) sectors & IPM reluctance torque',
-      icon: Gauge,
-      badge: 'Motor FOC',
-    },
-    {
-      href: '/solar-mppt',
-      title: 'Solar PV & MPPT Simulator',
-      description: 'Single-diode IV/PV curves, MPPT tracking (INC/P&O) & buck converter sizing',
-      icon: Sun,
-      badge: 'Solar MPPT',
-    },
-    {
-      href: '/thermal',
-      title: 'Thermal Profiler & Heat Sink Sizer',
-      description: '1D thermal resistor network (θ_jc, θ_cs, θ_sa), fin efficiency & SiC/GaN cooling',
-      icon: Thermometer,
-      badge: 'Thermal Resistors',
-    },
-    {
-      href: '/battery-eis',
-      title: 'Battery EIS & State-of-Health',
-      description: 'Nyquist spectra, Bode plots, Randles ECM fitting & AIS-156 Amendment 3 compliance',
-      icon: BatteryCharging,
-      badge: 'Battery EIS',
-    },
-    {
-      href: '/rf-calc',
-      title: 'RF & Microwave Transmission Lines',
-      description: '50Ω microstrip, GCPW, 100Ω differential pairs & Smith Chart matching networks',
-      icon: Radar,
-      badge: 'RF Solver',
-    },
-    {
-      href: '/emc',
-      title: 'EMI / EMC Pre-Scan Analyzer',
-      description: 'Conducted & radiated emissions vs CISPR 25/32 limits with near-field probe hotspots',
-      icon: Gauge,
-      badge: 'EMC Pre-Scan',
-    },
-    {
-      href: '/assembly',
-      title: 'Assembly Line & SMT Visualizer',
-      description: 'Pick-and-place centroid visualizer, feeder tape planner & Indian EMS turnkey quotes',
-      icon: Factory,
-      badge: 'SMT Centroids',
-    },
-    {
-      href: '/sourcing',
-      title: 'Component Sourcing & Drop-In Alternates',
-      description: 'Pin-compatible IC finder, domestic Indian stock & HSN 8542 landed tariff calculator',
-      icon: Cpu,
-      badge: 'Drop-In ICs',
-    },
-    {
-      href: '/testbeds',
-      title: 'Remote HIL Testbeds & Lab Benches',
-      description: 'Shared 20 GHz analyzers, 1000A battery cyclers & anechoic chambers with remote SCPI',
-      icon: Atom,
-      badge: 'Remote SCPI',
-    },
-    {
-      href: '/compliance',
-      title: 'Statutory Compliance & NABL Wizard',
-      description: 'BIS CRS, WPC ETA, TEC MTCTE, DGCA & AIS-156 testing fee benchmarks',
-      icon: ShieldCheck,
-      badge: 'NABL Labs',
-    },
-    {
-      href: '/firmware',
-      title: 'Firmware Registry & Flasher',
-      description: 'One-click WebSerial flashing for ArduPilot, Zephyr RTOS & MicroPython',
-      icon: Usb,
-      badge: 'WebSerial',
-    },
-    {
-      href: '/telemetry',
-      title: 'Digital Twin & Telemetry Stream',
-      description: 'Real-time oscilloscope, 3D attitude gyro, AIS-156 BMS & WebSerial debugging',
-      icon: Gauge,
-      badge: 'Digital Twin',
-    },
-    {
-      href: '/copilot',
-      title: 'Hardware Co-Pilot & Sourcing',
-      description: 'IPC-2152 trace sizing, SMPS buck filter, thermal heatsink & Indian domestic parts',
-      icon: Zap,
-      badge: 'AI Workbench',
-    },
-    {
-      href: '/network/ip',
-      title: 'Open Invention Network (IP Defense)',
-      description: 'Cryptographic prior-art timestamping & defensive patent pool for indie makers',
-      icon: ShieldCheck,
-      badge: 'IP Defense',
-    },
-    {
-      href: '/clubs',
-      title: 'Innovation Clubs & ATL Hub',
-      description: 'Atal Tinkering Labs & robotics clubs mesh, machine sharing & intra-club challenges',
-      icon: GraduationCap,
-      badge: 'ATL Mesh',
-    },
-    {
-      href: '/prototype',
-      title: 'Idea-to-Prototype Simulator',
-      description: 'Synthesize full system architecture, MCU pinouts, BOM & squad skills from any idea',
-      icon: Sparkles,
-      badge: 'AI Architect',
-    },
-    {
-      href: '/manufacturing',
-      title: 'Manufacturing Hub',
-      description: '8 engineering domains: PCB, Drone, EV, Propulsion & Silicon',
-      icon: Cpu,
-      badge: 'Hub',
-    },
-    {
-      href: '/manufacturing/pcb',
-      title: 'A-Z PCB & Circuit Studio',
-      description: 'Real-time SPICE circuit simulation, Veroboard, Breadboard & Gerber export',
-      icon: Layers,
-      badge: 'Real-Time',
-    },
-    {
-      href: '/manufacturing/rfq',
-      title: 'Instant PCB RFQ Quoting',
-      description: 'Compare LionCircuits, PCB Power & global fab costs with true landed tax',
-      icon: Calculator,
-      badge: 'Instant RFQ',
-    },
-    {
-      href: '/manufacturing/flasher',
-      title: 'WebSerial Firmware Flasher',
-      description: 'Flash ESP32, RP2040, Arduino over USB directly from browser',
-      icon: Usb,
-      badge: 'WebSerial',
-    },
-    {
-      href: '/teardowns',
-      title: 'Hardware Teardowns Library',
-      description: 'Chip-level schematics & BOMs of Ather 450, DJI drones & meters',
-      icon: Compass,
-      badge: 'Autopsies',
-    },
-    {
-      href: '/manufacturing/physics/3d',
-      title: '3D Simulator Labs',
-      description: 'Interactive 3D WebGL physics labs for drones, rockets, EVs, racecars & PCBs',
-      icon: Box,
-      badge: '3D WebGL',
-    },
-    {
-      href: '/manufacturing/physics',
-      title: 'Virtual Simulators Suite',
-      description: 'Vehicle, Quadcopter, Rocket, SPICE & EDA 60 FPS physics engines',
-      icon: Gauge,
-      badge: 'Simulators',
-    },
-    {
-      href: '/labs',
-      title: 'Makerspaces & Labs Across India',
-      description: '3D printers, CNC mills, ATL nodes & HIL testbenches',
-      icon: Atom,
-      badge: 'Labs',
-    },
-    {
-      href: '/how-to-start',
-      title: 'Factory Blueprints',
-      description: 'Semiconductor fab, PCB, carbon fiber, cycle & mobile plants',
-      icon: Factory,
-      badge: 'CapEx',
-    },
-  ],
-};
-
-const ACADEMY_DROPDOWN: NavDropdown = {
-  id: 'academy',
-  label: 'Knowledge & Academy',
-  matchPrefixes: ['/stories', '/ideas', '/problems', '/learn', '/entrepreneurship', '/museum', '/observatory', '/young-innovators'],
-  items: [
-    {
-      href: '/young-innovators',
-      title: 'Young Innovators Track',
-      description: 'Supervised K-12 maker track (Ages 8-17), block-to-hardware coding & ATL lab projects',
-      icon: GraduationCap,
-      badge: 'Ages 8-17',
-    },
-    {
-      href: '/observatory',
-      title: 'Innovation Observatory',
-      description: 'Live radar of expired patents, lab breakthroughs, open silicon & deep-tech grants',
-      icon: Radar,
-      badge: 'Tech Radar',
-    },
-    {
-      href: '/stories',
-      title: 'Build Journey Archive',
-      description: 'Deep, chapter-by-chapter case studies & decision archaeology of real companies',
-      icon: BookOpen,
-      badge: 'Deep Histories',
-    },
-    {
-      href: '/museum',
-      title: 'Failed Projects Museum',
-      description: 'Technical root-cause autopsies of Juicero, Theranos, Better Place & hardware traps',
-      icon: Skull,
-      badge: 'Autopsies',
-    },
-    {
-      href: '/ideas',
-      title: 'IdeaLab (Stage Zero)',
-      description: '7-stage guided incubator from vague idea to customer discovery & squad',
-      icon: Lightbulb,
-      badge: 'Incubator',
-    },
-    {
-      href: '/problems',
-      title: 'Unsolved Problems Library',
-      description: 'Real-world challenges in health, water, agriculture & space seeking solutions',
-      icon: Target,
-      badge: 'Bounties',
-    },
-    {
-      href: '/learn',
-      title: 'Learn by Doing Roadmaps',
-      description: 'Curated open-source engineering skill roadmaps & squads',
-      icon: GraduationCap,
-      badge: 'Roadmaps',
-    },
-    {
-      href: '/entrepreneurship',
-      title: 'Founder Academy',
-      description: 'Stanford, YC, MIT courses, Cap Table & Unit Economics tools',
-      icon: BookOpen,
-      badge: '100% Free',
-    },
-  ],
-};
-
 const COMMUNITY_DROPDOWN: NavDropdown = {
   id: 'community',
-  label: 'Community & Proof',
-  matchPrefixes: ['/leaderboard', '/u', '/passport', '/squads', '/launchpad', '/jobs', '/sprints'],
+  label: 'Community',
+  matchPrefixes: ['/u', '/leaderboard', '/squads', '/clubs', '/sprints', '/jobs', '/launchpad', '/learn', '/entrepreneurship', '/stories', '/ideas', '/problems', '/museum', '/observatory', '/passport', '/young-innovators'],
   items: [
     {
-      href: '/sprints',
-      title: '48H Hardware Sprints & Bounties',
-      description: 'Time-boxed 48H rapid builds with milestone gates, escrow cash prizes & lab perks',
-      icon: Zap,
-      badge: '48H Sprints',
-    },
-    {
-      href: '/jobs',
-      title: 'Hardware Jobs & Fellowships',
-      description: 'Proof-of-work hiring for aerospace, robotics, EV & semiconductor engineering',
-      icon: Briefcase,
-      badge: 'Proof-of-Work',
-    },
-    {
-      href: '/launchpad',
-      title: 'Hardware Launchpad & Grants',
-      description: 'Milestone-locked crowdfunding escrow & Indian central govt non-dilutive grant matcher',
-      icon: Rocket,
-      badge: 'Escrow & Grants',
-    },
-    {
-      href: '/squads',
-      title: 'Squad Rooms & Escrow Vault',
-      description: 'Active project squads, verified milestone escrows & task boards',
-      icon: Users,
-      badge: 'Escrows',
-    },
-    {
-      href: '/passport',
-      title: 'Innovation Passport',
-      description: 'Verified proof-of-work, hardware fabrications & contributor credentials',
-      icon: ShieldCheck,
-      badge: 'Proof-of-Work',
-    },
-    {
       href: '/u',
-      title: 'Innovator Profiles',
-      description: 'Explore public profiles of hardware makers, researchers & squad leads',
+      title: 'Makers & Innovators',
+      description: 'Explore public builder profiles, ships & endorsements',
       icon: Users,
       badge: 'Directory',
     },
     {
-      href: '/leaderboard',
-      title: 'Top Innovators',
-      description: 'Global leaderboard of top project builders and contributors',
-      icon: Trophy,
-      badge: 'Top 100',
+      href: '/squads',
+      title: 'Squad Rooms & Clubs',
+      description: 'Active project rooms, tasks & ATL makerspace clubs',
+      icon: Sparkles,
+      badge: 'Squads',
     },
     {
-      href: '/launch',
-      title: 'Community Launch Kit',
-      description: 'Ready-to-post announcement kits for Product Hunt, Hacker News & X',
+      href: '/sprints',
+      title: '48H Build Sprints',
+      description: 'Weekend hackathon sprints with milestone prizes',
+      icon: Zap,
+      badge: 'Live',
+    },
+    {
+      href: '/leaderboard',
+      title: 'Top Builders',
+      description: 'Weekly reputation & proof-of-ship rankings',
+      icon: Trophy,
+    },
+    {
+      href: '/jobs',
+      title: 'Proof-of-Work Jobs',
+      description: 'Fellowships & engineering roles based on what you ship',
+      icon: Briefcase,
+    },
+    {
+      href: '/launchpad',
+      title: 'Launchpad & Grants',
+      description: 'Milestone escrow & Indian hardware grant matcher',
       icon: Rocket,
-      badge: 'Launch',
+    },
+    {
+      href: '/learn',
+      title: 'Learn & Founder Academy',
+      description: 'Skill roadmaps, startup playbooks & Young Innovators track',
+      icon: GraduationCap,
+      badge: 'Free',
     },
     {
       href: 'https://ai.hackerland.in/',
-      title: 'Join AI Community',
-      description: 'Global network of 10,000+ AI engineers, researchers & builders',
+      title: 'AI Community',
+      description: 'Join 10,000+ AI engineers & makers globally',
       icon: Sparkles,
       badge: 'Free',
       external: true,
     },
     {
       href: 'https://blog.hackerland.in/',
-      title: 'Hackerland Blog',
-      description: 'Engineering stories, system designs & hardware breakthroughs',
+      title: 'Engineering Blog',
+      description: 'Stories, build autopsies & community highlights',
       icon: Newspaper,
       external: true,
+    },
+  ],
+};
+
+const LABS_DROPDOWN: NavDropdown = {
+  id: 'labs',
+  label: 'Labs & Tools',
+  matchPrefixes: ['/manufacturing', '/labs', '/teardowns', '/prototype', '/copilot', '/telemetry', '/firmware', '/compliance', '/testbeds', '/sourcing', '/assembly', '/emc', '/rf-calc', '/battery-eis', '/thermal', '/solar-mppt', '/motor-foc', '/can-bus', '/how-to-start', '/network'],
+  items: [
+    {
+      href: '/manufacturing',
+      title: 'Maker Workbench & Labs',
+      description: 'Central hub for PCB studio, CAD, RF, EV & hardware simulators',
+      icon: Cpu,
+      badge: 'Hub',
+    },
+    {
+      href: '/manufacturing/pcb',
+      title: 'PCB & SPICE Studio',
+      description: 'Browser circuit simulation, Veroboard & Gerber export',
+      icon: Layers,
+    },
+    {
+      href: '/manufacturing/physics/3d',
+      title: '3D Physics Simulators',
+      description: 'Interactive WebGL labs for drones, EVs & rockets',
+      icon: Gauge,
+    },
+    {
+      href: '/can-bus',
+      title: 'Automotive CAN Bus',
+      description: 'Bit timing quanta, sample points & bus bandwidth',
+      icon: Network,
+    },
+    {
+      href: '/motor-foc',
+      title: 'Motor FOC & SVPWM',
+      description: 'Clarke/Park transforms & traction motor simulator',
+      icon: Gauge,
+    },
+    {
+      href: '/solar-mppt',
+      title: 'Solar PV & MPPT',
+      description: 'PV I-V curves, MPPT tracking & buck sizing',
+      icon: Sun,
+    },
+    {
+      href: '/battery-eis',
+      title: 'Battery EIS & Health',
+      description: 'Nyquist plots, Randles ECM & AIS-156 diagnostics',
+      icon: BatteryCharging,
+    },
+    {
+      href: '/thermal',
+      title: 'Thermal & Heatsink',
+      description: '1D resistor networks & inverter cooling profiler',
+      icon: Thermometer,
+    },
+    {
+      href: '/rf-calc',
+      title: 'RF & EMC Analyzers',
+      description: 'Microstrip lines, Smith charts & CISPR pre-scans',
+      icon: Radar,
+    },
+    {
+      href: '/labs',
+      title: 'Makerspaces & ATL Mesh',
+      description: 'Find physical CNCs, 3D printers & labs across India',
+      icon: Atom,
+    },
+    {
+      href: '/compliance',
+      title: 'Compliance & Sourcing',
+      description: 'BIS/WPC wizards, drop-in ICs & turnkey assembly',
+      icon: ShieldCheck,
     },
   ],
 };
@@ -390,30 +196,25 @@ export function MainNav() {
   const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Close dropdown on route change
   useEffect(() => {
     setOpenDropdown(null);
   }, [pathname]);
 
-  // Close dropdown on click outside or escape key
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setOpenDropdown(null);
       }
     }
-
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setOpenDropdown(null);
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
@@ -434,21 +235,17 @@ export function MainNav() {
     }, 150);
   };
 
-  const isProjectsActive =
-    pathname === '/projects' ||
-    pathname.startsWith('/projects/') ||
-    pathname === '/new';
-
-  const isFeedActive = pathname === '/feed' || pathname.startsWith('/feed/');
-  const isEarnActive = pathname === '/earn' || pathname.startsWith('/earn/');
-  const isLeaderboardActive =
-    pathname === '/leaderboard' || pathname.startsWith('/leaderboard/');
+  const navLinkClass = (active: boolean) =>
+    cn(
+      'inline-flex items-center gap-1.5 px-3 py-1.5 text-body-sm font-display font-medium rounded-full transition-colors',
+      active
+        ? 'bg-accent/10 text-accent-fg font-semibold'
+        : 'text-fg-muted hover:text-fg hover:bg-surface-2',
+    );
 
   const renderDropdown = (dropdown: NavDropdown) => {
     const isOpen = openDropdown === dropdown.id;
-    const isDropdownActive = dropdown.matchPrefixes.some((prefix) =>
-      pathname.startsWith(prefix)
-    );
+    const isDropdownActive = dropdown.matchPrefixes.some((prefix) => pathname.startsWith(prefix));
 
     return (
       <div
@@ -462,18 +259,13 @@ export function MainNav() {
           onClick={() => setOpenDropdown(isOpen ? null : dropdown.id)}
           aria-expanded={isOpen}
           aria-haspopup="true"
-          className={cn(
-            'flex items-center gap-1.5 px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
-            isDropdownActive
-              ? 'text-accent bg-surface-2 border border-accent/20'
-              : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
-          )}
+          className={navLinkClass(isDropdownActive)}
         >
           <span>{dropdown.label}</span>
           <ChevronDown
             className={cn(
-              'size-3.5 transition-transform duration-200 text-fg-subtle',
-              isOpen && 'rotate-180 text-accent'
+              'size-3.5 transition-transform duration-150 text-fg-subtle',
+              isOpen && 'rotate-180 text-accent-fg',
             )}
           />
         </button>
@@ -482,9 +274,9 @@ export function MainNav() {
           <div
             role="menu"
             aria-label={`${dropdown.label} menu`}
-            className="absolute left-0 top-full mt-2 w-80 rounded-xl border border-hairline bg-surface-1/95 p-2 shadow-module backdrop-blur-md z-50 animate-in fade-in slide-in-from-top-1 duration-150"
+            className="absolute left-0 top-full mt-2 w-80 rounded-2xl border border-hairline bg-surface-1 p-2 shadow-overlay z-50 animate-in fade-in slide-in-from-top-1 duration-150"
           >
-            <div className="space-y-1">
+            <div className="max-h-[70vh] overflow-y-auto space-y-0.5 pr-0.5">
               {dropdown.items.map((item) => {
                 const Icon = item.icon;
                 const isItemActive =
@@ -495,42 +287,34 @@ export function MainNav() {
                   <>
                     <div
                       className={cn(
-                        'flex size-8 shrink-0 items-center justify-center rounded-md border border-line bg-surface-2 transition-transform group-hover:scale-105',
-                        isItemActive && 'border-accent/40 bg-accent/15 text-accent',
-                        item.external && 'text-brand-pink group-hover:bg-brand-pink/10'
+                        'flex size-8 shrink-0 items-center justify-center rounded-xl transition-colors',
+                        isItemActive
+                          ? 'bg-accent text-on-solid'
+                          : 'bg-surface-2 text-fg-muted group-hover:bg-accent/10 group-hover:text-accent-fg',
                       )}
                     >
                       <Icon className="size-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <span
                           className={cn(
-                            'text-caption font-display font-bold',
-                            isItemActive
-                              ? 'text-accent'
-                              : 'text-fg group-hover:text-accent transition-colors'
+                            'text-body-sm font-display font-semibold truncate',
+                            isItemActive ? 'text-accent-fg' : 'text-fg group-hover:text-accent-fg',
                           )}
                         >
                           {item.title}
                         </span>
                         {item.badge && (
-                          <span
-                            className={cn(
-                              'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded border',
-                              item.badge === 'Free'
-                                ? 'bg-brand-pink/15 text-brand-pink border-brand-pink/30 font-bold'
-                                : 'bg-surface-3 text-fg-subtle border-hairline'
-                            )}
-                          >
+                          <span className="rounded-full bg-accent/10 px-2 py-0.5 font-display text-[10px] font-semibold text-accent-fg">
                             {item.badge}
                           </span>
                         )}
                         {item.external && (
-                          <ExternalLink className="size-3 text-fg-subtle ml-auto shrink-0 opacity-60 group-hover:opacity-100" />
+                          <ExternalLink className="size-3 text-fg-subtle ml-auto shrink-0" />
                         )}
                       </div>
-                      <p className="text-[11px] text-fg-muted line-clamp-1 mt-0.5">
+                      <p className="text-[12px] text-fg-subtle line-clamp-1 mt-0.5">
                         {item.description}
                       </p>
                     </div>
@@ -546,7 +330,7 @@ export function MainNav() {
                       rel="noopener noreferrer"
                       role="menuitem"
                       onClick={() => setOpenDropdown(null)}
-                      className="group flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-surface-2 border border-transparent"
+                      className="group flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-surface-2"
                     >
                       {content}
                     </a>
@@ -560,10 +344,8 @@ export function MainNav() {
                     role="menuitem"
                     onClick={() => setOpenDropdown(null)}
                     className={cn(
-                      'group flex items-start gap-3 rounded-lg p-2.5 transition-colors',
-                      isItemActive
-                        ? 'bg-accent/10 border border-accent/20'
-                        : 'hover:bg-surface-2 border border-transparent'
+                      'group flex items-center gap-3 rounded-xl p-2 transition-colors',
+                      isItemActive ? 'bg-accent/8' : 'hover:bg-surface-2',
                     )}
                   >
                     {content}
@@ -572,36 +354,18 @@ export function MainNav() {
               })}
             </div>
 
-            {/* Hub Shortcut Footer */}
-            <div className="mt-2 pt-2 border-t border-hairline/60 px-2 flex items-center justify-between">
-              <span className="text-[10px] font-mono text-fg-subtle">
-                {dropdown.id === 'hardware'
-                  ? 'Open-Source Hardware'
-                  : dropdown.id === 'academy'
-                  ? 'Entrepreneurship & Skills'
-                  : 'Hackerland Network'}
+            <div className="mt-1.5 pt-2 border-t border-hairline px-2 flex items-center justify-between">
+              <span className="text-[11px] font-medium text-fg-subtle">
+                {dropdown.id === 'labs' ? 'Open Hardware Tools' : 'Hackerland Network'}
               </span>
-              {dropdown.items[0]!.external ? (
-                <a
-                  href={dropdown.items[0]!.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setOpenDropdown(null)}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono font-medium text-brand-pink hover:underline"
-                >
-                  <span>{dropdown.items[0]!.title}</span>
-                  <ArrowRight className="size-3" />
-                </a>
-              ) : (
-                <Link
-                  href={dropdown.items[0]!.href}
-                  onClick={() => setOpenDropdown(null)}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono font-medium text-accent hover:underline"
-                >
-                  <span>Launch Hub</span>
-                  <ArrowRight className="size-3" />
-                </Link>
-              )}
+              <Link
+                href={dropdown.items[0]!.href}
+                onClick={() => setOpenDropdown(null)}
+                className="inline-flex items-center gap-1 text-[12px] font-display font-semibold text-accent-fg hover:underline"
+              >
+                <span>Explore all</span>
+                <ArrowRight className="size-3" />
+              </Link>
             </div>
           </div>
         )}
@@ -613,58 +377,42 @@ export function MainNav() {
     <nav
       ref={containerRef}
       aria-label="Main Navigation"
-      className="hidden lg:flex items-center gap-0.5 xl:gap-1.5"
+      className="hidden lg:flex items-center gap-1"
     >
-      {/* 1. Projects */}
-      <Link
-        href="/projects"
-        aria-current={isProjectsActive ? 'page' : undefined}
-        className={cn(
-          'px-2.5 xl:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
-          isProjectsActive
-            ? 'text-accent bg-surface-2 border border-accent/20'
-            : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
-        )}
-      >
-        Projects
+      <Link href="/" aria-current={pathname === '/' ? 'page' : undefined} className={navLinkClass(pathname === '/')}>
+        <Home className="size-3.5" aria-hidden="true" />
+        <span>Home</span>
       </Link>
 
-      {/* 2. Feed */}
       <Link
         href="/feed"
-        aria-current={isFeedActive ? 'page' : undefined}
-        className={cn(
-          'px-2.5 xl:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
-          isFeedActive
-            ? 'text-accent bg-surface-2 border border-accent/20'
-            : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
-        )}
+        aria-current={pathname === '/feed' || pathname.startsWith('/feed/') ? 'page' : undefined}
+        className={navLinkClass(pathname === '/feed' || pathname.startsWith('/feed/'))}
       >
-        Feed
+        <Flame className="size-3.5" aria-hidden="true" />
+        <span>Feed</span>
       </Link>
 
-      {/* 3. Hardware Dropdown (Manufacturing, Physics, Labs, Factory Blueprints) */}
-      {renderDropdown(HARDWARE_DROPDOWN)}
+      <Link
+        href="/projects"
+        aria-current={pathname.startsWith('/projects') || pathname === '/new' ? 'page' : undefined}
+        className={navLinkClass(pathname.startsWith('/projects') || pathname === '/new')}
+      >
+        <FolderKanban className="size-3.5" aria-hidden="true" />
+        <span>Projects</span>
+      </Link>
 
-      {/* 4. Earn */}
       <Link
         href="/earn"
-        aria-current={isEarnActive ? 'page' : undefined}
-        className={cn(
-          'px-2.5 xl:px-3 py-1.5 text-body-sm font-display font-medium rounded-md transition-colors',
-          isEarnActive
-            ? 'text-accent bg-surface-2 border border-accent/20'
-            : 'text-fg-muted hover:text-fg hover:bg-surface-1 border border-transparent'
-        )}
+        aria-current={pathname.startsWith('/earn') ? 'page' : undefined}
+        className={navLinkClass(pathname.startsWith('/earn'))}
       >
-        Earn
+        <Trophy className="size-3.5" aria-hidden="true" />
+        <span>Bounties</span>
       </Link>
 
-      {/* 5. Academy Dropdown (Learn by Doing, Founders, How to Start) */}
-      {renderDropdown(ACADEMY_DROPDOWN)}
-
-      {/* 6. Community Dropdown (Join AI Community, Blog, Leaderboard, Innovator Profiles) */}
       {renderDropdown(COMMUNITY_DROPDOWN)}
+      {renderDropdown(LABS_DROPDOWN)}
     </nav>
   );
 }

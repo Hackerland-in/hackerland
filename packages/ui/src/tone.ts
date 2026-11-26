@@ -20,22 +20,22 @@ export const toneText: Record<Tone, string> = {
   neutral: 'text-fg-muted',
 };
 
-/** Tinted outline treatment (badges, chips). */
+/** Soft tinted social pill treatment (badges, chips). */
 export const toneOutline: Record<Tone, string> = {
-  code: 'border-code/50 bg-code/10 text-code-fg',
-  make: 'border-make/50 bg-make/10 text-make-fg',
-  design: 'border-design/50 bg-design/10 text-design-fg',
-  research: 'border-research/50 bg-research/10 text-research-fg',
-  earn: 'border-earn/50 bg-earn/10 text-earn-fg',
-  learn: 'border-learn/50 bg-learn/10 text-learn-fg',
-  accent: 'border-accent/50 bg-accent/10 text-accent-fg',
-  success: 'border-success/50 bg-success/10 text-success-fg',
-  warning: 'border-warning/50 bg-warning/10 text-warning-fg',
-  danger: 'border-danger/50 bg-danger/10 text-danger-fg',
-  neutral: 'border-line bg-surface-2 text-fg-muted',
+  code: 'border-code/25 bg-code/8 text-code-fg',
+  make: 'border-make/25 bg-make/8 text-make-fg',
+  design: 'border-design/25 bg-design/8 text-design-fg',
+  research: 'border-research/25 bg-research/8 text-research-fg',
+  earn: 'border-earn/25 bg-earn/8 text-earn-fg',
+  learn: 'border-learn/25 bg-learn/8 text-learn-fg',
+  accent: 'border-accent/25 bg-accent/8 text-accent-fg',
+  success: 'border-success/25 bg-success/8 text-success-fg',
+  warning: 'border-warning/25 bg-warning/10 text-warning-fg',
+  danger: 'border-danger/25 bg-danger/8 text-danger-fg',
+  neutral: 'border-hairline bg-surface-2 text-fg-muted',
 };
 
-/** Solid fill with dark text (solid badges). */
+/** Solid fill with crisp contrasting text (solid badges). */
 export const toneSolid: Record<Tone, string> = {
   code: 'border-code bg-code text-on-solid',
   make: 'border-make bg-make text-on-solid',
@@ -46,7 +46,7 @@ export const toneSolid: Record<Tone, string> = {
   accent: 'border-accent bg-accent text-on-solid',
   success: 'border-success bg-success text-on-solid',
   warning: 'border-warning bg-warning text-on-solid',
-  danger: 'border-danger bg-danger text-fg',
+  danger: 'border-danger bg-danger text-on-solid',
   neutral: 'border-line bg-surface-3 text-fg',
 };
 

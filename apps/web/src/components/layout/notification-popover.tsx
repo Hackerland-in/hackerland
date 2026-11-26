@@ -36,7 +36,6 @@ export function NotificationPopover() {
     return () => clearInterval(interval);
   }, []);
 
-  // Close on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
@@ -59,7 +58,6 @@ export function NotificationPopover() {
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch {
-      // Optimistic update
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
     }
@@ -68,7 +66,7 @@ export function NotificationPopover() {
   const getIcon = (type: NotificationItem['type']) => {
     switch (type) {
       case 'squad_apply':
-        return <Users className="h-4 w-4 text-accent" />;
+        return <Users className="h-4 w-4 text-accent-fg" />;
       case 'bounty_claim':
         return <Award className="h-4 w-4 text-earn-fg" />;
       case 'ship_update':
@@ -87,11 +85,11 @@ export function NotificationPopover() {
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
         aria-expanded={isOpen}
-        className="relative inline-flex h-9 w-9 items-center justify-center rounded-md border border-hairline bg-surface-1 text-fg-muted transition-colors hover:border-accent hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-hairline bg-surface-1 text-fg-muted transition-colors hover:border-accent/40 hover:bg-accent/5 hover:text-accent-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <Bell className="h-4 w-4" aria-hidden="true" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 font-mono text-[10px] font-bold text-on-solid ring-2 ring-canvas animate-pulse">
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 font-display text-[10px] font-bold text-on-solid ring-2 ring-surface-1">
             {unreadCount}
           </span>
         )}
@@ -101,12 +99,11 @@ export function NotificationPopover() {
         <div
           role="dialog"
           aria-label="Notification Center"
-          className="absolute right-0 mt-2 w-80 sm:w-96 rounded-lg border border-hairline bg-surface-2 shadow-overlay z-50 overflow-hidden min-w-0"
+          className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-hairline bg-surface-1 shadow-overlay z-50 overflow-hidden min-w-0"
         >
-          {/* Header */}
           <div className="flex items-center justify-between border-b border-hairline px-4 py-3 bg-surface-1">
             <div className="flex items-center gap-2">
-              <span className="font-display font-semibold text-fg text-body-sm">Notifications</span>
+              <span className="font-display font-semibold text-fg text-body-sm">Activity</span>
               {unreadCount > 0 && (
                 <Badge tone="accent" variant="outline">
                   {unreadCount} new
@@ -117,19 +114,18 @@ export function NotificationPopover() {
               <button
                 type="button"
                 onClick={markAllRead}
-                className="text-label-xs font-display text-accent hover:underline flex items-center gap-1"
+                className="text-body-sm font-display font-medium text-accent-fg hover:underline flex items-center gap-1"
               >
-                <Check className="h-3 w-3" />
+                <Check className="h-3.5 w-3.5" />
                 Mark all read
               </button>
             )}
           </div>
 
-          {/* List */}
           <div className="max-h-80 overflow-y-auto divide-y divide-hairline">
             {notifications.length === 0 ? (
               <div className="p-6 text-center text-body-sm text-fg-muted">
-                No notifications yet.
+                All caught up! No new activity.
               </div>
             ) : (
               notifications.slice(0, 6).map((notif) => (
@@ -138,35 +134,34 @@ export function NotificationPopover() {
                   href={notif.link}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'flex items-start gap-3 p-3 transition-colors hover:bg-surface-3 min-w-0 block',
-                    !notif.read && 'bg-accent/5'
+                    'flex items-start gap-3 p-3.5 transition-colors hover:bg-surface-2 min-w-0 block',
+                    !notif.read && 'bg-accent/5',
                   )}
                 >
-                  <div className="mt-0.5 rounded-full border border-hairline bg-surface-1 p-1.5 shrink-0">
+                  <div className="mt-0.5 rounded-full border border-hairline bg-surface-2 p-2 shrink-0">
                     {getIcon(notif.type)}
                   </div>
                   <div className="flex-1 min-w-0 space-y-0.5">
-                    <p className="font-display text-body-sm font-medium text-fg truncate">
+                    <p className="font-display text-body-sm font-semibold text-fg truncate">
                       {notif.title}
                     </p>
-                    <p className="text-body-xs text-fg-muted line-clamp-2">
+                    <p className="text-body-sm text-fg-muted line-clamp-2">
                       {notif.message}
                     </p>
                   </div>
                   {!notif.read && (
-                    <span className="h-2 w-2 rounded-full bg-accent shrink-0 mt-1.5" />
+                    <span className="h-2 w-2 rounded-full bg-accent shrink-0 mt-2" />
                   )}
                 </Link>
               ))
             )}
           </div>
 
-          {/* Footer */}
-          <div className="border-t border-hairline px-4 py-2.5 bg-surface-1 text-center">
+          <div className="border-t border-hairline px-4 py-2.5 bg-surface-2/50 text-center">
             <Link
               href="/notifications"
               onClick={() => setIsOpen(false)}
-              className="text-label-sm font-display text-accent hover:text-accent-strong inline-flex items-center gap-1"
+              className="text-body-sm font-display font-semibold text-accent-fg hover:underline inline-flex items-center gap-1"
             >
               <span>View all activity</span>
               <ExternalLink className="h-3 w-3" />

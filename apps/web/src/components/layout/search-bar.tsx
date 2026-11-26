@@ -14,10 +14,9 @@ import {
   Atom,
   FolderKanban,
   Sparkles,
-  Command,
   CornerDownLeft,
 } from 'lucide-react';
-import { Badge, IconButton, cn } from '@hackerland/ui';
+import { IconButton, cn } from '@hackerland/ui';
 import { STATIC_SEARCH_CATALOG, type SearchResultItem } from '@/lib/search/search-catalog';
 
 export function SearchBar() {
@@ -26,12 +25,11 @@ export function SearchBar() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Global hotkey: Cmd+K / Ctrl+K or / to open search
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -46,7 +44,6 @@ export function SearchBar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  // Autofocus input when modal opens
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
@@ -63,7 +60,6 @@ export function SearchBar() {
     };
   }, [isOpen]);
 
-  // Filter results on query change (instant static + async server query)
   useEffect(() => {
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) {
@@ -130,7 +126,7 @@ export function SearchBar() {
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex((prev) =>
-        results.length > 0 ? (prev - 1 + results.length) % results.length : 0
+        results.length > 0 ? (prev - 1 + results.length) % results.length : 0,
       );
     } else if (e.key === 'Enter') {
       e.preventDefault();
@@ -141,47 +137,49 @@ export function SearchBar() {
   const renderCategoryIcon = (category: SearchResultItem['category']) => {
     switch (category) {
       case 'projects':
-        return <FolderKanban className="size-4 text-accent" />;
+        return <FolderKanban className="size-4 text-accent-fg" />;
       case 'simulators':
-        return <Cpu className="size-4 text-cyan-400" />;
+        return <Cpu className="size-4 text-code-fg" />;
       case 'blueprints':
-        return <Factory className="size-4 text-amber-400" />;
+        return <Factory className="size-4 text-make-fg" />;
       case 'academy':
       case 'roadmaps':
-        return <GraduationCap className="size-4 text-emerald-400" />;
+        return <GraduationCap className="size-4 text-earn-fg" />;
       case 'bounties':
-        return <Coins className="size-4 text-brand-pink" />;
+        return <Coins className="size-4 text-accent-fg" />;
       case 'labs':
-        return <Atom className="size-4 text-purple-400" />;
+        return <Atom className="size-4 text-research-fg" />;
       default:
-        return <Sparkles className="size-4 text-accent" />;
+        return <Sparkles className="size-4 text-accent-fg" />;
     }
   };
 
   return (
     <>
-      {/* Desktop Search Trigger Field (2xl+) */}
-      <div className="hidden 2xl:block w-52 2xl:w-60">
+      {/* Desktop Pill Search Trigger (xl+) */}
+      <div className="hidden xl:block w-52 2xl:w-64">
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="flex w-full items-center justify-between rounded-md border border-hairline bg-sunken px-3 py-1.5 text-body-xs text-fg-subtle transition-colors hover:border-line hover:text-fg focus:outline-none focus:ring-1 focus:ring-accent"
+          className="flex w-full items-center justify-between rounded-full border border-hairline bg-sunken px-3.5 py-1.5 text-body-sm text-fg-subtle transition-colors hover:border-accent/40 hover:bg-surface-1 hover:text-fg focus:outline-none focus:ring-2 focus:ring-accent/20"
           aria-label="Search Hackerland (⌘K)"
         >
           <div className="flex items-center gap-2 truncate">
             <Search className="size-3.5 shrink-0 text-fg-subtle" />
-            <span className="truncate">Search Hackerland…</span>
+            <span className="truncate text-[13px]">Search builders, builds…</span>
           </div>
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-hairline/60 bg-surface-2 px-1.5 font-mono text-[10px] text-fg-subtle">
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-full border border-hairline bg-surface-1 px-1.5 font-mono text-[10px] text-fg-subtle">
             ⌘K
           </kbd>
         </button>
       </div>
 
-      {/* Mobile, Tablet & Laptop Search Trigger Icon (< 2xl) */}
-      <div className="2xl:hidden">
+      {/* Tablet & Mobile Search Trigger (< xl) */}
+      <div className="xl:hidden">
         <IconButton
           label="Search Hackerland"
+          variant="secondary"
+          size="sm"
           onClick={() => setIsOpen(true)}
           className="text-fg"
         >
@@ -189,13 +187,13 @@ export function SearchBar() {
         </IconButton>
       </div>
 
-      {/* Global Spotlight Search Modal Backdrop & Dialog */}
+      {/* Global Spotlight Search Modal */}
       {isOpen && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Global Search"
-          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-canvas/80 backdrop-blur-md animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-fg/35 backdrop-blur-sm animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsOpen(false);
           }}
@@ -204,10 +202,9 @@ export function SearchBar() {
             ref={containerRef}
             className="w-full max-w-2xl rounded-2xl border border-hairline bg-surface-1 shadow-overlay overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col max-h-[85vh]"
           >
-            {/* Search Input Bar */}
             <form
               onSubmit={handleSubmit}
-              className="flex items-center gap-3 px-4 py-3.5 border-b border-hairline bg-surface-2/60"
+              className="flex items-center gap-3 px-4 py-3.5 border-b border-hairline bg-surface-1"
             >
               <Search className="size-5 shrink-0 text-accent" />
               <input
@@ -216,14 +213,14 @@ export function SearchBar() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search projects, simulators, factory blueprints, academy, labs…"
+                placeholder="Search makers, builds, squads, bounties, labs…"
                 className="flex-1 bg-transparent text-body-md text-fg placeholder:text-fg-subtle focus:outline-none font-sans"
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery('')}
-                  className="p-1 rounded-md text-fg-subtle hover:text-fg hover:bg-surface-3 transition-colors"
+                  className="p-1.5 rounded-full text-fg-subtle hover:text-fg hover:bg-surface-2 transition-colors"
                   aria-label="Clear query"
                 >
                   <X className="size-4" />
@@ -232,18 +229,17 @@ export function SearchBar() {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="font-mono text-[11px] px-2 py-1 rounded bg-surface-3 text-fg-subtle hover:text-fg border border-hairline"
+                className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-surface-2 text-fg-subtle hover:text-fg border border-hairline"
               >
                 ESC
               </button>
             </form>
 
-            {/* Results or Suggestions List */}
-            <div className="overflow-y-auto p-3 space-y-2 flex-1 scrollbar-thin">
+            <div className="overflow-y-auto p-3 space-y-2 flex-1">
               {results.length > 0 ? (
                 <div className="space-y-1">
-                  <div className="px-2 py-1 text-[11px] font-mono uppercase tracking-wider text-fg-subtle">
-                    Matching Results ({results.length})
+                  <div className="px-2 py-1 text-[11px] font-display font-semibold text-fg-subtle">
+                    Results ({results.length})
                   </div>
                   {results.map((item, index) => {
                     const isSelected = index === selectedIndex;
@@ -256,16 +252,14 @@ export function SearchBar() {
                         className={cn(
                           'flex items-start gap-3 p-3 rounded-xl transition-all group border',
                           isSelected
-                            ? 'bg-accent/15 border-accent/40 shadow-xs ring-1 ring-accent/30'
-                            : 'border-transparent hover:bg-surface-2'
+                            ? 'bg-accent/8 border-accent/30 shadow-xs'
+                            : 'border-transparent hover:bg-surface-2',
                         )}
                       >
                         <div
                           className={cn(
-                            'p-2 rounded-lg shrink-0 mt-0.5 border border-hairline',
-                            isSelected
-                              ? 'bg-surface-1 text-accent'
-                              : 'bg-surface-2 text-fg-subtle group-hover:text-fg'
+                            'p-2 rounded-xl shrink-0 mt-0.5 border border-hairline',
+                            isSelected ? 'bg-surface-1' : 'bg-surface-2',
                           )}
                         >
                           {renderCategoryIcon(item.category)}
@@ -275,8 +269,8 @@ export function SearchBar() {
                           <div className="flex items-center gap-2">
                             <span
                               className={cn(
-                                'font-display text-body-sm font-bold truncate',
-                                isSelected ? 'text-accent' : 'text-fg group-hover:text-accent'
+                                'font-display text-body-sm font-semibold truncate',
+                                isSelected ? 'text-accent-fg' : 'text-fg group-hover:text-accent-fg',
                               )}
                             >
                               {item.title}
@@ -284,22 +278,22 @@ export function SearchBar() {
                             {item.badge && (
                               <span
                                 className={cn(
-                                  'font-mono text-[9px] uppercase px-1.5 py-0.2 rounded shrink-0 border border-hairline',
+                                  'rounded-full text-[10px] font-display font-semibold px-2 py-0.5 shrink-0 border border-hairline',
                                   item.badgeTone === 'accent'
-                                    ? 'bg-accent/15 text-accent'
+                                    ? 'bg-accent/10 text-accent-fg border-accent/20'
                                     : item.badgeTone === 'earn'
-                                    ? 'bg-emerald-500/15 text-emerald-400'
-                                    : 'bg-surface-3 text-fg-subtle'
+                                    ? 'bg-earn/10 text-earn-fg border-earn/20'
+                                    : 'bg-surface-2 text-fg-subtle',
                                 )}
                               >
                                 {item.badge}
                               </span>
                             )}
                           </div>
-                          <p className="text-caption text-fg-muted line-clamp-1 mt-0.5">
+                          <p className="text-body-sm text-fg-muted line-clamp-1 mt-0.5">
                             {item.description}
                           </p>
-                          <span className="text-[10px] font-mono text-fg-subtle mt-1 block">
+                          <span className="text-[11px] text-fg-subtle mt-0.5 block">
                             {item.categoryLabel}
                           </span>
                         </div>
@@ -309,8 +303,8 @@ export function SearchBar() {
                             className={cn(
                               'size-4 transition-transform',
                               isSelected
-                                ? 'text-accent translate-x-0.5'
-                                : 'text-fg-subtle opacity-40 group-hover:opacity-100'
+                                ? 'text-accent-fg translate-x-0.5'
+                                : 'text-fg-subtle opacity-40 group-hover:opacity-100',
                             )}
                           />
                         </div>
@@ -319,46 +313,43 @@ export function SearchBar() {
                   })}
                 </div>
               ) : query.trim() ? (
-                /* No quick matches, offer search page */
                 <div className="py-10 text-center space-y-3">
                   <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-surface-2 text-fg-subtle">
                     <Search className="size-6" />
                   </div>
                   <div>
                     <p className="font-display text-body-md font-semibold text-fg">
-                      No instant suggestions for &quot;{query}&quot;
+                      No instant matches for &quot;{query}&quot;
                     </p>
-                    <p className="text-caption text-fg-muted mt-0.5">
-                      Press Enter to run a comprehensive multi-category search across the network.
+                    <p className="text-body-sm text-fg-muted mt-0.5">
+                      Press Enter to run a full search across posts, projects, and builders.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleSubmit()}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent text-on-solid font-display text-body-sm font-semibold hover:bg-accent-strong transition-colors"
+                    className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-accent text-on-solid font-display text-body-sm font-semibold hover:bg-accent-strong transition-colors"
                   >
                     <span>Search all of Hackerland</span>
                     <CornerDownLeft className="size-3.5" />
                   </button>
                 </div>
               ) : (
-                /* Empty state: popular queries & shortcuts */
                 <div className="space-y-4 py-2 px-1">
                   <div>
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-fg-subtle block mb-2 px-2">
-                      Popular & Suggested Searches
+                    <span className="text-[12px] font-display font-semibold text-fg-subtle block mb-2 px-2">
+                      Trending searches
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {[
-                        'Quadcopter Drone Physics',
-                        'Multilayer PCB Plant',
-                        'EV Battery Gigafactory',
-                        'Cap Table Calculator',
-                        'KiCad 8 OpenEDA',
-                        'SPICE Circuit Solver',
-                        'Stanford CS183 Startup',
-                        '3D Printing Labs India',
+                        'AeroGlide UAV',
+                        'OpenBraille',
+                        'PCB Studio',
                         'Bounties & Grants',
+                        'STM32 Firmware',
+                        '3D Physics Labs',
+                        'Quadcopter',
+                        'Solar MPPT',
                       ].map((item) => (
                         <button
                           key={item}
@@ -367,7 +358,7 @@ export function SearchBar() {
                             setQuery(item);
                             inputRef.current?.focus();
                           }}
-                          className="px-2.5 py-1.5 rounded-lg border border-hairline bg-surface-2 text-caption text-fg-muted hover:text-fg hover:border-accent/40 hover:bg-surface-3 transition-colors text-left"
+                          className="px-3 py-1.5 rounded-full border border-hairline bg-surface-2 text-body-sm text-fg-muted hover:text-accent-fg hover:border-accent/40 hover:bg-accent/5 transition-colors"
                         >
                           {item}
                         </button>
@@ -376,15 +367,15 @@ export function SearchBar() {
                   </div>
 
                   <div className="border-t border-hairline pt-3">
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-fg-subtle block mb-2 px-2">
-                      Quick Hub Shortcuts
+                    <span className="text-[12px] font-display font-semibold text-fg-subtle block mb-2 px-2">
+                      Popular destinations
                     </span>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {[
-                        { label: 'Simulators', href: '/manufacturing/physics', icon: Cpu },
-                        { label: 'Factory Blueprints', href: '/how-to-start', icon: Factory },
-                        { label: 'Founder Academy', href: '/entrepreneurship', icon: GraduationCap },
-                        { label: 'Makerspaces & Labs', href: '/labs', icon: Atom },
+                        { label: 'Community Feed', href: '/feed', icon: Sparkles },
+                        { label: 'Explore Projects', href: '/projects', icon: FolderKanban },
+                        { label: 'Makers', href: '/u', icon: Coins },
+                        { label: 'Hardware Labs', href: '/manufacturing', icon: Cpu },
                       ].map((hub) => {
                         const Icon = hub.icon;
                         return (
@@ -392,10 +383,10 @@ export function SearchBar() {
                             key={hub.href}
                             href={hub.href}
                             onClick={() => setIsOpen(false)}
-                            className="flex items-center gap-2 p-2.5 rounded-lg border border-hairline bg-surface-2/60 text-caption font-semibold text-fg hover:border-accent hover:bg-surface-2 transition-colors"
+                            className="flex items-center gap-2 p-2.5 rounded-xl border border-hairline bg-surface-2/60 text-body-sm font-display font-medium text-fg hover:border-accent/40 hover:text-accent-fg transition-colors"
                           >
                             <Icon className="size-4 text-accent" />
-                            <span>{hub.label}</span>
+                            <span className="truncate">{hub.label}</span>
                           </Link>
                         );
                       })}
@@ -405,31 +396,20 @@ export function SearchBar() {
               )}
             </div>
 
-            {/* Footer with Keyboard Shortcuts and Full Results link */}
             <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 border-t border-hairline bg-surface-2/40 text-[11px] font-mono text-fg-subtle">
               <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <kbd className="px-1 py-0.5 rounded bg-surface-3 border border-hairline">↑</kbd>
-                  <kbd className="px-1 py-0.5 rounded bg-surface-3 border border-hairline">↓</kbd>
-                  <span>navigate</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <kbd className="px-1 py-0.5 rounded bg-surface-3 border border-hairline">↵</kbd>
-                  <span>open</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <kbd className="px-1 py-0.5 rounded bg-surface-3 border border-hairline">esc</kbd>
-                  <span>close</span>
-                </span>
+                <span>↑↓ navigate</span>
+                <span>↵ open</span>
+                <span>esc close</span>
               </div>
 
               {query.trim() && (
                 <button
                   type="button"
                   onClick={() => handleSubmit()}
-                  className="text-accent hover:underline font-semibold flex items-center gap-1"
+                  className="text-accent-fg hover:underline font-display font-semibold flex items-center gap-1"
                 >
-                  <span>View full search page</span>
+                  <span>See all results</span>
                   <ArrowRight className="size-3" />
                 </button>
               )}

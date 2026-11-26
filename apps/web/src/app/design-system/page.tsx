@@ -1,6 +1,6 @@
 import {
   COLOR_TOKENS,
-  DAY_COLOR_TOKENS,
+  DARK_COLOR_TOKENS,
   TRACK_TONES,
   TYPE_SCALE,
   Avatar,
@@ -34,51 +34,41 @@ import {
   Textarea,
 } from '@hackerland/ui';
 import { TRACK_META, TRACKS, type Track } from '@hackerland/core';
-import { Bell, Flame, Moon, Sparkles, Sun } from 'lucide-react';
+import { Bell, Heart, Moon, Sparkles, Sun } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 export const metadata = {
-  title: 'Mission Control Design System | Hackerland',
-  description: 'Living styleguide for Hackerland tokens, typography, colors, and components.',
+  title: 'Rosepaper Social Design System | Hackerland',
+  description: 'Living styleguide for the Pink & White social Hackerland design system.',
 };
 
 export default function DesignSystemPage() {
   const statusTones = ['neutral', 'accent', 'success', 'warning', 'danger'] as const;
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12 space-y-12">
+    <div className="container mx-auto max-w-6xl px-4 py-8 md:py-12 space-y-12">
       {/* Page Header */}
       <div className="max-w-4xl space-y-4">
-        <p className="font-display text-label-sm uppercase text-accent-fg flex items-center gap-2">
+        <p className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 font-display text-label-sm text-accent-fg">
           <StatusDot tone="accent" pulse />
-          LIVING STYLEGUIDE
+          Hackerland UI · v2.0 Pink & White
         </p>
-        <h1 className="font-display text-headline-xl text-fg">
-          Mission Control design system
+        <h1 className="font-display text-headline-xl text-fg tracking-tight">
+          Rosepaper Social Design System
         </h1>
         <p className="text-body-lg text-fg-muted">
-          Tokens, components, and interaction patterns powering the Hackerland open-source network.
-          For architectural decisions, rationale, and contracts, consult the specification at{' '}
-          <a
-            href="https://github.com/hackerland/hackerland/blob/main/packages/ui/DESIGN.md"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent underline hover:text-accent-strong"
-          >
-            packages/ui/DESIGN.md
-          </a>
-          .
+          The signature Hackerland Pink (<code className="font-mono text-accent-fg">#FA1681</code>) and crisp white social community design language powering feeds, maker profiles, squad rooms, and interactive labs.
         </p>
 
         {/* Theme Mode Control Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border border-hairline bg-surface-1 shadow-module">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border border-hairline bg-surface-1 shadow-module">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="font-display font-semibold text-fg">Appearance & Theme Engine</span>
-              <Badge tone="accent" variant="outline">Dark Default</Badge>
+              <span className="font-display font-semibold text-fg">Theme Polarity</span>
+              <Badge tone="accent" variant="outline">Crisp White Default</Badge>
             </div>
             <p className="text-body-sm text-fg-muted">
-              Hackerland defaults to Space Navy Dark (#0A0E17). Toggle to test the high-clarity Solar Day Mode (#F4F7FC) in real time.
+              Hackerland defaults to Pure White & Off-White Canvas (#F7F7FA / #FFFFFF) with Signature Pink (#FA1681), plus an optional Midnight Dark Mode.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -87,25 +77,22 @@ export default function DesignSystemPage() {
         </div>
 
         {/* Quick links */}
-        <div className="flex flex-wrap gap-2 pt-2 text-body-sm">
+        <div className="flex flex-wrap gap-2 pt-1 text-body-sm">
           {[
             ['Colours', '#colors'],
-            ['Dual Themes', '#dual-themes'],
-            ['Tracks', '#tracks'],
+            ['Channels', '#tracks'],
             ['Typography', '#typography'],
             ['Buttons', '#buttons'],
-            ['Badges & Chips', '#badges-chips'],
+            ['Pills & Chips', '#badges-chips'],
             ['Form Controls', '#forms'],
-            ['Data Display', '#data-display'],
-            ['Rules & Guidelines', '#rules'],
-            ['Layout', '#layout'],
+            ['Community Cards', '#layout'],
             ['Navigation', '#navigation'],
-            ['Motion & A11y', '#motion-a11y'],
+            ['Guidelines', '#rules'],
           ].map(([label, href]) => (
             <a
               key={href}
               href={href}
-              className="rounded-sm border border-hairline bg-surface-2 px-2.5 py-1 text-fg-muted hover:border-accent hover:text-fg"
+              className="rounded-full border border-hairline bg-surface-1 px-3.5 py-1.5 text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors shadow-xs"
             >
               {label}
             </a>
@@ -117,32 +104,32 @@ export default function DesignSystemPage() {
 
       {/* 1. Colours */}
       <div id="colors" className="scroll-mt-20">
-        <Panel title="Colours & Dual Theme Engine" headingLevel={2}>
+        <Panel title="Colours & Dual Theme Tokens" headingLevel={2}>
           <p className="text-body-md text-fg-muted mb-6">
-            The mission-control palette is dark-first by default (Space Navy #0A0E17), with a calibrated Solar Day Mode (#F4F7FC) for bright environments. All components consume semantic CSS variables, ensuring automatic theme switching with zero hardcoded hex colors.
+            White-first social hierarchy powered by semantic CSS variables so every community surface stays airy and crisp in daylight while remaining adaptable to Midnight Pink dark mode.
           </p>
 
-          <Tabs defaultValue="dark">
-            <TabsList label="Theme options" className="mb-6">
+          <Tabs defaultValue="light">
+            <TabsList label="Theme palettes" className="mb-6">
+              <TabsTrigger value="light">
+                <Sun className="size-3.5 mr-1.5" />
+                White & Pink (Default)
+              </TabsTrigger>
               <TabsTrigger value="dark">
                 <Moon className="size-3.5 mr-1.5" />
-                Mission Control Dark (Default)
-              </TabsTrigger>
-              <TabsTrigger value="day">
-                <Sun className="size-3.5 mr-1.5" />
-                Solar Day Mode
+                Midnight Pink (Optional Dark)
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="dark">
+            <TabsContent value="light">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {COLOR_TOKENS.map((token) => (
                   <div
                     key={token.name}
-                    className="flex flex-col rounded-md border border-hairline bg-surface-2 p-3 space-y-2.5"
+                    className="flex flex-col rounded-2xl border border-hairline bg-surface-1 p-3 space-y-2.5 shadow-xs"
                   >
                     <div
-                      className="h-14 w-full rounded border border-hairline"
+                      className="h-14 w-full rounded-xl border border-hairline"
                       style={{ backgroundColor: token.value }}
                     />
                     <div>
@@ -158,15 +145,15 @@ export default function DesignSystemPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="day">
+            <TabsContent value="dark">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {DAY_COLOR_TOKENS.map((token) => (
+                {DARK_COLOR_TOKENS.map((token) => (
                   <div
                     key={token.name}
-                    className="flex flex-col rounded-md border border-hairline bg-surface-2 p-3 space-y-2.5"
+                    className="flex flex-col rounded-2xl border border-hairline bg-surface-1 p-3 space-y-2.5 shadow-xs"
                   >
                     <div
-                      className="h-14 w-full rounded border border-hairline"
+                      className="h-14 w-full rounded-xl border border-hairline"
                       style={{ backgroundColor: token.value }}
                     />
                     <div>
@@ -187,9 +174,9 @@ export default function DesignSystemPage() {
 
       {/* 2. Tracks */}
       <div id="tracks" className="scroll-mt-20">
-        <Panel title="Tracks & Disciplines" headingLevel={2}>
+        <Panel title="Community Channels & Tracks" headingLevel={2}>
           <p className="text-body-md text-fg-muted mb-6">
-            Six canonical tracks define every project, person, and opportunity in the community.
+            Six creator channels categorize posts, projects, bounties, and builder skills across the network.
           </p>
 
           <div className="space-y-4">
@@ -198,7 +185,7 @@ export default function DesignSystemPage() {
               return (
                 <div
                   key={track}
-                  className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-lg border border-hairline bg-surface-2/60 p-4"
+                  className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-2xl border border-hairline bg-surface-2/60 p-4"
                 >
                   <div className="space-y-1 md:w-1/3">
                     <div className="flex items-center gap-2">
@@ -211,13 +198,13 @@ export default function DesignSystemPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
-                    <Chip tone={track}>Skill Chip</Chip>
+                    <Chip tone={track}>#{meta.label.toLowerCase()}</Chip>
                     <FilterChip selected tone={track}>
-                      Filter Active
+                      Following
                     </FilterChip>
                     {track === 'make' && (
                       <Button variant="make" size="sm">
-                        Make Action
+                        Share Build
                       </Button>
                     )}
                     {track === 'earn' && (
@@ -225,16 +212,11 @@ export default function DesignSystemPage() {
                         Claim Bounty
                       </Button>
                     )}
-                    {track === 'code' && (
+                    {track === 'design' && (
                       <Button variant="primary" size="sm">
-                        View Code
+                        Post Concept
                       </Button>
                     )}
-                    <Card accent={track} className="p-3 w-44">
-                      <span className="text-body-sm text-fg-muted font-display uppercase">
-                        {meta.label} Card
-                      </span>
-                    </Card>
                   </div>
                 </div>
               );
@@ -247,8 +229,7 @@ export default function DesignSystemPage() {
       <div id="typography" className="scroll-mt-20">
         <Panel title="Typography Scale" headingLevel={2}>
           <p className="text-body-md text-fg-muted mb-6">
-            Space Grotesk powers display titles and telemetry numerals; Inter serves body and form controls;
-            JetBrains Mono handles code blocks.
+            Space Grotesk gives maker headlines personality; Inter provides effortless social reading comfort; JetBrains Mono renders embedded code blocks cleanly.
           </p>
 
           <div className="divide-y divide-hairline">
@@ -258,66 +239,60 @@ export default function DesignSystemPage() {
                 <div className="flex-1 break-words">
                   {token === 'display-hero' && (
                     <div className="font-display text-display-hero text-fg leading-none">
-                      Build Together
+                      Build in the open
                     </div>
                   )}
                   {token === 'display-hero-mobile' && (
                     <div className="font-display text-display-hero-mobile text-fg">
-                      Build Together
+                      Build in the open
                     </div>
                   )}
                   {token === 'headline-xl' && (
                     <div className="font-display text-headline-xl text-fg">
-                      Open Innovation Network
+                      Where India&apos;s makers hang out
                     </div>
                   )}
                   {token === 'headline-xl-mobile' && (
                     <div className="font-display text-headline-xl-mobile text-fg">
-                      Open Innovation
+                      Community Square
                     </div>
                   )}
                   {token === 'headline-lg' && (
-                    <div className="font-display text-headline-lg text-fg">Mission Control Telemetry</div>
+                    <div className="font-display text-headline-lg text-fg">Trending Builds Today</div>
                   )}
                   {token === 'headline-md' && (
-                    <div className="font-display text-headline-md text-fg">Squad Lead Roster</div>
+                    <div className="font-display text-headline-md text-fg">People to Follow</div>
                   )}
                   {token === 'headline-sm' && (
-                    <div className="font-display text-headline-sm text-fg">Autonomous Systems</div>
+                    <div className="font-display text-headline-sm text-fg">Wind Tunnel Test Log</div>
                   )}
                   {token === 'body-lg' && (
                     <div className="text-body-lg text-fg">
-                      Large body text for hero introductions and manifesto declarations.
+                      Friendly readable intro prose for community stories and showcases.
                     </div>
                   )}
                   {token === 'body-md' && (
                     <div className="text-body-md text-fg">
-                      Standard paragraph text with comfortable line-height for readability on dark surfaces.
+                      Standard feed post body text tuned for crisp contrast on white cards.
                     </div>
                   )}
                   {token === 'body-sm' && (
                     <div className="text-body-sm text-fg-muted">
-                      Compact body text for secondary metadata, descriptions, and captions.
+                      Compact text for handles, replies, and timestamps.
                     </div>
                   )}
                   {token === 'label-lg' && (
-                    <div className="font-display text-label-lg uppercase text-fg">
-                      STATUS ACTIVE · ALL SYSTEMS NOMINAL
-                    </div>
+                    <div className="font-display text-label-lg text-fg">Publish Build Update</div>
                   )}
                   {token === 'label-md' && (
-                    <div className="font-display text-label-md uppercase text-fg-muted">
-                      TELEMETRY FREQUENCY 1420 MHZ
-                    </div>
+                    <div className="font-display text-label-md text-fg-muted">142 Reactions · 18 Replies</div>
                   )}
                   {token === 'label-sm' && (
-                    <div className="font-display text-label-sm uppercase text-fg-subtle">
-                      VERIFIED NODE · 2026-11-14
-                    </div>
+                    <div className="font-display text-label-sm text-fg-subtle">Shipped 2h ago</div>
                   )}
                   {token === 'code-inline' && (
-                    <div className="font-mono text-code-inline text-accent-fg bg-sunken px-2 py-0.5 rounded inline-block">
-                      npm install @hackerland/core
+                    <div className="font-mono text-code-inline text-accent-fg bg-sunken px-2.5 py-0.5 rounded-lg inline-block">
+                      git push origin main
                     </div>
                   )}
                 </div>
@@ -329,46 +304,35 @@ export default function DesignSystemPage() {
 
       {/* 4. Buttons */}
       <div id="buttons" className="scroll-mt-20">
-        <Panel title="Buttons & Actions" headingLevel={2}>
+        <Panel title="Buttons & Social Actions" headingLevel={2}>
           <div className="space-y-6">
             <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">Variants</h3>
+              <h3 className="font-display text-label-md text-fg-muted mb-3">Variants</h3>
               <div className="flex flex-wrap gap-3 items-center">
-                <Button variant="primary">Primary (Cyan)</Button>
-                <Button variant="secondary">Secondary</Button>
-                <Button variant="ghost">Ghost</Button>
-                <Button variant="make">Make (Amber)</Button>
-                <Button variant="earn">Earn (Emerald)</Button>
-                <Button variant="danger">Danger</Button>
+                <Button variant="primary">Post Update (Pink)</Button>
+                <Button variant="soft">Follow Maker</Button>
+                <Button variant="secondary">Comment</Button>
+                <Button variant="ghost">Share</Button>
+                <Button variant="make">Submit Build</Button>
+                <Button variant="earn">Claim Bounty</Button>
+                <Button variant="danger">Report</Button>
               </div>
             </div>
 
             <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">Sizes</h3>
+              <h3 className="font-display text-label-md text-fg-muted mb-3">States & Icon Actions</h3>
               <div className="flex flex-wrap gap-3 items-center">
-                <Button size="sm">Small (36px)</Button>
-                <Button size="md">Medium (44px)</Button>
-                <Button size="lg">Large (52px)</Button>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">States</h3>
-              <div className="flex flex-wrap gap-3 items-center">
-                <Button variant="primary" loading>
-                  Loading
+                <Button variant="primary" size="sm" loading>
+                  Publishing
                 </Button>
-                <Button variant="primary" disabled>
-                  Disabled
-                </Button>
-                <Button variant="secondary" disabled>
-                  Disabled Secondary
+                <Button variant="secondary" size="sm" disabled>
+                  Following
                 </Button>
                 <IconButton label="Notifications">
                   <Bell />
                 </IconButton>
-                <IconButton label="Popular">
-                  <Flame />
+                <IconButton label="Like post" variant="secondary">
+                  <Heart className="text-accent" />
                 </IconButton>
               </div>
             </div>
@@ -378,11 +342,11 @@ export default function DesignSystemPage() {
 
       {/* 5. Badges & Chips */}
       <div id="badges-chips" className="scroll-mt-20">
-        <Panel title="Badges & Chips" headingLevel={2}>
+        <Panel title="Social Pills, Hashtags & Filters" headingLevel={2}>
           <div className="space-y-6">
             <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">
-                Badges (Outline & Solid)
+              <h3 className="font-display text-label-md text-fg-muted mb-3">
+                Badges (Soft Outline & Solid Pink)
               </h3>
               <div className="flex flex-wrap gap-2 items-center">
                 {TRACK_TONES.map((t) => (
@@ -399,61 +363,62 @@ export default function DesignSystemPage() {
             </div>
 
             <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">
-                Chips & Filter Chips
+              <h3 className="font-display text-label-md text-fg-muted mb-3">
+                Topics & Timeline Filters
               </h3>
               <div className="flex flex-wrap gap-3 items-center">
-                <Chip>Default Skill</Chip>
-                <Chip tone="accent">Accent Chip</Chip>
-                <Chip tone="make">Make Chip</Chip>
-                <FilterChip selected={false}>Unselected Filter</FilterChip>
-                <FilterChip selected={true}>Selected Filter</FilterChip>
+                <Chip>#open-hardware</Chip>
+                <Chip tone="accent">#pink-design</Chip>
+                <Chip tone="make">#robotics</Chip>
+                <FilterChip selected={true}>For You</FilterChip>
+                <FilterChip selected={false}>Following</FilterChip>
+                <FilterChip selected={false}>Showcases</FilterChip>
               </div>
             </div>
           </div>
         </Panel>
       </div>
 
-      {/* 6. Form Controls */}
+      {/* 6. Forms */}
       <div id="forms" className="scroll-mt-20">
-        <Panel title="Form Controls" headingLevel={2}>
+        <Panel title="Composer & Search Controls" headingLevel={2}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
-            <div>
-              <Label htmlFor="demo-input">Standard Input</Label>
-              <Input
-                id="demo-input"
-                placeholder="Autonomous sensor node"
-                defaultValue="KiCad 8.0 PCB Design"
+            <div className="md:col-span-2">
+              <Label htmlFor="demo-search">Pill Search Bar</Label>
+              <SearchField
+                id="demo-search"
+                placeholder="Search builders, projects, #tags, or bounties..."
                 className="mt-1.5"
               />
             </div>
 
             <div>
-              <Label htmlFor="demo-invalid">Invalid State</Label>
+              <Label htmlFor="demo-input">Input</Label>
+              <Input
+                id="demo-input"
+                placeholder="What did you build?"
+                defaultValue="STM32H7 Flight Controller Rev B"
+                className="mt-1.5"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="demo-invalid">Validation Error</Label>
               <Input
                 id="demo-invalid"
-                placeholder="name@domain.com"
-                defaultValue="invalid-email-format"
+                placeholder="@handle"
+                defaultValue="invalid handle"
                 invalid
                 className="mt-1.5"
               />
             </div>
 
             <div className="md:col-span-2">
-              <Label htmlFor="demo-search">Search Field</Label>
-              <SearchField
-                id="demo-search"
-                placeholder="Search projects, squad leads, roadmaps..."
-                className="mt-1.5"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <Label htmlFor="demo-textarea">Textarea</Label>
+              <Label htmlFor="demo-textarea">Social Composer Box</Label>
               <Textarea
                 id="demo-textarea"
                 rows={3}
-                placeholder="Enter project specifications or mission brief..."
+                placeholder="Share a quick build photo log, milestone, or question with the community..."
                 className="mt-1.5"
               />
             </div>
@@ -461,269 +426,131 @@ export default function DesignSystemPage() {
         </Panel>
       </div>
 
-      {/* 7. Data Display */}
-      <div id="data-display" className="scroll-mt-20">
-        <Panel title="Data Display" headingLevel={2}>
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">KPI Tiles</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatTile label="Active Nodes" value="1,248" hint="+14% this month" tone="accent" />
-                <StatTile label="Bounties Paid" value="₹12.4L" hint="Direct UPI/Bank" tone="earn" />
-                <StatTile label="Squads" value="84" hint="Across 6 tracks" tone="make" />
-                <StatTile label="Reputation Pool" value="48,200" hint="Append-only ledger" />
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">Progress Indicators</h3>
-              <div className="space-y-4 max-w-xl">
-                <div>
-                  <div className="text-body-sm text-fg-muted mb-1.5">Sprint Goal Funding</div>
-                  <ProgressBar value={68} max={100} label="Goal progress" showValue tone="accent" />
-                </div>
-                <div>
-                  <div className="text-body-sm text-fg-muted mb-1.5">Roadmap Stages (3 of 5 complete)</div>
-                  <SegmentedProgress total={5} completed={3} label="Milestones" tone="earn" />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">Avatars & Groups</h3>
-              <div className="flex items-center gap-6">
-                <Avatar name="Meera Iyer" size="lg" tone="code" />
-                <Avatar name="Kavya Subramaniam" size="md" tone="make" />
-                <Avatar name="Rohan Sharma" size="sm" tone="design" />
-                <AvatarGroup
-                  people={[
-                    { name: 'Aarav Patel' },
-                    { name: 'Divya Rao' },
-                    { name: 'Vikram Seth' },
-                    { name: 'Ananya Gupta' },
-                    { name: 'Pooja Hegde' },
-                  ]}
-                  max={3}
-                />
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">Code Block</h3>
-              <CodeBlock
-                filename="apps/web/src/lib/auth.ts"
-                language="typescript"
-                code={`import { isAuthConfigured, getAuth } from '@/lib/auth';\n\nexport async function GET(req: Request) {\n  if (!isAuthConfigured()) {\n    return Response.json({ error: 'auth_not_configured' }, { status: 503 });\n  }\n  return toNextJsHandler(getAuth()).GET(req);\n}`}
-              />
-            </div>
-
-            <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">Miscellaneous</h3>
-              <div className="flex items-center gap-4">
-                <StatusDot pulse label="Live" tone="accent" />
-                <StatusDot label="Syncing" tone="warning" />
-                <span className="text-body-sm text-fg-muted">
-                  Press <Kbd>⌘</Kbd> <Kbd>K</Kbd> to open quick search.
-                </span>
-              </div>
-            </div>
-          </div>
-        </Panel>
-      </div>
-
-      {/* 8. Layout */}
+      {/* 7. Layout */}
       <div id="layout" className="scroll-mt-20">
-        <Panel title="Layout & Surfaces" headingLevel={2}>
+        <Panel title="Feed Cards & Social Building Blocks" headingLevel={2}>
           <div className="space-y-6">
-            <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">Section Header</h3>
-              <SectionHeader
-                eyebrow="TELEMETRY HUB"
-                title="Universal Discovery Feed"
-                description="Live updates, Q&A discussions, and squad recruitments across the network."
-                action={<Button variant="primary">New Post</Button>}
-              />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatTile label="Active Makers" value="2,480" hint="+18% this week" tone="accent" />
+              <StatTile label="Bounties Paid" value="₹12.4L" hint="Verified escrow" tone="earn" />
+              <StatTile label="Live Squads" value="84" hint="Across 6 channels" tone="make" />
+              <StatTile label="Posts Today" value="312" hint="Build logs & Q&A" />
             </div>
 
-            <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">Card Variants</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card interactive accent="code">
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <Badge tone="code">Code</Badge>
-                      <span className="font-mono text-label-sm text-fg-subtle">v0.4.0</span>
-                    </div>
-                    <h4 className="font-display text-headline-sm text-fg mt-2">
-                      Autonomous Flight Computer
-                    </h4>
-                  </CardHeader>
-                  <CardBody>
-                    <p className="text-body-sm text-fg-muted">
-                      Dual-core Cortex-M4 flight controller running real-time navigation telemetry.
-                    </p>
-                  </CardBody>
-                  <CardFooter>
-                    <span className="text-body-sm text-fg-subtle">Updated 2h ago</span>
-                  </CardFooter>
-                </Card>
+            <SectionHeader
+              eyebrow="Community Feed"
+              title="Fresh builds from Makers"
+              description="Live progress notes, demos, and questions shared by builders right now."
+              action={<Button variant="primary">New Post</Button>}
+            />
 
-                <Card interactive accent="earn">
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <Badge tone="earn">Bounty</Badge>
-                      <span className="font-display font-semibold text-earn">₹40,000</span>
-                    </div>
-                    <h4 className="font-display text-headline-sm text-fg mt-2">
-                      Optimize CAN Bus Decoder
-                    </h4>
-                  </CardHeader>
-                  <CardBody>
-                    <p className="text-body-sm text-fg-muted">
-                      Rewrite the frame parser in Rust with zero memory allocations on embedded hardware.
-                    </p>
-                  </CardBody>
-                  <CardFooter>
-                    <span className="text-body-sm text-fg-subtle">4 applicants</span>
-                  </CardFooter>
-                </Card>
-              </div>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card interactive accent="accent">
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <Badge tone="accent">Showcase</Badge>
+                    <span className="text-body-sm text-fg-subtle">2h ago</span>
+                  </div>
+                  <h4 className="font-display text-headline-sm text-fg mt-2">
+                    OpenBraille 40-Cell Tactile Display
+                  </h4>
+                </CardHeader>
+                <CardBody>
+                  <p className="text-body-sm text-fg-muted">
+                    Hit $68 BOM cost using recycled PLA and custom 5V micro-solenoid latches!
+                  </p>
+                </CardBody>
+                <CardFooter className="justify-between text-fg-subtle text-body-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="text-accent-fg font-medium">67 Likes</span>
+                    <span>14 Comments</span>
+                  </div>
+                  <AvatarGroup
+                    people={[
+                      { name: 'Zoya Khan' },
+                      { name: 'Lena Fischer' },
+                      { name: 'Kabir Shah' },
+                    ]}
+                    max={3}
+                  />
+                </CardFooter>
+              </Card>
 
-            <div>
-              <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">Empty State</h3>
               <EmptyState
                 icon={<Sparkles />}
-                title="No active squad applications"
-                description="You have not submitted any join requests yet. Browse open roles in the Projects directory."
-                action={<Button variant="secondary">Explore Projects</Button>}
+                title="No saved bookmarks yet"
+                description="Tap Bookmark on any community post or build log to save it for later."
+                action={<Button variant="soft">Browse Feed</Button>}
               />
             </div>
+
+            <div className="space-y-3 max-w-xl">
+              <div className="text-body-sm text-fg-muted">Milestone Progress</div>
+              <ProgressBar value={74} max={100} label="Funding progress" showValue tone="accent" />
+              <SegmentedProgress total={5} completed={4} label="Build stages" tone="accent" />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <Avatar name="Dr. Meera Iyer" size="lg" tone="design" />
+              <Avatar name="Kabir Shah" size="md" tone="code" />
+              <StatusDot pulse label="Online now" tone="accent" />
+              <span className="text-body-sm text-fg-muted">
+                Quick search: <Kbd>⌘</Kbd> <Kbd>K</Kbd>
+              </span>
+            </div>
+
+            <CodeBlock
+              filename="post-stream.ts"
+              language="typescript"
+              code={`const post = await feed.publish({\n  kind: 'showcase',\n  theme: 'pink-white',\n  tags: ['open-hardware', 'build-in-public'],\n});`}
+            />
           </div>
         </Panel>
       </div>
 
-      {/* 9. Navigation */}
+      {/* 8. Navigation & Guidelines */}
       <div id="navigation" className="scroll-mt-20">
-        <Panel title="Navigation" headingLevel={2}>
+        <Panel title="Segmented Navigation & Tabs" headingLevel={2}>
           <div className="max-w-xl">
-            <h3 className="font-display text-label-md uppercase text-fg-muted mb-3">Tabs Component</h3>
-            <Tabs defaultValue="overview">
-              <TabsList label="Project sections">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="squad">Squad & Roles</TabsTrigger>
-                <TabsTrigger value="resources">BOM & Parts</TabsTrigger>
+            <Tabs defaultValue="foryou">
+              <TabsList label="Timeline tabs">
+                <TabsTrigger value="foryou">For You</TabsTrigger>
+                <TabsTrigger value="following">Following</TabsTrigger>
+                <TabsTrigger value="squads">Squad Calls</TabsTrigger>
               </TabsList>
-              <TabsContent value="overview" className="mt-4 rounded-md border border-hairline bg-surface-2 p-4">
-                <p className="text-body-md text-fg">
-                  Overview content: High-level architectural milestones, team objectives, and timeline.
-                </p>
+              <TabsContent value="foryou" className="mt-4 rounded-2xl border border-hairline bg-surface-1 p-4">
+                <p className="text-body-md text-fg">Curated stream of trending maker posts, questions, and demos.</p>
               </TabsContent>
-              <TabsContent value="squad" className="mt-4 rounded-md border border-hairline bg-surface-2 p-4">
-                <p className="text-body-md text-fg">
-                  Squad roster and open engineering roles available for recruitment.
-                </p>
+              <TabsContent value="following" className="mt-4 rounded-2xl border border-hairline bg-surface-1 p-4">
+                <p className="text-body-md text-fg">Updates strictly from makers and projects you follow.</p>
               </TabsContent>
-              <TabsContent value="resources" className="mt-4 rounded-md border border-hairline bg-surface-2 p-4">
-                <p className="text-body-md text-fg">
-                  Bill of materials, CAD files, KiCad schematics, and component suppliers.
-                </p>
+              <TabsContent value="squads" className="mt-4 rounded-2xl border border-hairline bg-surface-1 p-4">
+                <p className="text-body-md text-fg">Teams actively looking for engineers, designers, and makers.</p>
               </TabsContent>
             </Tabs>
           </div>
         </Panel>
       </div>
 
-      {/* 9. Design System Rules & Guidelines */}
       <div id="rules" className="scroll-mt-20">
-        <Panel title="Design System Governance & Rules for Contributors" headingLevel={2}>
-          <div className="space-y-6 text-body-md text-fg-muted max-w-4xl">
-            <p>
-              To maintain absolute visual cohesion across the Hackerland platform, all engineers, agents, and community contributors must adhere strictly to these architectural contracts:
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-md border border-danger/40 bg-danger/5 p-4 space-y-2">
-                <span className="font-display font-semibold text-danger flex items-center gap-2 text-headline-sm">
-                  ✕ STRICTLY PROHIBITED (DON&apos;T)
-                </span>
-                <ul className="space-y-1.5 text-body-sm text-fg-muted list-disc list-inside">
-                  <li><strong className="text-fg">Zero Raw Hex Values:</strong> Never write raw hex colors like <code className="font-mono text-danger-fg">#0A0E17</code>, <code className="font-mono text-danger-fg">#00E5FF</code>, or hardcoded utility colors like <code className="font-mono text-danger-fg">bg-white</code>, <code className="font-mono text-danger-fg">text-black</code>, <code className="font-mono text-danger-fg">bg-gray-900</code>.</li>
-                  <li><strong className="text-fg">No Arbitrary Fixed Widths:</strong> Avoid hardcoded widths (e.g., <code className="font-mono text-danger-fg">w-[600px]</code>) that induce horizontal scrolling on 390px mobile screens.</li>
-                  <li><strong className="text-fg">No Age Profiling:</strong> Never display numeric age (&quot;Age 16&quot;) anywhere on profiles or posts (statutory violation of India&apos;s DPDP Act 2023).</li>
-                </ul>
-              </div>
-
-              <div className="rounded-md border border-success/40 bg-success/5 p-4 space-y-2">
-                <span className="font-display font-semibold text-success-fg flex items-center gap-2 text-headline-sm">
-                  ✓ MANDATORY PRACTICES (DO)
-                </span>
-                <ul className="space-y-1.5 text-body-sm text-fg-muted list-disc list-inside">
-                  <li><strong className="text-fg">Semantic Color Utilities:</strong> Use <code className="font-mono text-success-fg">bg-canvas</code>, <code className="font-mono text-success-fg">bg-surface-1</code>, <code className="font-mono text-success-fg">text-fg</code>, <code className="font-mono text-success-fg">text-fg-muted</code>, and <code className="font-mono text-success-fg">border-hairline</code>. They adapt between Dark and Day modes automatically.</li>
-                  <li><strong className="text-fg">Responsive Containment:</strong> Always add <code className="font-mono text-success-fg">min-w-0</code> and <code className="font-mono text-success-fg">[overflow-wrap:anywhere]</code> on cards and textual headers.</li>
-                  <li><strong className="text-fg">Opt-in Experience Badges:</strong> Display skills and self-selected badges (&quot;Student&quot;, &quot;Maker&quot;, &quot;Lab Node Lead&quot;).</li>
-                </ul>
-              </div>
+        <Panel title="Design System Governance Rules" headingLevel={2}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-body-sm text-fg-muted">
+            <div className="rounded-2xl border border-danger/25 bg-danger/5 p-4 space-y-2">
+              <span className="font-display font-semibold text-danger-fg text-headline-sm">Don&apos;t</span>
+              <ul className="space-y-1.5 list-disc list-inside">
+                <li>Never hardcode raw hex codes (`#FA1681`, `#FFFFFF`, `#000000`) inside components.</li>
+                <li>Avoid heavy dark sci-fi HUD boxes on community pages.</li>
+                <li>Never display numeric age badges (India DPDP Act 2023 safety compliance).</li>
+              </ul>
             </div>
-
-            <div className="space-y-3 pt-2">
-              <h3 className="font-display text-headline-sm text-fg">Canonical Component Usage</h3>
-              <CodeBlock
-                language="tsx"
-                filename="widget.tsx"
-                code={`import { Card, CardHeader, CardBody, Badge, Button } from '@hackerland/ui';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
-
-export function ExampleWidget() {
-  return (
-    <Card accent="make" className="min-w-0">
-      <CardHeader className="flex justify-between items-center">
-        <h3 className="font-display text-headline-sm text-fg">Avionics Telemetry Node</h3>
-        <Badge tone="make" variant="outline">Hardware</Badge>
-      </CardHeader>
-      <CardBody className="space-y-4">
-        <p className="text-body-md text-fg-muted [overflow-wrap:anywhere]">
-          Fabricating open flight controller with CAN bus telemetry.
-        </p>
-        <div className="flex gap-2">
-          <Button variant="primary">Claim Bounty</Button>
-          <ThemeToggle />
-        </div>
-      </CardBody>
-    </Card>
-  );
-}`}
-              />
+            <div className="rounded-2xl border border-success/25 bg-success/5 p-4 space-y-2">
+              <span className="font-display font-semibold text-success-fg text-headline-sm">Do</span>
+              <ul className="space-y-1.5 list-disc list-inside">
+                <li>Use `bg-canvas`, `bg-surface-1`, `text-fg`, `text-accent-fg`, `border-hairline`.</li>
+                <li>Use pill buttons (`rounded-full`) and cozy cards (`rounded-2xl`) for a welcoming social UX.</li>
+                <li>Always include `min-w-0` and `break-words` so mobile viewports stay overflow-free.</li>
+              </ul>
             </div>
-          </div>
-        </Panel>
-      </div>
-
-      {/* 10. Motion & Accessibility */}
-      <div id="motion-a11y" className="scroll-mt-20">
-        <Panel title="Motion & Accessibility Notes" headingLevel={2}>
-          <div className="space-y-4 text-body-md text-fg-muted max-w-3xl">
-            <p>
-              <strong className="text-fg font-semibold">Touch Target Minimum:</strong> All interactive
-              elements (buttons, filter chips, icon controls) respect a minimum hit area of 44×44px on
-              touch devices to guarantee reliable manipulation.
-            </p>
-            <p>
-              <strong className="text-fg font-semibold">Contrast Standards:</strong> Muted text
-              (<code className="font-mono text-accent-fg">--color-fg-muted</code>, #A9B6CC) guarantees at least
-              4.5:1 contrast against the darkest canvas background (#0A0E17). Primary text achieves &gt; 13:1.
-            </p>
-            <p>
-              <strong className="text-fg font-semibold">Reduced Motion:</strong> Ambient pulses and
-              transitions automatically degrade gracefully when{' '}
-              <code className="font-mono text-accent-fg">prefers-reduced-motion: reduce</code> is signaled
-              by the user operating system.
-            </p>
-            <p>
-              <strong className="text-fg font-semibold">Focus Halos:</strong> Interactive components render
-              emissive neon cyan focus rings exclusively on keyboard interaction (<code className="font-mono text-accent-fg">:focus-visible</code>),
-              preventing visual distraction during standard pointer clicks while ensuring full WCAG compliance.
-            </p>
           </div>
         </Panel>
       </div>

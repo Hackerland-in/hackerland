@@ -144,10 +144,10 @@ export function CreatePostModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="create-post-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/80 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-fg/35 backdrop-blur-sm animate-in fade-in duration-150"
     >
       <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto min-w-0">
-        <Card className="shadow-overlay border-line min-w-0">
+        <Card className="shadow-overlay border-hairline min-w-0">
           <form onSubmit={handleSubmit}>
             <CardHeader className="flex flex-row items-center justify-between border-b border-hairline pb-4">
               <div>

@@ -31,14 +31,16 @@ export function SectionHeader({
     <div className={cn('flex flex-col gap-4 md:flex-row md:items-end md:justify-between', className)}>
       <div className="min-w-0 max-w-3xl">
         {eyebrow ? (
-          <p className="mb-2 flex items-center gap-2 font-display text-label-sm uppercase text-accent-fg">
+          <p className="mb-2 inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 font-display text-label-sm text-accent-fg">
             <StatusDot tone="accent" />
-            {eyebrow}
+            <span>{eyebrow}</span>
           </p>
         ) : null}
-        <Heading className={cn('font-display text-fg break-words', titleSize[size])}>{title}</Heading>
+        <Heading className={cn('font-display text-fg break-words tracking-tight', titleSize[size])}>
+          {title}
+        </Heading>
         {description ? (
-          <p className="mt-3 text-body-md text-fg-muted md:text-body-lg">{description}</p>
+          <p className="mt-2.5 text-body-md text-fg-muted md:text-body-lg">{description}</p>
         ) : null}
       </div>
       {action ? <div className="flex shrink-0 flex-wrap gap-3">{action}</div> : null}

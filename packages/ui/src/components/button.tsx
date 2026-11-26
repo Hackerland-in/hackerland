@@ -6,7 +6,7 @@ import { cn } from '../cn';
 
 export const buttonVariants = cva(
   [
-    'inline-flex shrink-0 select-none items-center justify-center gap-2 whitespace-nowrap rounded-sm',
+    'inline-flex shrink-0 select-none items-center justify-center gap-2 whitespace-nowrap rounded-full',
     'font-display font-semibold transition-[background-color,border-color,color,box-shadow,transform]',
     'duration-150 ease-out active:scale-[.98] motion-reduce:active:scale-100',
     'disabled:pointer-events-none disabled:opacity-50',
@@ -16,18 +16,19 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-accent text-on-solid hover:bg-accent-strong hover:shadow-glow-accent',
+        primary: 'bg-accent text-on-solid shadow-xs hover:bg-accent-strong hover:shadow-glow-accent',
         secondary:
-          'border border-line bg-transparent text-fg hover:border-accent hover:bg-accent/8',
+          'border border-line bg-surface-1 text-fg hover:border-accent/40 hover:bg-accent/5 hover:text-accent-fg',
+        soft: 'bg-accent/10 text-accent-fg hover:bg-accent/15',
         ghost: 'bg-transparent text-fg-muted hover:bg-surface-2 hover:text-fg',
         make: 'bg-make text-on-solid hover:shadow-glow-make',
         earn: 'bg-earn text-on-solid hover:shadow-glow-earn',
-        danger: 'bg-danger text-fg hover:bg-danger/90',
+        danger: 'bg-danger text-on-solid hover:bg-danger/90',
       },
       size: {
-        sm: 'h-9 px-3 text-body-sm',
-        md: 'h-11 px-4 text-label-lg',
-        lg: 'h-13 px-6 text-body-lg',
+        sm: 'h-9 px-3.5 text-body-sm',
+        md: 'h-11 px-5 text-label-lg',
+        lg: 'h-12 px-6 text-body-lg',
       },
     },
     defaultVariants: { variant: 'primary', size: 'md' },

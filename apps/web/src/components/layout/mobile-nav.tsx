@@ -2,29 +2,31 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Compass, FolderKanban, Plus, Cpu, User } from 'lucide-react';
+import { Home, Flame, Plus, FolderKanban, User } from 'lucide-react';
 import { cn } from '@hackerland/ui';
 
 export function MobileNav() {
   const pathname = usePathname();
 
   const items = [
-    { href: '/feed', label: 'Feed', icon: Compass },
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/feed', label: 'Feed', icon: Flame },
+    { href: '/new', label: 'Post', icon: Plus, isAction: true },
     { href: '/projects', label: 'Projects', icon: FolderKanban },
-    { href: '/new', label: 'Start', icon: Plus, isAction: true },
-    { href: '/manufacturing', label: 'Hardware', icon: Cpu },
     { href: '/profile', label: 'Profile', icon: User },
   ];
 
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 flex h-[calc(4rem+env(safe-area-inset-bottom,0px))] items-center justify-around border-t border-hairline bg-canvas/95 backdrop-blur md:hidden px-2 pb-[env(safe-area-inset-bottom,0px)]"
+      className="fixed bottom-0 left-0 right-0 z-40 flex h-[calc(4rem+env(safe-area-inset-bottom,0px))] items-center justify-around border-t border-hairline bg-surface-1/95 backdrop-blur-md md:hidden px-2 pb-[env(safe-area-inset-bottom,0px)] shadow-overlay"
     >
       {items.map((item) => {
         const Icon = item.icon;
         const isActive =
-          pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+          item.href === '/'
+            ? pathname === '/'
+            : pathname === item.href || pathname.startsWith(item.href);
 
         if (item.isAction) {
           return (
@@ -45,12 +47,12 @@ export function MobileNav() {
             href={item.href}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-2 py-1 transition-colors',
-              isActive ? 'text-accent' : 'text-fg-subtle hover:text-fg'
+              'flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-2 py-1 rounded-xl transition-colors',
+              isActive ? 'text-accent-fg font-semibold' : 'text-fg-subtle hover:text-fg',
             )}
           >
             <Icon className="h-5 w-5" aria-hidden="true" />
-            <span className="text-label-sm font-display mt-0.5">{item.label}</span>
+            <span className="text-[11px] font-display mt-0.5">{item.label}</span>
           </Link>
         );
       })}

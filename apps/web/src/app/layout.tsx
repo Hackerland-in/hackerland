@@ -26,7 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: '#0A0B0E',
+  themeColor: '#FA1681',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -37,20 +37,17 @@ export const metadata: Metadata = {
   applicationName: 'Hackerland',
   title: {
     template: '%s · Hackerland',
-    default: 'Hackerland: Open Hardware, PCB Studio & Innovation Network',
+    default: 'Hackerland · Builder Community, Open Hardware & Squad Network',
   },
   description:
-    'Open-source hardware & electronics innovation network. Design PCBs with real-time SPICE circuit simulation, Veroboard track cuts, 3D WebGL physics labs, and earn through hardware bounties and grants.',
+    'Social community where makers, engineers, students, designers, and researchers share what they are building, assemble squads, and earn bounties.',
   keywords: [
+    'Maker Community India',
+    'Open Hardware Social Network',
+    'Hardware Bounties India',
+    'Build in Public Community',
     'PCB Design Online',
     'Real-time Circuit Simulator',
-    'Veroboard Stripboard Simulator',
-    'SPICE Simulation in Browser',
-    'Open Hardware Network',
-    'Hardware Bounties India',
-    '3D WebGL Physics Labs',
-    'RS-274X Gerber Exporter',
-    'KiCad Netlist',
     'Makerspace India',
     'Electronics Prototyping',
   ],
@@ -62,23 +59,23 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: 'https://www.hackerland.in',
     siteName: 'Hackerland',
-    title: 'Hackerland · Open Hardware, PCB Studio & Innovation Network',
+    title: 'Hackerland · Build Together Community',
     description:
-      'Design PCBs with live SPICE simulation, slice Veroboard strips, inspect 3D physics labs, and collaborate with hardware innovators across India.',
+      'Discover what makers are shipping today, join hardware & software squads, ask engineering questions, and earn bounties.',
     images: [
       {
         url: '/images/logo1.png',
         width: 1200,
         height: 630,
-        alt: 'Hackerland - Open Hardware Innovation Network',
+        alt: 'Hackerland Community',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Hackerland · Build Together, Earn Together',
+    title: 'Hackerland · Build Together Community',
     description:
-      'Open-source hardware & electronics studio with live SPICE circuit simulation, Veroboard, and hardware bounties.',
+      'Open community for makers, students, engineers, and designers building hardware & software in public.',
     images: ['/images/logo1.png'],
     creator: '@hackerland_in',
   },
@@ -102,7 +99,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
     title: 'Hackerland',
   },
 };
@@ -116,7 +113,7 @@ const jsonLd = {
       name: 'Hackerland',
       url: 'https://www.hackerland.in',
       logo: 'https://www.hackerland.in/logo.png',
-      description: 'Open-source hardware and electronics innovation network for students, makers, and innovators.',
+      description: 'Community and open innovation network for students, makers, engineers, and builders.',
       sameAs: [
         'https://github.com/Hackerland-in',
         'https://x.com/hackerland_in',
@@ -134,36 +131,22 @@ const jsonLd = {
         'query-input': 'required name=search_term_string',
       },
     },
-    {
-      '@type': 'SoftwareApplication',
-      '@id': 'https://www.hackerland.in/manufacturing/pcb#app',
-      name: 'Hackerland PCB & Real-Time Circuit Studio',
-      applicationCategory: 'EngineeringApplication',
-      operatingSystem: 'All',
-      url: 'https://www.hackerland.in/manufacturing/pcb',
-      description: 'Browser-based electronic design automation tool with real-time SPICE circuit simulation, Veroboard track cutter, 3D WebGL viewer, and Gerber RS-274X export.',
-      offers: {
-        '@type': 'Offer',
-        price: '0.00',
-        priceCurrency: 'USD',
-      },
-    },
   ],
 };
 
 const themeScript = `(function() {
   try {
     var saved = localStorage.getItem('hackerland-theme');
-    var isLight = saved === 'light';
+    var isDark = saved === 'dark';
     var root = document.documentElement;
-    if (isLight) {
-      root.setAttribute('data-theme', 'light');
-      root.classList.remove('dark');
-      root.classList.add('light');
-    } else {
+    if (isDark) {
       root.setAttribute('data-theme', 'dark');
       root.classList.remove('light');
       root.classList.add('dark');
+    } else {
+      root.setAttribute('data-theme', 'light');
+      root.classList.remove('dark');
+      root.classList.add('light');
     }
   } catch (e) {}
 })();`;
@@ -176,9 +159,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="dark"
+      data-theme="light"
       suppressHydrationWarning
-      className={`dark ${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`light ${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

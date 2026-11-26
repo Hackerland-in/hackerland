@@ -1,155 +1,82 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import {
-  EmptyState,
-  FilterChip,
-  Panel,
-  SectionHeader,
-  Button,
-} from '@hackerland/ui';
 import { POST_KINDS, parseEnum } from '@hackerland/core';
-import { Sparkles, Trophy, Rocket } from 'lucide-react';
-import { getFeed, listOpportunities, listProjects } from '@/lib/data/queries';
-import { PostCard } from '@/components/domain/post-card';
-import { OpportunityCard } from '@/components/domain/opportunity-card';
-import { ProjectCard } from '@/components/domain/project-card';
-import { CreatePostTrigger } from './create-post-trigger';
+import {
+  getFeed,
+  getPlatformStats,
+  listOpportunities,
+  listProjects,
+} from '@/lib/data/queries';
+import { ALL_PEOPLE } from '@/lib/data/fixtures/people';
+import { SocialCommunityProvider } from '@/components/social/social-context';
+import { SocialShell } from '@/components/social/social-shell';
+import { SocialFeedStream } from '@/components/social/social-feed-stream';
+import { CommunityRightRail } from '@/components/social/community-right-rail';
+import { Flame } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Community Feed',
   description:
-    'Discover what innovators, engineers, and makers are building across hardware, software, and deep-tech.',
+    'Discover what makers, engineers, and builders are sharing across hardware, robotics, software, and open projects.',
 };
 
 interface FeedPageProps {
   searchParams: Promise<{
     kind?: string | string[];
+    tag?: string | string[];
   }>;
 }
-
-const FILTER_ITEMS = [
-  { kind: undefined, label: 'All', href: '/feed' },
-  { kind: 'update' as const, label: 'Build logs', href: '/feed?kind=update' },
-  { kind: 'showcase' as const, label: 'Showcases', href: '/feed?kind=showcase' },
-  { kind: 'question' as const, label: 'Questions', href: '/feed?kind=question' },
-  { kind: 'squad-call' as const, label: 'Squad calls', href: '/feed?kind=squad-call' },
-];
 
 export default async function FeedPage({ searchParams }: FeedPageProps) {
   const resolvedParams = await searchParams;
   const rawKind = Array.isArray(resolvedParams.kind)
     ? resolvedParams.kind[0]
     : resolvedParams.kind;
+  const rawTag = Array.isArray(resolvedParams.tag)
+    ? resolvedParams.tag[0]
+    : resolvedParams.tag;
+
   const activeKind = parseEnum(POST_KINDS, rawKind);
 
-  // Fetch feed posts and right-rail widgets
-  const [posts, opportunities, projects] = await Promise.all([
-    getFeed(activeKind),
+  const [posts, opportunities, projects, stats] = await Promise.all([
+    getFeed(),
     listOpportunities('bounty'),
     listProjects(),
+    getPlatformStats(),
   ]);
 
-  const topBounties = opportunities.slice(0, 3);
-  const squadOfTheWeek = projects[0];
-
   return (
-    <div className="mx-auto max-w-page px-4 py-8 md:px-6 md:py-12 space-y-8 min-w-0">
-      {/* Page Header */}
-      <SectionHeader
-        as="h1"
-        size="page"
-        eyebrow="LIVE FEED"
-        title="What the community is building"
-        description="Real-time telemetry, build milestones, technical Q&A, and squad recruitment across all tracks."
-      />
-
-      {/* Action Bar */}
-      <CreatePostTrigger />
-
-      {/* Filter Chips */}
-      <nav
-        aria-label="Feed filters"
-        className="flex flex-wrap items-center gap-2 pt-2"
+    <SocialCommunityProvider>
+      <SocialShell
+        rightRail={
+          <CommunityRightRail
+            suggestedMakers={ALL_PEOPLE.slice(0, 4)}
+            trendingProjects={projects.slice(0, 3)}
+            openBounties={opportunities.slice(0, 3)}
+            stats={stats}
+          />
+        }
       >
-        {FILTER_ITEMS.map((item) => {
-          const isSelected = item.kind === undefined ? !activeKind : activeKind === item.kind;
-          return (
-            <FilterChip key={item.label} asChild selected={isSelected}>
-              <Link href={item.href}>{item.label}</Link>
-            </FilterChip>
-          );
-        })}
-      </nav>
-
-      {/* Two-Column Grid: Main Feed & Right Rail */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_360px] min-w-0">
-        {/* Main Feed Column */}
-        <div className="min-w-0 space-y-6">
-          {posts.length === 0 ? (
-            <EmptyState
-              title="No posts found"
-              description="There are no community posts matching this filter yet."
-              action={
-                <Button asChild variant="secondary">
-                  <Link href="/feed">View all posts</Link>
-                </Button>
-              }
-            />
-          ) : (
-            posts.map((post) => <PostCard key={post.id} post={post} />)
-          )}
-        </div>
-
-        {/* Right Rail Panels */}
-        <aside className="space-y-6 min-w-0">
-          {/* Squad of the Week */}
-          {squadOfTheWeek ? (
-            <Panel
-              title="Squad of the week"
-              icon={<Sparkles className="size-4 text-accent" aria-hidden="true" />}
-            >
-              <ProjectCard project={squadOfTheWeek} />
-            </Panel>
-          ) : null}
-
-          {/* Open Bounties */}
-          {topBounties.length > 0 ? (
-            <Panel
-              title="Open bounties"
-              icon={<Trophy className="size-4 text-earn" aria-hidden="true" />}
-              action={
-                <Link
-                  href="/earn?kind=bounty"
-                  className="font-display text-label-sm uppercase text-accent hover:underline transition-colors"
-                >
-                  View all &rarr;
-                </Link>
-              }
-            >
-              <div className="flex flex-col gap-3">
-                {topBounties.map((bounty) => (
-                  <OpportunityCard key={bounty.id} opportunity={bounty} />
-                ))}
-              </div>
-            </Panel>
-          ) : null}
-
-          {/* Got a project? CTA */}
-          <div className="rounded-lg border border-accent/30 bg-surface-1 p-5 shadow-module space-y-3">
-            <div className="flex items-center gap-2 text-accent">
-              <Rocket className="size-5" aria-hidden="true" />
-              <h3 className="font-display text-headline-sm text-fg">Got a project?</h3>
-            </div>
-            <p className="text-body-sm text-fg-muted">
-              Assemble a squad of students, engineers, and designers. Post open roles, share
-              telemetry, and earn bounties.
-            </p>
-            <Button asChild variant="primary" className="w-full">
-              <Link href="/new">Start project</Link>
-            </Button>
+        {/* Clean Social Feed Header */}
+        <header className="rounded-2xl border border-hairline bg-surface-1 p-5 shadow-xs space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
+            <Flame className="size-3.5" aria-hidden="true" />
+            <span>Explore Community</span>
           </div>
-        </aside>
-      </div>
-    </div>
+          <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold text-fg tracking-tight">
+            What makers are building right now
+          </h1>
+          <p className="text-body-sm sm:text-body-md text-fg-muted">
+            Live build logs, hardware demos, technical Q&amp;A threads, and active squad calls.
+          </p>
+        </header>
+
+        <SocialFeedStream
+          initialPosts={posts}
+          initialKind={activeKind}
+          initialTag={rawTag}
+          showComposer
+        />
+      </SocialShell>
+    </SocialCommunityProvider>
   );
 }

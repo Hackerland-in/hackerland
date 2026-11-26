@@ -4,18 +4,18 @@ import { cn } from '../cn';
 
 const iconButtonVariants = cva(
   [
-    'inline-flex shrink-0 items-center justify-center rounded-sm transition-colors duration-150',
+    'inline-flex shrink-0 items-center justify-center rounded-full transition-colors duration-150',
     'disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-5',
   ],
   {
     variants: {
       variant: {
         ghost: 'text-fg-muted hover:bg-surface-2 hover:text-fg',
-        secondary: 'border border-line bg-surface-1 text-fg-muted hover:border-accent hover:text-fg',
+        secondary: 'border border-hairline bg-surface-1 text-fg-muted hover:border-accent/40 hover:bg-accent/5 hover:text-accent-fg',
       },
       size: {
         sm: 'size-9',
-        md: 'size-11',
+        md: 'size-10',
       },
     },
     defaultVariants: { variant: 'ghost', size: 'md' },

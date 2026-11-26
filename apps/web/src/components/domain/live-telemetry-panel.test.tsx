@@ -35,13 +35,13 @@ describe('LiveTelemetryPanel', () => {
     container.remove();
   });
 
-  it('renders hardware mission control telemetry metrics and status', () => {
+  it('renders live hardware telemetry metrics and status', () => {
     act(() => {
       root.render(<LiveTelemetryPanel telemetry={MOCK_TELEMETRY} />);
     });
 
-    expect(container.textContent).toContain('Hardware Mission Control');
-    expect(container.textContent).toContain('STREAMING');
+    expect(container.textContent).toContain('Live Hardware Benchmark');
+    expect(container.textContent).toContain('Streaming');
     expect(container.textContent).toContain('TEST-NODE-01');
     expect(container.textContent).toContain('ESP32 Sensor Hub');
     expect(container.textContent).toContain('Airspeed');
@@ -56,18 +56,18 @@ describe('LiveTelemetryPanel', () => {
     });
 
     const toggleBtn = container.querySelector('button') as HTMLButtonElement;
-    expect(toggleBtn.textContent).toContain('Pause Stream');
+    expect(toggleBtn.textContent).toContain('Pause');
 
     act(() => {
       toggleBtn.click();
     });
-    expect(toggleBtn.textContent).toContain('Resume Live Stream');
-    expect(container.textContent).toContain('PAUSED');
+    expect(toggleBtn.textContent).toContain('Resume');
+    expect(container.textContent).toContain('Paused');
 
     act(() => {
       toggleBtn.click();
     });
-    expect(toggleBtn.textContent).toContain('Pause Stream');
-    expect(container.textContent).toContain('STREAMING');
+    expect(toggleBtn.textContent).toContain('Pause');
+    expect(container.textContent).toContain('Streaming');
   });
 });

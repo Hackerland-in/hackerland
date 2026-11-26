@@ -88,7 +88,7 @@ export function TabsList({ label, className, children }: TabsListProps) {
       aria-label={label}
       onKeyDown={onKeyDown}
       className={cn(
-        'flex max-w-full gap-1 overflow-x-auto rounded-lg border border-hairline bg-surface-1 p-1',
+        'inline-flex max-w-full gap-1 overflow-x-auto rounded-full border border-hairline bg-surface-2 p-1',
         className,
       )}
     >
@@ -113,11 +113,11 @@ export function TabsTrigger({ value, className, children }: TabsTriggerProps) {
       data-value={value}
       onClick={() => select(value)}
       className={cn(
-        'inline-flex h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-sm px-3 md:h-9',
-        'font-display text-label-md uppercase transition-colors duration-150',
+        'inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 md:h-8.5',
+        'font-display text-label-md transition-all duration-150',
         selected
-          ? 'bg-surface-3 text-accent-fg shadow-[inset_0_-2px_0_var(--color-accent)]'
-          : 'text-fg-muted hover:bg-surface-2 hover:text-fg',
+          ? 'bg-surface-1 text-accent-fg shadow-xs ring-1 ring-hairline'
+          : 'text-fg-muted hover:text-fg',
         className,
       )}
     >

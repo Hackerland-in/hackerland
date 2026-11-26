@@ -1,85 +1,87 @@
 /*
- * Hackerland "Mission Control" design tokens for Tailwind CSS v4.
+ * Hackerland "Rosepaper Social" design tokens for Tailwind CSS v4.
+ * Light / White-first theme by default paired with Signature Hackerland Pink (#FA1681).
  *
  * Import after Tailwind in the app stylesheet:
  *   @import "tailwindcss";
  *   @import "@hackerland/ui/theme.css";
  *
  * Colour values are mirrored in src/tokens.ts (kept in sync by tokens.test.ts).
- * Components must use these semantic utilities (bg-surface-1, text-fg-muted,
- * border-hairline, text-make-fg …), never raw hex values.
+ * Components must use semantic utilities (bg-surface-1, text-fg-muted,
+ * border-hairline, text-accent-fg …), never raw hex values.
  */
 
 @theme {
-  /* ---------- Colour ---------- */
-  --color-canvas: #0A0E17;
-  --color-surface-1: #101726;
-  --color-surface-2: #182238;
-  --color-surface-3: #1C2842;
-  --color-sunken: #0D131F;
-  --color-hairline: #1E2B45;
-  --color-line: #2A3B5E;
-  --color-fg: #F0F4FC;
-  --color-fg-muted: #A9B6CC;
-  --color-fg-subtle: #7D8DA8;
-  --color-accent: #00E5FF;
-  --color-accent-strong: #5CF0FF;
-  --color-accent-fg: #38E8FF;
-  --color-on-solid: #060B12;
-  --color-success: #00F59B;
-  --color-success-fg: #5CFFBA;
-  --color-warning: #FFD600;
-  --color-warning-fg: #FFE14D;
-  --color-danger: #FF334B;
-  --color-danger-fg: #FF6B7D;
-  --color-code: #00E5FF;
-  --color-code-fg: #38E8FF;
-  --color-make: #FF8A00;
-  --color-make-fg: #FFA033;
-  --color-design: #FF5FA2;
-  --color-design-fg: #FF85B8;
-  --color-research: #A970FF;
-  --color-research-fg: #C29BFF;
-  --color-earn: #00F59B;
-  --color-earn-fg: #5CFFBA;
-  --color-learn: #4D9FFF;
-  --color-learn-fg: #7DB8FF;
+  /* ---------- Colour (Crisp White + Pink Default) ---------- */
+  --color-canvas: #F7F7FA;
+  --color-surface-1: #FFFFFF;
+  --color-surface-2: #F2F3F7;
+  --color-surface-3: #E6E8F0;
+  --color-sunken: #F4F5F8;
+  --color-hairline: #E6E8EF;
+  --color-line: #D1D5E2;
+  --color-fg: #111827;
+  --color-fg-muted: #4B5563;
+  --color-fg-subtle: #6B7280;
+  --color-accent: #FA1681;
+  --color-accent-strong: #E00E70;
+  --color-accent-fg: #D10D69;
+  --color-accent-soft: #FFF0F7;
+  --color-on-solid: #FFFFFF;
+  --color-success: #10B981;
+  --color-success-fg: #047857;
+  --color-warning: #F59E0B;
+  --color-warning-fg: #B45309;
+  --color-danger: #EF4444;
+  --color-danger-fg: #DC2626;
+  --color-code: #2563EB;
+  --color-code-fg: #1D4ED8;
+  --color-make: #EA580C;
+  --color-make-fg: #C2410C;
+  --color-design: #FA1681;
+  --color-design-fg: #D10D69;
+  --color-research: #7C3AED;
+  --color-research-fg: #6D28D9;
+  --color-earn: #059669;
+  --color-earn-fg: #047857;
+  --color-learn: #0284C7;
+  --color-learn-fg: #0369A1;
   --color-brand-pink: #FA1681;
-  --color-brand-mint: #64FFDA;
+  --color-brand-mint: #00BFA5;
   --color-brand-green: #1BA94C;
   --color-brand-blue: #3A7CED;
 
-  /* ---------- Type scale (Space Grotesk headings/labels, Inter body) ---------- */
-  --text-display-hero: 3.5rem;
-  --text-display-hero--line-height: 4rem;
+  /* ---------- Type scale (Space Grotesk headings, Inter body) ---------- */
+  --text-display-hero: 3rem;
+  --text-display-hero--line-height: 3.5rem;
   --text-display-hero--letter-spacing: -0.03em;
   --text-display-hero--font-weight: 700;
-  --text-display-hero-mobile: 2.25rem;
-  --text-display-hero-mobile--line-height: 2.75rem;
+  --text-display-hero-mobile: 2rem;
+  --text-display-hero-mobile--line-height: 2.5rem;
   --text-display-hero-mobile--letter-spacing: -0.02em;
   --text-display-hero-mobile--font-weight: 700;
-  --text-headline-xl: 2.5rem;
-  --text-headline-xl--line-height: 3rem;
+  --text-headline-xl: 2.25rem;
+  --text-headline-xl--line-height: 2.75rem;
   --text-headline-xl--letter-spacing: -0.02em;
-  --text-headline-xl--font-weight: 600;
-  --text-headline-xl-mobile: 1.75rem;
-  --text-headline-xl-mobile--line-height: 2.25rem;
-  --text-headline-xl-mobile--letter-spacing: -0.01em;
-  --text-headline-xl-mobile--font-weight: 600;
-  --text-headline-lg: 1.75rem;
-  --text-headline-lg--line-height: 2.25rem;
-  --text-headline-lg--letter-spacing: -0.01em;
+  --text-headline-xl--font-weight: 700;
+  --text-headline-xl-mobile: 1.625rem;
+  --text-headline-xl-mobile--line-height: 2.125rem;
+  --text-headline-xl-mobile--letter-spacing: -0.015em;
+  --text-headline-xl-mobile--font-weight: 700;
+  --text-headline-lg: 1.5rem;
+  --text-headline-lg--line-height: 2rem;
+  --text-headline-lg--letter-spacing: -0.015em;
   --text-headline-lg--font-weight: 600;
-  --text-headline-md: 1.375rem;
-  --text-headline-md--line-height: 1.875rem;
-  --text-headline-md--letter-spacing: 0em;
-  --text-headline-md--font-weight: 500;
-  --text-headline-sm: 1.125rem;
-  --text-headline-sm--line-height: 1.625rem;
-  --text-headline-sm--letter-spacing: 0em;
-  --text-headline-sm--font-weight: 500;
-  --text-body-lg: 1.125rem;
-  --text-body-lg--line-height: 1.75rem;
+  --text-headline-md: 1.25rem;
+  --text-headline-md--line-height: 1.75rem;
+  --text-headline-md--letter-spacing: -0.01em;
+  --text-headline-md--font-weight: 600;
+  --text-headline-sm: 1.0625rem;
+  --text-headline-sm--line-height: 1.5rem;
+  --text-headline-sm--letter-spacing: -0.01em;
+  --text-headline-sm--font-weight: 600;
+  --text-body-lg: 1.0625rem;
+  --text-body-lg--line-height: 1.625rem;
   --text-body-lg--font-weight: 400;
   --text-body-md: 0.9375rem;
   --text-body-md--line-height: 1.5rem;
@@ -89,29 +91,29 @@
   --text-body-sm--font-weight: 400;
   --text-label-lg: 0.875rem;
   --text-label-lg--line-height: 1.125rem;
-  --text-label-lg--letter-spacing: 0.04em;
+  --text-label-lg--letter-spacing: 0.01em;
   --text-label-lg--font-weight: 600;
   --text-label-md: 0.75rem;
   --text-label-md--line-height: 1rem;
-  --text-label-md--letter-spacing: 0.05em;
+  --text-label-md--letter-spacing: 0.02em;
   --text-label-md--font-weight: 600;
   --text-label-sm: 0.6875rem;
-  --text-label-sm--line-height: 0.875rem;
-  --text-label-sm--letter-spacing: 0.08em;
-  --text-label-sm--font-weight: 700;
+  --text-label-sm--line-height: 0.9375rem;
+  --text-label-sm--letter-spacing: 0.03em;
+  --text-label-sm--font-weight: 600;
   --text-code-inline: 0.8125rem;
   --text-code-inline--line-height: 1.125rem;
   --text-code-inline--font-weight: 500;
 
   /* ---------- Elevation ---------- */
-  --shadow-module: 0 8px 24px -4px rgb(0 0 0 / 0.6);
-  --shadow-overlay: 0 16px 40px -8px rgb(0 0 0 / 0.85);
-  --shadow-glow-accent: 0 0 16px rgb(0 229 255 / 0.35);
-  --shadow-glow-make: 0 0 16px rgb(255 138 0 / 0.4);
-  --shadow-glow-earn: 0 0 16px rgb(0 245 155 / 0.35);
+  --shadow-module: 0 1px 3px rgb(15 23 42 / 0.05), 0 4px 12px rgb(15 23 42 / 0.04);
+  --shadow-overlay: 0 10px 30px -5px rgb(15 23 42 / 0.12), 0 4px 10px rgb(15 23 42 / 0.06);
+  --shadow-glow-accent: 0 4px 14px rgb(250 22 129 / 0.28);
+  --shadow-glow-make: 0 4px 14px rgb(234 88 12 / 0.24);
+  --shadow-glow-earn: 0 4px 14px rgb(5 150 105 / 0.24);
 
   /* ---------- Layout ---------- */
-  --container-page: 90rem;
+  --container-page: 84rem;
 }
 
 /* Font families resolve the CSS variables that next/font sets on <html>. */
@@ -124,90 +126,92 @@
 @layer base {
   :root,
   html,
-  html[data-theme="dark"],
-  .dark {
-    color-scheme: dark;
-    --color-canvas: #0A0E17;
-    --color-surface-1: #101726;
-    --color-surface-2: #182238;
-    --color-surface-3: #1C2842;
-    --color-sunken: #0D131F;
-    --color-hairline: #1E2B45;
-    --color-line: #2A3B5E;
-    --color-fg: #F0F4FC;
-    --color-fg-muted: #A9B6CC;
-    --color-fg-subtle: #7D8DA8;
-    --color-accent: #00E5FF;
-    --color-accent-strong: #5CF0FF;
-    --color-accent-fg: #38E8FF;
-    --color-on-solid: #060B12;
-    --color-success: #00F59B;
-    --color-success-fg: #5CFFBA;
-    --color-warning: #FFD600;
-    --color-warning-fg: #FFE14D;
-    --color-danger: #FF334B;
-    --color-danger-fg: #FF6B7D;
-    --color-code: #00E5FF;
-    --color-code-fg: #38E8FF;
-    --color-make: #FF8A00;
-    --color-make-fg: #FFA033;
-    --color-design: #FF5FA2;
-    --color-design-fg: #FF85B8;
-    --color-research: #A970FF;
-    --color-research-fg: #C29BFF;
-    --color-earn: #00F59B;
-    --color-earn-fg: #5CFFBA;
-    --color-learn: #4D9FFF;
-    --color-learn-fg: #7DB8FF;
-    --color-brand-pink: #FA1681;
-    --color-brand-mint: #64FFDA;
-    --color-brand-green: #1BA94C;
-    --color-brand-blue: #3A7CED;
-    --shadow-module: 0 8px 24px -4px rgb(0 0 0 / 0.6);
-    --shadow-overlay: 0 16px 40px -8px rgb(0 0 0 / 0.85);
-  }
-
   html[data-theme="light"],
   .light {
     color-scheme: light;
-    --color-canvas: #F4F7FC;
+    --color-canvas: #F7F7FA;
     --color-surface-1: #FFFFFF;
-    --color-surface-2: #E8EEF8;
-    --color-surface-3: #DCE5F5;
-    --color-sunken: #E7EDF7;
-    --color-hairline: #D0DBEB;
-    --color-line: #B5C6E0;
-    --color-fg: #0A0E17;
-    --color-fg-muted: #384A64;
-    --color-fg-subtle: #5D708E;
-    --color-accent: #008B9E;
-    --color-accent-strong: #006C7B;
-    --color-accent-fg: #007A8A;
+    --color-surface-2: #F2F3F7;
+    --color-surface-3: #E6E8F0;
+    --color-sunken: #F4F5F8;
+    --color-hairline: #E6E8EF;
+    --color-line: #D1D5E2;
+    --color-fg: #111827;
+    --color-fg-muted: #4B5563;
+    --color-fg-subtle: #6B7280;
+    --color-accent: #FA1681;
+    --color-accent-strong: #E00E70;
+    --color-accent-fg: #D10D69;
+    --color-accent-soft: #FFF0F7;
     --color-on-solid: #FFFFFF;
-    --color-success: #059669;
+    --color-success: #10B981;
     --color-success-fg: #047857;
-    --color-warning: #D97706;
+    --color-warning: #F59E0B;
     --color-warning-fg: #B45309;
-    --color-danger: #E11D48;
-    --color-danger-fg: #BE123C;
-    --color-code: #008B9E;
-    --color-code-fg: #007A8A;
+    --color-danger: #EF4444;
+    --color-danger-fg: #DC2626;
+    --color-code: #2563EB;
+    --color-code-fg: #1D4ED8;
     --color-make: #EA580C;
     --color-make-fg: #C2410C;
-    --color-design: #DB2777;
-    --color-design-fg: #BE185D;
+    --color-design: #FA1681;
+    --color-design-fg: #D10D69;
     --color-research: #7C3AED;
     --color-research-fg: #6D28D9;
     --color-earn: #059669;
     --color-earn-fg: #047857;
-    --color-learn: #2563EB;
-    --color-learn-fg: #1D4ED8;
+    --color-learn: #0284C7;
+    --color-learn-fg: #0369A1;
     --color-brand-pink: #FA1681;
     --color-brand-mint: #00BFA5;
     --color-brand-green: #1BA94C;
     --color-brand-blue: #3A7CED;
-    --shadow-module: 0 4px 16px -2px rgb(15 23 42 / 0.08);
-    --shadow-overlay: 0 12px 32px -4px rgb(15 23 42 / 0.16);
+    --shadow-module: 0 1px 3px rgb(15 23 42 / 0.05), 0 4px 12px rgb(15 23 42 / 0.04);
+    --shadow-overlay: 0 10px 30px -5px rgb(15 23 42 / 0.12), 0 4px 10px rgb(15 23 42 / 0.06);
+  }
+
+  html[data-theme="dark"],
+  .dark {
+    color-scheme: dark;
+    --color-canvas: #0F1014;
+    --color-surface-1: #171920;
+    --color-surface-2: #1F222C;
+    --color-surface-3: #282C38;
+    --color-sunken: #12141A;
+    --color-hairline: #262A36;
+    --color-line: #343A4B;
+    --color-fg: #F9FAFB;
+    --color-fg-muted: #A1A8B8;
+    --color-fg-subtle: #7C8496;
+    --color-accent: #FA1681;
+    --color-accent-strong: #FF3D96;
+    --color-accent-fg: #FF6EB0;
+    --color-accent-soft: #2D1221;
+    --color-on-solid: #FFFFFF;
+    --color-success: #10B981;
+    --color-success-fg: #34D399;
+    --color-warning: #F59E0B;
+    --color-warning-fg: #FBBF24;
+    --color-danger: #F43F5E;
+    --color-danger-fg: #FB7185;
+    --color-code: #60A5FA;
+    --color-code-fg: #93C5FD;
+    --color-make: #FB923C;
+    --color-make-fg: #FDBA74;
+    --color-design: #FF4DA1;
+    --color-design-fg: #FF80BD;
+    --color-research: #A78BFA;
+    --color-research-fg: #C4B5FD;
+    --color-earn: #34D399;
+    --color-earn-fg: #6EE7B7;
+    --color-learn: #38BDF8;
+    --color-learn-fg: #7DD3FC;
+    --color-brand-pink: #FA1681;
+    --color-brand-mint: #2DD4BF;
+    --color-brand-green: #22C55E;
+    --color-brand-blue: #60A5FA;
+    --shadow-module: 0 6px 20px -4px rgb(0 0 0 / 0.45);
+    --shadow-overlay: 0 16px 40px -8px rgb(0 0 0 / 0.65);
   }
 
   html {

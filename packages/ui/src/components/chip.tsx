@@ -6,13 +6,13 @@ import { toneText } from '../tone';
 
 export type ChipProps = ComponentProps<'span'> & { tone?: Tone };
 
-/** Static pill for skills and tags. */
+/** Static pill for skills, topics, and hashtags. */
 export function Chip({ tone = 'neutral', className, ...props }: ChipProps) {
   return (
     <span
       className={cn(
-        'inline-flex max-w-full items-center gap-1.5 rounded-sm border border-hairline bg-surface-2',
-        'px-2.5 py-1 text-body-sm break-words',
+        'inline-flex max-w-full items-center gap-1.5 rounded-full border border-hairline bg-surface-2',
+        'px-3 py-1 text-body-sm font-medium break-words transition-colors hover:border-line',
         toneText[tone],
         className,
       )}
@@ -28,7 +28,7 @@ export type FilterChipProps = ComponentProps<'button'> & {
   asChild?: boolean;
 };
 
-/** Toggleable filter pill. */
+/** Toggleable social filter pill. */
 export function FilterChip({
   selected = false,
   tone = 'accent',
@@ -38,13 +38,13 @@ export function FilterChip({
   ...props
 }: FilterChipProps) {
   const classes = cn(
-    'inline-flex h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-sm border px-3 md:h-9',
-    'font-display text-label-md uppercase transition-colors duration-150',
+    'inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-4 md:h-9',
+    'font-display text-label-md transition-all duration-150',
     selected
       ? tone === 'accent'
-        ? 'border-accent bg-accent text-on-solid'
-        : cn('border-current bg-surface-2', toneText[tone])
-      : 'border-line bg-surface-1 text-fg-muted hover:border-accent/60 hover:text-fg',
+        ? 'border-accent bg-accent text-on-solid shadow-xs'
+        : cn('border-current bg-surface-2 shadow-xs', toneText[tone])
+      : 'border-hairline bg-surface-1 text-fg-muted hover:border-accent/40 hover:bg-accent/5 hover:text-fg',
     className,
   );
 

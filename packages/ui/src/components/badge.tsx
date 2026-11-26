@@ -8,13 +8,13 @@ export type BadgeProps = ComponentProps<'span'> & {
   variant?: 'outline' | 'solid';
 };
 
-/** 22px uppercase metadata tag. Always carries text: never colour alone. */
+/** 24px community status pill. Always carries text: never colour alone. */
 export function Badge({ tone = 'neutral', variant = 'outline', className, ...props }: BadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex h-[22px] max-w-full shrink-0 items-center gap-1 truncate rounded-sm border px-2',
-        'font-display text-label-sm uppercase [&_svg]:size-3',
+        'inline-flex h-6 max-w-full shrink-0 items-center gap-1 truncate rounded-full border px-2.5',
+        'font-display text-label-sm [&_svg]:size-3',
         variant === 'solid' ? toneSolid[tone] : toneOutline[tone],
         className,
       )}

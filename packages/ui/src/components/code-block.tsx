@@ -11,13 +11,15 @@ export type CodeBlockProps = {
 export function CodeBlock({ code, filename, language, className }: CodeBlockProps) {
   return (
     <figure
-      className={cn('min-w-0 overflow-hidden rounded-lg border border-hairline bg-sunken', className)}
+      className={cn('min-w-0 overflow-hidden rounded-xl border border-hairline bg-sunken', className)}
     >
       {filename || language ? (
-        <figcaption className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-2">
-          <span className="min-w-0 truncate font-mono text-[0.75rem] text-fg-muted">{filename}</span>
+        <figcaption className="flex items-center justify-between gap-3 border-b border-hairline bg-surface-2/60 px-4 py-2">
+          <span className="min-w-0 truncate font-mono text-[0.75rem] font-medium text-fg-muted">
+            {filename}
+          </span>
           {language ? (
-            <span className="shrink-0 font-display text-label-sm uppercase text-fg-subtle">
+            <span className="shrink-0 rounded-full bg-surface-1 px-2 py-0.5 font-mono text-[11px] font-medium text-fg-subtle border border-hairline">
               {language}
             </span>
           ) : null}

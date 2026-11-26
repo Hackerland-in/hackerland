@@ -22,7 +22,6 @@ export function PostReactionButton({
   const handleReact = async () => {
     if (isPending) return;
 
-    // Optimistic toggle
     const nextReacted = !hasReacted;
     const nextCount = nextReacted ? reactions + 1 : Math.max(0, reactions - 1);
 
@@ -42,7 +41,7 @@ export function PostReactionButton({
         }
       }
     } catch {
-      // In static demo or offline mode, preserve optimistic state
+      // Preserve optimistic UI in offline/static mode
     } finally {
       setIsPending(false);
     }
@@ -53,25 +52,25 @@ export function PostReactionButton({
       type="button"
       onClick={handleReact}
       disabled={isPending}
-      aria-label={`${reactions} reactions. Click to ${hasReacted ? 'unlike' : 'react'}`}
+      aria-label={`${reactions} likes. Click to ${hasReacted ? 'unlike' : 'like'}`}
       aria-pressed={hasReacted}
       className={cn(
-        'group inline-flex items-center gap-1.5 tabular-nums text-body-sm transition-colors',
+        'group inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 tabular-nums text-body-sm transition-colors',
         hasReacted
-          ? 'text-danger font-medium'
-          : 'text-fg-subtle hover:text-danger focus-visible:text-danger',
-        className
+          ? 'bg-accent/10 text-accent-fg font-semibold'
+          : 'text-fg-subtle hover:bg-accent/8 hover:text-accent-fg focus-visible:text-accent-fg',
+        className,
       )}
     >
       <Heart
         className={cn(
           'size-4 transition-transform group-hover:scale-110 active:scale-95',
-          hasReacted ? 'fill-current text-danger' : 'text-fg-subtle group-hover:text-danger'
+          hasReacted ? 'fill-accent text-accent' : 'text-fg-subtle group-hover:text-accent',
         )}
         aria-hidden="true"
       />
       <span>{reactions}</span>
-      <span className="sr-only">reactions</span>
+      <span className="sr-only">likes</span>
     </button>
   );
 }

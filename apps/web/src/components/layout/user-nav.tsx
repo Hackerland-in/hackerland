@@ -32,7 +32,6 @@ export function UserNav() {
   const user = session.data?.user;
   const isPending = session.isPending;
 
-  // Fetch user profile from /api/me/profile if logged in, with localStorage sync
   useEffect(() => {
     function loadLocal() {
       try {
@@ -85,7 +84,6 @@ export function UserNav() {
     };
   }, [user?.id, user?.name, user?.image]);
 
-  // Close dropdown on outside click or Escape key
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -120,11 +118,10 @@ export function UserNav() {
 
   if (isPending) {
     return (
-      <div className="h-9 w-20 animate-pulse rounded-md bg-surface-2" />
+      <div className="h-9 w-20 animate-pulse rounded-full bg-surface-2" />
     );
   }
 
-  // If user is logged in
   if (user) {
     const displayName = userProfile?.displayName || user.name || 'Innovator';
     const handle = userProfile?.handle;
@@ -135,7 +132,7 @@ export function UserNav() {
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
-          className="flex min-h-[44px] items-center gap-2 rounded-full border border-hairline bg-surface-1 p-1 pr-2.5 transition-all hover:border-hairline-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="flex min-h-[40px] items-center gap-2 rounded-full border border-hairline bg-surface-1 p-1 pr-2.5 transition-all hover:border-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           aria-expanded={isOpen}
           aria-haspopup="menu"
           aria-label="User account menu"
@@ -144,14 +141,14 @@ export function UserNav() {
             name={displayName}
             src={userProfile?.avatarUrl || user.image || undefined}
             size="sm"
-            className="ring-1 ring-hairline"
+            className="ring-1 ring-accent/20"
           />
           <div className="hidden sm:flex flex-col text-left">
-            <span className="font-display text-caption font-bold text-fg leading-none max-w-[120px] truncate">
+            <span className="font-display text-[13px] font-semibold text-fg leading-none max-w-[120px] truncate">
               {displayName}
             </span>
             {handle ? (
-              <span className="font-mono text-[10px] text-accent leading-none mt-0.5 truncate max-w-[120px]">
+              <span className="font-mono text-[10px] text-accent-fg leading-none mt-0.5 truncate max-w-[120px]">
                 @{handle}
               </span>
             ) : (
@@ -163,28 +160,26 @@ export function UserNav() {
           <ChevronDown className="size-3.5 text-fg-subtle" />
         </button>
 
-        {/* Dropdown Menu */}
         {isOpen && (
           <div
             role="menu"
             aria-label="User profile options"
-            className="absolute right-0 mt-2 w-64 origin-top-right rounded-xl border border-hairline bg-surface-1 p-2 shadow-xl ring-1 ring-black/5 z-50 animate-in fade-in zoom-in-95 duration-100"
+            className="absolute right-0 mt-2 w-64 origin-top-right rounded-2xl border border-hairline bg-surface-1 p-2 shadow-overlay z-50 animate-in fade-in zoom-in-95 duration-100"
           >
-            {/* User Header in Dropdown */}
             <div className="border-b border-hairline px-3 py-2.5 mb-1">
               <p className="font-display text-body-sm font-bold text-fg truncate">
                 {displayName}
               </p>
-              <p className="font-mono text-caption text-fg-muted truncate mt-0.5">
+              <p className="font-mono text-[12px] text-fg-muted truncate mt-0.5">
                 {user.email}
               </p>
               {handle && (
-                <div className="flex items-center gap-2 mt-2 pt-1 border-t border-hairline/60">
-                  <span className="font-mono text-[11px] text-accent font-semibold">
+                <div className="flex items-center gap-2 mt-2 pt-1.5 border-t border-hairline/70">
+                  <span className="font-mono text-[11px] text-accent-fg font-semibold">
                     @{handle}
                   </span>
                   {userProfile?.reputation !== undefined && (
-                    <span className="inline-flex items-center gap-1 rounded bg-accent/10 px-1.5 py-0.2 text-[10px] font-mono font-bold text-accent">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-mono font-semibold text-accent-fg">
                       <Award className="size-2.5" />
                       {userProfile.reputation} REP
                     </span>
@@ -193,15 +188,14 @@ export function UserNav() {
               )}
             </div>
 
-            {/* Menu Links */}
             <div className="space-y-0.5" role="none">
               <Link
                 href={profileHref}
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
               >
-                <User className="size-4 text-accent" />
+                <User className="size-4 text-accent-fg" />
                 <span>My Profile</span>
               </Link>
 
@@ -209,7 +203,7 @@ export function UserNav() {
                 href="/settings"
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
               >
                 <Settings className="size-4 text-fg-muted" />
                 <span>Profile Settings</span>
@@ -219,9 +213,9 @@ export function UserNav() {
                 href="/new"
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
               >
-                <Plus className="size-4 text-earn" />
+                <Plus className="size-4 text-earn-fg" />
                 <span>Create New Project</span>
               </Link>
 
@@ -229,20 +223,20 @@ export function UserNav() {
                 href="/entrepreneurship"
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
               >
-                <GraduationCap className="size-4 text-accent" />
+                <GraduationCap className="size-4 text-accent-fg" />
                 <span>Founder Academy</span>
               </Link>
 
               <Link
-                href="/how-to-start"
+                href="/manufacturing"
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-body-sm text-fg hover:bg-surface-2 transition-colors"
               >
-                <Factory className="size-4 text-accent" />
-                <span>How to Start (Factories)</span>
+                <Factory className="size-4 text-make-fg" />
+                <span>Hardware Workbench</span>
               </Link>
 
               {!handle && (
@@ -250,21 +244,20 @@ export function UserNav() {
                   href="/onboarding"
                   role="menuitem"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-body-sm text-accent bg-accent/5 hover:bg-accent/10 transition-colors font-medium"
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-body-sm text-accent-fg bg-accent/8 hover:bg-accent/12 transition-colors font-medium"
                 >
-                  <Sparkles className="size-4 text-accent" />
-                  <span>Claim Handle & Badges</span>
+                  <Sparkles className="size-4 text-accent-fg" />
+                  <span>Claim Handle &amp; Badges</span>
                 </Link>
               )}
             </div>
 
-            {/* Sign Out Divider */}
             <div className="border-t border-hairline my-1 pt-1" role="none">
               <button
                 type="button"
                 role="menuitem"
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-body-sm text-danger hover:bg-danger/10 transition-colors text-left"
+                className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-body-sm text-danger-fg hover:bg-danger/10 transition-colors text-left"
               >
                 <LogOut className="size-4" />
                 <span>Sign Out</span>
@@ -276,7 +269,6 @@ export function UserNav() {
     );
   }
 
-  // If user is not logged in (on < sm, sign in / sign up are in the mobile slider drawer)
   return (
     <div className="hidden sm:flex items-center gap-2">
       <Button asChild size="sm" variant="secondary">

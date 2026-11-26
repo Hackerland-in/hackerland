@@ -13,7 +13,7 @@ export type PanelProps = {
   children?: ReactNode;
 };
 
-/** Titled section container, exposed as a named region. */
+/** Titled social community section container, exposed as a named region. */
 export function Panel({
   title,
   titleId,
@@ -29,14 +29,14 @@ export function Panel({
     <section
       aria-labelledby={headingId}
       className={cn(
-        'min-w-0 rounded-lg border border-hairline bg-surface-1 p-4 md:p-5',
+        'min-w-0 rounded-2xl border border-hairline bg-surface-1 p-4 md:p-5 shadow-xs',
         className,
       )}
     >
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-3.5 flex flex-wrap items-center justify-between gap-3">
         <Heading
           id={headingId}
-          className="flex min-w-0 items-center gap-2 font-display text-headline-sm text-fg [&_svg]:size-5 [&_svg]:text-accent"
+          className="flex min-w-0 items-center gap-2 font-display text-headline-sm text-fg [&_svg]:size-4 [&_svg]:text-accent"
         >
           {icon}
           <span className="min-w-0 break-words">{title}</span>
