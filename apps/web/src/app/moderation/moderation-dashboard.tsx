@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ModerationAction, ModerationReport, ReportStatus } from '@/lib/data/types';
 import { Badge, Button, EmptyState } from '@hackerland/ui';
 import {
@@ -21,6 +21,25 @@ export function ModerationDashboard({ initialReports }: ModerationDashboardProps
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('hackerland_mod_actions');
+      if (saved) {
+        const overrides = JSON.parse(saved) as Record<
+          string,
+          { status: ReportStatus; actionTaken: ModerationAction; resolvedAt: string }
+        >;
+        setReports((prev) =>
+          prev.map((r) =>
+            overrides[r.id]
+              ? { ...r, ...overrides[r.id], resolvedBy: 'mod_admin' }
+              : r,
+          ),
+        );
+      }
+    } catch {}
+  }, []);
+
   const filteredReports = reports.filter((r) => {
     if (filter === 'all') return true;
     return r.status === filter;
@@ -37,6 +56,28 @@ export function ModerationDashboard({ initialReports }: ModerationDashboardProps
   const handleAction = async (reportId: string, action: ModerationAction, newStatus: ReportStatus = 'actioned') => {
     setActionLoading(reportId);
     setBannerMessage(null);
+    const resolvedAt = new Date().toISOString();
+
+    try {
+      const prevRaw = localStorage.getItem('hackerland_mod_actions');
+      const prevMap = prevRaw ? (JSON.parse(prevRaw) as Record<string, unknown>) : {};
+      prevMap[reportId] = { status: newStatus, actionTaken: action, resolvedAt };
+      localStorage.setItem('hackerland_mod_actions', JSON.stringify(prevMap));
+    } catch {}
+
+    setReports((prev) =>
+      prev.map((r) =>
+        r.id === reportId
+          ? {
+              ...r,
+              status: newStatus,
+              actionTaken: action,
+              resolvedBy: 'mod_admin',
+              resolvedAt,
+            }
+          : r,
+      ),
+    );
 
     try {
       await fetch(`/api/moderation/reports/${reportId}/action`, {
@@ -45,42 +86,11 @@ export function ModerationDashboard({ initialReports }: ModerationDashboardProps
         body: JSON.stringify({ action, status: newStatus }),
       });
 
-      // Optimistically update even if offline/fixture mode
-      setReports((prev) =>
-        prev.map((r) => {
-          if (r.id === reportId) {
-            return {
-              ...r,
-              status: newStatus,
-              actionTaken: action,
-              resolvedBy: 'mod_admin',
-              resolvedAt: new Date().toISOString(),
-            };
-          }
-          return r;
-        })
-      );
-
       setBannerMessage(
         `Incident #${reportId} updated to ${newStatus.toUpperCase()}${action !== 'none' ? ` with action [${action.toUpperCase()}]` : ''}.`
       );
     } catch {
-      // Fallback local update
-      setReports((prev) =>
-        prev.map((r) => {
-          if (r.id === reportId) {
-            return {
-              ...r,
-              status: newStatus,
-              actionTaken: action,
-              resolvedBy: 'mod_admin',
-              resolvedAt: new Date().toISOString(),
-            };
-          }
-          return r;
-        })
-      );
-      setBannerMessage(`Incident #${reportId} updated locally (offline mode).`);
+      setBannerMessage(`Incident #${reportId} saved locally (offline mode).`);
     } finally {
       setActionLoading(null);
     }
