@@ -11,6 +11,8 @@ export const problemDomainEnum = z.enum([
   'robotics_automation',
   'climate_sustainability',
   'advanced_silicon',
+  'textiles_crafts',
+  'software_dpi',
 ]);
 export type ProblemDomain = z.infer<typeof problemDomainEnum>;
 

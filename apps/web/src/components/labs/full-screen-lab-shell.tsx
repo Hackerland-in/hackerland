@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { Badge, Button, Input, cn } from '@hackerland/ui';
 import { useBuilderIdentity } from '@/lib/builder-identity';
+import { useVenture } from '@/components/social/venture-context';
 
 export interface SavedLabWorkspaceItem {
   workspaceId: string;
@@ -152,6 +153,7 @@ export function FullScreenLabShell({
   children,
 }: FullScreenLabShellProps) {
   const { identity } = useBuilderIdentity();
+  const { linkWorkspaceToVenture } = useVenture();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const snapshotGetterRef = useRef<(() => LabSnapshotDraft) | null>(null);
   const snapshotLoaderRef = useRef<((ws: SavedLabWorkspaceItem) => void) | null>(null);
@@ -265,6 +267,17 @@ export function FullScreenLabShell({
               data.workspace!,
               ...prev.filter((w) => w.workspaceId !== data.workspace!.workspaceId),
             ]);
+            const ventureKind =
+              labKind === 'pcb'
+                ? 'pcb'
+                : labKind === 'rfq'
+                  ? 'rfq'
+                  : labKind === 'prototype'
+                    ? 'prototype'
+                    : labKind === 'copilot'
+                      ? 'copilot'
+                      : 'sim_preset';
+            linkWorkspaceToVenture(ventureKind, data.workspace.workspaceId, 4);
             setLastSaveMessage(
               data.sharedPostId
                 ? 'Saved & published snapshot to community feed!'
@@ -280,7 +293,7 @@ export function FullScreenLabShell({
       }
       return null;
     },
-    [currentRoute, identity.handle, identity.name, labKind, title],
+    [currentRoute, identity.handle, identity.name, labKind, linkWorkspaceToVenture, title],
   );
 
   const handleQuickSave = async (publishToFeed: boolean) => {

@@ -22,14 +22,32 @@ function mapProblemDomainToSector(domain: string): { sectorId: string; sectorLab
         sectorLabel: 'Agro-Processing, Cold Chain & AgriTech',
       };
     case 'clean_water':
+    case 'energy_storage':
+    case 'climate_sustainability':
       return {
         sectorId: 'ev-clean-energy',
-        sectorLabel: 'Climate Tech, Clean Water & Energy',
+        sectorLabel: 'EV Powertrains, Clean Energy & Climate Tech',
       };
     case 'space_aerospace':
       return {
         sectorId: 'drones-defense-space',
         sectorLabel: 'Drones, UAVs, Defense & Space Systems',
+      };
+    case 'textiles_crafts':
+      return {
+        sectorId: 'technical-textiles-apparel',
+        sectorLabel: 'Technical Textiles, Smart Apparel & GI Crafts',
+      };
+    case 'robotics_automation':
+      return {
+        sectorId: 'robotics-cnc-automation',
+        sectorLabel: 'Industrial Robotics, CNC Machining & Automation',
+      };
+    case 'software_dpi':
+    case 'education_access':
+      return {
+        sectorId: 'consumer-hardware-appliances',
+        sectorLabel: 'Software DPI, Vernacular AI & Smart Products',
       };
     default:
       return {

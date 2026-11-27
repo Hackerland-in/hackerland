@@ -681,6 +681,186 @@ export const ROADMAP_META_LEARNING: RoadmapView = {
   ],
 };
 
+export const ROADMAP_EXPORT_COMPLIANCE: RoadmapView = {
+  slug: 'export-compliance-and-global-trade',
+  title: 'India-to-World Export, Customs, BIS/CE & Margin Engineering',
+  track: 'earn',
+  level: 'beginner',
+  summary:
+    'Go from local MSME shopfloor to container/air-cargo exports: IEC & AD Code, RoDTEP duty drawbacks, LUT zero-rated GST, Incoterms 2020 (EXW/FOB/CIF/DDP), and BIS/NABL-to-CE/FCC certification.',
+  hours: 45,
+  learners: 2140,
+  stages: [
+    {
+      title: 'DGFT Registrations, HSN Coding & RoDTEP Incentives',
+      status: 'done',
+      modules: [
+        {
+          title: 'DGFT Niryat Bandhu: Export Onboarding, IEC & ITC-HS Codes',
+          provider: 'DGFT Govt of India (100% Free)',
+          hours: 15,
+          free: true,
+          certified: true,
+          url: 'https://www.dgft.gov.in',
+        },
+        {
+          title: 'Indian Trade Portal: Corridor Tariffs & FTA Rules of Origin',
+          provider: 'FIEO / Dept. of Commerce',
+          hours: 10,
+          free: true,
+          certified: false,
+          url: 'https://www.indiantradeportal.in',
+        },
+      ],
+    },
+    {
+      title: 'CE, FCC, REACH & Buyer PPAP Certification Readiness',
+      status: 'active',
+      modules: [
+        {
+          title: 'NABL Accredited Lab Bridging & EU REACH / RoHS Compliance Guide',
+          provider: 'QCI / EEPC India',
+          hours: 20,
+          free: true,
+          certified: false,
+          url: 'https://nabl-india.org',
+        },
+      ],
+    },
+  ],
+};
+
+export const ROADMAP_VERNACULAR_DPI_ONDC: RoadmapView = {
+  slug: 'india-dpi-ondc-bhashini-ai',
+  title: 'India Stack, ONDC Beckn Protocol & Bhashini Voice AI',
+  track: 'code',
+  level: 'beginner',
+  summary:
+    'Build billion-scale inclusive software: Bhashini ULCA Indic ASR/TTS APIs, Beckn/ONDC open commerce protocols, UPI deep-links, and edge quantized AI models for rural India.',
+  hours: 65,
+  learners: 2680,
+  stages: [
+    {
+      title: 'India Digital Public Infrastructure & Beckn Open Protocols',
+      status: 'done',
+      modules: [
+        {
+          title: 'ONDC Academy: Seller & Logistics Protocol Builder Track',
+          provider: 'ONDC Academy (Free)',
+          hours: 20,
+          free: true,
+          certified: true,
+          url: 'https://academy.ondc.org',
+        },
+        {
+          title: 'Beckn Protocol Sandbox & Open Commerce Schemas',
+          provider: 'Beckn Foundation',
+          hours: 15,
+          free: true,
+          certified: false,
+          url: 'https://becknprotocol.io',
+        },
+      ],
+    },
+    {
+      title: 'Indic Speech & Regional-Language AI Applications',
+      status: 'active',
+      modules: [
+        {
+          title: 'Bhashini ULCA Pipeline & AI4Bharat Open Models',
+          provider: 'Digital India Bhashini / IIT Madras',
+          hours: 30,
+          free: true,
+          certified: false,
+          url: 'https://bhashini.gov.in',
+        },
+      ],
+    },
+  ],
+};
+
+export const ROADMAP_AGRI_COLDCHAIN_FOOD: RoadmapView = {
+  slug: 'agri-coldchain-food-processing',
+  title: 'Agri Food-Processing, FSSAI, Solar Cold-Chain & Value-Add',
+  track: 'make',
+  level: 'beginner',
+  summary:
+    'Turn raw Indian harvest (spices, fruits, dairy, millets, marine catch) into shelf-stable, APEDA/USFDA-compliant export SKUs using solar dehydrators, clean packaging, and IoT monitoring.',
+  hours: 50,
+  learners: 1490,
+  stages: [
+    {
+      title: 'Food Safety, Shelf-Life Science & PMFME Subsidy Prep',
+      status: 'done',
+      modules: [
+        {
+          title: 'PMFME Micro Food Processing & FSSAI Hygiene Standards',
+          provider: 'MoFPI / NIFTEM Kundli (Free)',
+          hours: 20,
+          free: true,
+          certified: true,
+          url: 'https://pmfme.mofpi.gov.in',
+        },
+      ],
+    },
+    {
+      title: 'Solar Dehydration, Cold Storage & Traceable Packaging',
+      status: 'active',
+      modules: [
+        {
+          title: 'Post-Harvest Cold-Chain & APEDA Export Residue Norms',
+          provider: 'CSIR-CFTRI / APEDA',
+          hours: 30,
+          free: true,
+          certified: false,
+          url: 'https://apeda.gov.in',
+        },
+      ],
+    },
+  ],
+};
+
+export const ROADMAP_TEXTILES_GI_EXPORTS: RoadmapView = {
+  slug: 'technical-textiles-gi-crafts-export',
+  title: 'Technical Textiles, Zero-Defect Looms & Heritage GI Craft Export',
+  track: 'design',
+  level: 'beginner',
+  summary:
+    'Modernize apparel, technical fabrics, bamboo/wood products, and Geographical Indication (GI) artisan clusters to win European, US, and GCC wholesale orders.',
+  hours: 48,
+  learners: 1320,
+  stages: [
+    {
+      title: 'Material Testing, Sustainable Dyeing & GI Authentication',
+      status: 'done',
+      modules: [
+        {
+          title: 'ATIRA & NITRA Textile Quality, GSM & Tensile Testing Primer',
+          provider: 'Ministry of Textiles / NTTM',
+          hours: 22,
+          free: true,
+          certified: false,
+          url: 'https://nttm.texmin.gov.in',
+        },
+      ],
+    },
+    {
+      title: 'Export Tech Packs, OEKO-TEX / REACH & Global D2C Cataloging',
+      status: 'active',
+      modules: [
+        {
+          title: 'EPCH & ODOP Craft-to-Global Export Packaging & B2B Specs',
+          provider: 'EPCH / ODOP India',
+          hours: 26,
+          free: true,
+          certified: false,
+          url: 'https://www.epch.in',
+        },
+      ],
+    },
+  ],
+};
+
 /* =========================================================================
    ALL ROADMAPS EXPORT
    ========================================================================= */
@@ -689,19 +869,23 @@ export const ALL_ROADMAPS: RoadmapView[] = [
   // Code
   ROADMAP_FULL_STACK,
   ROADMAP_RUST_SYSTEMS,
+  ROADMAP_VERNACULAR_DPI_ONDC,
   // Make
   ROADMAP_EMBEDDED,
   ROADMAP_ROBOTICS_ROS2,
   ROADMAP_KICAD_PCB,
+  ROADMAP_AGRI_COLDCHAIN_FOOD,
   // Design
   ROADMAP_PRODUCT_DESIGN,
   ROADMAP_CAD_ENCLOSURES,
+  ROADMAP_TEXTILES_GI_EXPORTS,
   // Research
   ROADMAP_CUBESAT,
   ROADMAP_DEEP_LEARNING_TINYML,
   // Earn
   ROADMAP_OPEN_SOURCE_LEADERSHIP,
   ROADMAP_BOUNTY_ENGINEERING,
+  ROADMAP_EXPORT_COMPLIANCE,
   // Learn
   ROADMAP_SYSTEMS_ENGINEERING,
   ROADMAP_META_LEARNING,

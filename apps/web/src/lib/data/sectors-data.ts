@@ -1459,6 +1459,42 @@ export function getRoadmapNextSteps(roadmapSlug: string, track?: string): {
     };
   }
 
+  if (roadmapSlug === 'export-compliance-and-global-trade') {
+    return {
+      primarySectorRoute: '/export',
+      primarySectorLabel: 'Export Hub',
+      primaryLabRoute: '/compliance',
+      primaryLabLabel: 'Compliance',
+    };
+  }
+
+  if (roadmapSlug === 'india-dpi-ondc-bhashini-ai') {
+    return {
+      primarySectorRoute: '/resources',
+      primarySectorLabel: 'DPI & Grants',
+      primaryLabRoute: '/copilot',
+      primaryLabLabel: 'AI Copilot',
+    };
+  }
+
+  if (roadmapSlug === 'agri-coldchain-food-processing') {
+    return {
+      primarySectorRoute: '/sectors/agro-food-coldchain',
+      primarySectorLabel: 'Agro & Cold Chain',
+      primaryLabRoute: '/manufacturing/spice',
+      primaryLabLabel: 'Labs',
+    };
+  }
+
+  if (roadmapSlug === 'technical-textiles-gi-crafts-export') {
+    return {
+      primarySectorRoute: '/sectors/technical-textiles-apparel',
+      primarySectorLabel: 'Textiles & GI',
+      primaryLabRoute: '/how-to-start',
+      primaryLabLabel: 'Pilot Guides',
+    };
+  }
+
   if (track === 'code' || track === 'research') {
     return {
       primarySectorRoute: '/sectors/semiconductors-electronics',

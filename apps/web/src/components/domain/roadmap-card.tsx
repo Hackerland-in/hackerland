@@ -28,6 +28,7 @@ import {
 import type { RoadmapView, RoadmapStage, RoadmapModule } from '@/lib/data/types';
 import { getRoadmapNextSteps } from '@/lib/data/sectors-data';
 import { useSocialCommunity } from '@/components/social/social-context';
+import { useVenture } from '@/components/social/venture-context';
 import { TrackBadge } from './track-badge';
 
 export interface RoadmapCardProps {
@@ -54,6 +55,7 @@ export function RoadmapCard({
   const [sharedNotice, setSharedNotice] = useState(false);
 
   const { isItemSaved, toggleSaveItem } = useSocialCommunity();
+  const { markLearnCompleted } = useVenture();
   const saved = isItemSaved(`roadmap:${roadmap.slug}`);
 
   useEffect(() => {
@@ -67,6 +69,7 @@ export function RoadmapCard({
   }, [storageKey]);
 
   const toggleModule = (modKey: string) => {
+    const isNowComplete = !completedModules.includes(modKey);
     setCompletedModules((prev) => {
       const next = prev.includes(modKey) ? prev.filter((k) => k !== modKey) : [...prev, modKey];
       try {
@@ -74,6 +77,9 @@ export function RoadmapCard({
       } catch {}
       return next;
     });
+    if (isNowComplete) {
+      markLearnCompleted(roadmap.slug);
+    }
   };
 
   const totalModules = roadmap.stages.reduce((acc, s) => acc + s.modules.length, 0);

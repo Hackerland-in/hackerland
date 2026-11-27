@@ -93,9 +93,16 @@ function mapProblemDomainToWorkbenchDomain(problemDomain: string): string {
     case 'agriculture':
       return 'Agro-Processing';
     case 'clean_water':
+    case 'climate_sustainability':
       return 'Climate';
+    case 'energy_storage':
+      return 'EV/Energy';
     case 'space_aerospace':
       return 'Drones';
+    case 'textiles_crafts':
+      return 'Textiles';
+    case 'robotics_automation':
+      return 'CNC/Robotics';
     default:
       return 'Software/AI';
   }

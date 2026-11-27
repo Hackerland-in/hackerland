@@ -6,6 +6,7 @@ import { SkipLink } from '@/components/layout/skip-link';
 import { AppHeader } from '@/components/layout/app-header';
 import { AppFooter } from '@/components/layout/app-footer';
 import { MobileNav } from '@/components/layout/mobile-nav';
+import { VentureProvider } from '@/components/social/venture-context';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -171,13 +172,15 @@ export default function RootLayout({
         />
       </head>
       <body className="flex min-h-screen flex-col bg-canvas text-fg font-sans text-body-md antialiased selection:bg-accent selection:text-on-solid max-w-full overflow-x-clip">
-        <SkipLink />
-        <AppHeader />
-        <main id="main" className="flex-1 pb-20 md:pb-0 max-w-full overflow-x-clip">
-          {children}
-        </main>
-        <AppFooter />
-        <MobileNav />
+        <VentureProvider>
+          <SkipLink />
+          <AppHeader />
+          <main id="main" className="flex-1 pb-20 md:pb-0 max-w-full overflow-x-clip">
+            {children}
+          </main>
+          <AppFooter />
+          <MobileNav />
+        </VentureProvider>
       </body>
     </html>
   );
