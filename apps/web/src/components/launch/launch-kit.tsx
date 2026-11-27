@@ -1,8 +1,21 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Badge, Button, Card, Input, Label, cn } from '@hackerland/ui';
-import { Copy, Check, ExternalLink, CheckCircle2, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  Copy,
+  ExternalLink,
+  Globe2,
+  Send,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
+import { useBuilderIdentity } from '@/lib/builder-identity';
+import { useVenture } from '@/components/social/venture-context';
 
 interface LaunchPlatform {
   id: string;

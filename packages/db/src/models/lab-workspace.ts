@@ -19,6 +19,7 @@ export const LAB_WORKSPACE_KINDS = [
   'copilot',
   'eda',
   'spice',
+  'export_trade',
 ] as const;
 
 export type LabWorkspaceKind = (typeof LAB_WORKSPACE_KINDS)[number];

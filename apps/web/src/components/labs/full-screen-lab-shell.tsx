@@ -119,6 +119,9 @@ const ALL_LAB_GROUPS: Array<{
       { label: 'Thermal Heatsink Profiler', href: '/thermal/gan-sic-traction-inverter-coldplate' },
       { label: 'EMC Pre-Scan Analyzer', href: '/emc/bldc-foc-esc-cispr25-prescan' },
       { label: 'Hardware Teardowns Studio', href: '/teardowns/submit', kind: 'teardown' },
+      { label: 'Global Export & OEM Hub', href: '/export/uae-gcc', kind: 'export_trade' },
+      { label: 'All 10 Sector Pathways', href: '/sectors' },
+      { label: 'Funding & Free Resources', href: '/resources' },
     ],
   },
 ];

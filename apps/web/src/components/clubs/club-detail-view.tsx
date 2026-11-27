@@ -43,7 +43,78 @@ export function ClubDetailView({ club }: ClubDetailViewProps) {
         }
       }
     } catch {}
-  }, [club.id, club.slug]);
+
+    if (typeof fetch !== 'function') return;
+    let active = true;
+    const identity = getActiveBuilderIdentity();
+
+    fetch('/api/bookings?namespace=booking&bookingKind=club_equipment')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data || !Array.isArray(data.records)) return;
+        const fromServer: StoredEquipmentBooking[] = [];
+        for (const rec of data.records as Array<{ key: string; payload?: Record<string, unknown> }>) {
+          const p = rec.payload;
+          if (!p || p.kind !== 'club_equipment_booking' || p.clubSlug !== club.slug) continue;
+          const slotWindow = typeof p.slotWindow === 'string' ? p.slotWindow : 'Scheduled Window';
+          const parts = slotWindow.split(' ');
+          const requestedDate = parts[0] || '2026-11-28';
+          const timeSlot = parts.slice(1).join(' ') || slotWindow;
+          const id = typeof p.id === 'string' ? p.id : rec.key;
+          fromServer.push({
+            passCode: id.toUpperCase(),
+            clubSlug: club.slug,
+            clubName: club.name,
+            equipmentId: typeof p.equipmentId === 'string' ? p.equipmentId : '',
+            equipmentName: typeof p.equipmentName === 'string' ? p.equipmentName : 'Lab Machine',
+            requestedDate,
+            timeSlot,
+            applicantName: typeof p.bookedByName === 'string' ? p.bookedByName : identity.name,
+            projectTitle: 'Synced Lab Pass',
+          });
+        }
+        if (fromServer.length === 0) return;
+
+        setClubBookings((prev) => {
+          const seen = new Set(
+            prev.map((b) => `${b.equipmentId}::${b.requestedDate} ${b.timeSlot}`.toLowerCase()),
+          );
+          const merged = [...prev];
+          for (const srv of fromServer) {
+            const sig = `${srv.equipmentId}::${srv.requestedDate} ${srv.timeSlot}`.toLowerCase();
+            if (!seen.has(sig) && !merged.some((m) => m.passCode === srv.passCode)) {
+              seen.add(sig);
+              merged.push(srv);
+            }
+          }
+          return merged;
+        });
+      })
+      .catch(() => {});
+
+    fetch('/api/bookings?namespace=club_membership')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data || !Array.isArray(data.records)) return;
+        for (const rec of data.records as Array<{ payload?: Record<string, unknown> }>) {
+          const p = rec.payload;
+          if (
+            p &&
+            p.clubSlug === club.slug &&
+            String(p.memberHandle || '').toLowerCase() === identity.handle.toLowerCase() &&
+            typeof p.joined === 'boolean'
+          ) {
+            setJoined(p.joined);
+            break;
+          }
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, [club.id, club.name, club.slug]);
 
   const toggleJoin = () => {
     const nextJoined = !joined;

@@ -177,6 +177,21 @@ describe('WorkflowStateModel validation and indexes', () => {
     );
     expect(hasCompound).toBe(true);
   });
+
+  it('accepts export_readiness and venture_thread namespaces', () => {
+    const exportDoc = new WorkflowStateModel({
+      namespace: 'export_readiness',
+      key: 'exporter_bms_01',
+      payload: { corridor: 'uae_gcc', readinessScore: 90 },
+    });
+    const ventureDoc = new WorkflowStateModel({
+      namespace: 'venture_thread',
+      key: 'thread_ev_pune_01',
+      payload: { stage: 'pilot' },
+    });
+    expect(exportDoc.validateSync()).toBeUndefined();
+    expect(ventureDoc.validateSync()).toBeUndefined();
+  });
 });
 
 describe('LabWorkspaceModel validation and indexes', () => {
@@ -212,5 +227,18 @@ describe('LabWorkspaceModel validation and indexes', () => {
       ([fields, opts]) => fields.workspaceId === 1 && opts?.unique === true,
     );
     expect(hasUniqueId).toBe(true);
+  });
+
+  it('accepts export_trade lab workspace kind', () => {
+    const doc = new LabWorkspaceModel({
+      workspaceId: 'export-trade-bms-uae',
+      kind: 'export_trade',
+      slugOrRoute: '/export-trade',
+      title: 'LFP Smart BMS UAE CEPA Export Dossier',
+      ownerHandle: 'meera-iyer',
+      ownerName: 'Meera Iyer',
+      payload: { corridor: 'uae_gcc', domesticValueAddPercent: 48 },
+    });
+    expect(doc.validateSync()).toBeUndefined();
   });
 });

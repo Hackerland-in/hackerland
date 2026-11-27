@@ -1,7 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Users } from 'lucide-react';
+import {
+  Activity,
+  ArrowLeft,
+  Cpu,
+  Factory,
+  Globe2,
+  Rocket,
+  ShieldCheck,
+  Users,
+  Zap,
+} from 'lucide-react';
 import {
   PROJECT_STAGE_LABEL,
   TRACK_META,
@@ -46,6 +56,8 @@ import {
   PostUpdateAction,
   ProjectHeroActions,
 } from './project-interactions';
+
+export const dynamic = 'force-dynamic';
 
 export async function generateStaticParams() {
   const projects = await listProjects();
@@ -130,6 +142,62 @@ export default async function ProjectDetailPage({
               <span>Squad Room &amp; Escrow</span>
             </Link>
           </Button>
+        </div>
+
+        {/* End-to-End Studio & Export Pipeline */}
+        <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-hairline bg-surface-1 px-3.5 py-2.5 text-[11px] shadow-xs">
+          <span className="font-mono font-semibold uppercase tracking-wide text-accent-fg mr-1">
+            Build Pipeline:
+          </span>
+          <Link
+            href={`/prototype?title=${encodeURIComponent(project.title)}`}
+            className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+          >
+            <Cpu className="size-3 text-accent" aria-hidden="true" />
+            <span>Prototype Architect</span>
+          </Link>
+          <Link
+            href={`/manufacturing/pcb?title=${encodeURIComponent(project.title)}`}
+            className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+          >
+            <Zap className="size-3 text-accent" aria-hidden="true" />
+            <span>PCB Studio</span>
+          </Link>
+          <Link
+            href={`/manufacturing/rfq?boardName=${encodeURIComponent(project.title)}`}
+            className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+          >
+            <Factory className="size-3 text-accent" aria-hidden="true" />
+            <span>Instant Fab RFQ</span>
+          </Link>
+          <Link
+            href="/testbeds"
+            className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+          >
+            <Activity className="size-3 text-accent" aria-hidden="true" />
+            <span>HIL Testbeds</span>
+          </Link>
+          <Link
+            href="/compliance"
+            className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+          >
+            <ShieldCheck className="size-3 text-accent" aria-hidden="true" />
+            <span>Compliance</span>
+          </Link>
+          <Link
+            href={`/launch?title=${encodeURIComponent(project.title)}&tagline=${encodeURIComponent(project.summary)}`}
+            className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+          >
+            <Rocket className="size-3 text-accent" aria-hidden="true" />
+            <span>Launch Kit</span>
+          </Link>
+          <Link
+            href="/export"
+            className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+          >
+            <Globe2 className="size-3 text-accent" aria-hidden="true" />
+            <span>Export Hub</span>
+          </Link>
         </div>
 
         {/* Social Showcase Hero Card */}

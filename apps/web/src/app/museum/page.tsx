@@ -1,7 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Skull, ArrowRight, ShieldAlert } from 'lucide-react';
-import { Badge, Card, StatTile } from '@hackerland/ui';
+import {
+  Skull,
+  ArrowRight,
+  ShieldAlert,
+  ShieldCheck,
+  PackageSearch,
+  Globe,
+  Lightbulb,
+} from 'lucide-react';
+import { Badge, Button, Card, StatTile } from '@hackerland/ui';
 import { MUSEUM_EXHIBITS } from '@/lib/data/museum-data';
 import { FailureRiskCalculator } from '@/components/museum/failure-risk-calculator';
 import { SocialCommunityProvider } from '@/components/social/social-context';
@@ -11,7 +19,7 @@ import { CommunityRailServer } from '@/components/social/community-rail-server';
 export const metadata: Metadata = {
   title: 'Failed Projects Museum & Autopsy Archive | Hackerland',
   description:
-    'An honest museum of failed hardware and deep-tech ventures. Technical root-cause autopsies, engineering mistakes, physics limits, and pre-mortem risk tools.',
+    'An honest museum of failed hardware, deep-tech ventures, and ₹50k–₹5L Indian MSME traps. Technical root-cause autopsies, customs/WPC/UN 38.3 failures, and pre-mortem risk tools.',
 };
 
 export default function MuseumPage() {
@@ -27,15 +35,15 @@ export default function MuseumPage() {
             Failed Projects Museum &amp; Engineering Autopsies
           </h1>
           <p className="text-body-sm sm:text-body-md text-fg-muted max-w-2xl leading-relaxed">
-            Study candid root-cause autopsies of ambitious hardware projects that hit physics, BOM cost, tooling, or certification walls—and stress-test your own build first.
+            Study candid root-cause autopsies of global hardware collapses and real ₹50k–₹5L Indian MSME traps—from Nhava Sheva RF customs seizures to single-source MCU halts and UN 38.3 battery rejections.
           </p>
         </header>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
-          <StatTile label="Capital Autopsied" value="$1.6B+" hint="Venture & hardware post-mortems" tone="danger" />
-          <StatTile label="Physics vs Hype" value="Laws" hint="Thermodynamic & energy limits" tone="accent" />
+          <StatTile label="Global Autopsies" value="$1.6B+" hint="Venture & hardware post-mortems" tone="danger" />
+          <StatTile label="India MSME Traps" value="₹50k–₹5L" hint="WPC, BOM & cargo failures" tone="warning" />
           <StatTile label="Salvageable Tech" value="Reusable IP" hint="Ideas proven later" tone="code" />
-          <StatTile label="Pre-Mortem Tool" value="Live Risk" hint="Test your own BOM" tone="make" />
+          <StatTile label="Pre-Mortem Tool" value="Live Risk" hint="Test your own BOM" tone="accent" />
         </div>
 
         <FailureRiskCalculator />
@@ -45,10 +53,10 @@ export default function MuseumPage() {
             <div>
               <h2 className="font-display text-headline-sm font-bold text-fg flex items-center gap-2">
                 <Skull className="size-4 text-danger-fg" />
-                <span>Curated Post-Mortem Exhibits</span>
+                <span>Curated Post-Mortem Exhibits &amp; MSME Traps</span>
               </h2>
               <p className="text-body-xs text-fg-muted mt-0.5">
-                Architectural breakdowns of prominent hardware &amp; deep-tech failures
+                Architectural breakdowns of global deep-tech failures and ₹50k–₹5L Indian manufacturing &amp; customs traps
               </p>
             </div>
             <span className="text-body-xs font-mono text-fg-subtle">
@@ -57,24 +65,31 @@ export default function MuseumPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {MUSEUM_EXHIBITS.map((exhibit) => (
-              <Link
-                key={exhibit.slug}
-                href={`/museum/${exhibit.slug}`}
-                className="group block min-w-0"
-              >
-                <Card className="h-full border-hairline bg-surface-1 hover:border-accent/50 transition p-5 flex flex-col justify-between space-y-4 [overflow-wrap:anywhere]">
+            {MUSEUM_EXHIBITS.map((exhibit) => {
+              const isIndiaMsmeTrap = exhibit.capitalBurned.includes('₹');
+              return (
+                <Card
+                  key={exhibit.slug}
+                  className="h-full border-hairline bg-surface-1 hover:border-accent/50 transition p-5 flex flex-col justify-between space-y-4 [overflow-wrap:anywhere] group"
+                >
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <Badge tone="danger" variant="outline">
-                        {exhibit.primaryFailureMode}
-                      </Badge>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge tone="danger" variant="outline">
+                          {exhibit.primaryFailureMode}
+                        </Badge>
+                        {isIndiaMsmeTrap && (
+                          <Badge tone="accent" variant="solid">
+                            India MSME Trap · ₹50k–₹5L
+                          </Badge>
+                        )}
+                      </div>
                       <span className="text-[11px] text-fg-subtle font-mono">{exhibit.lifespan}</span>
                     </div>
 
                     <div className="space-y-1">
                       <h3 className="font-display text-body-lg font-bold text-fg group-hover:text-accent-fg transition">
-                        {exhibit.title}
+                        <Link href={`/museum/${exhibit.slug}`}>{exhibit.title}</Link>
                       </h3>
                       <p className="text-body-xs font-medium text-accent-fg italic">
                         &ldquo;{exhibit.tagline}&rdquo;
@@ -113,13 +128,48 @@ export default function MuseumPage() {
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-hairline flex items-center justify-between text-body-xs font-display font-semibold text-accent-fg">
-                    <span>Read Complete Engineering Autopsy</span>
-                    <ArrowRight className="size-4 group-hover:translate-x-0.5 transition" />
+                  <div className="pt-3 border-t border-hairline space-y-2.5">
+                    <Button asChild variant="soft" size="sm" className="w-full justify-between">
+                      <Link href={`/museum/${exhibit.slug}`}>
+                        <span>Read Complete Engineering Autopsy</span>
+                        <ArrowRight className="size-3.5" />
+                      </Link>
+                    </Button>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                      <Link
+                        href="/compliance"
+                        className="inline-flex items-center justify-center gap-1 rounded-lg border border-hairline bg-sunken px-2 py-1.5 text-[11px] font-display font-semibold text-fg-muted hover:border-accent/40 hover:bg-accent-soft hover:text-accent-fg transition-colors"
+                      >
+                        <ShieldCheck className="size-3 shrink-0 text-accent-fg" aria-hidden="true" />
+                        <span>Compliance</span>
+                      </Link>
+                      <Link
+                        href="/sourcing"
+                        className="inline-flex items-center justify-center gap-1 rounded-lg border border-hairline bg-sunken px-2 py-1.5 text-[11px] font-display font-semibold text-fg-muted hover:border-accent/40 hover:bg-accent-soft hover:text-accent-fg transition-colors"
+                      >
+                        <PackageSearch className="size-3 shrink-0 text-accent-fg" aria-hidden="true" />
+                        <span>Sourcing</span>
+                      </Link>
+                      <Link
+                        href="/export"
+                        className="inline-flex items-center justify-center gap-1 rounded-lg border border-hairline bg-sunken px-2 py-1.5 text-[11px] font-display font-semibold text-fg-muted hover:border-accent/40 hover:bg-accent-soft hover:text-accent-fg transition-colors"
+                      >
+                        <Globe className="size-3 shrink-0 text-accent-fg" aria-hidden="true" />
+                        <span>Export</span>
+                      </Link>
+                      <Link
+                        href="/ideas"
+                        className="inline-flex items-center justify-center gap-1 rounded-lg border border-accent/25 bg-accent-soft/70 px-2 py-1.5 text-[11px] font-display font-semibold text-accent-fg hover:bg-accent hover:text-on-solid transition-colors"
+                      >
+                        <Lightbulb className="size-3 shrink-0" aria-hidden="true" />
+                        <span>IdeaLab</span>
+                      </Link>
+                    </div>
                   </div>
                 </Card>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         </section>
       </SocialShell>

@@ -13,6 +13,8 @@ export const WORKFLOW_NAMESPACES = [
   'booking',
   'club_membership',
   'young_innovator',
+  'export_readiness',
+  'venture_thread',
 ] as const;
 
 export type WorkflowNamespace = (typeof WORKFLOW_NAMESPACES)[number];

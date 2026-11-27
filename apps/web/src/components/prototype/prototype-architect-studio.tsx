@@ -14,12 +14,18 @@ import {
   Copy,
   Bookmark,
   Trash2,
+  Compass,
+  Landmark,
 } from 'lucide-react';
 import { Badge, Button, Card, Input, cn } from '@hackerland/ui';
 import type { PrototypeArchitecturePlan, PrototypeBlockCategory } from '@hackerland/core';
 import { PROTOTYPE_PRESETS, synthesizePrototypePlan } from '@/lib/data/prototype-data';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
+import { useVenture } from '@/components/social/venture-context';
 
 export function PrototypeArchitectStudio() {
+  const labShell = useLabShell();
+  const { linkWorkspaceToVenture } = useVenture();
   const [selectedPresetId, setSelectedPresetId] = useState<string>(PROTOTYPE_PRESETS[0]!.id);
   const [customPrompt, setCustomPrompt] = useState<string>('');
   const [currentPlan, setCurrentPlan] = useState<PrototypeArchitecturePlan>(PROTOTYPE_PRESETS[0]!);
@@ -35,7 +41,39 @@ export function PrototypeArchitectStudio() {
         if (Array.isArray(parsed)) setSavedPlans(parsed);
       }
     } catch {}
+
+    if (typeof window !== 'undefined' && window.location.search) {
+      const params = new URLSearchParams(window.location.search);
+      const titleParam = (params.get('title') || params.get('idea') || '').trim();
+      if (titleParam) {
+        const synthesized = synthesizePrototypePlan(titleParam);
+        setSelectedPresetId(synthesized.id);
+        setCurrentPlan(synthesized);
+        setCustomPrompt(titleParam);
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: currentPlan.ideaTitle,
+        summary: `${currentPlan.domain} · ${currentPlan.targetFormFactor} · ₹${currentPlan.estimatedTotalProtoCost.inr}`,
+        tags: ['prototype', currentPlan.domain.toLowerCase()],
+        payload: { plan: currentPlan, currency },
+      }),
+      onLoad: (ws) => {
+        const loadedPlan = ws.payload?.plan as PrototypeArchitecturePlan | undefined;
+        if (loadedPlan && typeof loadedPlan === 'object' && loadedPlan.ideaTitle) {
+          setSelectedPresetId(loadedPlan.id);
+          setCurrentPlan(loadedPlan);
+        }
+        if (ws.payload?.currency === 'INR' || ws.payload?.currency === 'USD') {
+          setCurrency(ws.payload.currency);
+        }
+      },
+    });
+  }, [labShell, currentPlan, currency]);
 
   const handleSelectPreset = (plan: PrototypeArchitecturePlan) => {
     setSelectedPresetId(plan.id);
@@ -53,12 +91,28 @@ export function PrototypeArchitectStudio() {
 
   const handleSavePlan = () => {
     const exists = savedPlans.some((p) => p.ideaTitle === currentPlan.ideaTitle);
-    if (exists) return;
-    const updated = [currentPlan, ...savedPlans].slice(0, 5);
-    setSavedPlans(updated);
-    try {
-      localStorage.setItem('hackerland_proto_plans', JSON.stringify(updated));
-    } catch {}
+    if (!exists) {
+      const updated = [currentPlan, ...savedPlans].slice(0, 5);
+      setSavedPlans(updated);
+      try {
+        localStorage.setItem('hackerland_proto_plans', JSON.stringify(updated));
+      } catch {}
+    }
+
+    if (labShell) {
+      void labShell
+        .saveWorkspace({
+          title: currentPlan.ideaTitle,
+          summary: `${currentPlan.domain} · ${currentPlan.targetFormFactor} · ₹${currentPlan.estimatedTotalProtoCost.inr}`,
+          tags: ['prototype', currentPlan.domain.toLowerCase()],
+          payload: { plan: currentPlan, currency },
+        })
+        .then((ws) => {
+          if (ws?.workspaceId) {
+            linkWorkspaceToVenture('prototype', ws.workspaceId, 4);
+          }
+        });
+    }
   };
 
   const handleRemoveSaved = (title: string) => {
@@ -247,21 +301,35 @@ Synthesized by Hackerland Prototype Simulator: https://www.hackerland.in/prototy
         <div className="pt-3 border-t border-hairline flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="primary" size="sm">
-              <Link href="/manufacturing/pcb">
+              <Link href={`/manufacturing/pcb?fromProto=1&title=${encodeURIComponent(currentPlan.ideaTitle)}`}>
                 <Cpu className="size-3.5" />
                 <span>Open in PCB Studio</span>
               </Link>
             </Button>
             <Button asChild variant="secondary" size="sm">
-              <Link href="/manufacturing/rfq">
+              <Link href={`/manufacturing/rfq?boardName=${encodeURIComponent(currentPlan.ideaTitle)}`}>
                 <Layers className="size-3.5 text-accent" />
                 <span>Get Indian Fab Quotes</span>
               </Link>
             </Button>
             <Button asChild variant="secondary" size="sm">
-              <Link href="/earn">
+              <Link
+                href={`/new?title=${encodeURIComponent(currentPlan.ideaTitle)}&skills=${encodeURIComponent(currentPlan.requiredSkills.flatMap((r) => r.skills).join(','))}&tagline=${encodeURIComponent(currentPlan.summary.slice(0, 140))}&tracks=make,code`}
+              >
                 <Users className="size-3.5 text-accent" />
                 <span>Recruit Squad</span>
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/sectors">
+                <Compass className="size-3.5 text-accent" />
+                <span>Sectors</span>
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/resources">
+                <Landmark className="size-3.5 text-accent" />
+                <span>Grants &amp; Labs</span>
               </Link>
             </Button>
           </div>

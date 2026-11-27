@@ -25,6 +25,8 @@ import {
   SegmentedProgress,
   Textarea,
 } from '@hackerland/ui';
+import { getActiveBuilderIdentity } from '@/lib/builder-identity';
+import { useVenture } from '@/components/social/venture-context';
 
 export type WizardRole = {
   title: string;
@@ -41,19 +43,48 @@ export type WizardState = {
   roles: WizardRole[];
 };
 
+export type NewProjectInitialDraft = {
+  title?: string;
+  tagline?: string;
+  description?: string;
+  tracks?: Track[];
+  skills?: string[];
+};
+
 const STEP_LABELS = ['Idea', 'Tracks & skills', 'Team roles', 'Review & launch'] as const;
 
-export function NewProjectWizard() {
+function slugifyProjectTitle(title: string): string {
+  const base =
+    title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 52) || 'build';
+  return `${base}-${Date.now().toString(36).slice(-4)}`;
+}
+
+export function NewProjectWizard({ initialDraft }: { initialDraft?: NewProjectInitialDraft } = {}) {
   const router = useRouter();
+  const { updateActiveVenture } = useVenture();
   const [step, setStep] = useState(0);
-  const [state, setState] = useState<WizardState>({
-    title: '',
-    tagline: '',
-    description: '',
-    tracks: [],
-    skills: [],
+  const [state, setState] = useState<WizardState>(() => ({
+    title: initialDraft?.title?.trim() ?? '',
+    tagline: (initialDraft?.tagline?.trim() ?? '').slice(0, 140),
+    description: initialDraft?.description?.trim() ?? '',
+    tracks: (initialDraft?.tracks ?? []).filter((t): t is Track =>
+      (TRACKS as readonly string[]).includes(t),
+    ),
+    skills: Array.from(
+      new Set(
+        (initialDraft?.skills ?? [])
+          .map((s) => s.trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    ),
     roles: [],
-  });
+  }));
 
   // Step 4 submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -217,19 +248,81 @@ export function NewProjectWizard() {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 503 || res.status === 401) {
+        const createdSlug = slugifyProjectTitle(state.title);
+        const identity = getActiveBuilderIdentity();
+        const now = new Date().toISOString();
+        const customProjectRecord = {
+          slug: createdSlug,
+          title: payload.title,
+          summary: payload.summary,
+          body: payload.description || payload.summary,
+          tracks: payload.tracks,
+          stage: 'idea',
+          licence: 'MIT',
+          skills: payload.tags,
+          openRoles: payload.openRoles.map((r, idx) => ({
+            id: `role-${idx}-${Date.now()}`,
+            ...r,
+          })),
+          creatorHandle: identity.handle,
+          creatorName: identity.name,
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        try {
+          const prevRaw = localStorage.getItem('hackerland_custom_projects_v1');
+          const prev = prevRaw ? (JSON.parse(prevRaw) as unknown[]) : [];
+          localStorage.setItem(
+            'hackerland_custom_projects_v1',
+            JSON.stringify([customProjectRecord, ...(Array.isArray(prev) ? prev : [])].slice(0, 30)),
+          );
+        } catch {}
+
+        try {
+          await fetch('/api/workbenches', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              workspaceId: `custom-project-${createdSlug}`,
+              kind: 'prototype',
+              slugOrRoute: `/projects/${createdSlug}`,
+              title: payload.title,
+              summary: payload.summary,
+              ownerHandle: identity.handle,
+              ownerName: identity.name,
+              tags: ['custom-project', ...payload.tracks, ...payload.tags.slice(0, 5)],
+              payload: customProjectRecord,
+              publishToFeed: true,
+            }),
+          });
+        } catch {}
+
+        updateActiveVenture({
+          title: payload.title,
+          projectSlug: createdSlug,
+          squadSlug: createdSlug,
+          currentStage: 3,
+        });
+
+        router.push(`/projects/${createdSlug}`);
+        return;
+      }
 
       if (!res.ok) {
-        if (res.status === 401) {
-          throw new Error('Please sign in to publish a project.');
-        }
-        if (res.status === 503) {
-          throw new Error('Database is not configured on this deployment yet.');
-        }
         throw new Error(data.error || 'Failed to publish project. Please try again.');
       }
 
       if (data.slug) {
+        updateActiveVenture({
+          title: payload.title,
+          projectSlug: data.slug,
+          squadSlug: data.slug,
+          currentStage: 3,
+        });
         router.push(`/projects/${data.slug}`);
       } else {
         router.push('/projects');
@@ -245,6 +338,16 @@ export function NewProjectWizard() {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-8">
+      {initialDraft?.title && (
+        <div className="rounded-xl border border-accent/25 bg-accent-soft/60 px-4 py-2.5 text-body-xs text-fg flex flex-wrap items-center justify-between gap-2">
+          <span>
+            Pre-filled build brief for <strong className="text-accent-fg">{initialDraft.title}</strong>
+          </span>
+          <span className="font-mono text-[11px] text-fg-muted">
+            Review tracks, add squad roles &amp; launch your Squad Room
+          </span>
+        </div>
+      )}
       {/* Progress Header */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-label-md text-fg-muted font-display uppercase">

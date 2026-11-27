@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { NewProjectWizard } from '@/components/new-project/wizard';
+import { TRACKS, type Track } from '@hackerland/core';
+import { NewProjectWizard, type NewProjectInitialDraft } from '@/components/new-project/wizard';
 import { SocialCommunityProvider } from '@/components/social/social-context';
 import { SocialShell } from '@/components/social/social-shell';
 import { Panel } from '@hackerland/ui';
@@ -10,7 +11,62 @@ export const metadata = {
   description: 'Assemble a squad, launch an open project, and build in public.',
 };
 
-export default function NewProjectPage() {
+function readParam(val: string | string[] | undefined): string {
+  if (Array.isArray(val)) return val[0]?.trim() ?? '';
+  return val?.trim() ?? '';
+}
+
+function inferTracksFromDomain(domain: string): Track[] {
+  const lower = domain.toLowerCase();
+  if (!lower) return [];
+  if (lower.includes('software') || lower.includes('ai')) return ['code'];
+  if (lower.includes('craft') || lower.includes('design')) return ['make', 'design'];
+  if (lower.includes('health') || lower.includes('medtech') || lower.includes('climate') || lower.includes('water')) {
+    return ['make', 'research'];
+  }
+  return ['make', 'code'];
+}
+
+export default async function NewProjectPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolved = (await searchParams) ?? {};
+  const title = readParam(resolved.title);
+  const tagline = readParam(resolved.tagline);
+  const description = readParam(resolved.description);
+  const domain = readParam(resolved.domain);
+  const rawTracks = readParam(resolved.tracks);
+  const rawSkills = readParam(resolved.skills);
+
+  const parsedTracks = rawTracks
+    ? rawTracks
+        .split(',')
+        .map((t) => t.trim().toLowerCase())
+        .filter((t): t is Track => (TRACKS as readonly string[]).includes(t))
+    : inferTracksFromDomain(domain);
+
+  const parsedSkills = rawSkills
+    ? rawSkills
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : domain
+      ? [domain.toLowerCase()]
+      : [];
+
+  const initialDraft: NewProjectInitialDraft | undefined =
+    title || tagline || description || parsedTracks.length > 0 || parsedSkills.length > 0
+      ? {
+          ...(title ? { title } : {}),
+          ...(tagline ? { tagline } : {}),
+          ...(description ? { description } : {}),
+          ...(parsedTracks.length > 0 ? { tracks: parsedTracks } : {}),
+          ...(parsedSkills.length > 0 ? { skills: parsedSkills } : {}),
+        }
+      : undefined;
+
   return (
     <SocialCommunityProvider>
       <SocialShell
@@ -58,7 +114,7 @@ export default function NewProjectPage() {
           </p>
         </header>
 
-        <NewProjectWizard />
+        <NewProjectWizard initialDraft={initialDraft} />
       </SocialShell>
     </SocialCommunityProvider>
   );

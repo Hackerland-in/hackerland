@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import {
   Activity,
+  ArrowRight,
   CheckCircle2,
   Download,
   Layers,
@@ -11,12 +13,15 @@ import {
   RotateCw,
   Save,
   ShieldAlert,
+  ShieldCheck,
   Trash2,
   X,
   Zap,
 } from 'lucide-react';
 import { Badge, Button, cn } from '@hackerland/ui';
 import { useLabShell } from '@/components/labs/full-screen-lab-shell';
+import { useVenture } from '@/components/social/venture-context';
+import { getActiveBuilderIdentity } from '@/lib/builder-identity';
 import type {
   BoardSubstrate,
   CopperTraceSegment,
@@ -243,6 +248,7 @@ const STARTER_CIRCUITS: Record<'ne555_flasher' | 'veroboard_audio', StarterCircu
 
 export function PcbStudio() {
   const labShell = useLabShell();
+  const { activeVenture, linkWorkspaceToVenture } = useVenture();
   const [boardTitle, setBoardTitle] = useState('555 Astable Flasher Rev B');
   const [substrate, setSubstrate] = useState<BoardSubstrate>('fr4');
   const [activeLayer, setActiveLayer] = useState<PcbLayer>('top_copper');
@@ -274,16 +280,68 @@ export function PcbStudio() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportPackage, setExportPackage] = useState<ReturnType<typeof buildCompleteManufacturingExport> | null>(null);
   const [boardSaveStatus, setBoardSaveStatus] = useState<string | null>(null);
+  const [quotingRfq, setQuotingRfq] = useState(false);
 
   const scopeCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search) {
+      const params = new URLSearchParams(window.location.search);
+      const titleParam = params.get('title')?.trim();
+      if (titleParam) {
+        setBoardTitle(`${titleParam} PCB`);
+      } else if (
+        params.get('fromProto') === '1' &&
+        activeVenture?.title &&
+        activeVenture.id !== 'venture_seed_kaveri_bms'
+      ) {
+        setBoardTitle(`${activeVenture.title} PCB`);
+      }
+    }
+  }, [activeVenture]);
+
+  const computeBoardSnapshotMeta = () => {
+    const widthMm = Math.max(
+      80,
+      Math.min(300, Math.round(components.reduce((max, c) => Math.max(max, c.x + 15), 85))),
+    );
+    const heightMm = Math.max(
+      60,
+      Math.min(250, Math.round(components.reduce((max, c) => Math.max(max, c.y + 15), 65))),
+    );
+    const layers: 1 | 2 | 4 =
+      substrate !== 'fr4'
+        ? 1
+        : vias.length >= 4
+          ? 4
+          : 2;
+    const bomCsv =
+      exportPackage?.bomCsv ?? buildCompleteManufacturingExport(components, traces, vias).bomCsv;
+    return {
+      widthMm,
+      heightMm,
+      layers,
+      componentsCount: components.length,
+      bomCsv,
+    };
+  };
+
+  useEffect(() => {
+    const meta = computeBoardSnapshotMeta();
     labShell?.registerSnapshotHandlers({
       getSnapshot: () => ({
         title: boardTitle.trim() || 'Untitled PCB Revision',
-        summary: `${substrate.toUpperCase()} layout · ${components.length} components · ${traces.length} copper traces`,
+        summary: `${substrate.toUpperCase()} layout · ${meta.widthMm}x${meta.heightMm}mm · ${meta.layers}L · ${components.length} components · ${traces.length} traces`,
         tags: ['pcb', substrate, 'kicad-ready'],
-        payload: { boardTitle, substrate, components, traces, vias, trackCuts },
+        payload: {
+          boardTitle,
+          substrate,
+          components,
+          traces,
+          vias,
+          trackCuts,
+          ...meta,
+        },
       }),
       onLoad: (ws) => {
         const p = ws.payload;
@@ -299,7 +357,7 @@ export function PcbStudio() {
         setSelectedCompId(null);
       },
     });
-  }, [labShell, boardTitle, substrate, components, traces, vias, trackCuts]);
+  }, [labShell, boardTitle, substrate, components, traces, vias, trackCuts, exportPackage]);
 
   useEffect(() => {
     if (!isSimRunning) return;
@@ -409,16 +467,80 @@ export function PcbStudio() {
     setShowExportModal(true);
   };
 
-  const handleSaveBoard = async () => {
+  const persistPcbWorkspace = async () => {
+    const meta = computeBoardSnapshotMeta();
+    const title = boardTitle.trim() || 'Untitled PCB Design';
+    const summary = `${substrate.toUpperCase()} PCB · ${meta.widthMm}x${meta.heightMm}mm · ${meta.layers}L · ${components.length} parts · ${traces.length} traces`;
+    const payload = {
+      boardTitle: title,
+      substrate,
+      components,
+      traces,
+      vias,
+      trackCuts,
+      ...meta,
+    };
+
     if (labShell) {
-      await labShell.saveWorkspace({
-        title: boardTitle.trim() || 'Untitled PCB Design',
-        summary: `${substrate.toUpperCase()} PCB · ${components.length} parts · ${traces.length} traces`,
-        tags: ['pcb', substrate],
-        payload: { boardTitle, substrate, components, traces, vias, trackCuts },
+      const ws = await labShell.saveWorkspace({
+        title,
+        summary,
+        tags: ['pcb', substrate, 'rfq-ready'],
+        payload,
       });
-      setBoardSaveStatus('Saved!');
-      setTimeout(() => setBoardSaveStatus(null), 2500);
+      if (ws?.workspaceId) {
+        linkWorkspaceToVenture('pcb', ws.workspaceId, 4);
+      }
+      return ws;
+    }
+
+    if (typeof fetch === 'function') {
+      const identity = getActiveBuilderIdentity();
+      try {
+        const res = await fetch('/api/workbenches', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            kind: 'pcb',
+            slugOrRoute: '/manufacturing/pcb',
+            title,
+            summary,
+            ownerHandle: identity.handle,
+            ownerName: identity.name,
+            tags: ['pcb', substrate, 'rfq-ready'],
+            payload,
+          }),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as { workspace?: { workspaceId: string } };
+          if (data.workspace?.workspaceId) {
+            linkWorkspaceToVenture('pcb', data.workspace.workspaceId, 4);
+            return data.workspace;
+          }
+        }
+      } catch {}
+    }
+    return null;
+  };
+
+  const handleSaveBoard = async () => {
+    await persistPcbWorkspace();
+    setBoardSaveStatus('Saved!');
+    setTimeout(() => setBoardSaveStatus(null), 2500);
+  };
+
+  const handleSaveAndQuoteRfq = async () => {
+    setQuotingRfq(true);
+    try {
+      const saved = await persistPcbWorkspace();
+      const targetUrl = saved?.workspaceId
+        ? `/manufacturing/rfq?fromWorkspaceId=${encodeURIComponent(saved.workspaceId)}`
+        : `/manufacturing/rfq?boardName=${encodeURIComponent(boardTitle.trim() || 'PCB-Design')}`;
+      if (typeof window !== 'undefined') {
+        window.location.assign(targetUrl);
+      }
+    } finally {
+      setQuotingRfq(false);
     }
   };
 
@@ -1092,6 +1214,35 @@ export function PcbStudio() {
               >
                 Download Gerber TopCopper
               </Button>
+            </div>
+
+            <div className="pt-3 border-t border-hairline flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <Button
+                type="button"
+                variant="soft"
+                className="w-full sm:w-auto flex-1"
+                loading={quotingRfq}
+                onClick={() => void handleSaveAndQuoteRfq()}
+              >
+                <span>Save &amp; Quote Board in Instant RFQ →</span>
+              </Button>
+
+              <div className="flex items-center gap-2 text-xs">
+                <Link
+                  href="/manufacturing/rfq"
+                  className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-3 py-1.5 font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+                >
+                  <span>Instant RFQ</span>
+                  <ArrowRight className="size-3" />
+                </Link>
+                <Link
+                  href="/compliance"
+                  className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-3 py-1.5 font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+                >
+                  <ShieldCheck className="size-3 text-accent" />
+                  <span>Compliance</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

@@ -192,6 +192,32 @@ export function SourcingDetailView({ record }: SourcingDetailViewProps) {
           </ul>
         </div>
       )}
+
+      {/* Additive Export Incoterms, FTA RVC & Dual-Source OEM Cross-Link */}
+      <div className="rounded-xl border border-accent/25 bg-accent-soft/40 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-accent-fg block">
+            Export Tariff, FTA Value Addition &amp; OEM Readiness
+          </span>
+          <p className="text-xs text-fg-muted leading-relaxed max-w-2xl">
+            Swapping imported silicon for Indian/pin-compatible alternates boosts Domestic Value Addition above 40% for India-UAE CEPA 0% duty and eliminates single-source OEM audit blockers.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Link
+            href="/export?tab=incoterms"
+            className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-mono font-semibold text-on-solid hover:bg-accent-strong transition-colors"
+          >
+            <span>Simulate Export Incoterms →</span>
+          </Link>
+          <Link
+            href="/export?tab=oem"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-1 px-3.5 py-2 text-xs font-mono font-semibold text-fg hover:border-accent/40 hover:text-accent-fg transition-colors"
+          >
+            <span>OEM Dual-BOM Audit</span>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

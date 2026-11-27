@@ -35,6 +35,8 @@ export * from './thermal';
 export * from './solar';
 export * from './motor-foc';
 export * from './can-bus';
+export * from './sectors';
+export * from './export-trade';
 
 
 

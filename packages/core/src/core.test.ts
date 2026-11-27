@@ -109,6 +109,28 @@ import {
   filterCanBusProjects,
   canBusProjectSchema,
   type CanBusProject,
+  SECTOR_IDS,
+  sectorIdSchema,
+  sectorBlueprintSchema,
+  SECTOR_PATHWAYS_CORE,
+  getSectorMeta,
+  recommendSectorsForSkill,
+  exportCorridorIdSchema,
+  exportProductArchetypeSchema,
+  incotermSchema,
+  scometRiskLevelSchema,
+  exportRegulatoryMappingSchema,
+  hsnExportProfileSchema,
+  pliAndExportSchemeSchema,
+  oemAuditChecklistItemSchema,
+  HSN_EXPORT_PROFILES,
+  EXPORT_PAPERWORK_GATES,
+  PLI_AND_EXPORT_SCHEMES,
+  evaluateExportRegulatoryStack,
+  calculateExportUnitEconomics,
+  evaluateExportPaperworkWorkflow,
+  matchPliAndExportIncentives,
+  evaluateOemQualificationReadiness,
 } from './index';
 
 describe('tracks', () => {
@@ -2639,6 +2661,313 @@ describe('Automotive CAN Bus & ISO 11898 Network Simulator', () => {
       termination: 'single_end_high_z_unterminated',
     });
     expect(noMatch.length).toBe(0);
+  });
+});
+
+describe('Indian Industrial & Hardware Sectors Taxonomy', () => {
+  it('defines all 10 canonical sectors and validates every blueprint against sectorBlueprintSchema', () => {
+    expect(SECTOR_IDS).toHaveLength(10);
+    expect(SECTOR_PATHWAYS_CORE).toHaveLength(10);
+
+    const expectedStageOrder = [
+      'raw_input',
+      'sub_assembly',
+      'integration_qa',
+      'certification',
+      'export',
+    ];
+
+    for (const sectorId of SECTOR_IDS) {
+      expect(sectorIdSchema.parse(sectorId)).toBe(sectorId);
+      const meta = getSectorMeta(sectorId);
+      expect(meta).toBeDefined();
+
+      const parsed = sectorBlueprintSchema.parse(meta);
+      expect(parsed.valueChainSteps.map((s) => s.stage)).toEqual(expectedStageOrder);
+      expect(parsed.jargonDecoder.length).toBeGreaterThanOrEqual(3);
+      expect(parsed.jargonDecoder.length).toBeLessThanOrEqual(4);
+      expect(parsed.recommendedWorkbenches.every((w) => w.route.startsWith('/'))).toBe(true);
+      expect(
+        parsed.starterProjectIdeas.every(
+          (idea) => idea.estimatedCostInr >= 2000 && idea.estimatedCostInr <= 15000,
+        ),
+      ).toBe(true);
+    }
+
+    const allCities = SECTOR_PATHWAYS_CORE.flatMap((s) => s.indiaClusterCities);
+    for (const hub of [
+      'Bengaluru',
+      'Sriperumbudur',
+      'Pune',
+      'Coimbatore',
+      'Rajkot',
+      'Surat',
+      'Tiruppur',
+    ]) {
+      expect(allCities).toContain(hub);
+    }
+
+    expect(getSectorMeta('unknown-sector')).toBeUndefined();
+  });
+
+  it('recommends and ranks relevant sectors by skill, city, or compliance keyword', () => {
+    expect(recommendSectorsForSkill('')).toHaveLength(10);
+
+    const bmsMatches = recommendSectorsForSkill('AIS-156 BMS');
+    expect(bmsMatches.length).toBeGreaterThan(0);
+    expect(bmsMatches[0]?.id).toBe('ev-clean-energy');
+
+    const textileMatches = recommendSectorsForSkill('Tiruppur');
+    expect(textileMatches.some((s) => s.id === 'technical-textiles-apparel')).toBe(true);
+
+    const cncMatches = recommendSectorsForSkill('PPAP Level 3 CNC');
+    expect(cncMatches[0]?.id).toBe('robotics-cnc-automation');
+
+    expect(recommendSectorsForSkill('nonexistent-xyz-term')).toEqual([]);
+  });
+});
+
+describe('Export Trade, Global Compliance & Unit Economics Engine', () => {
+  it('validates enum schemas, HSN export profiles, and PLI schemes catalogs', () => {
+    expect(exportCorridorIdSchema.parse('uae_gcc')).toBe('uae_gcc');
+    expect(exportProductArchetypeSchema.parse('ev_battery_bms')).toBe('ev_battery_bms');
+    expect(incotermSchema.parse('DDP')).toBe('DDP');
+    expect(scometRiskLevelSchema.parse('restricted_dual_use')).toBe('restricted_dual_use');
+
+    expect(HSN_EXPORT_PROFILES).toHaveLength(6);
+    for (const profile of HSN_EXPORT_PROFILES) {
+      expect(hsnExportProfileSchema.parse(profile).hsnCode.length).toBeGreaterThanOrEqual(4);
+    }
+
+    expect(PLI_AND_EXPORT_SCHEMES).toHaveLength(9);
+    for (const scheme of PLI_AND_EXPORT_SCHEMES) {
+      expect(pliAndExportSchemeSchema.parse(scheme).name.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('evaluates US, EU, UAE, ASEAN, Africa regulatory stacks, SCOMET status, RF savings, and ILAC-MRA credit', () => {
+    const usIot = evaluateExportRegulatoryStack({
+      corridor: 'us',
+      productArchetype: 'iot_wireless',
+      usesPreCertifiedRfModule: true,
+      hasExistingNablIlacReport: true,
+    });
+    expect(exportRegulatoryMappingSchema.parse(usIot)).toBeDefined();
+    const usCodes = usIot.triggeredStandards.map((s) => s.code);
+    expect(usCodes).toContain('FCC Part 15B');
+    expect(usCodes).toContain('FCC Part 15C');
+    expect(usIot.scometStatus).toBe('clear_non_scomet');
+    expect(usIot.preCertifiedRfModuleSavings.estimatedCostSavedUsd).toBe(5500);
+    expect(usIot.preCertifiedRfModuleSavings.estimatedWeeksSaved).toBe(6);
+    expect(usIot.ilacMraNablCredit.eligible).toBe(true);
+    expect(usIot.ilacMraNablCredit.estimatedCostCreditUsd).toBeGreaterThan(0);
+
+    const euMed = evaluateExportRegulatoryStack({
+      corridor: 'eu',
+      productArchetype: 'medical_diagnostic',
+      hasWirelessRadio: true,
+      hasLithiumBattery: true,
+      includeUkcaWithEu: true,
+    });
+    const euCodes = euMed.triggeredStandards.map((s) => s.code);
+    expect(euCodes.some((c) => c.includes('CE RED'))).toBe(true);
+    expect(euCodes.some((c) => c.includes('CE LVD'))).toBe(true);
+    expect(euCodes.some((c) => c.includes('UKCA'))).toBe(true);
+    expect(euCodes.some((c) => c.includes('RoHS 3'))).toBe(true);
+    expect(euCodes.some((c) => c.includes('REACH'))).toBe(true);
+    expect(euCodes.some((c) => c.includes('WEEE'))).toBe(true);
+    expect(euCodes.some((c) => c.includes('EU MDR'))).toBe(true);
+    expect(euCodes).toContain('UN 38.3');
+
+    const usDroneRestricted = evaluateExportRegulatoryStack({
+      corridor: 'us',
+      productArchetype: 'drone_uav',
+      includesEncryptionOrHighPrecisionImu: true,
+    });
+    expect(usDroneRestricted.scometStatus).toBe('restricted_dual_use');
+    expect(usDroneRestricted.triggeredStandards.some((s) => s.code.includes('FAA Remote ID'))).toBe(
+      true,
+    );
+
+    const uaeIoT = evaluateExportRegulatoryStack({
+      corridor: 'uae_gcc',
+      productArchetype: 'iot_wireless',
+    });
+    expect(uaeIoT.triggeredStandards.some((s) => s.code.includes('UAE TDRA'))).toBe(true);
+    expect(uaeIoT.triggeredStandards.some((s) => s.code.includes('UAE ECAS'))).toBe(true);
+
+    const aseanIoT = evaluateExportRegulatoryStack({
+      corridor: 'asean',
+      productArchetype: 'iot_wireless',
+    });
+    expect(aseanIoT.triggeredStandards.some((s) => s.code.includes('IMDA'))).toBe(true);
+
+    const africaSmps = evaluateExportRegulatoryStack({
+      corridor: 'africa',
+      productArchetype: 'industrial_power_smps',
+    });
+    expect(africaSmps.triggeredStandards.some((s) => s.code.includes('KEBS'))).toBe(true);
+  });
+
+  it('calculates full Incoterm waterfall, RoDTEP/DBK/IGST credits, FTA RVC duty delta, and margins', () => {
+    const uaeCepaPass = calculateExportUnitEconomics({
+      corridor: 'uae_gcc',
+      productArchetype: 'ev_battery_bms',
+      bomCostInr: 4200,
+      manufacturingAndQaCostInr: 800,
+      packagingAndExportPrepInr: 200,
+      exWorksPriceInr: 8200,
+      quantity: 500,
+      domesticValueAddPercent: 48,
+      targetRetailMsrpUsd: 260,
+    });
+
+    expect(uaeCepaPass.incotermWaterfall.map((w) => w.incoterm)).toEqual([
+      'EXW',
+      'FCA',
+      'FOB',
+      'CIF',
+      'DAP',
+      'DDP',
+    ]);
+    expect(uaeCepaPass.exwInr).toBeLessThanOrEqual(uaeCepaPass.fcaInr);
+    expect(uaeCepaPass.fcaInr).toBeLessThanOrEqual(uaeCepaPass.fobInr);
+    expect(uaeCepaPass.fobInr).toBeLessThanOrEqual(uaeCepaPass.cifInr);
+    expect(uaeCepaPass.cifInr).toBeLessThanOrEqual(uaeCepaPass.dapInr);
+    expect(uaeCepaPass.dapInr).toBeLessThanOrEqual(uaeCepaPass.ddpInr);
+
+    expect(uaeCepaPass.rodtepCreditInr).toBeGreaterThan(100);
+    expect(uaeCepaPass.dutyDrawbackInr).toBeGreaterThan(100);
+    expect(uaeCepaPass.igstWorkingCapitalSavedInr).toBeGreaterThan(1400);
+    expect(uaeCepaPass.netEffectiveExWorksInr).toBeGreaterThan(uaeCepaPass.exWorksPriceInr);
+    expect(uaeCepaPass.ftaCheck.eligible).toBe(true);
+    expect(uaeCepaPass.ftaCheck.mfnDutyPercent).toBe(5);
+    expect(uaeCepaPass.ftaCheck.preferentialFtaDutyPercent).toBe(0);
+    expect(uaeCepaPass.ftaCheck.ftaDutyDeltaPerUnitInr).toBeGreaterThan(0);
+    expect(uaeCepaPass.grossMarginPercent).toBeGreaterThan(35);
+    expect(uaeCepaPass.msrpMultiplier).toBeGreaterThan(3);
+
+    const aseanShortfall = calculateExportUnitEconomics({
+      corridor: 'asean',
+      productArchetype: 'industrial_power_smps',
+      bomCostInr: 2500,
+      manufacturingAndQaCostInr: 500,
+      exWorksPriceInr: 3600,
+      domesticValueAddPercent: 25, // Below 35% AIFTA RVC
+      usingAdvanceAuthorization: true,
+      targetRetailMsrpUsd: 70, // Tight retail MSRP (<2.5x COGS)
+    });
+    expect(aseanShortfall.ftaCheck.eligible).toBe(false);
+    expect(aseanShortfall.dutyDrawbackInr).toBe(0);
+    expect(aseanShortfall.warningFlags.some((w) => w.includes('FTA RVC shortfall'))).toBe(true);
+    expect(aseanShortfall.warningFlags.some((w) => w.includes('MSRP-to-COGS multiplier'))).toBe(
+      true,
+    );
+  });
+
+  it('scores 10-gate Indian export paperwork workflow accurately with critical blockers', () => {
+    expect(EXPORT_PAPERWORK_GATES).toHaveLength(10);
+
+    const empty = evaluateExportPaperworkWorkflow([]);
+    expect(empty.readinessScore).toBe(0);
+    expect(empty.missingBlockers).toHaveLength(10);
+    expect(empty.status).toBe('blocked');
+
+    const nonCriticalOnlyMissing = evaluateExportPaperworkWorkflow([
+      'iec',
+      'ad_code_icegate',
+      'gst_lut',
+      'scomet_screening',
+      'un383_msds',
+      'commercial_invoice_packing',
+      'shipping_bill_bl',
+    ]);
+    expect(nonCriticalOnlyMissing.readinessScore).toBe(70);
+    expect(nonCriticalOnlyMissing.criticalBlockerCount).toBe(0);
+    expect(nonCriticalOnlyMissing.status).toBe('conditional_incentive_gaps');
+    expect(nonCriticalOnlyMissing.missingBlockers.map((b) => b.id)).toEqual([
+      'rodtep_scrip',
+      'certificate_of_origin',
+      'rbi_edpms_ebrc',
+    ]);
+
+    const full = evaluateExportPaperworkWorkflow(EXPORT_PAPERWORK_GATES.map((g) => g.id));
+    expect(full.readinessScore).toBe(100);
+    expect(full.missingBlockers).toEqual([]);
+    expect(full.status).toBe('shipment_ready');
+  });
+
+  it('ranks PLI and Indian export promotion schemes for sector, scale, and corridor', () => {
+    const droneMatches = matchPliAndExportIncentives({
+      sectorId: 'drones-defense-space',
+      productArchetype: 'drone_uav',
+      annualExportTurnoverInr: 35_000_000,
+      domesticValueAddPercent: 52,
+      importsRawMaterialsForReExport: true,
+      corridor: 'uae_gcc',
+      hasMsmeUdyamRegistration: true,
+    });
+    expect(droneMatches).toHaveLength(9);
+    expect(droneMatches[0]?.scheme.name).toBe('PLI Drones');
+    expect(droneMatches[0]?.eligibilityTier).toBe('primary_match');
+    expect(droneMatches.some((m) => m.scheme.name === 'RoDTEP' && m.relevanceScore >= 90)).toBe(
+      true,
+    );
+    expect(
+      droneMatches.some(
+        (m) => m.scheme.name === 'Advance Authorization' && m.eligibilityTier === 'primary_match',
+      ),
+    ).toBe(true);
+    expect(droneMatches.every((m) => m.estimatedBenefitNote.length > 10)).toBe(true);
+  });
+
+  it('evaluates OEM qualification readiness and flags CERN-OHL-S / GPL-3.0 copyleft and single-source risk', () => {
+    const ready = evaluateOemQualificationReadiness({
+      productArchetype: 'ev_battery_bms',
+      hasIso9001: true,
+      hasIatf16949: true,
+      hasPpapLevel3: true,
+      hardwareLicense: 'CERN-OHL-P-2.0',
+      firmwareLicense: 'Apache-2.0',
+      ftoClearanceDone: true,
+      singleSourceBomCount: 0,
+      hasTraceabilityMes: true,
+    });
+    expect(ready.verdict).toBe('oem_audit_ready');
+    expect(ready.score).toBe(100);
+    expect(ready.ipFtoClean).toBe(true);
+    expect(ready.copyleftFlags).toEqual([]);
+    for (const item of ready.checklist) {
+      expect(oemAuditChecklistItemSchema.parse(item).passed).toBe(true);
+    }
+
+    const copyleftBlocked = evaluateOemQualificationReadiness({
+      productArchetype: 'iot_wireless',
+      hasIso9001: true,
+      hasPpapLevel3: true,
+      hardwareLicense: 'CERN-OHL-S-2.0',
+      firmwareLicense: 'GPL-3.0',
+      ftoClearanceDone: true,
+      singleSourceBomCount: 4,
+    });
+    expect(copyleftBlocked.verdict).toBe('not_ready');
+    expect(copyleftBlocked.ipFtoClean).toBe(false);
+    expect(copyleftBlocked.copyleftFlags).toContain('Hardware: CERN-OHL-S');
+    expect(copyleftBlocked.copyleftFlags).toContain('Firmware: GPL-3.0');
+    expect(copyleftBlocked.singleSourceRiskLevel).toBe('high');
+
+    const conditional = evaluateOemQualificationReadiness({
+      productArchetype: 'industrial_power_smps',
+      hasIso9001: true,
+      hasPpapLevel3: true,
+      hardwareLicense: 'Proprietary',
+      firmwareLicense: 'MIT',
+      ftoClearanceDone: false,
+      singleSourceBomCount: 1,
+      hasTraceabilityMes: false,
+    });
+    expect(conditional.verdict).toBe('conditional_gaps');
+    expect(conditional.singleSourceRiskLevel).toBe('moderate');
   });
 });
 

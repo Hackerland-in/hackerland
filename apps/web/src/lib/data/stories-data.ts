@@ -215,6 +215,390 @@ The team pivoted to polygonal architecture, designing the RIVA 128 in an all-or-
     createdAt: '2026-03-01T00:00:00.000Z',
     updatedAt: '2026-11-16T00:00:00.000Z',
   },
+  {
+    id: 'story_kulkarni_patil_pune',
+    slug: 'kulkarni-patil-pune-ev-bldc-exports',
+    title: 'Kulkarni-Patil Auto Systems: From Bhosari Gala to German & Thai EV Exports',
+    subjectName: 'Kulkarni-Patil Auto Systems',
+    tagline:
+      'How two Pune engineers scaled waterproof IP67 BLDC controllers and EV wiring harnesses to German and Thai OEMs via ARAI testing and ECGC export credit.',
+    storyType: 'company',
+    category: 'EV & Powertrain',
+    heroImageUrl:
+      'https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=1200&q=80',
+    summary:
+      'Starting in a 900 sq ft Bhosari MIDC workshop in Pune, Rohan Kulkarni and Snehal Patil eliminated monsoon field failures with vacuum PU potting and STM32 FOC firmware—passing ARAI EMC compliance to win repeat export orders from Germany and Thailand.',
+    foundingYear: 2019,
+    headquarters: 'Pune, Maharashtra (Bhosari MIDC)',
+    metricsHighlights: [
+      { label: 'Export Share', value: '68% Revenue' },
+      { label: 'Field Defect Rate', value: '< 140 PPM' },
+      { label: 'IP67 Fleet Units', value: '42,000+' },
+    ],
+    readingTimeMinutes: 9,
+    verifiedSourcesCount: 8,
+    decisionRecords: [
+      {
+        id: 'dec_kp_1',
+        decisionPoint: 'Manual Epoxy Pouring vs Semi-Automated Vacuum Polyurethane Potting Line',
+        optionsAvailable: [
+          'Continue hand-mixing two-part epoxy on assembly benches to save ₹14L CapEx',
+          'Outsource controller enclosure assembly to contract jobbers in Chakan',
+          'Invest in a semi-automated vacuum degassing PU potting rig inside Bhosari MIDC',
+        ],
+        chosenOption: 'In-house vacuum PU potting line with aluminum IMS PCB substrate',
+        rationale:
+          'Hand-poured epoxy trapped microscopic air bubbles that cracked during 45°C thermal cycling and let monsoon moisture wick along harness pins.',
+        consequences:
+          'Field warranty returns dropped from 4.8% to under 140 PPM, clearing 96-hour ARAI thermal-shock and IP67 immersion audits.',
+        hindsightRating: 'game_changer',
+      },
+      {
+        id: 'dec_kp_2',
+        decisionPoint: 'Domestic Aftermarket Price War vs ARAI EMC & ECGC Export Pivot',
+        optionsAvailable: [
+          'Compete on ₹1,100 uncertified aftermarket e-rickshaw controllers',
+          'Fund ₹8.5L ARAI Pune AIS-156 / CISPR-25 EMC qualification and ECGC export insurance',
+        ],
+        chosenOption: 'ARAI EMC pre-scan compliance paired with ECGC Whole Turnover Export Cover',
+        rationale:
+          'Aftermarket price wars offered 9% gross margins and 90-day bad debts; German e-cargo OEMs and Thai 3W assemblers demanded CISPR-25 and traceable Deutsch DT harnesses at 34% gross margin.',
+        consequences:
+          'Six months of EMC filter iteration yielded EU/ASEAN vendor codes and LC-backed shipments through Nhava Sheva under RoDTEP.',
+        hindsightRating: 'game_changer',
+      },
+    ],
+    chapters: [
+      {
+        number: 1,
+        title: '01. The 900 Sq Ft Bhosari Workshop & Monsoon Harness Failures',
+        summary:
+          'Why building ruggedized 48V BLDC pump and traction controllers meant solving thermal potting and connector wicking before writing a single line of export marketing.',
+        contentMarkdown: `In 2019, COEP electrical graduate Rohan Kulkarni and polytechnic embedded specialist Snehal Patil pooled ₹6.5 lakh in Bhosari MIDC, Pune, repairing variable-frequency drives for sugarcane irrigation pumps.
+
+When local two-wheeler startups began retrofitting BLDC hub motors, every low-cost imported controller failed during the first Pune monsoon:
+- Unsealed PVC wire strands wicked rainwater straight into phase-current shunts.
+- FR-4 PCBs cracked under 110A phase spikes because MOSFET heat had nowhere to dissipate.
+- Hall-sensor harnesses fatigued near rear swingarms within 4,000 km.
+
+Kulkarni-Patil rebuilt the stack around **aluminum-backed IMS PCBs**, **STM32G4 Field-Oriented Control (FOC)**, ultrasonic wire-crimped **Deutsch DT06 connectors**, and full **vacuum polyurethane potting**.`,
+        keyTakeaway:
+          'In Indian Tier-2 industrial hubs, reliability under monsoon moisture and dust is the strongest wedge into global OEM supply chains.',
+        interactivePrompt: {
+          question:
+            'Your prototype BLDC controller passes bench loads, but ARAI pre-compliance flags a 9 dB radiated emission spike at 48 MHz. What do you do?',
+          options: [
+            'Skip formal EMC testing and sell only to uncertified local aftermarket dealers',
+            'Add a common-mode choke, split ground return paths, and re-test at ARAI Pune',
+            'Lower the switching frequency to 4 kHz despite audible motor whine',
+          ],
+          revealedOutcome:
+            'Kulkarni-Patil added an AC/DC input common-mode choke, tightened gate-drive loop area on a 4-layer stackup, and passed CISPR-25 Class 3—qualifying directly for German cargo-bike tenders.',
+        },
+      },
+      {
+        number: 2,
+        title: '02. ARAI Qualification, ECGC Cover & Shipping to Germany and Thailand',
+        summary:
+          'Turning Bhosari shopfloor discipline into bankable export shipments via IEC, GST Zero-Rated LUT, ECGC, and RoDTEP.',
+        contentMarkdown: `Passing technical qualification was only half the battle. European and Southeast Asian buyers required confidence that a 28-person Pune supplier would not default mid-season.
+
+1. **Compliance & Traceability:** Every controller carries a laser-etched QR code linking STM32 flash CRC, potting batch number, and automated bed-of-nails load-test logs.
+2. **Export Finance Stack:** Using **DGFT IEC**, **GST Zero-Rated LUT**, and **ECGC buyer credit insurance**, the founders offered 45-day payment terms without freezing working capital.
+3. **RoDTEP Advantage:** Exporting finished HS 8504/8544 harnesses and motor drives via JNPT (Nhava Sheva) captures RoDTEP duty-remission credits that fund quarterly NABL calibration.`,
+        keyTakeaway:
+          'Pair shopfloor PPM discipline with ECGC credit cover and LUT zero-rated billing so small Indian plants can win Tier-1 export POs safely.',
+      },
+    ],
+    createdAt: '2026-04-12T00:00:00.000Z',
+    updatedAt: '2026-11-20T00:00:00.000Z',
+  },
+  {
+    id: 'story_kaveri_loomworks_tiruppur',
+    slug: 'kaveri-loomworks-tiruppur-smart-knitting',
+    title: 'Kaveri LoomWorks: Retrofitting Tiruppur Knitting Mills for EU Technical Textiles',
+    subjectName: 'Kaveri LoomWorks',
+    tagline:
+      'How a Tiruppur mill retrofitted 1990s mechanical looms with ESP32 yarn-tension sensors to export OEKO-TEX medical & technical knits to the EU under RoDTEP.',
+    storyType: 'company',
+    category: 'Technical Textiles',
+    heroImageUrl:
+      'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=1200&q=80',
+    summary:
+      'Facing razor-thin margins in commodity knitwear, Kaveri LoomWorks teamed up with Coimbatore embedded engineers to build ₹18,500 ESP32 optical tension retrofits—cutting seconds rejection by 74% and unlocking EU medical compression fabric contracts.',
+    foundingYear: 2018,
+    headquarters: 'Tiruppur, Tamil Nadu',
+    metricsHighlights: [
+      { label: 'Loom Retrofit Cost', value: '₹18,500 / unit' },
+      { label: 'Fabric Defect Drop', value: '74% Lower' },
+      { label: 'EU Export Margin', value: '+11.5% Delta' },
+    ],
+    readingTimeMinutes: 8,
+    verifiedSourcesCount: 7,
+    decisionRecords: [
+      {
+        id: 'dec_kaveri_1',
+        decisionPoint: '₹6.5L European PLC Loom Upgrades vs Indigenous ESP32-S3 Tension Nodes',
+        optionsAvailable: [
+          'Replace 64 mechanical circular looms with ₹42L/unit European smart looms',
+          'Import ₹6.5L proprietary European retrofit PLC cabinets per bank',
+          'Design a DIN-rail opto-isolated ESP32-S3 + optical yarn-break & load-cell node locally',
+        ],
+        chosenOption: 'Custom ₹18,500 ESP32-S3 RS-485 Modbus RTU retrofit per loom',
+        rationale:
+          'Legacy Mayer & Terrot steel frames in Tiruppur remained mechanically sound; only sensing, elastane feed tension, and stop-motion speed lagged modern European specs.',
+        consequences:
+          'Retrofitted all 64 looms in 11 weeks at under 5% of new-machine CapEx, slashing seconds rejection from 14% to 3.6%.',
+        hindsightRating: 'game_changer',
+      },
+      {
+        id: 'dec_kaveri_2',
+        decisionPoint: 'Commodity Cotton Apparel vs OEKO-TEX Standard 100 Medical Knits',
+        optionsAvailable: [
+          'Bid on high-volume basic T-shirt blanks competing against Bangladesh duty-free quotas',
+          'Invest in OEKO-TEX Standard 100 certification, ZLD dye traceability, and medical compression knits',
+        ],
+        chosenOption: 'Transition 70% capacity to OEKO-TEX medical & technical compression fabrics',
+        rationale:
+          'EU hospitals and sports-medicine brands require verified chemical safety and yarn-tension consistency per roll, where Indian engineering mills command durable margins.',
+        consequences:
+          'Secured recurring German and Dutch purchase orders under HSN 6006/6115 with RoDTEP export remission.',
+        hindsightRating: 'game_changer',
+      },
+    ],
+    chapters: [
+      {
+        number: 1,
+        title: '01. Fourteen Percent Seconds & Snapped Elastane on Avinashi Road',
+        summary:
+          'How optical IR break sensors and closed-loop tension gauges modernized 25-year-old mechanical circular knitting machines.',
+        contentMarkdown: `In Tiruppur’s crowded knitting clusters, a single snapped spandex core yarn running undetected for 90 seconds ruins an entire 22 kg fabric roll.
+
+Mechanical drop-wire stop-motions reacted too slowly at 32 RPM, leaving Tiruppur mills trapped in low-margin commodity apparel. Partnering with two embedded engineers from PSG Polytechnic in Coimbatore, Kaveri LoomWorks designed a **DIN-rail ESP32-S3 industrial controller**:
+- **IR optical yarn-break gates** stop the main VFD inverter within **18 milliseconds**.
+- **24-bit HX711 load-cell strain gauges** log elastane feed tension continuously over **RS-485 Modbus RTU**.
+- **Dust-sealed IP65 polycarbonate boxes** keep cotton lint away from optocouplers and relays.`,
+        keyTakeaway:
+          'Retrofitting proven mechanical machinery with ₹20k industrial IoT nodes delivers 10x faster ROI than scrapping factories for imported turnkey lines.',
+        interactivePrompt: {
+          question:
+            'Your factory has 64 mechanically healthy circular looms, but EU technical-textile buyers reject rolls with >1.5% tension drift. How do you modernize?',
+          options: [
+            'Take a ₹22 Cr loan to scrap all 64 machines and import new European looms',
+            'Install optical yarn sensors + strain-gauge tension feedback connected via RS-485 to existing VFDs',
+            'Hire 16 additional night-shift floor inspectors for manual checks',
+          ],
+          revealedOutcome:
+            'Kaveri LoomWorks deployed ₹18,500 ESP32-S3 tension nodes per loom, kept CapEx under ₹12L total, and achieved ±0.4% tension repeatability.',
+        },
+      },
+      {
+        number: 2,
+        title: '02. OEKO-TEX Standard 100, Digital Lot Logs & EU RoDTEP Shipments',
+        summary:
+          'Connecting floor-level sensor telemetry to European compliance audits and Tuticorin container dispatches.',
+        contentMarkdown: `German orthopedic distributors did not buy on verbal quality promises—they audited chemical dye safety, wastewater compliance, and stitch-density repeatability.
+
+1. **OEKO-TEX Standard 100 & ZLD:** Pairing Tiruppur’s Zero Liquid Discharge dyeing clusters with OEKO-TEX Annex 6 chemical testing opened regulated EU medical textile tenders.
+2. **QR Roll Passport:** Every exported fabric roll carries tension variance charts automatically generated from the loom’s RS-485 gateway.
+3. **RoDTEP Margin Lift:** Claiming RoDTEP scrips on HSN 6006/6115 shipments out of Tuticorin port directly covers air-sample freight for new European buyers.`,
+        keyTakeaway:
+          'Sensor telemetry plus recognized international eco-certifications turns Tier-2 Indian textile clusters into high-margin medical & technical exporters.',
+      },
+    ],
+    createdAt: '2026-05-04T00:00:00.000Z',
+    updatedAt: '2026-11-20T00:00:00.000Z',
+  },
+  {
+    id: 'story_tapi_photonics_surat',
+    slug: 'tapi-photonics-surat-laser-galvo-spindles',
+    title: 'Tapi Photonics: Replacing ₹18L Imported Diamond Laser Controllers in Surat',
+    subjectName: 'Tapi Photonics',
+    tagline:
+      'Built in Katargam GIDC, Surat: custom 4-layer STM32H7 + FPGA XY2-100 laser galvo and air-bearing CNC spindle boards exported to Belgium and Israel.',
+    storyType: 'company',
+    category: 'Photonics & CNC',
+    heroImageUrl:
+      'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=1200&q=80',
+    summary:
+      'Surat cuts 9 out of 10 rough diamonds on Earth, yet depended entirely on ₹18L imported laser galvo cards. Tapi Photonics engineered deterministic 4-layer FPGA + STM32H7 servo boards in Katargam GIDC—slashing downtime and exporting kits to Antwerp and Tel Aviv.',
+    foundingYear: 2020,
+    headquarters: 'Surat, Gujarat (Katargam GIDC)',
+    metricsHighlights: [
+      { label: 'Controller Cost Cut', value: '₹18L → ₹3.4L' },
+      { label: 'Galvo Precision', value: '16-bit XY2-100' },
+      { label: 'Export Hubs', value: 'Belgium & Israel' },
+    ],
+    readingTimeMinutes: 10,
+    verifiedSourcesCount: 6,
+    decisionRecords: [
+      {
+        id: 'dec_tapi_1',
+        decisionPoint: 'Reselling Imported German Galvo Cards vs Designing Custom 4-Layer FPGA Servo Boards',
+        optionsAvailable: [
+          'Remain an authorized service reseller charging ₹18L per imported control rack',
+          'Build a deterministic Lattice FPGA + STM32H7 controller supporting standard XY2-100 galvo scanners',
+        ],
+        chosenOption: 'Indigenous 4-layer impedance-controlled FPGA + STM32H7 servo controller',
+        rationale:
+          'Imported boards took 14–16 weeks to clear customs during spares shortages, halting 24/7 diamond-planning laser lines in Surat.',
+        consequences:
+          'Delivered ₹3.4L drop-in replacements with < 12 µm kerf accuracy and 48-hour board-swap warranties.',
+        hindsightRating: 'game_changer',
+      },
+      {
+        id: 'dec_tapi_2',
+        decisionPoint: 'Domestic Surat Only vs CE Laser Safety & SCOMET Clearance for Antwerp Exports',
+        optionsAvailable: [
+          'Restrict sales to Gujarat diamond units without international safety dossiers',
+          'Complete EN 60825-1 Class 1 interlock certification and DGFT SCOMET non-dual-use screening',
+        ],
+        chosenOption: 'Complete CE EN 60825-1 safety interlocks and DGFT SCOMET verification',
+        rationale:
+          'Precision optical/laser controllers attract export-control scrutiny at European and Israeli customs unless dual-use paperwork is crystal clear.',
+        consequences:
+          'Zero customs holds at Brussels and Ben Gurion air cargo; 40% of controller volume now ships overseas.',
+        hindsightRating: 'game_changer',
+      },
+    ],
+    chapters: [
+      {
+        number: 1,
+        title: '01. When One Dead Laser Galvo Card Costs ₹4 Lakh a Day in Katargam',
+        summary:
+          'Reverse-engineering deterministic XY2-100 differential timing and air-bearing CNC spindle synchronization in Surat.',
+        contentMarkdown: `Across Varachha and Katargam in Surat, green 532nm DPSS and fiber laser machines saw and bruiting-shape rough diamonds down to micron kerfs.
+
+Whenever an imported European control card failed from summer power transients or cooling dust, factories paid **₹18 lakh** and waited weeks for customs clearance. Two optical and embedded engineers launched Tapi Photonics in a 1,200 sq ft GIDC unit:
+- Built a **4-layer controlled-impedance PCB** pairing an **STM32H743** trajectory planner with a **Lattice ECP5 FPGA** driving **16-bit XY2-100 differential galvo frames** at 100 kHz.
+- Added isolated 24V interlocks, hardware watchdog shutoffs, and active Peltier thermal stabilization rated for **45°C workshop ambient heat**.`,
+        keyTakeaway:
+          'Every high-cost imported industrial black box in an Indian manufacturing cluster is an open invitation for deterministic indigenous PCB + FPGA engineering.',
+        interactivePrompt: {
+          question:
+            'Your first FPGA galvo prototype shows a 12-micron oscillation wave along 45-degree diagonal cuts when factory compressors kick in. What is the root cause?',
+          options: [
+            'Rewrite the user UI in a faster web framework',
+            'Isolate analog DAC reference rails from switching supply noise and add PID notch filtering in FPGA logic',
+            'Double the laser pulse power to burn wider kerfs',
+          ],
+          revealedOutcome:
+            'Tapi Photonics separated analog ±15V galvo rails using low-noise LDOs, added differential termination, and tuned a 2.4 kHz notch filter—locking repeatable ±4 µm cuts.',
+        },
+      },
+      {
+        number: 2,
+        title: '02. Navigating SCOMET, EPCG & Shipping to Antwerp and Tel Aviv',
+        summary:
+          'How Surat precision optics builders cleared export controls and established global spares depots.',
+        contentMarkdown: `When Belgian and Israeli diamond houses tested Tapi Photonics’ retrofit kits in 2023, customs documentation mattered as much as optical precision.
+
+1. **SCOMET & HS Classification:** Documenting pulse-repetition limits and non-military HS 8537/9013 classification upfront eliminated export-control delays.
+2. **EPCG Optical Lab Setup:** Leveraging India’s Export Promotion Capital Goods (EPCG) scheme allowed duty-free import of beam profilers in exchange for committed export volumes.
+3. **Modular Field Spares:** Pre-calibrated controller cartridges ship via DHL/FedEx air express directly to Antwerp and Ramat Gan workshops in 72 hours.`,
+        keyTakeaway:
+          'Deep-tech Indian MSMEs can out-execute European incumbents globally when spares ship fast and export compliance is engineered upfront.',
+      },
+    ],
+    createdAt: '2026-06-18T00:00:00.000Z',
+    updatedAt: '2026-11-20T00:00:00.000Z',
+  },
+  {
+    id: 'story_narmada_precision_rajkot',
+    slug: 'narmada-precision-rajkot-coimbatore-castings',
+    title: 'Narmada Precision Foundries: Diploma Machinists Scaling Castings to US OEMs',
+    subjectName: 'Narmada Precision Foundries',
+    tagline:
+      'How Rajkot & Coimbatore polytechnic diploma machinists scaled 5-axis CNC tolerance control and ISO 9001 PPAP Level 3 castings to Midwest US OEMs.',
+    storyType: 'company',
+    category: 'Precision Manufacturing',
+    heroImageUrl:
+      'https://images.unsplash.com/photo-1565043666747-69f6646db940?auto=format&fit=crop&w=1200&q=80',
+    summary:
+      'Founded by Government Polytechnic diploma machinists across Rajkot and Coimbatore, Narmada Precision escaped raw-casting price wars by adding 5-axis CNC finishing, CMM metrology, and AIAG PPAP Level 3 dossiers—now shipping 18 containers annually to US agri and aerospace tooling OEMs.',
+    foundingYear: 2017,
+    headquarters: 'Rajkot (Gujarat) & Coimbatore (Tamil Nadu)',
+    metricsHighlights: [
+      { label: 'CNC Tolerance', value: '±8 Microns' },
+      { label: 'Quality Standard', value: 'ISO 9001 PPAP L3' },
+      { label: 'US Exports', value: '18 Containers/Yr' },
+    ],
+    readingTimeMinutes: 9,
+    verifiedSourcesCount: 9,
+    decisionRecords: [
+      {
+        id: 'dec_narmada_1',
+        decisionPoint: 'Selling Raw Castings by Weight vs 5-Axis CNC Finish Machining + CMM Inspection',
+        optionsAvailable: [
+          'Sell rough unmachined SG-iron castings at ₹115/kg to domestic traders',
+          'Combine Rajkot investment/SG foundries with Coimbatore 5-axis CNC finish cells and CMM verification',
+        ],
+        chosenOption: 'Integrated Rajkot foundry + Coimbatore 5-axis CNC & Mitutoyo CMM lab',
+        rationale:
+          'Raw foundry margins hover near 8%, whereas finished, pressure-tested hydraulic manifolds and ground-support brackets earn 3.4x higher realization per kg.',
+        consequences:
+          'Unlocked direct Tier-1 supplier agreements in Iowa and Illinois without middlemen brokers.',
+        hindsightRating: 'game_changer',
+      },
+      {
+        id: 'dec_narmada_2',
+        decisionPoint: 'Informal Shopfloor Gauges vs Full AIAG PPAP Level 3 & Heat-Lot Traceability',
+        optionsAvailable: [
+          'Ship trial export batches with basic Vernier caliper PDFs',
+          'Implement optical spectrometer melt checks, SPC Cp/Cpk ≥ 1.67, and PPAP Level 3 packages',
+        ],
+        chosenOption: 'Full AIAG PPAP Level 3 + barcoded heat-number melt traceability',
+        rationale:
+          'US OEM quality directors never switch suppliers for a 10% price discount if documentation cannot pass ISO/IATF incoming audits.',
+        consequences:
+          'First-pass container acceptance reached 99.4%, growing annual exports to 18 FCL sea containers via Mundra and Tuticorin.',
+        hindsightRating: 'game_changer',
+      },
+    ],
+    chapters: [
+      {
+        number: 1,
+        title: '01. From Government Polytechnic Lathes to Shapar-Veraval & SIDCO',
+        summary:
+          'Why Indian Tier-2 machinists lose export RFQs not on machining skill, but on metrology proof and melt traceability.',
+        contentMarkdown: `Three Government Polytechnic Mechanical Diploma classmates started Narmada Precision in Rajkot’s Shapar-Veraval GIDC with two reconditioned turret lathes.
+
+Their turning point came after losing a $90,000 Midwest US hydraulic valve housing tender despite quoting 28% below a Polish rival. The American procurement lead explained bluntly: *"Your steel price is great, but you sent zero Cp/Cpk capability plots, no spectrometer chemistry certificate, and no CMM balloon drawing."*
+
+The founders reorganized across two complementary Indian hubs:
+- **Rajkot Foundry Hub:** Automated green-sand & lost-wax investment casting with optical emission spectrometer verification on every furnace heat.
+- **Coimbatore SIDCO Cell:** 5-axis CNC finish machining holding **±8 micron bore concentricity**, deburring, and **Mitutoyo CMM** automated report generation.`,
+        keyTakeaway:
+          'Indian diploma and ITI machinists already hold world-class shopfloor intuition; pairing it with CMM data and PPAP Level 3 closes the global trust gap.',
+        interactivePrompt: {
+          question:
+            'A US agri-equipment buyer flags micro-porosity in 4 out of 200 rough-machined ductile iron brackets during first-article inspection. How do you respond?',
+          options: [
+            'Argue that minor casting porosity is normal for agricultural parts',
+            'Run ultrasonic NDT + X-ray gating redesign in Rajkot, issue a 8D root-cause report, and air-freight 200 verified replacements',
+            'Stop bidding for US export orders and stick to local tractor repair shops',
+          ],
+          revealedOutcome:
+            'Narmada issued a transparent 8D Corrective Action Report within 72 hours, redesigned feeder risers, and replaced all suspect lots—winning a 3-year master supply contract.',
+        },
+      },
+      {
+        number: 2,
+        title: '02. VCI Export Packaging, Mundra Sea Freight & Scaling to 18 Containers/Year',
+        summary:
+          'Protecting ±8 micron steel surfaces across 35-day ocean voyages under RoDTEP and ECGC cover.',
+        contentMarkdown: `Machining to ±8 microns means nothing if ocean humidity rusts bore faces inside a 40-foot sea container crossing the Arabian Sea and Suez Canal.
+
+1. **VCI Corrosion Engineering:** Every finished manifold is ultrasonic-washed, dipped in dry-film rust preventive, and heat-sealed in Volatile Corrosion Inhibitor (VCI) polybags inside ISPM-15 fumigated pallets.
+2. **Dual-Port Flexibility:** Rajkot shipments exit **Mundra Port** while Coimbatore CNC assemblies consolidate out of **Tuticorin / Chennai**.
+3. **Policy Leverage:** Combining **MSME Udyam TReDS** invoice discounting with **RoDTEP** export scrips lets a diploma-founded firm finance raw steel without diluting equity.`,
+        keyTakeaway:
+          'Export readiness covers metallurgy, metrology, VCI sea-packaging, and working-capital tooling—every single step can be built from Tier-2 India.',
+      },
+    ],
+    createdAt: '2026-07-09T00:00:00.000Z',
+    updatedAt: '2026-11-20T00:00:00.000Z',
+  },
 ];
 
 export async function listBuildStories(category?: string): Promise<BuildJourneyStory[]> {

@@ -122,16 +122,23 @@ export function IpDefenseLedgerView({ initialPublications }: IpDefenseLedgerView
             </p>
           </div>
 
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={() => setShowSubmitModal(true)}
-            className="shrink-0"
-          >
-            <PlusCircle className="size-3.5" />
-            <span>Publish Defense Disclosure</span>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/export?tab=oem">
+                <span>Export OEM IP Audit</span>
+                <ChevronRight className="size-3.5" />
+              </Link>
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => setShowSubmitModal(true)}
+            >
+              <PlusCircle className="size-3.5" />
+              <span>Publish Defense Disclosure</span>
+            </Button>
+          </div>
         </div>
       </Card>
 

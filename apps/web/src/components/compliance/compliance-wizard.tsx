@@ -210,6 +210,36 @@ export function ComplianceWizard({ initialRoadmaps }: ComplianceWizardProps) {
         </div>
       </Card>
 
+      {/* Additive Cross-Links to Global Export Bridge, EMC Pre-Scan & HIL Testbeds */}
+      <Card className="border-accent/25 bg-accent-soft/35 p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-accent-fg">
+            EXPORT &amp; PRE-COMPLIANCE LAB PIPELINE
+          </div>
+          <p className="text-body-xs text-fg-muted">
+            Reuse Indian NABL ILAC-MRA reports to cut overseas CE/FCC/UL/ECAS lab fees by ~35%, run EMC pre-scans, or reserve HIL benches.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Button asChild variant="primary" size="sm">
+            <Link href="/export">
+              <span>Global Export Bridge (/export)</span>
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" size="sm">
+            <Link href="/emc">
+              <span>EMC Pre-Scan Lab</span>
+            </Link>
+          </Button>
+          <Button asChild variant="secondary" size="sm">
+            <Link href="/testbeds">
+              <span>NABL &amp; HIL Testbeds</span>
+            </Link>
+          </Button>
+        </div>
+      </Card>
+
       {/* Search & Filter */}
       <Card className="border-hairline bg-surface-1 p-3.5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1">

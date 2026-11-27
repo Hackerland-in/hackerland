@@ -9,20 +9,63 @@ import {
   ExternalLink,
   Factory,
   FileCode2,
+  FolderOpen,
   Save,
+  ShieldCheck,
   Sparkles,
   Truck,
 } from 'lucide-react';
 import { Button } from '@hackerland/ui';
-import { useLabShell } from '@/components/labs/full-screen-lab-shell';
+import { useLabShell, type SavedLabWorkspaceItem } from '@/components/labs/full-screen-lab-shell';
+import { useVenture } from '@/components/social/venture-context';
 import {
   calculateVendorQuotes,
   type RFQConfig,
   USD_TO_INR,
 } from './rfq-types';
 
+function extractRfqFromPcbWorkspace(ws: SavedLabWorkspaceItem): Partial<RFQConfig> {
+  const p = ws.payload ?? {};
+  const comps = Array.isArray(p.components)
+    ? (p.components as Array<{ x?: number; y?: number }>)
+    : [];
+  const vias = Array.isArray(p.vias) ? p.vias : [];
+  const inferredW =
+    typeof p.widthMm === 'number' && p.widthMm >= 10
+      ? p.widthMm
+      : Math.max(80, Math.min(300, Math.round(comps.reduce((m, c) => Math.max(m, (c.x ?? 60) + 15), 85))));
+  const inferredH =
+    typeof p.heightMm === 'number' && p.heightMm >= 10
+      ? p.heightMm
+      : Math.max(60, Math.min(250, Math.round(comps.reduce((m, c) => Math.max(m, (c.y ?? 50) + 15), 65))));
+  const inferredLayers: 1 | 2 | 4 | 6 =
+    p.layers === 1 || p.layers === 2 || p.layers === 4 || p.layers === 6
+      ? p.layers
+      : p.substrate && p.substrate !== 'fr4'
+        ? 1
+        : vias.length >= 4
+          ? 4
+          : 2;
+  const inferredCount =
+    typeof p.componentsCount === 'number' && p.componentsCount >= 0
+      ? p.componentsCount
+      : comps.length;
+
+  return {
+    boardName:
+      typeof p.boardTitle === 'string' && p.boardTitle.trim()
+        ? p.boardTitle.trim()
+        : ws.title,
+    widthMm: inferredW,
+    heightMm: inferredH,
+    layers: inferredLayers,
+    componentsCount: Math.max(1, inferredCount),
+  };
+}
+
 export function RFQCalculator() {
   const labShell = useLabShell();
+  const { linkWorkspaceToVenture } = useVenture();
   const [config, setConfig] = useState<RFQConfig>({
     boardName: 'Hackerland-Node-v1',
     widthMm: 100,
@@ -41,9 +84,74 @@ export function RFQCalculator() {
   const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
   const [uploadedGerberName, setUploadedGerberName] = useState<string | null>(null);
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
+  const [savedPcbDesigns, setSavedPcbDesigns] = useState<SavedLabWorkspaceItem[]>([]);
+  const [selectedPcbId, setSelectedPcbId] = useState<string>('');
+  const [importedBoardBanner, setImportedBoardBanner] = useState<string | null>(null);
   const fileInputId = useId();
 
   const quotes = calculateVendorQuotes(config);
+
+  const applyPcbWorkspace = (ws: SavedLabWorkspaceItem) => {
+    const patch = extractRfqFromPcbWorkspace(ws);
+    setSelectedPcbId(ws.workspaceId);
+    setConfig((prev) => ({
+      ...prev,
+      ...patch,
+      pcbAssembly: (patch.componentsCount ?? 0) > 0 ? true : prev.pcbAssembly,
+    }));
+    setImportedBoardBanner(`Imported dimensions & BOM count from "${ws.title}".`);
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search) {
+      const params = new URLSearchParams(window.location.search);
+      const boardNameParam = params.get('boardName')?.trim();
+      if (boardNameParam) {
+        setConfig((prev) => ({ ...prev, boardName: boardNameParam }));
+      }
+    }
+
+    if (typeof fetch !== 'function') return;
+    let active = true;
+
+    const fromWorkspaceId =
+      typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('fromWorkspaceId')?.trim() || ''
+        : '';
+
+    fetch('/api/workbenches?kind=pcb')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data || !Array.isArray(data.workspaces)) return;
+        const list = data.workspaces as SavedLabWorkspaceItem[];
+        setSavedPcbDesigns(list);
+        if (fromWorkspaceId) {
+          const matched = list.find((w) => w.workspaceId === fromWorkspaceId);
+          if (matched) {
+            applyPcbWorkspace(matched);
+          }
+        }
+      })
+      .catch(() => {});
+
+    if (fromWorkspaceId) {
+      fetch(`/api/workbenches?workspaceId=${encodeURIComponent(fromWorkspaceId)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!active || !data?.workspace) return;
+          const ws = data.workspace as SavedLabWorkspaceItem;
+          setSavedPcbDesigns((prev) =>
+            prev.some((p) => p.workspaceId === ws.workspaceId) ? prev : [ws, ...prev],
+          );
+          applyPcbWorkspace(ws);
+        })
+        .catch(() => {});
+    }
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     labShell?.registerSnapshotHandlers({
@@ -67,12 +175,15 @@ export function RFQCalculator() {
 
   const handleSaveQuoteToDb = async () => {
     if (!labShell) return;
-    await labShell.saveWorkspace({
+    const saved = await labShell.saveWorkspace({
       title: `${config.boardName} (${config.layers}L RFQ)`,
       summary: `${config.widthMm}x${config.heightMm}mm · Qty ${config.quantity} · Best quote: ₹${quotes[0]?.totalInr?.toLocaleString('en-IN') ?? '—'}`,
       tags: ['rfq', `${config.layers}-layer`],
       payload: { config, currency, quotes },
     });
+    if (saved?.workspaceId) {
+      linkWorkspaceToVenture('rfq', saved.workspaceId, 4);
+    }
     setSavedBanner('RFQ quote configuration saved to workspace history!');
   };
 
@@ -149,6 +260,12 @@ Ready for instant ordering at https://www.hackerland.in/manufacturing/rfq
             >
               <Cpu className="w-4 h-4 text-accent" /> Open PCB Studio
             </Link>
+            <Link
+              href="/compliance"
+              className="px-3.5 py-2 rounded-full bg-surface-1 hover:bg-surface-2 text-xs font-semibold text-fg transition flex items-center gap-1.5 border border-hairline shadow-xs"
+            >
+              <ShieldCheck className="w-4 h-4 text-accent" /> Compliance
+            </Link>
             <div className="flex rounded-full bg-sunken border border-hairline p-0.5">
               <button
                 type="button"
@@ -180,6 +297,57 @@ Ready for instant ordering at https://www.hackerland.in/manufacturing/rfq
             <h3 className="font-display text-base font-bold text-fg flex items-center gap-2">
               <Factory className="w-4 h-4 text-accent" /> 1. Board Specifications
             </h3>
+
+            {/* Import Dimensions from Saved PCB Studio Design */}
+            <div className="rounded-xl border border-accent/25 bg-accent-soft/45 p-3.5 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-display font-bold text-fg flex items-center gap-1.5">
+                  <FolderOpen className="size-3.5 text-accent" />
+                  <span>Import Dimensions from Saved PCB Studio Design</span>
+                </span>
+                <span className="text-[10px] font-mono text-fg-muted">
+                  {savedPcbDesigns.length} saved
+                </span>
+              </div>
+
+              {savedPcbDesigns.length > 0 ? (
+                <div className="flex items-center gap-2">
+                  <select
+                    aria-label="Select saved PCB Studio design"
+                    value={selectedPcbId}
+                    onChange={(e) => {
+                      const chosen = savedPcbDesigns.find((w) => w.workspaceId === e.target.value);
+                      if (chosen) applyPcbWorkspace(chosen);
+                    }}
+                    className="flex-1 rounded-xl bg-surface-1 border border-line px-3 py-2 text-xs text-fg focus:outline-none focus:border-accent"
+                  >
+                    <option value="">Choose saved PCB Studio board…</option>
+                    {savedPcbDesigns.map((ws) => {
+                      const meta = extractRfqFromPcbWorkspace(ws);
+                      return (
+                        <option key={ws.workspaceId} value={ws.workspaceId}>
+                          {ws.title} ({meta.layers}L · {meta.widthMm}x{meta.heightMm}mm · {meta.componentsCount} parts)
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              ) : (
+                <p className="text-[11px] text-fg-muted">
+                  Save any layout in{' '}
+                  <Link href="/manufacturing/pcb" className="text-accent-fg font-semibold hover:underline">
+                    PCB Studio
+                  </Link>{' '}
+                  to auto-import board dimensions, layer count, and SMD parts count here.
+                </p>
+              )}
+
+              {importedBoardBanner && (
+                <p role="status" className="text-[11px] font-medium text-success-fg">
+                  {importedBoardBanner}
+                </p>
+              )}
+            </div>
 
             {/* Gerber Upload */}
             <div className="rounded-xl border border-dashed border-accent/35 bg-sunken/70 p-4 text-center hover:border-accent transition-colors">

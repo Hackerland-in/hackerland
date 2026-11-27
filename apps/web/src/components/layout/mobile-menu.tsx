@@ -140,33 +140,39 @@ export function MobileMenu() {
 
   const SECTIONS = [
     {
-      heading: 'Community',
+      heading: '01 · Ideate & Learn',
       items: [
-        { href: '/', label: 'Home Square', icon: Home },
-        { href: '/feed', label: 'Explore Feed', icon: Flame },
-        { href: '/projects', label: 'Builds & Projects', icon: FolderKanban },
-        { href: '/u', label: 'Makers & Profiles', icon: Users },
-        { href: '/squads', label: 'Squad Rooms', icon: Sparkles },
+        { href: '/', label: 'India Home Hub', icon: Home },
+        { href: '/sectors', label: 'All 10 Sectors & Paths', icon: Rocket, badge: 'New' },
+        { href: '/resources', label: 'Funding, ATLs & Free Vault', icon: Coins, badge: '₹0' },
+        { href: '/ideas', label: 'IdeaLab & Problems', icon: Sparkles },
+        { href: '/learn', label: 'Skill Roadmaps', icon: GraduationCap, badge: 'Free' },
+        { href: '/young-innovators', label: 'Students & Youth (8–26)', icon: Sparkles },
+        { href: '/stories', label: 'India Stories & Museum', icon: Newspaper },
+      ],
+    },
+    {
+      heading: '02 · Team Up & Fund',
+      items: [
+        { href: '/feed', label: 'Community Feed', icon: Flame },
+        { href: '/projects', label: 'Builds & Squads', icon: FolderKanban },
+        { href: '/squads', label: 'Squad Rooms & Clubs', icon: Users },
+        { href: '/earn', label: 'Bounties & Grants', icon: Coins, badge: 'Active' },
+        { href: '/sprints', label: '48H Build Sprints', icon: Zap, badge: '48H' },
+        { href: '/launchpad', label: 'Launchpad & Escrow', icon: Rocket },
+        { href: '/jobs', label: 'Proof-of-Work Jobs', icon: Briefcase },
         { href: '/leaderboard', label: 'Top Builders', icon: Trophy },
       ],
     },
     {
-      heading: 'Earn & Academy',
-      items: [
-        { href: '/earn', label: 'Bounties & Grants', icon: Coins, badge: 'Active' },
-        { href: '/sprints', label: '48H Build Sprints', icon: Zap, badge: '48H' },
-        { href: '/jobs', label: 'Proof-of-Work Jobs', icon: Briefcase },
-        { href: '/launchpad', label: 'Launchpad & Grants', icon: Rocket },
-        { href: '/learn', label: 'Skill Roadmaps', icon: GraduationCap, badge: 'Free' },
-      ],
-    },
-    {
-      heading: 'Hardware Labs & Simulators',
+      heading: '03 · Build, Fab & Export',
       items: [
         { href: '/manufacturing', label: 'Hardware Workbench', icon: Cpu, badge: 'Labs' },
         { href: '/manufacturing/pcb', label: 'PCB & SPICE Studio', icon: Cpu },
-        { href: '/manufacturing/physics/3d', label: '3D Physics Labs', icon: Atom },
-        { href: '/labs', label: 'Makerspaces & ATL', icon: ShieldCheck },
+        { href: '/how-to-start', label: '12 Pilot-to-Plant Guides', icon: Atom },
+        { href: '/labs', label: 'Makerspaces & Testbeds', icon: ShieldCheck },
+        { href: '/compliance', label: 'Compliance & Sourcing', icon: ShieldCheck },
+        { href: '/export', label: 'Global Export & OEM Hub', icon: Rocket, badge: 'Export' },
       ],
     },
     {

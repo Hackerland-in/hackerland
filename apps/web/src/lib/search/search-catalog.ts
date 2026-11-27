@@ -686,6 +686,42 @@ export const STATIC_SEARCH_CATALOG: SearchResultItem[] = [
     keywords: ['learn', 'roadmaps', 'skills', 'embedded', 'robotics', 'software', 'courses'],
   },
   {
+    id: 'hub-sectors',
+    title: 'All 10 India Industrial Sector Pathways (Semiconductors, EV, MedTech, Textiles, Agro & More)',
+    description:
+      'Step-by-step Sector 101 to Factory & Export ladders covering Bengaluru, Pune, Surat, Tiruppur, Coimbatore, Rajkot & pan-India clusters.',
+    category: 'roadmaps',
+    categoryLabel: 'India Sectors',
+    href: '/sectors',
+    badge: '10 Sectors',
+    badgeTone: 'accent',
+    keywords: ['sectors', 'india manufacturing', 'medtech', 'textiles', 'agro', 'cold chain', 'ev', 'semiconductors', 'drones', 'cnc', 'tiruppur', 'surat', 'pune'],
+  },
+  {
+    id: 'hub-resources',
+    title: 'Pan-India Funding Grants, ATLs, Free Prototyping Labs & 22-Language Resources',
+    description:
+      'Every sector across North, South, East, West, North-East & Central India: NIDHI-PRAYAS, SISFS, BIRAC BIG, PMEGP, I-STEM, ATLs, NPTEL & Spoken Tutorial.',
+    category: 'roadmaps',
+    categoryLabel: 'Free Resources',
+    href: '/resources',
+    badge: '₹0 Start',
+    badgeTone: 'earn',
+    keywords: ['funding', 'grants', 'nidhi prayas', 'sisfs', 'pmegp', 'unnatI', 'assam', 'odisha', 'kerala', 'gujarat ssip', 'free resources', 'nptel', 'spoken tutorial', 'istem', 'prototyping', 'handicrafts', 'ai', 'bhashini', 'ondc'],
+  },
+  {
+    id: 'hub-export',
+    title: 'Global Export & OEM Trade Hub (CE, FCC, UL, HSN Incoterms, RoDTEP, PLI & PPAP)',
+    description:
+      'Bridge Indian BIS/NABL approvals to CE, FCC, UL & UN 38.3; calculate EXW/FOB/CIF/DDP unit margins with RoDTEP & FTA origin rules; complete DGFT checklists.',
+    category: 'blueprints',
+    categoryLabel: 'Export Hub',
+    href: '/export',
+    badge: 'Global Export',
+    badgeTone: 'brand-pink',
+    keywords: ['export', 'customs', 'dgft', 'iec', 'rodtep', 'pli', 'incoterms', 'fob', 'cif', 'ddp', 'ce', 'fcc', 'ul', 'rohs', 'scomet', 'ppap', 'oem', 'hsn', 'lut'],
+  },
+  {
     id: 'hub-innovators',
     title: 'Public Innovators & Builders Directory',
     description:

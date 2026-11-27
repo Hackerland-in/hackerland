@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import Link from 'next/link';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -11,6 +12,12 @@ import {
   Clock,
   ChevronRight,
   GraduationCap,
+  Rocket,
+  Zap,
+  Compass,
+  Lightbulb,
+  Factory,
+  Globe,
 } from 'lucide-react';
 import { Badge, Button, Card, CardBody, Panel, cn } from '@hackerland/ui';
 import {
@@ -21,7 +28,11 @@ import {
 } from '@/lib/data/young-innovators-data';
 import { GuardianConsentModal } from './guardian-consent-modal';
 
-export function YoungInnovatorsHub() {
+export interface YoungInnovatorsHubProps {
+  statsSlot?: ReactNode;
+}
+
+export function YoungInnovatorsHub({ statsSlot }: YoungInnovatorsHubProps = {}) {
   const [selectedAge, setSelectedAge] = useState<string>('all');
   const [selectedPreset, setSelectedPreset] = useState<VisualBlockPreset>(VISUAL_BLOCK_PRESETS[0]!);
   const [activeCodeTab, setActiveCodeTab] = useState<'log' | 'python' | 'cpp'>('log');
@@ -96,19 +107,19 @@ export function YoungInnovatorsHub() {
 
   return (
     <div className="space-y-6 min-w-0">
-      {/* Banner */}
-      <div className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs">
+      {/* Unified Hero Banner */}
+      <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-mono font-semibold bg-accent/10 text-accent-fg">
               <GraduationCap className="size-3.5" aria-hidden="true" />
-              <span>SUPERVISED JUNIOR INNOVATOR TRACK · AGES 8 TO 17</span>
+              <span>YOUNG INNOVATORS SANDBOX · AGES 8 TO 26 PATHWAY</span>
             </div>
-            <h2 className="font-display text-headline-md sm:text-headline-lg font-bold tracking-tight text-fg">
+            <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
               From Curiosity to Real Physical Hardware
-            </h2>
-            <p className="text-body-sm text-fg-muted leading-relaxed">
-              A 10-year-old building circuits, a 13-year-old programming robotics, or a 16-year-old soldering satellite telemetry. Learn safely with visual logic blocks, MicroPython, verified mentors, and DPDP Act safety.
+            </h1>
+            <p className="text-body-sm sm:text-body-md text-fg-muted leading-relaxed">
+              A 10-year-old building circuits, a 13-year-old programming robotics, or a 16–26 diploma, ITI, and college builder shipping export-grade hardware. Learn safely with visual logic blocks, MicroPython, DPDP Act guardian co-signs, and ATL mentors.
             </p>
             {verifiedConsentTokens.length > 0 && (
               <div className="inline-flex items-center gap-1.5 rounded-full bg-success/10 border border-success/30 px-3 py-1 text-body-xs font-mono font-semibold text-success-fg">
@@ -128,7 +139,9 @@ export function YoungInnovatorsHub() {
             <span>Guardian DPDP Co-Sign</span>
           </Button>
         </div>
-      </div>
+      </header>
+
+      {statsSlot}
 
       {/* 3 Age Progression Pillars (note: keep .cursor-pointer class on each card for test compatibility) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -202,7 +215,162 @@ export function YoungInnovatorsHub() {
         </div>
       </div>
 
+      {/* Youth-to-Export Launch Ramp (16–26 Diploma, ITI & College Builders) */}
+      <section
+        aria-labelledby="youth-export-launch-ramp"
+        className="rounded-2xl border border-accent/25 bg-gradient-to-br from-surface-1 via-surface-1 to-accent-soft/75 p-5 sm:p-6 shadow-xs space-y-5"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-accent text-on-solid px-3 py-0.5 text-[11px] font-mono font-semibold">
+              <Rocket className="size-3" aria-hidden="true" />
+              <span>AGES 16–26 · DIPLOMA · ITI · POLYTECHNIC · COLLEGE</span>
+            </div>
+            <h2
+              id="youth-export-launch-ramp"
+              className="font-display text-headline-sm sm:text-headline-md font-bold text-fg"
+            >
+              Youth-to-Export Launch Ramp (16–26 Diploma, ITI &amp; College Builders)
+            </h2>
+            <p className="text-body-xs sm:text-body-sm text-fg-muted max-w-3xl">
+              Graduate cleanly from ₹500 benchtop sensor kits in your hostel or ITI workshop to 48-hour build sprints, certified sector pathways, and global export batches.
+            </p>
+          </div>
+          <Button asChild variant="primary" size="sm" className="shrink-0">
+            <Link href="/export">
+              <Globe className="size-3.5" aria-hidden="true" />
+              <span>View Export Pathway</span>
+            </Link>
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="rounded-xl border border-hairline bg-surface-1 p-4 flex flex-col justify-between space-y-3">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-mono">
+                <span className="font-bold text-accent-fg">STEP 01</span>
+                <Cpu className="size-3.5 text-accent-fg" aria-hidden="true" />
+              </div>
+              <h3 className="font-display text-body-sm font-bold text-fg">
+                ₹500–₹5,000 Starter Bench Kits &amp; Simulator
+              </h3>
+              <p className="text-body-xs text-fg-muted leading-relaxed">
+                Practice GPIO, PWM, ADC, and telemetry logic on Arduino, ESP32, or RP2040 in the live simulator below before buying parts.
+              </p>
+            </div>
+            <Link
+              href="#hardware-simulator"
+              className="inline-flex items-center gap-1 text-[11px] font-display font-semibold text-accent-fg hover:underline"
+            >
+              <span>Launch Arduino/ESP32 Simulator</span>
+              <ChevronRight className="size-3" aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="rounded-xl border border-hairline bg-surface-1 p-4 flex flex-col justify-between space-y-3">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-mono">
+                <span className="font-bold text-accent-fg">STEP 02</span>
+                <Zap className="size-3.5 text-accent-fg" aria-hidden="true" />
+              </div>
+              <h3 className="font-display text-body-sm font-bold text-fg">
+                Join 48H Sprints &amp; Squads
+              </h3>
+              <p className="text-body-xs text-fg-muted leading-relaxed">
+                Team up with ITI machinists, firmware devs, and CAD designers across India in timed hardware sprints.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-display font-semibold">
+              <Link href="/sprints" className="text-accent-fg hover:underline inline-flex items-center gap-0.5">
+                <span>48H Sprints</span>
+                <ChevronRight className="size-3" aria-hidden="true" />
+              </Link>
+              <span className="text-fg-subtle">·</span>
+              <Link href="/squads" className="text-accent-fg hover:underline inline-flex items-center gap-0.5">
+                <span>Squads</span>
+                <ChevronRight className="size-3" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-hairline bg-surface-1 p-4 flex flex-col justify-between space-y-3">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-mono">
+                <span className="font-bold text-accent-fg">STEP 03</span>
+                <Compass className="size-3.5 text-accent-fg" aria-hidden="true" />
+              </div>
+              <h3 className="font-display text-body-sm font-bold text-fg">
+                Take a Sector Track
+              </h3>
+              <p className="text-body-xs text-fg-muted leading-relaxed">
+                Master EV powertrains, agri-IoT, CNC tooling, or medical textiles via structured industrial roadmaps.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-display font-semibold">
+              <Link href="/sectors" className="text-accent-fg hover:underline inline-flex items-center gap-0.5">
+                <span>Sector Tracks</span>
+                <ChevronRight className="size-3" aria-hidden="true" />
+              </Link>
+              <span className="text-fg-subtle">·</span>
+              <Link href="/learn" className="text-accent-fg hover:underline inline-flex items-center gap-0.5">
+                <span>Learn</span>
+                <ChevronRight className="size-3" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-hairline bg-surface-1 p-4 flex flex-col justify-between space-y-3">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-mono">
+                <span className="font-bold text-accent-fg">STEP 04</span>
+                <Lightbulb className="size-3.5 text-accent-fg" aria-hidden="true" />
+              </div>
+              <h3 className="font-display text-body-sm font-bold text-fg">
+                Shape Your Idea
+              </h3>
+              <p className="text-body-xs text-fg-muted leading-relaxed">
+                Validate unit BOM, buyer pain, and BIS/WPC pre-checks inside IdeaLab before cutting molds or ordering reels.
+              </p>
+            </div>
+            <Link
+              href="/ideas"
+              className="inline-flex items-center gap-1 text-[11px] font-display font-semibold text-accent-fg hover:underline"
+            >
+              <span>Open IdeaLab</span>
+              <ChevronRight className="size-3" aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="rounded-xl border border-accent/30 bg-accent-soft/60 p-4 flex flex-col justify-between space-y-3">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-mono">
+                <span className="font-bold text-accent-fg">STEP 05</span>
+                <Factory className="size-3.5 text-accent-fg" aria-hidden="true" />
+              </div>
+              <h3 className="font-display text-body-sm font-bold text-fg">
+                Prototype &amp; Export
+              </h3>
+              <p className="text-body-xs text-fg-muted leading-relaxed">
+                Run DFM/RFQ quotes with verified Indian fabs and ship commercial pilot lots globally under IEC &amp; RoDTEP.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-display font-semibold">
+              <Link href="/manufacturing" className="text-accent-fg hover:underline inline-flex items-center gap-0.5">
+                <span>Manufacturing</span>
+                <ChevronRight className="size-3" aria-hidden="true" />
+              </Link>
+              <span className="text-fg-subtle">·</span>
+              <Link href="/export" className="text-accent-fg hover:underline inline-flex items-center gap-0.5">
+                <span>Export Hub</span>
+                <ChevronRight className="size-3" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Interactive Block-to-Hardware Micro-Simulator */}
+      <div id="hardware-simulator">
       <Panel
         title="Visual Logic to Real MicroPython & C++ Simulator"
         icon={<Code aria-hidden="true" />}
@@ -314,6 +482,7 @@ export function YoungInnovatorsHub() {
           </div>
         </div>
       </Panel>
+      </div>
 
       {/* Junior Challenges Roster */}
       <div className="space-y-4">

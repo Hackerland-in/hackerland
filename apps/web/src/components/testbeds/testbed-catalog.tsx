@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Badge, Button, Card } from '@hackerland/ui';
-import { Search, Activity } from 'lucide-react';
+import { Search, Activity, CalendarCheck2, ArrowRight } from 'lucide-react';
 import type { TestbedFacility } from '@hackerland/core';
 import { filterTestbedFacilities, formatComplianceCost } from '@hackerland/core';
 import { TestbedBookingModal } from './testbed-booking-modal';
@@ -12,12 +12,54 @@ interface TestbedCatalogProps {
   initialTestbeds: TestbedFacility[];
 }
 
+interface PersistedTestbedBooking {
+  id: string;
+  testbedSlug: string;
+  testbedTitle: string;
+  slotLabel: string;
+  notes?: string;
+  bookedByName?: string;
+  status?: string;
+}
+
 export function TestbedCatalog({ initialTestbeds }: TestbedCatalogProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedAccessType, setSelectedAccessType] = useState<string>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [bookingTestbed, setBookingTestbed] = useState<TestbedFacility | null>(null);
+  const [activeBookings, setActiveBookings] = useState<PersistedTestbedBooking[]>([]);
+
+  const hydrateBookings = useCallback(async () => {
+    if (typeof fetch !== 'function') return;
+    try {
+      const res = await fetch('/api/bookings?namespace=booking&bookingKind=testbed');
+      if (!res.ok) return;
+      const data = (await res.json()) as {
+        records?: Array<{ key: string; payload?: Record<string, unknown> }>;
+      };
+      if (!Array.isArray(data.records)) return;
+      const parsed: PersistedTestbedBooking[] = [];
+      for (const rec of data.records) {
+        const p = rec.payload;
+        if (!p || p.kind !== 'testbed_booking') continue;
+        parsed.push({
+          id: typeof p.id === 'string' ? p.id : rec.key,
+          testbedSlug: typeof p.testbedSlug === 'string' ? p.testbedSlug : '',
+          testbedTitle: typeof p.testbedTitle === 'string' ? p.testbedTitle : 'Testbed Slot',
+          slotLabel: typeof p.slotLabel === 'string' ? p.slotLabel : 'Scheduled Slot',
+          notes: typeof p.notes === 'string' ? p.notes : undefined,
+          bookedByName: typeof p.bookedByName === 'string' ? p.bookedByName : undefined,
+          status: typeof p.status === 'string' ? p.status : 'confirmed',
+        });
+      }
+      setActiveBookings(parsed);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    void hydrateBookings();
+  }, [hydrateBookings]);
 
   const filteredTestbeds = useMemo(() => {
     return filterTestbedFacilities(initialTestbeds, {

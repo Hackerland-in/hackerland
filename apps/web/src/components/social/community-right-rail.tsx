@@ -185,6 +185,36 @@ export function CommunityRightRail({
           </Button>
         </Panel>
       )}
+
+      {/* Pan-India Funding, Prototyping & Export Shortcuts */}
+      <div className="rounded-2xl border border-hairline bg-surface-1 p-4 space-y-2.5 shadow-xs">
+        <div className="text-[11px] font-mono uppercase tracking-wider font-bold text-accent-fg">
+          Zero-to-Export Toolkit
+        </div>
+        <div className="space-y-1.5 text-body-xs">
+          <Link
+            href="/resources"
+            className="flex items-center justify-between rounded-xl bg-sunken px-3 py-2 font-medium text-fg hover:text-accent-fg transition-colors"
+          >
+            <span>Funding, ATLs &amp; Free Resources</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
+          <Link
+            href="/sectors"
+            className="flex items-center justify-between rounded-xl bg-sunken px-3 py-2 font-medium text-fg hover:text-accent-fg transition-colors"
+          >
+            <span>All 10 India Sector Pathways</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
+          <Link
+            href="/export"
+            className="flex items-center justify-between rounded-xl bg-sunken px-3 py-2 font-medium text-fg hover:text-accent-fg transition-colors"
+          >
+            <span>Global Export &amp; OEM Hub</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,11 @@
-import type {
-  OpportunityKind,
-  PostKind,
-  Track,
+import {
+  PROJECT_STAGES,
+  TRACKS,
+  type OpportunityKind,
+  type PostKind,
+  type ProjectSquadRoom,
+  type ProjectStage,
+  type Track,
 } from '@hackerland/core';
 import {
   connectDb,
@@ -14,6 +18,7 @@ import {
   NotificationModel,
   ReputationEventModel,
 } from '@hackerland/db';
+import { getLabWorkspace, listLabWorkspaces, type LabWorkspaceDTO } from './db-persistence';
 import { ALL_LAB_NODES } from './fixtures/labs';
 import { ALL_OPPORTUNITIES } from './fixtures/opportunities';
 import { ALL_PROFILES } from './fixtures/people';
@@ -382,12 +387,286 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
   }
 
   const match = ALL_PROJECTS.find((p) => p.slug === slug);
-  if (!match) return null;
+  if (match) {
+    const projectPosts = ALL_POSTS.filter((post) => post.project?.slug === slug);
+    return {
+      ...match,
+      updates: projectPosts.length > 0 ? projectPosts : match.updates,
+    };
+  }
 
-  const projectPosts = ALL_POSTS.filter((post) => post.project?.slug === slug);
+  // Fallback to custom projects persisted via /api/workbenches (kind: 'prototype', tag: 'custom-project')
+  try {
+    let customWs: LabWorkspaceDTO | null = await getLabWorkspace(`custom-project-${slug}`);
+    if (!customWs) {
+      const { workspaces } = await listLabWorkspaces({ kind: 'prototype', limit: 100 });
+      customWs =
+        workspaces.find(
+          (w) =>
+            w.tags.includes('custom-project') &&
+            (w.payload?.slug === slug || w.slugOrRoute === `/projects/${slug}`),
+        ) ?? null;
+    }
+    if (customWs) {
+      return workspaceToProjectDetail(slug, customWs);
+    }
+  } catch {
+    // Ignore fallback errors
+  }
+
+  return null;
+}
+
+function workspaceToProjectDetail(slug: string, ws: LabWorkspaceDTO): ProjectDetail {
+  const p = ws.payload ?? {};
+  const rawTracks = Array.isArray(p.tracks)
+    ? p.tracks.filter((t): t is Track => typeof t === 'string' && (TRACKS as readonly string[]).includes(t))
+    : [];
+  const tracks: Track[] = rawTracks.length > 0 ? rawTracks : ['make'];
+  const stage: ProjectStage =
+    typeof p.stage === 'string' && (PROJECT_STAGES as readonly string[]).includes(p.stage)
+      ? (p.stage as ProjectStage)
+      : 'idea';
+  const creatorHandle =
+    typeof p.creatorHandle === 'string' && p.creatorHandle.trim()
+      ? p.creatorHandle.trim().toLowerCase()
+      : ws.ownerHandle || 'rohan_k';
+  const creatorName =
+    typeof p.creatorName === 'string' && p.creatorName.trim()
+      ? p.creatorName.trim()
+      : ws.ownerName || 'Rohan Kulkarni';
+  const skills = Array.isArray(p.skills)
+    ? p.skills.filter((s): s is string => typeof s === 'string')
+    : ws.tags.filter((t) => t !== 'custom-project');
+
+  const leadPerson: PersonRef & { role: string; bio: string; skills: string[] } = {
+    handle: creatorHandle,
+    name: creatorName,
+    headline: 'Project Lead & Builder',
+    badges: [{ label: 'Builder', tone: tracks[0] ?? 'make' }],
+    role: 'Project Lead',
+    bio: ws.summary || `Building ${ws.title} openly with the Hackerland community.`,
+    skills,
+  };
+
+  const openRoles: OpenRole[] = Array.isArray(p.openRoles)
+    ? (p.openRoles as Array<Record<string, unknown>>).map((r, idx) => ({
+        id: typeof r.id === 'string' ? r.id : `role-${idx}`,
+        title: typeof r.title === 'string' ? r.title : `Squad Role ${idx + 1}`,
+        track:
+          typeof r.track === 'string' && (TRACKS as readonly string[]).includes(r.track)
+            ? (r.track as Track)
+            : tracks[0] ?? 'make',
+        skills: Array.isArray(r.skills)
+          ? r.skills.filter((s): s is string => typeof s === 'string')
+          : skills.slice(0, 3),
+        description: typeof r.description === 'string' ? r.description : '',
+        compensation:
+          r.compensation && typeof r.compensation === 'object'
+            ? (r.compensation as OpenRole['compensation'])
+            : { type: 'volunteer' },
+      }))
+    : [];
+
   return {
-    ...match,
-    updates: projectPosts.length > 0 ? projectPosts : match.updates,
+    slug,
+    title: typeof p.title === 'string' && p.title.trim() ? p.title.trim() : ws.title,
+    summary:
+      typeof p.summary === 'string' && p.summary.trim()
+        ? p.summary.trim()
+        : ws.summary || ws.title,
+    body:
+      typeof p.body === 'string' && p.body.trim()
+        ? p.body.trim()
+        : typeof p.description === 'string' && p.description.trim()
+          ? p.description.trim()
+          : ws.summary || ws.title,
+    tracks,
+    stage,
+    licence: typeof p.licence === 'string' && p.licence.trim() ? p.licence.trim() : 'MIT',
+    squad: [
+      {
+        handle: leadPerson.handle,
+        name: leadPerson.name,
+        headline: leadPerson.headline,
+        badges: leadPerson.badges,
+      },
+    ],
+    squadSize: 1,
+    openRoleCount: openRoles.length,
+    updatedAt: ws.updatedAt || new Date().toISOString(),
+    leads: [leadPerson],
+    openRoles,
+    resources: [],
+    updates: [],
+    milestone: {
+      current: 1,
+      total: 3,
+      label: 'Architecture & Kickoff',
+      next: 'Prototype Bench Verification',
+    },
+  };
+}
+
+/**
+ * Synthesizes a rich default SquadRoom (milestones, starter Kanban tasks, roles)
+ * for any project slug not pre-seeded in SQUADS_DATA so Squad Room & Escrow never 404s.
+ */
+export function buildFallbackSquadRoom(
+  slug: string,
+  project?: ProjectDetail | null,
+): ProjectSquadRoom {
+  const readableTitle =
+    project?.title ||
+    slug
+      .replace(/-[a-z0-9]{4}$/i, '')
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase()) ||
+    'Open Hardware Build';
+
+  const lead = project?.leads?.[0] ?? project?.squad?.[0];
+  const leadHandle = lead?.handle || 'rohan_k';
+  const leadName = lead?.name || 'Rohan Kulkarni';
+  const primaryTrack = project?.tracks?.[0] ?? 'make';
+
+  const mappedRoles: ProjectSquadRoom['squadMembers'] = [
+    {
+      id: `role_${slug}_lead`,
+      roleTitle: 'Project Lead & System Architect',
+      track: primaryTrack,
+      status: 'filled',
+      stipend: 'Lead Maintainer',
+      skills: project?.leads?.[0]?.skills?.length
+        ? project.leads[0].skills
+        : ['System Architecture', 'BOM & DFM', 'Documentation'],
+      assignee: {
+        handle: leadHandle,
+        name: leadName,
+        reputationScore: 340,
+      },
+    },
+    ...(project?.openRoles ?? []).map((r) => ({
+      id: r.id,
+      roleTitle: r.title,
+      track: r.track,
+      status: 'open' as const,
+      stipend:
+        r.compensation.type === 'stipend' && r.compensation.amount
+          ? `₹${r.compensation.amount.toLocaleString('en-IN')} / mo`
+          : r.compensation.type === 'bounty' && r.compensation.amount
+            ? `₹${r.compensation.amount.toLocaleString('en-IN')} bounty`
+            : r.compensation.type,
+      skills: r.skills.length > 0 ? r.skills : ['KiCad / PCB Studio', 'Embedded C'],
+      assignee: null,
+    })),
+  ];
+
+  if (mappedRoles.length === 1) {
+    mappedRoles.push({
+      id: `role_${slug}_collab`,
+      roleTitle: 'Hardware & Embedded Co-Builder',
+      track: primaryTrack,
+      status: 'open',
+      stipend: '₹25,000 / milestone',
+      skills: ['PCB Layout', 'Firmware', 'HIL Bench Testing'],
+      assignee: null,
+    });
+  }
+
+  const totalInr = project?.funding?.goal ?? 75000;
+  const totalUsd = Math.round(totalInr / 86.5);
+
+  return {
+    projectSlug: slug,
+    projectTitle: readableTitle,
+    tagline:
+      project?.summary ||
+      `Collaborative squad workspace, Kanban sprint board, and milestone vault for ${readableTitle}.`,
+    escrowPoolTotalInr: totalInr,
+    escrowPoolTotalUsd: totalUsd,
+    squadMembers: mappedRoles,
+    milestones: [
+      {
+        id: `ms_${slug}_1`,
+        title: 'Milestone 1: Architecture Spec & Schematic Freeze',
+        description:
+          'Synthesize subsystem blocks, finalize component sourcing from domestic distributors, and verify ERC/DRC.',
+        escrowAmountInr: Math.round(totalInr * 0.3),
+        escrowAmountUsd: Math.round(totalUsd * 0.3),
+        status: 'in_review',
+        proofRequirements: [
+          'Saved Prototype Architect or PCB Studio snapshot',
+          'BOM risk audit with zero EOL single-source parts',
+        ],
+        submittedProof: {
+          proofUrl: `/prototype?title=${encodeURIComponent(readableTitle)}`,
+          summary: 'Initial subsystem topology and BOM initialized for squad review.',
+          submittedAt: new Date().toISOString().split('T')[0] ?? '2026-11-27',
+          submittedBy: leadHandle,
+        },
+        unlockedPassportBadge: 'Architecture Vanguard',
+      },
+      {
+        id: `ms_${slug}_2`,
+        title: 'Milestone 2: Prototype Assembly & HIL Bench Run',
+        description:
+          'Fabricate initial PCB/enclosure batch via domestic RFQ and validate electrical performance on a testbed.',
+        escrowAmountInr: Math.round(totalInr * 0.4),
+        escrowAmountUsd: Math.round(totalUsd * 0.4),
+        status: 'escrow_locked',
+        proofRequirements: [
+          'Instant RFQ landed cost spec & fab confirmation',
+          'SCPI / oscilloscope bench capture log',
+        ],
+        unlockedPassportBadge: 'Hardware Bench Verified',
+      },
+      {
+        id: `ms_${slug}_3`,
+        title: 'Milestone 3: Compliance Sign-Off & Launch',
+        description:
+          'Complete BIS/WPC/CE pre-compliance checklist and publish reproducible build documentation.',
+        escrowAmountInr: Math.round(totalInr * 0.3),
+        escrowAmountUsd: Math.round(totalUsd * 0.3),
+        status: 'escrow_locked',
+        proofRequirements: [
+          'Compliance readiness & export HS/RoDTEP check',
+          'Community feed launch announcement',
+        ],
+        unlockedPassportBadge: 'Shipped in India',
+      },
+    ],
+    tasks: [
+      {
+        id: `tsk_${slug}_1`,
+        title: 'Generate subsystem blocks & BOM in Prototype Studio',
+        status: 'done',
+        priority: 'high',
+        tags: ['Architecture', 'BOM'],
+        assigneeHandle: leadHandle,
+      },
+      {
+        id: `tsk_${slug}_2`,
+        title: 'Layout schematic & copper traces in PCB Studio',
+        status: 'in_progress',
+        priority: 'high',
+        tags: ['PCB', 'KiCad'],
+        assigneeHandle: leadHandle,
+      },
+      {
+        id: `tsk_${slug}_3`,
+        title: 'Run Instant Fab RFQ across LionCircuits & PCB Power',
+        status: 'todo',
+        priority: 'medium',
+        tags: ['Fabrication', 'RFQ'],
+      },
+      {
+        id: `tsk_${slug}_4`,
+        title: 'Book HIL testbed slot & capture SCPI verification log',
+        status: 'todo',
+        priority: 'medium',
+        tags: ['Testbed', 'QA'],
+      },
+    ],
   };
 }
 

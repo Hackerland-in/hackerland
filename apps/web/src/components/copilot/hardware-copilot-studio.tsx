@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import type { BomAuditItem } from '@hackerland/core';
 import {
   auditBomItems,
@@ -8,15 +9,59 @@ import {
   calculateSmpsBuck,
   calculateThermalHeatsink,
 } from '@hackerland/core';
-import { Calculator, Flame, MessageSquare, Search, Send, ShieldAlert } from 'lucide-react';
+import {
+  ArrowRight,
+  Calculator,
+  Flame,
+  FolderOpen,
+  MessageSquare,
+  Search,
+  Send,
+  ShieldAlert,
+} from 'lucide-react';
 import { Button } from '@hackerland/ui';
 import { useBuilderIdentity } from '@/lib/builder-identity';
-import { useLabShell } from '@/components/labs/full-screen-lab-shell';
+import { useLabShell, type SavedLabWorkspaceItem } from '@/components/labs/full-screen-lab-shell';
 import {
   CO_PILOT_PROMPTS,
   HARDWARE_COMPONENTS_CATALOG,
   SAMPLE_BOMS,
 } from '@/lib/data/copilot-data';
+
+function workspaceToBomCsv(ws: SavedLabWorkspaceItem): string {
+  const p = ws.payload ?? {};
+  const plan = p.plan as { bom?: Array<{ component?: string; partNumber?: string; footprint?: string }> } | undefined;
+  if (plan && Array.isArray(plan.bom) && plan.bom.length > 0) {
+    const rows = ['Reference,MPN,Description,Package,Quantity'];
+    plan.bom.forEach((item, idx) => {
+      rows.push(
+        `U${idx + 1},${(item.partNumber || item.component || 'PART').replace(/,/g, ' ')},${(item.component || 'Component').replace(/,/g, ' ')},${(item.footprint || 'SMD').replace(/,/g, ' ')},1`,
+      );
+    });
+    return rows.join('\n');
+  }
+  if (Array.isArray(p.components) && p.components.length > 0) {
+    const rows = ['Reference,MPN,Description,Package,Quantity'];
+    (p.components as Array<{
+      id?: string;
+      designator?: string;
+      name?: string;
+      value?: string;
+      footprint?: { packageType?: string };
+    }>).forEach((c, idx) => {
+      const ref = (c.designator || c.id || `U${idx + 1}`).replace(/,/g, ' ');
+      const mpn = (c.value || c.name || 'PART').replace(/,/g, ' ');
+      const desc = (c.name || 'PCB Component').replace(/,/g, ' ');
+      const pkg = (c.footprint?.packageType || 'THT/SMD').replace(/,/g, ' ');
+      rows.push(`${ref},${mpn},${desc},${pkg},1`);
+    });
+    return rows.join('\n');
+  }
+  if (typeof p.bomCsv === 'string' && p.bomCsv.trim()) {
+    return p.bomCsv.trim();
+  }
+  return `Reference,MPN,Description,Package,Quantity\nU1,${ws.title.replace(/,/g, ' ')},${(ws.summary || 'Saved board').replace(/,/g, ' ')},Custom,1`;
+}
 
 export function HardwareCopilotStudio() {
   const labShell = useLabShell();
@@ -87,6 +132,8 @@ export function HardwareCopilotStudio() {
   }, [sourcingQuery, selectedCategory]);
 
   const [bomCsvText, setBomCsvText] = useState(SAMPLE_BOMS[0]!.csvContent);
+  const [savedBoardWorkspaces, setSavedBoardWorkspaces] = useState<SavedLabWorkspaceItem[]>([]);
+  const [loadedWorkspaceNotice, setLoadedWorkspaceNotice] = useState<string | null>(null);
   const [auditResults, setAuditResults] = useState<BomAuditItem[]>(() => {
     const lines = SAMPLE_BOMS[0]!.csvContent.split('\n').slice(1);
     const parsed = lines
@@ -97,6 +144,25 @@ export function HardwareCopilotStudio() {
       .filter((p) => p.reference && p.mpn);
     return auditBomItems(parsed, HARDWARE_COMPONENTS_CATALOG);
   });
+
+  useEffect(() => {
+    if (typeof fetch !== 'function') return;
+    let active = true;
+    Promise.all([
+      fetch('/api/workbenches?kind=pcb').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch('/api/workbenches?kind=prototype').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ]).then(([pcbRes, protoRes]) => {
+      if (!active) return;
+      const list: SavedLabWorkspaceItem[] = [
+        ...(Array.isArray(pcbRes?.workspaces) ? (pcbRes.workspaces as SavedLabWorkspaceItem[]) : []),
+        ...(Array.isArray(protoRes?.workspaces) ? (protoRes.workspaces as SavedLabWorkspaceItem[]) : []),
+      ];
+      setSavedBoardWorkspaces(list);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     labShell?.registerSnapshotHandlers({
@@ -128,8 +194,8 @@ export function HardwareCopilotStudio() {
     });
   }, [labShell, traceCurrent, copperWeight, tempRise, isInternal, buckVin, buckVout, buckIout, buckFreq, thermalPower, maxJunction, ambientTemp, thetaJc, bomCsvText, traceResult.widthMm, buckResult.inductanceUh, auditResults.length]);
 
-  const handleRunBomAudit = () => {
-    const lines = bomCsvText.split('\n');
+  const runAuditForCsv = (csv: string) => {
+    const lines = csv.split('\n');
     const headerIndex = lines.findIndex((l) => l.toLowerCase().includes('mpn'));
     const dataLines = headerIndex >= 0 ? lines.slice(headerIndex + 1) : lines;
     const parsed = dataLines
@@ -141,6 +207,17 @@ export function HardwareCopilotStudio() {
 
     const audit = auditBomItems(parsed, HARDWARE_COMPONENTS_CATALOG);
     setAuditResults(audit);
+  };
+
+  const handleRunBomAudit = () => {
+    runAuditForCsv(bomCsvText);
+  };
+
+  const handleLoadWorkspaceBom = (ws: SavedLabWorkspaceItem) => {
+    const csv = workspaceToBomCsv(ws);
+    setBomCsvText(csv);
+    runAuditForCsv(csv);
+    setLoadedWorkspaceNotice(`Loaded BOM from "${ws.title}" (${ws.kind.toUpperCase()})`);
   };
 
   const [chatMessages, setChatMessages] = useState<
@@ -665,6 +742,57 @@ export function HardwareCopilotStudio() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="rounded-xl border border-accent/25 bg-accent-soft/40 p-3.5 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span className="font-display font-bold text-fg flex items-center gap-1.5">
+                  <FolderOpen className="size-3.5 text-accent" />
+                  <span>Load Saved PCB / Prototype Workspace BOM</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/manufacturing/rfq"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-accent-fg hover:underline"
+                  >
+                    <span>Get RFQ Quotes</span>
+                    <ArrowRight className="size-3" />
+                  </Link>
+                </div>
+              </div>
+
+              {savedBoardWorkspaces.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {savedBoardWorkspaces.slice(0, 6).map((ws) => (
+                    <button
+                      type="button"
+                      key={ws.workspaceId}
+                      onClick={() => handleLoadWorkspaceBom(ws)}
+                      className="px-3 py-1.5 rounded-full text-[11px] font-mono bg-surface-1 hover:bg-accent hover:text-on-solid text-fg border border-hairline transition-colors"
+                    >
+                      {ws.kind.toUpperCase()}: {ws.title}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] text-fg-muted">
+                  Save a board in{' '}
+                  <Link href="/manufacturing/pcb" className="text-accent-fg font-semibold hover:underline">
+                    PCB Studio
+                  </Link>{' '}
+                  or{' '}
+                  <Link href="/prototype" className="text-accent-fg font-semibold hover:underline">
+                    Prototype Architect
+                  </Link>{' '}
+                  to scrub its BOM for obsolescence in 1 click.
+                </p>
+              )}
+
+              {loadedWorkspaceNotice && (
+                <p role="status" className="text-[11px] font-medium text-success-fg">
+                  {loadedWorkspaceNotice}
+                </p>
+              )}
             </div>
 
             <textarea

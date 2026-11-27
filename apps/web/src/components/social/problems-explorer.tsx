@@ -7,6 +7,37 @@ import { Badge, Button, Card, FilterChip, cn } from '@hackerland/ui';
 import { Target, ArrowRight, Coins, Users, Search, Bookmark, Check } from 'lucide-react';
 import { getActiveBuilderIdentity } from '@/lib/builder-identity';
 import { useSocialCommunity } from './social-context';
+import { useVenture } from './venture-context';
+
+function mapProblemDomainToSector(domain: string): { sectorId: string; sectorLabel: string } {
+  switch (domain) {
+    case 'healthcare':
+      return {
+        sectorId: 'medtech-diagnostics',
+        sectorLabel: 'MedTech, Point-of-Care Diagnostics & Biomedical Hardware',
+      };
+    case 'agriculture':
+      return {
+        sectorId: 'agro-food-coldchain',
+        sectorLabel: 'Agro-Processing, Cold Chain & AgriTech',
+      };
+    case 'clean_water':
+      return {
+        sectorId: 'ev-clean-energy',
+        sectorLabel: 'Climate Tech, Clean Water & Energy',
+      };
+    case 'space_aerospace':
+      return {
+        sectorId: 'drones-defense-space',
+        sectorLabel: 'Drones, UAVs, Defense & Space Systems',
+      };
+    default:
+      return {
+        sectorId: 'semiconductors-electronics',
+        sectorLabel: 'Semiconductors, PCB & Embedded Electronics',
+      };
+  }
+}
 
 export interface ProblemsExplorerProps {
   initialProblems: Problem[];
@@ -16,7 +47,9 @@ export function ProblemsExplorer({ initialProblems }: ProblemsExplorerProps) {
   const [selectedDomain, setSelectedDomain] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [claimedIds, setClaimedIds] = useState<string[]>([]);
+  const [serverClaimsCountByProblem, setServerClaimsCountByProblem] = useState<Record<string, number>>({});
   const { isItemSaved, toggleSaveItem } = useSocialCommunity();
+  const { startVenture } = useVenture();
 
   useEffect(() => {
     try {
@@ -26,6 +59,43 @@ export function ProblemsExplorer({ initialProblems }: ProblemsExplorerProps) {
         if (Array.isArray(parsed)) setClaimedIds(parsed);
       }
     } catch {}
+
+    if (typeof fetch !== 'function') return;
+    let active = true;
+    const identity = getActiveBuilderIdentity();
+    fetch('/api/ideas?scope=problems')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data || !Array.isArray(data.problemClaims)) return;
+        const claims = data.problemClaims as Array<{
+          problemId?: string;
+          claimantHandle?: string;
+        }>;
+        const ownClaimed: string[] = [];
+        const counts: Record<string, number> = {};
+        for (const c of claims) {
+          if (!c.problemId) continue;
+          counts[c.problemId] = (counts[c.problemId] ?? 0) + 1;
+          if (!c.claimantHandle || c.claimantHandle.toLowerCase() === identity.handle.toLowerCase()) {
+            ownClaimed.push(c.problemId);
+          }
+        }
+        setServerClaimsCountByProblem(counts);
+        if (ownClaimed.length > 0) {
+          setClaimedIds((prev) => {
+            const merged = Array.from(new Set([...prev, ...ownClaimed]));
+            try {
+              localStorage.setItem('hackerland_claimed_problems', JSON.stringify(merged));
+            } catch {}
+            return merged;
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const toggleClaim = (id: string) => {
@@ -40,6 +110,17 @@ export function ProblemsExplorer({ initialProblems }: ProblemsExplorerProps) {
       } catch {}
       return next;
     });
+
+    if (willClaim && targetProblem) {
+      const sector = mapProblemDomainToSector(targetProblem.domain);
+      startVenture({
+        title: targetProblem.title,
+        sectorId: sector.sectorId,
+        sectorLabel: sector.sectorLabel,
+        problemSlug: targetProblem.slug,
+        stage: 1,
+      });
+    }
 
     if (willClaim && typeof fetch === 'function') {
       void fetch('/api/ideas', {
@@ -204,7 +285,11 @@ export function ProblemsExplorer({ initialProblems }: ProblemsExplorerProps) {
               <div className="pt-3 border-t border-hairline flex flex-wrap items-center justify-between gap-3 text-body-xs">
                 <div className="flex items-center gap-1.5 text-fg-muted font-mono">
                   <Users className="size-3.5" />
-                  <span>{prob.claimedProjectsCount + (isClaimed ? 1 : 0)} squads investigating</span>
+                  <span>
+                    {prob.claimedProjectsCount +
+                      Math.max(serverClaimsCountByProblem[prob.id] ?? 0, isClaimed ? 1 : 0)}{' '}
+                    squads investigating
+                  </span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -227,7 +312,9 @@ export function ProblemsExplorer({ initialProblems }: ProblemsExplorerProps) {
                     <Link href={`/ideas?problem=${prob.slug}`}>Propose in IdeaLab</Link>
                   </Button>
                   <Button asChild variant="primary" size="sm">
-                    <Link href={`/new?title=${encodeURIComponent(prob.title)}`}>
+                    <Link
+                      href={`/new?title=${encodeURIComponent(prob.title)}&tagline=${encodeURIComponent(prob.impactTarget)}&description=${encodeURIComponent(prob.description)}&domain=${encodeURIComponent(prob.domain)}`}
+                    >
                       <span>Form Squad</span>
                       <ArrowRight className="size-3.5" />
                     </Link>

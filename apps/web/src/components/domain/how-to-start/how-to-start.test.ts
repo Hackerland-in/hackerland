@@ -1,9 +1,21 @@
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
 import { PLANT_BLUEPRINTS } from './how-to-start-data';
+import { HowToStartHub } from './how-to-start-hub';
+import { PlantBudgetEstimator } from './plant-budget-estimator';
+import { COMPLIANCE_ROADMAPS } from '@/lib/data/compliance-data';
+import { PCBA_ASSEMBLY_CATALOG } from '@/lib/data/assembly-data';
+import { TESTBED_FACILITIES } from '@/lib/data/testbeds-data';
+import sitemap from '@/app/sitemap';
 
 describe('How to Start Manufacturing Blueprints', () => {
   it('contains comprehensive industrial manufacturing blueprints', () => {
     expect(PLANT_BLUEPRINTS.length).toBeGreaterThanOrEqual(7);
+    expect(PLANT_BLUEPRINTS).toHaveLength(12);
+
+    const uniqueSlugs = new Set(PLANT_BLUEPRINTS.map((p) => p.slug));
+    expect(uniqueSlugs.size).toBe(12);
 
     for (const plant of PLANT_BLUEPRINTS) {
       expect(plant.slug).toBeTruthy();
@@ -72,5 +84,118 @@ describe('How to Start Manufacturing Blueprints', () => {
     const drone = PLANT_BLUEPRINTS.find((p) => p.slug === 'drone-aerospace');
     expect(drone).toBeDefined();
     expect(drone?.certificationsAndCompliance.mandatory).toContain('DGCA Type Certification');
+  });
+
+  it('includes the 4 new export-focused & youth-inspiring manufacturing blueprints', () => {
+    const medtech = PLANT_BLUEPRINTS.find((p) => p.slug === 'medtech-diagnostics-plant');
+    expect(medtech).toBeDefined();
+    expect(medtech?.category).toBe('MedTech & Diagnostics');
+    expect(medtech?.certificationsAndCompliance.mandatory.some((c) => c.includes('ISO 13485'))).toBe(true);
+    expect(medtech?.certificationsAndCompliance.mandatory.some((c) => c.includes('CDSCO'))).toBe(true);
+
+    const solar = PLANT_BLUEPRINTS.find((p) => p.slug === 'solar-inverter-bess-plant');
+    expect(solar).toBeDefined();
+    expect(solar?.category).toBe('Clean Energy');
+    expect(solar?.certificationsAndCompliance.mandatory.some((c) => c.includes('UL 1741'))).toBe(true);
+
+    const textiles = PLANT_BLUEPRINTS.find((p) => p.slug === 'technical-textiles-mill');
+    expect(textiles).toBeDefined();
+    expect(textiles?.category).toBe('Technical Textiles');
+    expect(textiles?.rawMaterialsAndSupplyChain.indianIndustrialClusters.some((c) => c.includes('Surat'))).toBe(true);
+    expect(textiles?.rawMaterialsAndSupplyChain.indianIndustrialClusters.some((c) => c.includes('Tiruppur'))).toBe(true);
+    expect(textiles?.certificationsAndCompliance.mandatory.some((c) => c.includes('OEKO-TEX'))).toBe(true);
+
+    const agro = PLANT_BLUEPRINTS.find((p) => p.slug === 'agro-food-coldchain-plant');
+    expect(agro).toBeDefined();
+    expect(agro?.category).toBe('Agro-Processing & Cold Chain');
+    expect(agro?.rawMaterialsAndSupplyChain.indianIndustrialClusters.some((c) => c.includes('Coimbatore'))).toBe(true);
+    expect(agro?.rawMaterialsAndSupplyChain.indianIndustrialClusters.some((c) => c.includes('Nashik'))).toBe(true);
+    expect(agro?.governmentSchemes.some((s) => s.schemeName.includes('PMFME'))).toBe(true);
+  });
+
+  it('eliminates the Zero-to-Factory Cliff with Missing-Middle pilot & export links on every blueprint', () => {
+    const complianceSlugs = new Set(COMPLIANCE_ROADMAPS.map((r) => r.slug));
+    const assemblySlugs = new Set(PCBA_ASSEMBLY_CATALOG.map((a) => a.slug));
+    const testbedSlugs = new Set(TESTBED_FACILITIES.map((t) => t.slug));
+
+    for (const plant of PLANT_BLUEPRINTS) {
+      expect(plant.estimatorBaseCapExCrores).toBeGreaterThan(0);
+
+      expect(plant.pilotScaleOption).toBeDefined();
+      expect(plant.pilotScaleOption?.budgetRangeInr).toBeTruthy();
+      expect(plant.pilotScaleOption?.midpointLakhs).toBeGreaterThanOrEqual(5);
+      expect(plant.pilotScaleOption?.midpointLakhs).toBeLessThanOrEqual(40);
+      expect(plant.pilotScaleOption?.batchSize).toBeTruthy();
+      expect(plant.pilotScaleOption?.bridgeModel).toBeTruthy();
+      expect(plant.pilotScaleOption?.indianBridgePartners.length).toBeGreaterThan(0);
+      expect(plant.pilotScaleOption?.graduationGate).toBeTruthy();
+
+      expect(plant.linkedLabs?.length).toBeGreaterThan(0);
+      expect(plant.linkedComplianceSlug).toBeTruthy();
+      expect(complianceSlugs.has(plant.linkedComplianceSlug!)).toBe(true);
+      if (plant.linkedAssemblySlug) {
+        expect(assemblySlugs.has(plant.linkedAssemblySlug)).toBe(true);
+      }
+      if (plant.linkedTestbedSlug) {
+        expect(testbedSlugs.has(plant.linkedTestbedSlug)).toBe(true);
+      }
+
+      expect(plant.exportHsCodes?.length).toBeGreaterThan(0);
+      expect(plant.exportCorridors?.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('aligns sitemap dynamically with all 12 blueprints, removes dead URLs, and includes sectors & export corridors', async () => {
+    const entries = await sitemap();
+    const urls = new Set(entries.map((e) => e.url));
+
+    for (const plant of PLANT_BLUEPRINTS) {
+      expect(urls.has(`https://www.hackerland.in/how-to-start/${plant.slug}`)).toBe(true);
+    }
+
+    const deadLegacySlugs = [
+      'ev-powertrain',
+      'aerospace-avionics',
+      'iot-sensors',
+      'precision-cnc',
+      '3d-printing-farm',
+    ];
+    for (const dead of deadLegacySlugs) {
+      expect(urls.has(`https://www.hackerland.in/how-to-start/${dead}`)).toBe(false);
+    }
+
+    const requiredNewRoutes = [
+      '/sectors',
+      '/export',
+      '/export/us',
+      '/export/eu',
+      '/export/uae-gcc',
+      '/export/asean',
+      '/export/africa',
+    ];
+    for (const route of requiredNewRoutes) {
+      expect(urls.has(`https://www.hackerland.in${route}`)).toBe(true);
+    }
+  });
+
+  it('renders HowToStartHub and PlantBudgetEstimator with Start-Smaller ladder and all 12 presets', () => {
+    const hubHtml = renderToStaticMarkup(React.createElement(HowToStartHub));
+    expect(hubHtml).toContain('12 Industries');
+    expect(hubHtml).toContain('Start Smaller:');
+    expect(hubHtml).toContain('EMS Pilot Batch (₹5L–₹35L)');
+    expect(hubHtml).toContain('/sectors');
+    expect(hubHtml).toContain('/learn');
+    expect(hubHtml).toContain('/manufacturing');
+    expect(hubHtml).toContain('/sourcing');
+    expect(hubHtml).toContain('/assembly');
+    expect(hubHtml).toContain('/compliance');
+    expect(hubHtml).toContain('/export');
+
+    const estimatorHtml = renderToStaticMarkup(React.createElement(PlantBudgetEstimator));
+    expect(estimatorHtml).toContain('12 Make-In-India Presets');
+    expect(estimatorHtml).toContain('EMS / Job-Shop Pilot (₹5L–₹40L)');
+    for (const plant of PLANT_BLUEPRINTS) {
+      expect(estimatorHtml).toContain(plant.slug);
+    }
   });
 });

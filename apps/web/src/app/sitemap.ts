@@ -22,6 +22,8 @@ import { THERMAL_PROFILES_REGISTRY } from '@/lib/data/thermal-data';
 import { SOLAR_MPPT_PROJECTS_REGISTRY } from '@/lib/data/solar-mppt-data';
 import { MOTOR_FOC_PROJECTS_REGISTRY } from '@/lib/data/motor-foc-data';
 import { CAN_BUS_PROJECTS_REGISTRY } from '@/lib/data/can-bus-data';
+import { PLANT_BLUEPRINTS } from '@/components/domain/how-to-start/how-to-start-data';
+import { SECTOR_IDS } from '@hackerland/core';
 
 const BASE_URL = 'https://www.hackerland.in';
 
@@ -31,6 +33,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Core Static Routes
   const staticRoutes: { path: string; priority: number; changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' }[] = [
     { path: '', priority: 1.0, changeFrequency: 'daily' },
+    { path: '/sectors', priority: 0.95, changeFrequency: 'weekly' },
+    { path: '/resources', priority: 0.95, changeFrequency: 'weekly' },
     { path: '/observatory', priority: 0.95, changeFrequency: 'daily' },
     { path: '/stories', priority: 0.95, changeFrequency: 'daily' },
     { path: '/museum', priority: 0.95, changeFrequency: 'daily' },
@@ -76,6 +80,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/learn', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/entrepreneurship', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/how-to-start', priority: 0.8, changeFrequency: 'weekly' },
+    { path: '/sectors', priority: 0.9, changeFrequency: 'weekly' },
+    { path: '/export', priority: 0.9, changeFrequency: 'weekly' },
+    { path: '/export/us', priority: 0.85, changeFrequency: 'weekly' },
+    { path: '/export/eu', priority: 0.85, changeFrequency: 'weekly' },
+    { path: '/export/uae-gcc', priority: 0.85, changeFrequency: 'weekly' },
+    { path: '/export/asean', priority: 0.85, changeFrequency: 'weekly' },
+    { path: '/export/africa', priority: 0.85, changeFrequency: 'weekly' },
     // Manufacturing Domain Physics Simulators
     { path: '/manufacturing/physics/drone', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/manufacturing/physics/rocket', priority: 0.8, changeFrequency: 'weekly' },
@@ -92,15 +103,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/manufacturing/iss', priority: 0.75, changeFrequency: 'monthly' },
     { path: '/manufacturing/eda', priority: 0.75, changeFrequency: 'monthly' },
     { path: '/manufacturing/tools', priority: 0.75, changeFrequency: 'monthly' },
-    // How-To-Start Factory Blueprints
-    { path: '/how-to-start/fab-manufacturing', priority: 0.75, changeFrequency: 'monthly' },
-    { path: '/how-to-start/carbon-fiber-hub', priority: 0.75, changeFrequency: 'monthly' },
-    { path: '/how-to-start/pcb-plant', priority: 0.75, changeFrequency: 'monthly' },
-    { path: '/how-to-start/ev-powertrain', priority: 0.75, changeFrequency: 'monthly' },
-    { path: '/how-to-start/aerospace-avionics', priority: 0.75, changeFrequency: 'monthly' },
-    { path: '/how-to-start/iot-sensors', priority: 0.75, changeFrequency: 'monthly' },
-    { path: '/how-to-start/precision-cnc', priority: 0.75, changeFrequency: 'monthly' },
-    { path: '/how-to-start/3d-printing-farm', priority: 0.75, changeFrequency: 'monthly' },
     { path: '/u', priority: 0.7, changeFrequency: 'daily' },
   ];
 
@@ -110,6 +112,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
+
+  // Dynamic Sector Pathways Routes
+  for (const sectorId of SECTOR_IDS) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/sectors/${sectorId}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    });
+  }
+
+  // Dynamic How-To-Start Factory Blueprint Routes
+  for (const blueprint of PLANT_BLUEPRINTS) {
+    sitemapEntries.push({
+      url: `${BASE_URL}/how-to-start/${blueprint.slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    });
+  }
 
   // Dynamic Stories Routes
   try {

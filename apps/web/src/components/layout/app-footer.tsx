@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { StatusDot } from '@hackerland/ui';
 import { getPlatformStats } from '@/lib/data/queries';
-import { ExternalLink, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 export async function AppFooter() {
   const stats = await getPlatformStats();
@@ -41,44 +41,54 @@ export async function AppFooter() {
             </div>
           </div>
 
-          {/* Col 1: Community */}
+          {/* Col 1: Ideate & Learn */}
           <div className="space-y-3">
             <p className="font-display text-body-sm font-semibold text-fg">
-              Community
+              Ideate &amp; Learn
             </p>
             <ul className="space-y-2 text-body-sm">
               <li>
-                <Link href="/feed" className="hover:text-accent-fg transition-colors">
-                  Social Feed
+                <Link href="/sectors" className="hover:text-accent-fg transition-colors">
+                  All Sectors Pathways
                 </Link>
               </li>
               <li>
-                <Link href="/projects" className="hover:text-accent-fg transition-colors">
-                  Explore Projects
+                <Link href="/resources" className="hover:text-accent-fg transition-colors">
+                  Funding &amp; Free Resources
                 </Link>
               </li>
               <li>
-                <Link href="/u" className="hover:text-accent-fg transition-colors">
-                  Makers Directory
+                <Link href="/ideas" className="hover:text-accent-fg transition-colors">
+                  IdeaLab &amp; Problems
                 </Link>
               </li>
               <li>
-                <Link href="/leaderboard" className="hover:text-accent-fg transition-colors">
-                  Leaderboard
+                <Link href="/young-innovators" className="hover:text-accent-fg transition-colors">
+                  Students &amp; Youth (8–26)
+                </Link>
+              </li>
+              <li>
+                <Link href="/stories" className="hover:text-accent-fg transition-colors">
+                  India Build Stories
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 2: Squads & Academy */}
+          {/* Col 2: Squads & Grants */}
           <div className="space-y-3">
             <p className="font-display text-body-sm font-semibold text-fg">
-              Grow & Earn
+              Squads &amp; Grants
             </p>
             <ul className="space-y-2 text-body-sm">
               <li>
+                <Link href="/projects" className="hover:text-accent-fg transition-colors">
+                  Builds &amp; Squads
+                </Link>
+              </li>
+              <li>
                 <Link href="/earn" className="hover:text-accent-fg transition-colors">
-                  Bounties & Grants
+                  Bounties &amp; Grants
                 </Link>
               </li>
               <li>
@@ -87,8 +97,8 @@ export async function AppFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/learn" className="hover:text-accent-fg transition-colors">
-                  Skill Roadmaps
+                <Link href="/launchpad" className="hover:text-accent-fg transition-colors">
+                  Launchpad &amp; Escrow
                 </Link>
               </li>
               <li>
@@ -99,10 +109,10 @@ export async function AppFooter() {
             </ul>
           </div>
 
-          {/* Col 3: Hardware & Labs */}
+          {/* Col 3: Manufacture & Export */}
           <div className="space-y-3">
             <p className="font-display text-body-sm font-semibold text-fg">
-              Labs & Links
+              Manufacture &amp; Export
             </p>
             <ul className="space-y-2 text-body-sm">
               <li>
@@ -111,30 +121,24 @@ export async function AppFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/labs" className="hover:text-accent-fg transition-colors">
-                  Makerspaces & ATL
+                <Link href="/how-to-start" className="hover:text-accent-fg transition-colors">
+                  Pilot-to-Plant Guides
                 </Link>
               </li>
               <li>
-                <a
-                  href="https://ai.hackerland.in/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-accent-fg font-medium hover:underline"
-                >
-                  <span>AI Community</span>
-                  <ExternalLink className="size-3" />
-                </a>
+                <Link href="/labs" className="hover:text-accent-fg transition-colors">
+                  Makerspaces &amp; ATL
+                </Link>
               </li>
               <li>
-                <a
-                  href="https://blog.hackerland.in/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-accent-fg transition-colors"
-                >
-                  Engineering Blog
-                </a>
+                <Link href="/compliance" className="hover:text-accent-fg transition-colors">
+                  Compliance &amp; Sourcing
+                </Link>
+              </li>
+              <li>
+                <Link href="/export" className="hover:text-accent-fg transition-colors font-medium text-accent-fg">
+                  Global Export Hub
+                </Link>
               </li>
             </ul>
           </div>

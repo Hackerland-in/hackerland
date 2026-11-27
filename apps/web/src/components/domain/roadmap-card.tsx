@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   Badge,
   Button,
@@ -25,6 +26,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import type { RoadmapView, RoadmapStage, RoadmapModule } from '@/lib/data/types';
+import { getRoadmapNextSteps } from '@/lib/data/sectors-data';
 import { useSocialCommunity } from '@/components/social/social-context';
 import { TrackBadge } from './track-badge';
 
@@ -32,10 +34,21 @@ export interface RoadmapCardProps {
   roadmap: RoadmapView;
   expanded?: boolean;
   className?: string;
+  recommendedLabHref?: string;
+  recommendedSectorHref?: string;
 }
 
-export function RoadmapCard({ roadmap, expanded = false, className }: RoadmapCardProps) {
+export function RoadmapCard({
+  roadmap,
+  expanded = false,
+  className,
+  recommendedLabHref,
+  recommendedSectorHref,
+}: RoadmapCardProps) {
   const storageKey = `hackerland_roadmap_${roadmap.slug}`;
+  const nextSteps = getRoadmapNextSteps(roadmap.slug, roadmap.track);
+  const labHref = recommendedLabHref ?? nextSteps.primaryLabRoute;
+  const sectorHref = recommendedSectorHref ?? nextSteps.primarySectorRoute;
   const [isExpanded, setIsExpanded] = useState(expanded);
   const [completedModules, setCompletedModules] = useState<string[]>([]);
   const [sharedNotice, setSharedNotice] = useState(false);
@@ -306,7 +319,7 @@ export function RoadmapCard({ roadmap, expanded = false, className }: RoadmapCar
         </CardBody>
       </div>
 
-      <CardFooter>
+      <CardFooter className="flex-col items-stretch gap-2.5">
         <Button
           variant="ghost"
           size="sm"
@@ -316,6 +329,25 @@ export function RoadmapCard({ roadmap, expanded = false, className }: RoadmapCar
           <span>{isExpanded ? 'Collapse roadmap' : 'View syllabus & interactive checklist'}</span>
           {isExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </Button>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-hairline/70 pt-2 text-[11px] font-display">
+          <span className="font-semibold uppercase tracking-wider text-fg-subtle">
+            Apply Next:
+          </span>
+          <div className="flex flex-wrap items-center gap-2 font-semibold text-fg-muted">
+            <Link href={labHref} className="hover:text-accent-fg transition-colors">
+              Labs
+            </Link>
+            <span className="text-fg-subtle" aria-hidden="true">·</span>
+            <Link href="/ideas" className="hover:text-accent-fg transition-colors">
+              Ideas
+            </Link>
+            <span className="text-fg-subtle" aria-hidden="true">·</span>
+            <Link href={sectorHref} className="text-accent-fg hover:underline">
+              Sectors ({nextSteps.primarySectorLabel})
+            </Link>
+          </div>
+        </div>
       </CardFooter>
     </Card>
   );

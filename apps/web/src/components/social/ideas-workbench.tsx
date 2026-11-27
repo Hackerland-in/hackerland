@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { INITIAL_COMMUNITY_IDEAS } from '@/lib/data/ideas-data';
+import { UNSOLVED_PROBLEMS_CATALOG } from '@/lib/data/problems-data';
 import type { Idea, IdeaStage } from '@hackerland/core';
 import { Badge, Button, Card, Input, Textarea, cn } from '@hackerland/ui';
 import {
@@ -14,9 +15,91 @@ import {
   Search,
   ChevronRight,
   Bookmark,
+  Cpu,
+  ShieldCheck,
+  Landmark,
 } from 'lucide-react';
 import { useBuilderIdentity } from '@/lib/builder-identity';
 import { useSocialCommunity } from './social-context';
+import { useVenture } from './venture-context';
+
+const DOMAIN_OPTIONS = [
+  {
+    value: 'Software/AI',
+    label: 'Software & AI Systems',
+    sectorId: 'semiconductors-electronics',
+    sectorLabel: 'Software, AI & Embedded Systems',
+  },
+  {
+    value: 'EV/Energy',
+    label: 'EV, Batteries & Clean Energy',
+    sectorId: 'ev-clean-energy',
+    sectorLabel: 'EV Powertrains, BMS & Clean Energy Storage',
+  },
+  {
+    value: 'MedTech',
+    label: 'MedTech & Diagnostics',
+    sectorId: 'medtech-diagnostics',
+    sectorLabel: 'MedTech, Point-of-Care Diagnostics & Biomedical Hardware',
+  },
+  {
+    value: 'Drones',
+    label: 'Drones, Aerospace & Space',
+    sectorId: 'drones-defense-space',
+    sectorLabel: 'Drones, UAVs, Defense & Space Systems',
+  },
+  {
+    value: 'Textiles',
+    label: 'Technical Textiles & Apparel',
+    sectorId: 'technical-textiles-apparel',
+    sectorLabel: 'Technical Textiles & Smart Apparel',
+  },
+  {
+    value: 'Agro-Processing',
+    label: 'Agro-Processing & Soil Tech',
+    sectorId: 'agro-food-coldchain',
+    sectorLabel: 'Agro-Processing, Cold Chain & AgriTech',
+  },
+  {
+    value: 'CNC/Robotics',
+    label: 'CNC Machining & Robotics',
+    sectorId: 'robotics-cnc-automation',
+    sectorLabel: 'Industrial Robotics, CNC Machining & Factory Automation',
+  },
+  {
+    value: 'Crafts',
+    label: 'Crafts & Artisan Hardware',
+    sectorId: 'consumer-hardware-appliances',
+    sectorLabel: 'Consumer Hardware, Crafts & Appliances',
+  },
+  {
+    value: 'Semiconductors',
+    label: 'Semiconductors & PCB',
+    sectorId: 'semiconductors-electronics',
+    sectorLabel: 'Semiconductors, PCB & Embedded Electronics',
+  },
+  {
+    value: 'Climate',
+    label: 'Climate & Clean Water',
+    sectorId: 'ev-clean-energy',
+    sectorLabel: 'Climate Tech, Clean Water & Energy',
+  },
+] as const;
+
+function mapProblemDomainToWorkbenchDomain(problemDomain: string): string {
+  switch (problemDomain) {
+    case 'healthcare':
+      return 'MedTech';
+    case 'agriculture':
+      return 'Agro-Processing';
+    case 'clean_water':
+      return 'Climate';
+    case 'space_aerospace':
+      return 'Drones';
+    default:
+      return 'Software/AI';
+  }
+}
 
 const STAGES: { stage: IdeaStage; number: number; name: string; desc: string }[] = [
   { stage: 'notice', number: 1, name: '1. Notice', desc: 'Find 10 real friction points around you' },
@@ -55,10 +138,11 @@ export function IdeasWorkbench() {
   const [newSummary, setNewSummary] = useState('');
   const [newProblem, setNewProblem] = useState('');
   const [newAudience, setNewAudience] = useState('');
-  const [newDomain, setNewDomain] = useState('Agriculture');
+  const [newDomain, setNewDomain] = useState<string>('Agro-Processing');
 
   const { isItemSaved, toggleSaveItem } = useSocialCommunity();
   const { identity } = useBuilderIdentity();
+  const { startVenture } = useVenture();
 
   useEffect(() => {
     try {
@@ -73,6 +157,78 @@ export function IdeasWorkbench() {
         if (Array.isArray(parsed)) setCheeredIds(parsed);
       }
     } catch {}
+
+    // Check URL query param ?problem=<slug> to auto-open workbook pre-filled
+    if (typeof window !== 'undefined' && window.location.search) {
+      const params = new URLSearchParams(window.location.search);
+      const problemParam = params.get('problem')?.trim();
+      if (problemParam) {
+        const lower = problemParam.toLowerCase();
+        const matched = UNSOLVED_PROBLEMS_CATALOG.find(
+          (p) =>
+            p.slug.toLowerCase() === lower ||
+            p.id.toLowerCase() === lower ||
+            p.title.toLowerCase().includes(lower),
+        );
+        if (matched) {
+          setNewTitle(matched.title.slice(0, 110));
+          setNewProblem(matched.description);
+          setNewAudience(matched.impactTarget);
+          setNewSummary(
+            `Prototype tackling ${matched.title} (${matched.keyConstraints[0] ?? 'field-ready design'})`,
+          );
+          setNewDomain(mapProblemDomainToWorkbenchDomain(matched.domain));
+        } else {
+          setNewTitle(problemParam);
+        }
+        setShowWorkbookModal(true);
+      }
+    }
+
+    if (typeof fetch !== 'function') return;
+    let active = true;
+    fetch('/api/ideas?scope=ideas')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data || !Array.isArray(data.ideas)) return;
+        const serverIdeas = data.ideas.filter(
+          (item: unknown): item is Idea =>
+            Boolean(item) &&
+            typeof item === 'object' &&
+            typeof (item as Idea).id === 'string' &&
+            typeof (item as Idea).title === 'string',
+        );
+        if (serverIdeas.length === 0) return;
+
+        setIdeas((prev) => {
+          const map = new Map<string, Idea>();
+          for (const item of prev) {
+            map.set(item.id, item);
+          }
+          for (const srv of serverIdeas) {
+            const existing = map.get(srv.id);
+            if (!existing) {
+              map.set(srv.id, srv);
+            } else {
+              const existingTime = new Date(existing.updatedAt).getTime() || 0;
+              const srvTime = new Date(srv.updatedAt).getTime() || 0;
+              if (srvTime > existingTime) {
+                map.set(srv.id, srv);
+              }
+            }
+          }
+          const merged = Array.from(map.values());
+          try {
+            localStorage.setItem('hackerland_ideas_v1', JSON.stringify(merged));
+          } catch {}
+          return merged;
+        });
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const persistIdeas = (next: Idea[]) => {
@@ -116,6 +272,15 @@ export function IdeasWorkbench() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+
+    const domainMeta = DOMAIN_OPTIONS.find((d) => d.value === newDomain);
+    startVenture({
+      title: created.title,
+      sectorId: domainMeta?.sectorId ?? 'semiconductors-electronics',
+      sectorLabel: domainMeta?.sectorLabel ?? newDomain,
+      ideaId: created.id,
+      stage: 1,
+    });
 
     persistIdeas([created, ...ideas]);
     syncIdeaToServer(created);
@@ -326,41 +491,69 @@ export function IdeasWorkbench() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-hairline flex flex-wrap items-center justify-between gap-2 text-body-xs">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleCheer(idea.id)}
-                    aria-pressed={isCheered}
-                    className={cn(
-                      'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors font-display font-semibold',
-                      isCheered
-                        ? 'border-accent bg-accent-soft text-accent-fg'
-                        : 'border-hairline bg-surface-2/60 text-fg-muted hover:text-accent-fg',
-                    )}
-                  >
-                    <Heart className={cn('size-3.5', isCheered && 'fill-current')} />
-                    <span>Cheer ({idea.cheersCount})</span>
-                  </button>
-
-                  {idea.currentStage !== 'plan' && (
+              <div className="pt-3 border-t border-hairline space-y-2.5 text-body-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => handleAdvanceStage(idea.id)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-hairline bg-surface-1 text-fg-muted hover:border-accent/40 hover:text-accent-fg font-display font-medium transition-colors"
+                      onClick={() => handleCheer(idea.id)}
+                      aria-pressed={isCheered}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors font-display font-semibold',
+                        isCheered
+                          ? 'border-accent bg-accent-soft text-accent-fg'
+                          : 'border-hairline bg-surface-2/60 text-fg-muted hover:text-accent-fg',
+                      )}
                     >
-                      <span>Next stage</span>
-                      <ChevronRight className="size-3" />
+                      <Heart className={cn('size-3.5', isCheered && 'fill-current')} />
+                      <span>Cheer ({idea.cheersCount})</span>
                     </button>
-                  )}
+
+                    {idea.currentStage !== 'plan' && (
+                      <button
+                        type="button"
+                        onClick={() => handleAdvanceStage(idea.id)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-hairline bg-surface-1 text-fg-muted hover:border-accent/40 hover:text-accent-fg font-display font-medium transition-colors"
+                      >
+                        <span>Next stage</span>
+                        <ChevronRight className="size-3" />
+                      </button>
+                    )}
+                  </div>
+
+                  <Button asChild variant="soft" size="sm">
+                    <Link
+                      href={`/new?title=${encodeURIComponent(idea.title)}&domain=${encodeURIComponent(idea.domains[0] ?? '')}&tagline=${encodeURIComponent(idea.summary)}`}
+                    >
+                      <span>Launch Project</span>
+                      <ArrowRight className="size-3" />
+                    </Link>
+                  </Button>
                 </div>
 
-                <Button asChild variant="soft" size="sm">
-                  <Link href={`/new?title=${encodeURIComponent(idea.title)}`}>
-                    <span>Launch Project</span>
-                    <ArrowRight className="size-3" />
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <Link
+                    href={`/prototype?title=${encodeURIComponent(idea.title)}`}
+                    className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 text-[11px] font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+                  >
+                    <Cpu className="size-3 text-accent" aria-hidden="true" />
+                    <span>Prototype</span>
                   </Link>
-                </Button>
+                  <Link
+                    href="/compliance"
+                    className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 text-[11px] font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+                  >
+                    <ShieldCheck className="size-3 text-accent" aria-hidden="true" />
+                    <span>Compliance</span>
+                  </Link>
+                  <Link
+                    href="/resources"
+                    className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 text-[11px] font-medium text-fg-muted hover:border-accent/40 hover:text-accent-fg transition-colors"
+                  >
+                    <Landmark className="size-3 text-accent" aria-hidden="true" />
+                    <span>Grants &amp; Labs</span>
+                  </Link>
+                </div>
               </div>
             </Card>
           );
@@ -451,11 +644,11 @@ export function IdeasWorkbench() {
                   onChange={(e) => setNewDomain(e.target.value)}
                   className="h-11 w-full rounded-xl border border-line bg-sunken px-3 text-body-sm text-fg focus:border-accent focus:outline-none"
                 >
-                  <option value="Agriculture">Agriculture &amp; Soil</option>
-                  <option value="Assistive Tech">Assistive &amp; Medical Technology</option>
-                  <option value="Robotics">Robotics &amp; Automation</option>
-                  <option value="Clean Energy">Clean Energy &amp; EV</option>
-                  <option value="Space">Aerospace &amp; Satellite</option>
+                  {DOMAIN_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 

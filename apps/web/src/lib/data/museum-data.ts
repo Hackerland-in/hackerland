@@ -290,6 +290,225 @@ export const MUSEUM_EXHIBITS: MuseumExhibit[] = [
       },
     ],
   },
+  {
+    slug: 'uncertified-rf-module-nhava-sheva-seizure',
+    title: 'Bare Uncertified RF Module Seized at Nhava Sheva & BLR Air Cargo',
+    tagline: 'Zero WPC ETA & Non-Modular FCC Planning Turned a ₹4.2L Inventory Drop into Dead Scrap',
+    category: 'Consumer Electronics',
+    lifespan: '2024 – 2025 (6-Week Customs Hold)',
+    capitalBurned: '₹4.2 Lakh Dead Inventory + Demurrage',
+    primaryFailureMode: 'Regulatory Barrier',
+    summary:
+      'An industrial telemetry startup shipped 1,200 bare Sub-GHz and 2.4 GHz RF transceiver boards without obtaining WPC Equipment Type Approval (ETA-SD) on SARAL Sanchar or using FCC/CE pre-certified shielded RF modules. Nhava Sheva Customs and Bengaluru Air Cargo detained the consignment under wireless import rules, burning ₹4.2L in dead stock, port demurrage, and missed export penalties.',
+    productSpecs: [
+      '1,200 bare 915 MHz / 2.4 GHz chip-antenna RF transceivers imported under HS Code 85176290',
+      'Zero WPC ETA-SD (Equipment Type Approval — Self Declaration) filed on SARAL Sanchar',
+      'Omitted metal EMI shield can required by FCC Part 15.212 modular certification reuse',
+      'Non-compliant frequency allocation (915 MHz US band colliding with Indian cellular bands instead of 865–867 MHz)',
+    ],
+    rootCauseAutopsy: [
+      {
+        stage: 'Spectrum & Import Compliance',
+        failureTrigger: 'Missing WPC ETA-SD & Wrong Sub-GHz Band (915 MHz vs 865–867 MHz)',
+        detail:
+          'The hardware team copied an American open-source 915 MHz LoRa reference schematic verbatim. Under India’s National Frequency Allocation Plan (NFAP), 865–867 MHz is de-licensed while 915 MHz overlaps licensed telecom spectrum—making WPC import clearance impossible.',
+        warningSigns: [
+          'Freight forwarder flagged "Wireless Apparatus — WPC NOC Required" on the Airway Bill.',
+          'Supplier datasheet listed US FCC Part 15 only without RF test reports for India or EU RED.',
+        ],
+      },
+      {
+        stage: 'RF Shielding & Modular Approval',
+        failureTrigger: 'Bare Unshielded RF Silicon Instead of Pre-Certified Modules',
+        detail:
+          'Saving ₹180 per board by placing bare RF SoCs directly on a 2-layer PCB invalidated modular FCC/CE reuse. Passing intentional-radiator NABL/FCC chamber testing would have cost ₹7.5L and 4 months—more than the entire seed order value.',
+        warningSigns: [
+          'No metal shield footprint or 50-ohm pi-matching network verified on VNA before Shenzhen PCBA.',
+        ],
+      },
+      {
+        stage: 'Customs & Working Capital Crunch',
+        failureTrigger: 'Accumulating Air Cargo Demurrage at BLR & Nhava Sheva',
+        detail:
+          'Without DGFT IEC wireless documentation or an R&D test-sample exemption letter, cargo storage fees compounded at ₹3,500/day until disposal cost exceeded invoice value.',
+        warningSigns: [
+          'Ordered full 1,200-unit batch before clearing a 5-unit sample airway bill.',
+        ],
+      },
+    ],
+    salvageableInnovations: [
+      {
+        innovation: 'Dual-Footprint Pre-Certified RF Module Carrier',
+        utility: 'Drop-in footprints supporting pre-certified WPC/FCC/CE cans (ESP32-WROOM, nRF52840, SX1262 865/868 MHz modules)',
+        modernSuccessors: ['Agri-IoT gateways with WPC ETA-SD', 'Export-ready EU RED 868 MHz industrial nodes'],
+      },
+      {
+        innovation: 'Pre-Shipment Compliance Gate Checklist',
+        utility: 'Mandatory HS code + NFAP frequency + WPC/BIS clearance check before issuing purchase orders',
+        modernSuccessors: ['Hackerland Compliance Wizard', 'Automated Customs BOM pre-audits'],
+      },
+    ],
+    lessonsForBuilders: [
+      {
+        principle: 'File WPC ETA-SD and check India NFAP bands before ordering PCBAs',
+        advice:
+          'Never copy a 915 MHz US RF reference design for Indian deployment or mixed export. Verify 865–867 MHz (India) / 868 MHz (EU) / 2.4 GHz de-licensed limits and secure WPC ETA on SARAL Sanchar before air freight leaves the fab.',
+        antiPattern: 'Assuming customs treats commercial wireless boards like passive resistors.',
+      },
+      {
+        principle: 'Always ship pre-certified shielded RF modules under 5,000 units',
+        advice:
+          'Paying ₹150–₹250 extra for a pre-certified metal-shielded module (with valid FCC ID, CE RED, and WPC reports) eliminates ₹7L–₹12L in intentional-radiator chamber re-testing.',
+        antiPattern: 'Placing bare RF chips on early batch boards to shave ₹120 off BOM.',
+      },
+    ],
+  },
+  {
+    slug: 'single-source-mcu-coimbatore-agri-po-halt',
+    title: 'Single-Source MCU & Connector Shortage Halting a 500-Unit Coimbatore Agri-Sensor PO',
+    tagline: 'Zero Second-Source BOM Alternates Froze a ₹3.8L Drip-Irrigation Order at Assembly',
+    category: 'Hardware & Robotics',
+    lifespan: '2023 – 2024 (18-Week Production Halt)',
+    capitalBurned: '₹3.8 Lakh Blocked WIP & Cancelled PO',
+    primaryFailureMode: 'Supply Chain & Manufacturing Hell',
+    summary:
+      'A Coimbatore agri-automation startup won a confirmed 500-unit purchase order for solar soil-moisture and solenoid valve controllers. Their KiCad BOM relied on a single proprietary QFN microcontroller and an exotic European IP68 push-pull connector with zero second-source alternates—halting assembly for 18 weeks with ₹3.8L in half-populated PCBs and custom ABS enclosures stranded.',
+    productSpecs: [
+      '500 partially populated 4-layer ENIG controller PCBs lacking QFN-48 specialty MCU',
+      'Niche 5-pin proprietary European circular connector with 26-week MOQ 2,000 factory lead time',
+      '₹1.4L custom ABS injection-molded enclosure cutouts matched exclusively to that connector flange',
+      'Hardcoded vendor register firmware unable to compile cleanly on pin-compatible alternates',
+    ],
+    rootCauseAutopsy: [
+      {
+        stage: 'BOM Architecture & Sourcing',
+        failureTrigger: '0 Second-Source Alternates for Primary MCU & Field Connector',
+        detail:
+          'Designers picked a specialty low-volume MCU suffix and boutique connector found on a single distributor page without checking stock depth across Mouser, DigiKey, LCSC, or Indian industrial markets.',
+        warningSigns: [
+          'Prototype batch used the last 8 loose samples on the bench with zero safety stock.',
+          'BOM spreadsheet had blank "Alternate MPN" columns.',
+        ],
+      },
+      {
+        stage: 'PO Acceptance & Working Capital',
+        failureTrigger: 'Signing 45-Day Delivery Penalties Without Component Allocation Lock',
+        detail:
+          'The startup accepted an agri-cooperative PO and ₹1.9L advance without locking distributor reel allocation first. Two weeks later, global lead time jumped to 26 weeks, triggering liquidated damages and PO cancellation.',
+        warningSigns: [
+          'Assumed Bengaluru/Coimbatore local traders could source specialty European connectors overnight.',
+        ],
+      },
+      {
+        stage: 'Firmware & Enclosure Lock-In',
+        failureTrigger: 'Tight Hardware Register & Mechanical Cutout Coupling',
+        detail:
+          'Swapping to an available STM32/RP2040/ESP32 or standard M12 A-coded connector required re-spinning the PCB layout, modifying the aluminum mold cavity, and rewriting bare-metal timer interrupts.',
+        warningSigns: [
+          'Application sensor logic mixed directly with proprietary MCU peripheral register pointers.',
+        ],
+      },
+    ],
+    salvageableInnovations: [
+      {
+        innovation: 'Standardized M12 / Deutsch DT Industrial Field Harnessing',
+        utility: 'Universal IP67/IP68 connector footprints stocked across Pune, Coimbatore, and global distributors',
+        modernSuccessors: ['Modular Indian smart-irrigation controllers', 'Multi-vendor industrial RS-485 nodes'],
+      },
+      {
+        innovation: 'Zephyr RTOS / Hardware Abstraction Layer (HAL) Firmware',
+        utility: 'Board-overlay architecture allowing same-week MCU swaps across ARM Cortex-M and RISC-V families',
+        modernSuccessors: ['Resilient multi-MCU agri-sensor fleets', 'Dual-footprint KiCad BOMs'],
+      },
+    ],
+    lessonsForBuilders: [
+      {
+        principle: 'Enforce 2 stocked second-source MPNs before freezing Gerbers',
+        advice:
+          'Every critical IC, regulator, and IP67 connector must have at least two pin-compatible or dual-footprint alternates with >5,000 units in active distributor stock before quoting delivery timelines.',
+        antiPattern: 'Validating a design with 3 engineering samples and assuming mass procurement is trivial.',
+      },
+      {
+        principle: 'Use globally standardized industrial connectors (M12, Deutsch DT, GX16)',
+        advice:
+          'Standardized M12 and Deutsch connectors are stocked locally across Indian industrial corridors and export markets, preventing enclosure mold lock-in.',
+        antiPattern: 'Cutting expensive enclosure molds around single-vendor boutique connectors.',
+      },
+    ],
+  },
+  {
+    slug: 'uncertified-liion-pack-air-cargo-rejection',
+    title: 'Uncertified Li-Ion Pack Rejected by Air Cargo & Failing AIS-156 Thermal Runaway',
+    tagline: 'Missing UN 38.3 Transport Certification & Unpotted Nickel Strips Killed a ₹2.9L Export Demo',
+    category: 'CleanTech & Energy',
+    lifespan: '2024 – 2025 (Cargo Quarantine & Lab Venting)',
+    capitalBurned: '₹2.9 Lakh Scrapped Packs & Freight Fines',
+    primaryFailureMode: 'Thermal & Physics Limit',
+    summary:
+      'A portable solar and light-EV builder packed 40 custom 48V 21700 Li-ion packs for European distributor demos and fleet trials without UN 38.3 transport test certification or AIS-156 thermal-propagation barriers. Airport Dangerous Goods screening quarantined the shipment as undeclared Class 9 Hazmat while unpotted field units suffered cell-to-cell thermal runaway.',
+    productSpecs: [
+      '40 units of 48V 13S4P NMC 21700 battery packs (~1.1 kWh capacity each)',
+      'Zero UN 38.3 (T1–T8 altitude, thermal, vibration, impact, short-circuit) air-transport certificate',
+      'Spot-welded pure nickel strips with zero cell-level fusible links or FR-epoxy potting',
+      'Single NTC thermistor mounted on BMS PCB instead of core cell-cluster temperature probes',
+    ],
+    rootCauseAutopsy: [
+      {
+        stage: 'IATA Dangerous Goods & Export Logistics',
+        failureTrigger: 'Shipping >100 Wh Li-Ion Packs by Air Without UN 38.3 T1–T8 Report',
+        detail:
+          'Lithium-ion batteries exceeding 100 Wh (UN 3480) are strictly regulated Class 9 Dangerous Goods. Express couriers quarantined the uncertified packs at Mumbai/Bengaluru air cargo, levying hazmat inspection fines and forcing hazardous disposal.',
+        warningSigns: [
+          'Tried shipping finished battery packs under "Electronic Power Supply" HS descriptions.',
+          'Relied on individual cell manufacturer UN 38.3 PDFs instead of assembled pack certification.',
+        ],
+      },
+      {
+        stage: 'Thermal Propagation & AIS-156 Barriers',
+        failureTrigger: 'Zero Thermal Potting or Phase-Change Cell Spacers',
+        detail:
+          'Packing NMC cylindrical cells shoulder-to-shoulder inside shrink-wrap without polycarbonate honeycomb spacing or flame-retardant thermal potting meant a single overheated cell ignited neighboring rows during 42°C ambient fast-charging.',
+        warningSigns: [
+          'Enclosure surface exceeded 63°C during 1.5C bench discharge without active cutoff.',
+        ],
+      },
+      {
+        stage: 'BMS Safety Telemetry',
+        failureTrigger: 'Single BMS-Board Thermistor Missed Core Cell Hotspot',
+        detail:
+          'The lone thermistor sat near discharge MOSFETs rather than center-pack 21700 cells, reporting normal 39°C temperatures while center cells hit 78°C and vented.',
+        warningSigns: [
+          'Skipped multi-point thermocouple mapping during high-ambient Indian summer load tests.',
+        ],
+      },
+    ],
+    salvageableInnovations: [
+      {
+        innovation: 'Wire-Bonded Fusible Link + Thermal Potted Module Architecture',
+        utility: 'Cell-level fuse wires and FR-grade potting compound arresting single-cell thermal runaway',
+        modernSuccessors: ['AIS-156 Phase-2 compliant 2W/3W packs', 'UN 38.3 certified export storage packs'],
+      },
+      {
+        innovation: 'LFP (LiFePO4) Export Chemistry Migration',
+        utility: 'Superior thermal stability (>270°C runaway threshold vs ~150°C NMC) for stationary & solar export units',
+        modernSuccessors: ['Exportable solar-microgrid LFP modules', 'CE/UN 38.3 certified commercial packs'],
+      },
+    ],
+    lessonsForBuilders: [
+      {
+        principle: 'Budget UN 38.3 NABL testing before promising international air-freight demos',
+        advice:
+          'Cell-level UN 38.3 does NOT cover an assembled battery pack. Budget ₹1.5L–₹3.0L and 6 weeks for pack-level UN 38.3 certification—or partner with an already certified Indian pack contract manufacturer for early export pilots.',
+        antiPattern: 'Assuming courier hubs will ignore lithium pack ratings inside sample crates.',
+      },
+      {
+        principle: 'Design AIS-156 thermal barriers and multi-point core NTCs from Pack v1',
+        advice:
+          'Use proper cell spacing, fire-retardant potting or mica separators, pressure-relief vents, and minimum 4 distributed NTC probes inside the cell matrix.',
+        antiPattern: 'Shrink-wrapping raw NMC cells tight together to hit smaller enclosure dimensions.',
+      },
+    ],
+  },
 ];
 
 export function listMuseumExhibits(): MuseumExhibit[] {

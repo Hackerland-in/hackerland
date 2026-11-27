@@ -1,3 +1,56 @@
+export type PlantCategory =
+  | 'Semiconductors'
+  | 'Composites'
+  | 'Electronics'
+  | 'Mobility & Vehicles'
+  | 'Precision Engineering'
+  | 'Clean Energy'
+  | 'MedTech & Diagnostics'
+  | 'Technical Textiles'
+  | 'Agro-Processing & Cold Chain';
+
+export const PLANT_CATEGORIES: readonly PlantCategory[] = [
+  'Semiconductors',
+  'Electronics',
+  'Clean Energy',
+  'MedTech & Diagnostics',
+  'Technical Textiles',
+  'Agro-Processing & Cold Chain',
+  'Composites',
+  'Mobility & Vehicles',
+  'Precision Engineering',
+] as const;
+
+export type ExportCorridorSlug = 'us' | 'eu' | 'uae-gcc' | 'asean' | 'africa';
+
+export interface PilotScaleOption {
+  /** Missing-Middle entry CapEx/NRE (typically ₹5L – ₹40L) before committing to ₹5Cr+ plant CapEx */
+  budgetRangeInr: string;
+  /** Numeric midpoint in ₹ Lakhs for unified budget estimation */
+  midpointLakhs: number;
+  /** Initial pilot batch size achievable without owning full plant machinery */
+  batchSize: string;
+  /** How Indian founders execute small lots via EMS houses, job-shops, and incubators */
+  bridgeModel: string;
+  /** Real Indian clusters, incubators, and contract manufacturing hubs */
+  indianBridgePartners: string[];
+  /** Concrete technical & commercial milestone before unlocking full plant CapEx */
+  graduationGate: string;
+}
+
+export interface ExportCorridorTarget {
+  corridorSlug: ExportCorridorSlug;
+  marketLabel: string;
+  certifications: string[];
+  incentiveNote: string;
+}
+
+export interface LinkedLabReference {
+  name: string;
+  city: string;
+  href: string;
+}
+
 export interface MachineryItem {
   name: string;
   purpose: string;
@@ -8,9 +61,17 @@ export interface MachineryItem {
 export interface PlantBlueprint {
   slug: string;
   title: string;
-  category: 'Semiconductors' | 'Composites' | 'Electronics' | 'Mobility & Vehicles' | 'Precision Engineering' | 'Clean Energy';
+  category: PlantCategory;
   tagline: string;
   overview: string;
+  estimatorBaseCapExCrores?: number;
+  pilotScaleOption?: PilotScaleOption;
+  linkedComplianceSlug?: string;
+  linkedAssemblySlug?: string;
+  linkedTestbedSlug?: string;
+  linkedLabs?: LinkedLabReference[];
+  exportHsCodes?: string[];
+  exportCorridors?: ExportCorridorTarget[];
   marketDemand: {
     tamGlobal: string;
     tamIndia: string;
@@ -66,6 +127,53 @@ export const PLANT_BLUEPRINTS: PlantBlueprint[] = [
     tagline: 'Start a semiconductor assembly, testing, marking, and advanced packaging (ATMP) or compound silicon foundry.',
     overview:
       'Semiconductor manufacturing spans compound semiconductor wafer foundries (GaN/SiC power devices) and Outsourced Semiconductor Assembly and Test (OSAT) packaging. An entry-level ATMP line bonds, encapsulates, and tests IC silicon dies with cleanrooms operating at ISO Class 1 to Class 5.',
+    estimatorBaseCapExCrores: 120.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹8 Lakhs – ₹35 Lakhs',
+      midpointLakhs: 22,
+      batchSize: '25 – 250 IC Die / Packaged Prototypes (MPW Shuttle + Pilot OSAT Lot)',
+      bridgeModel:
+        'Execute Multi-Project Wafer (MPW) tape-outs via Chips-to-Startup (C2S) & SCL Mohali 180nm shuttles, paired with contract QFN/BGA die wire-bonding and ATE bench characterization at Indian OSAT pilot houses before committing ₹85Cr+ fab CapEx.',
+      indianBridgePartners: [
+        'SCL Mohali (180nm MPW Shuttle)',
+        'CeNSE — IISc Bengaluru (NanoFab Cleanroom)',
+        'IIT Bombay / IIT Madras Nanoelectronics Labs',
+        'Tessolve Semiconductor Test Labs (Bengaluru)',
+      ],
+      graduationGate:
+        'First-silicon functional bring-up, JEDEC HTOL/ESD screening pass, and ≥10,000-unit anchor OEM demand commitment.',
+    },
+    linkedComplianceSlug: 'bis-crs-smps-adapter',
+    linkedAssemblySlug: 'edge-tpu-carrier-pcba',
+    linkedTestbedSlug: 'tektronix-136ch-logic-analyzer',
+    linkedLabs: [
+      { name: 'Center for Innovation (CFI) — IIT Madras', city: 'Chennai', href: '/labs' },
+      { name: 'T-Hub Hardware Prototyping Node', city: 'Hyderabad', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '8541.10 / 8541.29 (GaN/SiC Power Semiconductor Devices)',
+      '8542.31 / 8542.39 (Packaged Monolithic ICs & Controllers)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'us',
+        marketLabel: 'United States (Fabless OSAT)',
+        certifications: ['JEDEC JESD47', 'AEC-Q100 Automotive', 'RoHS 3 / REACH'],
+        incentiveNote: 'RoDTEP export remission + ISM 50% CapEx parity for US-allied trusted silicon.',
+      },
+      {
+        corridorSlug: 'eu',
+        marketLabel: 'European Union (Industrial & Auto)',
+        certifications: ['AEC-Q100 / Q101', 'REACH SVHC', 'ISO 26262 Supply Traceability'],
+        incentiveNote: 'Zero-duty electronics component access + EU Chips Act supply diversification.',
+      },
+      {
+        corridorSlug: 'asean',
+        marketLabel: 'ASEAN / Singapore Hubs',
+        certifications: ['ISO 9001', 'ANSI/ESD S20.20', 'JEDEC MSL-3'],
+        incentiveNote: 'India-ASEAN FTA preferential tariff routing for packaged ICs.',
+      },
+    ],
     marketDemand: {
       tamGlobal: '$680 Billion',
       tamIndia: '$64 Billion by 2026',
@@ -207,6 +315,53 @@ export const PLANT_BLUEPRINTS: PlantBlueprint[] = [
     tagline: 'Engineer high-performance carbon fiber prepreg, autoclave aerospace components, and lightweight automotive parts.',
     overview:
       'Carbon fiber composites replace metal across aerospace, racing bicycles, wind turbine blades, and automotive body shells. Setting up a composite hub involves prepreg layup, automated vacuum bagging, high-pressure autoclave curing, and 5-axis CNC composite trimming.',
+    estimatorBaseCapExCrores: 28.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹6 Lakhs – ₹28 Lakhs',
+      midpointLakhs: 17,
+      batchSize: '10 – 100 Structural Parts (Out-of-Autoclave Infusion & CNC Master Molds)',
+      bridgeModel:
+        'Machine Al-6061/tooling-board molds at local CNC shops, validate Out-of-Autoclave (OOA) vacuum resin infusion, and rent shared autoclave & ultrasonic NDT scan slots at NAL Bengaluru or Pune composite job-shops.',
+      indianBridgePartners: [
+        'CSIR-NAL Composites Centre (Bengaluru)',
+        'ARCI Advanced Composites Lab (Hyderabad)',
+        'Pune / Chakan Composite Layup Job-Shops',
+        'Coimbatore Precision 5-Axis Mold Makers',
+      ],
+      graduationGate:
+        'Ultrasonic C-Scan (<1.5% void content), ASTM D3039 tensile coupon pass, and recurring UAV/EV OEM orders > ₹1.5 Cr/yr.',
+    },
+    linkedComplianceSlug: 'dgca-drone-type-certification',
+    linkedAssemblySlug: 'drone-autopilot-v4-pcba',
+    linkedTestbedSlug: 'imv-electrodynamic-shaker-table',
+    linkedLabs: [
+      { name: 'Pune Maker FabLab Node', city: 'Pune', href: '/labs' },
+      { name: 'Coimbatore Hardware Prototyping Center', city: 'Coimbatore', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '6815.11 (Carbon Fibers & Structural Composite Laminates)',
+      '8807.30 (Aerospace & UAV Composite Airframe Parts)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'us',
+        marketLabel: 'United States (Aero & Sports)',
+        certifications: ['AS9100 Rev D', 'ASTM D3039 / D7136', 'NADCAP NDT'],
+        incentiveNote: 'RoDTEP structural export rebate + US defence/drone supply-chain offset contracts.',
+      },
+      {
+        corridorSlug: 'eu',
+        marketLabel: 'European Union (EV & Mobility)',
+        certifications: ['EN 9100', 'REACH Epoxy Compliance', 'ISO 4210 (Carbon Frames)'],
+        incentiveNote: 'High-margin lightweight EV tub, racing frame & wind blade component exports.',
+      },
+      {
+        corridorSlug: 'uae-gcc',
+        marketLabel: 'UAE & GCC (Energy & UAV)',
+        certifications: ['ISO 9001', 'ISO 11119-3 (Type-IV CNG/H2 Cylinders)'],
+        incentiveNote: 'India-UAE CEPA 0% tariff advantage for hydrogen pressure vessels and UAV shells.',
+      },
+    ],
     marketDemand: {
       tamGlobal: '$32 Billion',
       tamIndia: '$2.8 Billion by 2028',
@@ -344,6 +499,53 @@ export const PLANT_BLUEPRINTS: PlantBlueprint[] = [
     tagline: 'Fabricate 2 to 16-layer high-speed impedance-controlled circuit boards and automated SMT component assembly.',
     overview:
       'A PCB manufacturing plant converts raw copper-clad laminates (FR4/Rogers) into precision multilayer boards with microvias, ENIG gold plating, and provides high-speed surface-mount technology (SMT) component placement.',
+    estimatorBaseCapExCrores: 35.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹5 Lakhs – ₹18 Lakhs',
+      midpointLakhs: 11,
+      batchSize: '50 – 1,000 Assemblies (Contract Bare-Board Fab + Shared Pick-and-Place EMS)',
+      bridgeModel:
+        'Fabricate 4–8 layer impedance-controlled bare boards via Indian quick-turn fabs (PCB Power, Lion Circuits) and run contract SMT assembly with 3D SPI/AOI inspection at Peenya, Noida, or T-Hub partner lines before investing in wet-etch lines.',
+      indianBridgePartners: [
+        'PCB Power (Gandhinagar, Gujarat)',
+        'Lion Circuits (Bengaluru)',
+        'T-Hub Hardware Prototyping Node (Hyderabad)',
+        'Electronic City / Noida Phase-II EMS Job-Work Lines',
+      ],
+      graduationGate:
+        'IPC-A-610 Class 2/3 yield >99.2% across 5+ BOM revisions and ≥₹2.5 Cr annualized recurring PCBA demand.',
+    },
+    linkedComplianceSlug: 'bis-crs-smps-adapter',
+    linkedAssemblySlug: 'edge-tpu-carrier-pcba',
+    linkedTestbedSlug: 'rs-emc-semi-anechoic-chamber',
+    linkedLabs: [
+      { name: 'Center for Innovation (CFI) — IIT Madras', city: 'Chennai', href: '/labs' },
+      { name: 'T-Hub Hardware Prototyping Node', city: 'Hyderabad', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '8534.00 (Multilayer Rigid & Flex Printed Circuit Boards)',
+      '8537.10 / 8543.70 (Populated Industrial & IoT PCBA Modules)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'us',
+        marketLabel: 'United States (Industrial EMS)',
+        certifications: ['UL 94V-0 / UL 796', 'IPC-6012 Class 3', 'FCC Part 15 (PCBA)'],
+        incentiveNote: 'China+1 duty arbitrage + SPECS/PLI electronics component value-add.',
+      },
+      {
+        corridorSlug: 'eu',
+        marketLabel: 'European Union (Auto & Smart Grid)',
+        certifications: ['RoHS 3 / REACH', 'IATF 16949', 'CE EMC Directive'],
+        incentiveNote: 'RoDTEP remission on populated industrial controller & meter PCBAs.',
+      },
+      {
+        corridorSlug: 'asean',
+        marketLabel: 'ASEAN Electronics Supply Chain',
+        certifications: ['IPC-A-610 Class 2 & 3', 'ISO 14001'],
+        incentiveNote: 'Fast regional air-freight feeder supply into Vietnam/Malaysia EMS.',
+      },
+    ],
     marketDemand: {
       tamGlobal: '$82 Billion',
       tamIndia: '$12 Billion by 2027',
@@ -483,6 +685,53 @@ export const PLANT_BLUEPRINTS: PlantBlueprint[] = [
     tagline: 'Build an automated bicycle assembly line: automated tube hydroforming, robotic TIG welding, electrostatic painting, and wheel building.',
     overview:
       'Setting up a complete bicycle and electric bicycle (e-bike) assembly facility covers frame tube mitering/hydroforming, robotic welding fixtures, automated multi-stage electrostatic powder coating, robotic wheel truing, and final assembly lines compliant with BIS IS 10613.',
+    estimatorBaseCapExCrores: 16.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹7 Lakhs – ₹30 Lakhs',
+      midpointLakhs: 18,
+      batchSize: '50 – 300 Complete Bicycles / E-Bikes (Ludhiana Job-Work + CKD Assembly)',
+      bridgeModel:
+        'Contract tube mitering and TIG welding to specialized MSME frame job-shops in Ludhiana or Pune, outsource 5-stage electrostatic powder coating, and operate a 2,500 sq. ft. wheel-truing and final assembly bay.',
+      indianBridgePartners: [
+        'Ludhiana Cycle Cluster MSME Welding Job-Shops',
+        'R&D Centre for Bicycle & Sewing Machine (Ludhiana)',
+        'Statfield Outsourced Powder Coating Booths (Pune/Ludhiana)',
+        'Coimbatore Precision Hub & Drivetrain Suppliers',
+      ],
+      graduationGate:
+        'BIS IS 10613 / ISO 4210 frame fatigue pass + steady 400+ units/month sell-through or European OEM private-label contract.',
+    },
+    linkedComplianceSlug: 'ais156-ev-battery-pack',
+    linkedAssemblySlug: 'ais156-bms-master-pcba',
+    linkedTestbedSlug: 'imv-electrodynamic-shaker-table',
+    linkedLabs: [
+      { name: 'Pune Maker FabLab Node', city: 'Pune', href: '/labs' },
+      { name: 'Coimbatore Hardware Prototyping Center', city: 'Coimbatore', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '8712.00 (Complete Road, Gravel & Commuter Bicycles)',
+      '8711.60 (Electric Pedal-Assist E-Bikes <=250W)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'eu',
+        marketLabel: 'European Union (GSP / E-Bikes)',
+        certifications: ['EN 15194 (EPAC E-Bikes)', 'ISO 4210', 'CE Machinery Directive'],
+        incentiveNote: 'RoDTEP rebate + strong EU anti-dumping advantage over non-Indian frames.',
+      },
+      {
+        corridorSlug: 'us',
+        marketLabel: 'United States (DTC & Gravel)',
+        certifications: ['CPSC 16 CFR 1512', 'UL 2849 (E-Bike Electrical System)'],
+        incentiveNote: 'High-margin alloy & e-commuter private-label exports.',
+      },
+      {
+        corridorSlug: 'africa',
+        marketLabel: 'East & West Africa (Utility & Cargo)',
+        certifications: ['BIS IS 10613 / SONCAP / KEBS PVoC'],
+        incentiveNote: 'Volume cargo & commuter cycle exports backed by EXIM Bank buyer credit.',
+      },
+    ],
     marketDemand: {
       tamGlobal: '$65 Billion',
       tamIndia: '₹14,000 Cr ($1.7B) by 2027',
@@ -620,6 +869,53 @@ export const PLANT_BLUEPRINTS: PlantBlueprint[] = [
     tagline: 'CNC Swiss-lathes, cold forging, gear hobbing, and anodizing lines for bike hubs, bottom brackets, sprockets, and derailleurs.',
     overview:
       'Precision manufacturing supplies critical small metal components: bicycle wheel hubs, bottom bracket axles, CNC derailleur cages, chainring sprockets, pedal spindles, and disc brake calipers using Swiss-type CNC turn-mill centers and cold forging.',
+    estimatorBaseCapExCrores: 12.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹5 Lakhs – ₹25 Lakhs',
+      midpointLakhs: 14,
+      batchSize: '200 – 5,000 Precision CNC Components (Job-Shop Spindle Time + Batch Anodizing)',
+      bridgeModel:
+        'Book CNC Swiss-lathe and 5-axis VMC spindle hours across Coimbatore CODISSIA, Rajkot, or Peenya precision job-shops, paired with shared NABL CMM inspection and Type-III anodizing baths before purchasing multi-crore bar-fed cells.',
+      indianBridgePartners: [
+        'Coimbatore CODISSIA CNC Precision Cluster',
+        'Peenya Industrial Estate Turn-Mill Shops (Bengaluru)',
+        'Rajkot Machine Tools & Cold Forging Cluster',
+        'Pune Pimpri-Chinchwad Anodizing & Heat-Treat Houses',
+      ],
+      graduationGate:
+        'PPAP Level 3 sign-off with Cpk ≥ 1.67 and ≥3,000 spindle-hours/year contracted OEM backlog.',
+    },
+    linkedComplianceSlug: 'ais156-ev-battery-pack',
+    linkedAssemblySlug: 'drone-autopilot-v4-pcba',
+    linkedTestbedSlug: 'thermotron-thermal-shock-chamber',
+    linkedLabs: [
+      { name: 'Coimbatore Hardware Prototyping Center', city: 'Coimbatore', href: '/labs' },
+      { name: 'Pune Maker FabLab Node', city: 'Pune', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '8714.93 / 8714.99 (CNC Bicycle Hubs, Bottom Brackets & Sprockets)',
+      '8483.40 (Precision Gears, Actuator Shafts & Robotics Components)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'eu',
+        marketLabel: 'European Union (Precision & Cycling)',
+        certifications: ['IATF 16949', 'ISO 9001', 'MIL-A-8625 Type III / REACH'],
+        incentiveNote: 'PLI Auto Components + RoDTEP export incentives on precision machined parts.',
+      },
+      {
+        corridorSlug: 'us',
+        marketLabel: 'United States (Aero, Medical & EV)',
+        certifications: ['AS9100 / ISO 13485 (Sub-tier)', 'PPAP Level 3', 'RoHS 3'],
+        incentiveNote: 'High-margin CNC billet aluminum and Ti-6Al-4V precision exports.',
+      },
+      {
+        corridorSlug: 'uae-gcc',
+        marketLabel: 'UAE & GCC (Industrial & Energy)',
+        certifications: ['ISO 9001', 'API / ASTM Material Traceability'],
+        incentiveNote: 'India-UAE CEPA duty-free access for precision valves, shafts, and couplers.',
+      },
+    ],
     marketDemand: {
       tamGlobal: '$110 Billion',
       tamIndia: '₹18,500 Cr ($2.2B)',
@@ -757,6 +1053,53 @@ export const PLANT_BLUEPRINTS: PlantBlueprint[] = [
     tagline: 'Manufacture precision smartphone mechanical housings, camera modules, acoustic speakers, and flexible FPC assemblies.',
     overview:
       'Mobile parts manufacturing encompasses precision sub-assemblies: CNC-machined metal camera rings, ultra-thin polymer injection back covers, voice coil motor (VCM) camera modules, dynamic receiver speakers, and flexible printed circuit (FPC) soldering.',
+    estimatorBaseCapExCrores: 45.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹10 Lakhs – ₹35 Lakhs',
+      midpointLakhs: 23,
+      batchSize: '500 – 5,000 Acoustic/FPC/Housing Sub-Assemblies (Soft Tooling + Shared Cleanroom)',
+      bridgeModel:
+        'Use P20/Al-7075 soft injection molds, contract FPC hot-bar bonding, and shared ISO-6 cleanroom + acoustic chamber testing in Noida Sector-63 or Sriperumbudur EMS incubators prior to dedicated active-alignment CapEx.',
+      indianBridgePartners: [
+        'Electropreneur Park / Noida Sector-63 EMS Cluster',
+        'Sriperumbudur / Oragadam Electronics Manufacturing Hub',
+        'IIT Madras CFI Cleanroom Prototyping Partners',
+        'Tirupati EMC Shared Reliability & Drop-Test Labs',
+      ],
+      graduationGate:
+        'IP68 air-decay & 1,000-drop validation passed with Tier-1 ODM vendor code approval.',
+    },
+    linkedComplianceSlug: 'tec-mtcte-cellular-router',
+    linkedAssemblySlug: 'iot-wearable-sensor-pcba',
+    linkedTestbedSlug: 'rs-emc-semi-anechoic-chamber',
+    linkedLabs: [
+      { name: 'Center for Innovation (CFI) — IIT Madras', city: 'Chennai', href: '/labs' },
+      { name: 'T-Hub Hardware Prototyping Node', city: 'Hyderabad', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '8517.79 (Precision Smartphone Housings, FPC & Acoustic Parts)',
+      '8525.89 (Compact VCM Camera Sensor Modules)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'us',
+        marketLabel: 'United States (ODM & Wearables)',
+        certifications: ['IEC 62368-1', 'FCC Part 15', 'RoHS 3 & REACH'],
+        incentiveNote: 'PLI Mobile & SPECS 25% CapEx boost for global smartphone & wearable supply chains.',
+      },
+      {
+        corridorSlug: 'uae-gcc',
+        marketLabel: 'UAE & GCC (Distribution Hubs)',
+        certifications: ['G-Mark', 'RoHS', 'ISO 9001'],
+        incentiveNote: 'Zero-duty CEPA re-export corridor into MENA repair & OEM sub-assembly hubs.',
+      },
+      {
+        corridorSlug: 'asean',
+        marketLabel: 'ASEAN (Vietnam / Indonesia EMS)',
+        certifications: ['IEC 62368-1', 'IP68 Reliability Sign-off'],
+        incentiveNote: 'Regional component trade under India-ASEAN electronics tariff schedules.',
+      },
+    ],
     marketDemand: {
       tamGlobal: '$180 Billion',
       tamIndia: '$32 Billion by 2027',
@@ -895,6 +1238,53 @@ export const PLANT_BLUEPRINTS: PlantBlueprint[] = [
     tagline: 'Automated cylindrical/prismatic cell sorting, ultrasonic laser wire bonding, and battery management system (BMS) integration.',
     overview:
       'Setting up an automotive EV battery pack manufacturing plant involves automated OCV cell sorting, ultrasonic wire bonding of 21700 or prismatic cells, automated thermal gap filler dispensing, high-voltage busbar laser welding, and AIS-156 Amendment III testing.',
+    estimatorBaseCapExCrores: 38.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹8 Lakhs – ₹32 Lakhs',
+      midpointLakhs: 20,
+      batchSize: '15 – 150 Certified EV Battery Packs (Contract Spot/Laser Weld + Shared Cycler)',
+      bridgeModel:
+        'Assemble OCV-binned 21700/LFP packs using contract laser busbar welding job-shops in Pune or Hosur, flash open-source/Zephyr smart BMS firmware, and validate thermal propagation on shared Chroma cyclers before owning dry-room automation.',
+      indianBridgePartners: [
+        'Chakan / Bhosari EV Pack Pilot Job-Shops (Pune)',
+        'Hosur / Krishnagiri 2W/3W Battery Assembly Partners',
+        'ARAI Pune / ICAT Manesar AIS-156 Pre-Compliance Labs',
+        'IIT Madras / T-Hub Energy Storage Testbeds',
+      ],
+      graduationGate:
+        'AIS-156 Amendment III nail-penetration / thermal runaway + UN 38.3 certification and ≥10 MWh/yr OEM LoI.',
+    },
+    linkedComplianceSlug: 'ais156-ev-battery-pack',
+    linkedAssemblySlug: 'ais156-bms-master-pcba',
+    linkedTestbedSlug: 'chroma-17020-ev-battery-cycler',
+    linkedLabs: [
+      { name: 'Pune Maker FabLab Node', city: 'Pune', href: '/labs' },
+      { name: 'Center for Innovation (CFI) — IIT Madras', city: 'Chennai', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '8507.60 (Lithium-Ion Traction & Swappable Battery Packs)',
+      '8537.10 (Smart BMS & High-Voltage Battery Junction Boxes)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'eu',
+        marketLabel: 'European Union (EU Battery Passport)',
+        certifications: ['UN 38.3', 'ECE R100 / R136', 'EU Battery Regulation 2023/1542'],
+        incentiveNote: 'RoDTEP + ACC PLI localization feeding European 2W/3W & light commercial fleets.',
+      },
+      {
+        corridorSlug: 'us',
+        marketLabel: 'United States (Micro-Mobility & ESS)',
+        certifications: ['UL 2271 / UL 2580', 'UN 38.3', 'UL 9540A'],
+        incentiveNote: 'High-demand non-FEOC LFP pack & BMS assemblies for US utility/fleet OEMs.',
+      },
+      {
+        corridorSlug: 'africa',
+        marketLabel: 'East Africa (Kenya/Rwanda E-Boda Swapping)',
+        certifications: ['UN 38.3', 'AIS-156 / IEC 62619'],
+        incentiveNote: 'Fast-growing swappable 48V/72V LFP battery pack exports for African e-mobility.',
+      },
+    ],
     marketDemand: {
       tamGlobal: '$130 Billion',
       tamIndia: '$15 Billion by 2030',
@@ -1033,6 +1423,53 @@ export const PLANT_BLUEPRINTS: PlantBlueprint[] = [
     tagline: 'Manufacture carbon airframes, brushless motor stators, electronic speed controllers (ESC), and type-certified UAVs.',
     overview:
       'Starting a precision drone manufacturing facility involves carbon composite plate CNC routing, automated BLDC motor winding, SMT assembly of flight controllers and ESCs, and final indoor test bench calibration under DGCA Type Certification.',
+    estimatorBaseCapExCrores: 14.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹6 Lakhs – ₹26 Lakhs',
+      midpointLakhs: 16,
+      batchSize: '5 – 40 UAV Airframes & Flight Kits (Carbon CNC Routing + Local ESC SMT)',
+      bridgeModel:
+        'Route 3K carbon fiber frames via Bengaluru/Pune CNC job-shops, populate ArduPilot/H7 flight controllers and 4-in-1 ESCs at local SMT lines, and log 50-hour thrust & endurance trials at NIT/IIT flight cages before building an indoor arena.',
+      indianBridgePartners: [
+        'NIT Trichy Autonomous Robotics Bench',
+        'Bengaluru Peenya Carbon CNC & Motor Winding Shops',
+        'CoE Drone Labs (IIT Madras / T-Hub Hyderabad)',
+        'ADRDE / DGCA Authorized UAV Testing Ranges',
+      ],
+      graduationGate:
+        'DGCA Type Certificate (Form D-1) issuance + first GeM or agri/survey fleet order of 25+ UAVs.',
+    },
+    linkedComplianceSlug: 'dgca-drone-type-certification',
+    linkedAssemblySlug: 'drone-autopilot-v4-pcba',
+    linkedTestbedSlug: 'imv-electrodynamic-shaker-table',
+    linkedLabs: [
+      { name: 'NIT Trichy Autonomous Robotics Bench', city: 'Tiruchirappalli', href: '/labs' },
+      { name: 'T-Hub Hardware Prototyping Node', city: 'Hyderabad', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '8806.22 / 8806.29 (Unmanned Aircraft / Mapping & Agri UAVs)',
+      '8501.31 (Propulsion BLDC Motors & Flight Avionics)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'uae-gcc',
+        marketLabel: 'UAE & GCC (Inspection & Logistics)',
+        certifications: ['GCAA Drone Approval', 'IP54 Desert Dust Seal', 'ISO 9001'],
+        incentiveNote: 'India-UAE CEPA 0% tariff + oilfield, solar-farm, and port inspection UAV demand.',
+      },
+      {
+        corridorSlug: 'africa',
+        marketLabel: 'Africa (Agri-Spraying & Mining Survey)',
+        certifications: ['DGCA Type Cert Equivalence', 'UN 38.3 (UAV Smart Packs)'],
+        incentiveNote: 'PLI Drone cost edge enabling ruggedized 10L–30L agri-drone exports.',
+      },
+      {
+        corridorSlug: 'asean',
+        marketLabel: 'ASEAN (Plantation & Maritime Survey)',
+        certifications: ['CE / FCC Telemetry Compliance', 'ISO 9001'],
+        incentiveNote: 'Strong demand across Indonesia, Malaysia, and Vietnam oil-palm & coastal mapping.',
+      },
+    ],
     marketDemand: {
       tamGlobal: '$45 Billion',
       tamIndia: '₹12,000 Cr ($1.5B) by 2028',
@@ -1154,6 +1591,804 @@ export const PLANT_BLUEPRINTS: PlantBlueprint[] = [
       netMargin: '24% – 36%',
       paybackPeriodYears: '2.0 – 3.2 Years',
       breakEvenCapacityUtil: '38% Capacity Utilization',
+    },
+  },
+  {
+    slug: 'medtech-diagnostics-plant',
+    title: 'ISO 13485 Point-of-Care IVD & Wearable Medical Device Assembly',
+    category: 'MedTech & Diagnostics',
+    tagline: 'Build an ISO 13485 cleanroom facility for point-of-care microfluidic diagnostics, clinical wearables, and CDSCO / FDA export devices.',
+    overview:
+      'Point-of-care In-Vitro Diagnostics (IVD) and wearable medical monitoring assembly combines ISO Class 7 cleanroom SMT electronics, precision microfluidic reagent dispensing, ultrasonic polymer cartridge welding, and medical-grade QMS validation aligned with CDSCO Class B/C, EU CE IVDR, and US FDA 510(k).',
+    estimatorBaseCapExCrores: 22.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹12 Lakhs – ₹35 Lakhs',
+      midpointLakhs: 24,
+      batchSize: '500 – 5,000 IVD Cartridges / Wearable Monitor Units (AMTZ / BIRAC Shared Cleanroom)',
+      bridgeModel:
+        'Incubate inside AMTZ Visakhapatnam or BIRAC BioNEST cleanrooms using shared micro-dispensing, contract ISO-13485 SMT PCBA, and NABL biocompatibility/IEC 60601 testing before financing your own cleanroom.',
+      indianBridgePartners: [
+        'AMTZ — Andhra Pradesh MedTech Zone (Visakhapatnam)',
+        'BIRAC BioNEST / C-CAMP MedTech Cleanrooms (Bengaluru)',
+        'IKP Knowledge Park (Hyderabad)',
+        'HTIC — IIT Madras Healthcare Technology Innovation Centre',
+      ],
+      graduationGate:
+        'CDSCO Test License (Form MD-13) + clinical concordance ≥95% across 300+ samples and CE IVDR / FDA 510(k) technical dossier lock.',
+    },
+    linkedComplianceSlug: 'cdsco-med-class-b-vital-monitor',
+    linkedAssemblySlug: 'iot-wearable-sensor-pcba',
+    linkedTestbedSlug: 'rs-emc-semi-anechoic-chamber',
+    linkedLabs: [
+      { name: 'Center for Innovation (CFI) — IIT Madras', city: 'Chennai', href: '/labs' },
+      { name: 'T-Hub Hardware Prototyping Node', city: 'Hyderabad', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '9018.19 / 9018.90 (Point-of-Care Diagnostic & Vital Monitoring Devices)',
+      '3822.19 (Microfluidic IVD Test Cartridges & Biosensor Strips)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'us',
+        marketLabel: 'United States (FDA 510(k) / CLIA-Waived)',
+        certifications: ['US FDA 510(k)', 'ISO 13485:2016', 'IEC 60601-1 Ed 3.2'],
+        incentiveNote: 'High-margin US clinic & home-diagnostics supply with 3x domestic ASP realization.',
+      },
+      {
+        corridorSlug: 'eu',
+        marketLabel: 'European Union (CE IVDR / MDR)',
+        certifications: ['EU IVDR (2017/746)', 'ISO 14971 Risk Management', 'RoHS & REACH'],
+        incentiveNote: 'RoDTEP medical device rebate + EU hospital group procurement access.',
+      },
+      {
+        corridorSlug: 'africa',
+        marketLabel: 'Africa & Global Health Tenders (WHO PQ)',
+        certifications: ['WHO Prequalification (PQ)', 'CDSCO MD-15', 'ISO 13485'],
+        incentiveNote: 'PEPFAR, Global Fund, and Ministries of Health tropical disease IVD tenders.',
+      },
+    ],
+    marketDemand: {
+      tamGlobal: '$98 Billion',
+      tamIndia: '$16 Billion by 2028',
+      cagr: '17.6%',
+      importDependencyPercent: 72,
+      growthDrivers: [
+        'PLI Scheme for Medical Devices & dedicated MedTech Parks lowering cleanroom overhead by 35%',
+        'Ayushman Bharat Digital Mission & Tier-2/3 decentralized point-of-care diagnostics expansion',
+        'Global shift toward affordable WHO-PQ point-of-care PCR, HbA1c, and continuous ECG wearables',
+      ],
+    },
+    capitalRequirements: {
+      pilotCapEx: '₹3.8 Cr – ₹7.5 Cr (ISO Class 7 Cleanroom SMT, Microfluidics & QC Lab)',
+      commercialCapEx: '₹18 Cr – ₹48 Cr (Automated Cartridge Dispensing, Cleanroom Molding & Packaging)',
+      landSqFt: '12,000 – 38,000 sq. ft.',
+      powerGridKva: '450 – 1,400 kVA (Dual backup + UPS for lyophilized reagents)',
+      cleanroomClass: 'ISO 7 / Class 10,000 (Assembly) & ISO 6 Laminar Hoods (Reagent Fill)',
+      waterLpd: '25,000 Litres Purified Water (USP / WFI grade for reagent prep)',
+      workingCapitalMonths: 5,
+    },
+    machineryList: [
+      {
+        name: 'Precision Microfluidic Reagent Dispenser & BioJet Plotter',
+        purpose: 'Non-contact nanolitre spotting of antibodies, enzymes, and primers onto nitrocellulose or COP microfluidic chips.',
+        estCostInr: '₹1.2 Cr – ₹2.4 Cr',
+        recommendedBrands: ['BioDot (USA)', 'Biodot / Scienion', 'Nordson EFD'],
+      },
+      {
+        name: 'Ultrasonic & Laser Microfluidic Cartridge Welder',
+        purpose: 'Hermetic sealing of cyclic olefin polymer (COC/COP) diagnostic cassettes without thermal degradation of reagents.',
+        estCostInr: '₹65 Lakhs – ₹1.4 Cr',
+        recommendedBrands: ['Branson Ultrasonics (Emerson)', 'LPKF Laser', 'Herrmann Ultraschall'],
+      },
+      {
+        name: 'Cleanroom Medical-Grade SMT & Selective Conformal Line',
+        purpose: 'Lead-free medical PCBA placement (AFE ECG/PPG analog front-ends, BLE SoCs) with automated optical inspection.',
+        estCostInr: '₹2.2 Cr – ₹4.2 Cr',
+        recommendedBrands: ['Yamaha Motor Robotics', 'ASMPT', 'Koh Young 3D AOI'],
+      },
+      {
+        name: 'Automated Foil Pouch Sealer, Desiccant Inserter & Lyophilizer',
+        purpose: 'Moisture-barrier blister/foil packaging (<2% RH) preserving enzyme stability for 18–24 months at ambient tropical storage.',
+        estCostInr: '₹85 Lakhs – ₹1.8 Cr',
+        recommendedBrands: ['IMA Group', 'Optima Packaging', 'SP Scientific'],
+      },
+      {
+        name: 'IEC 60601 Electrical Safety & Clinical Fluorescence Analyzer Rig',
+        purpose: '100% end-of-line patient leakage current (<10µA CF-type), optical CV%, and thermal cycling verification.',
+        estCostInr: '₹55 Lakhs – ₹1.1 Cr',
+        recommendedBrands: ['Fluke Biomedical', 'Seaward Rigel', 'Molecular Devices'],
+      },
+    ],
+    executionRoadmap: [
+      {
+        phase: 'Phase 1',
+        title: 'ISO 13485 QMS Architecture & CDSCO MD-13 Test License',
+        durationWeeks: 'Weeks 1–10',
+        tasks: [
+          'Establish ISO 13485:2016 Quality Management System and ISO 14971 risk management dossier',
+          'Obtain CDSCO Form MD-13 Test License and register facility at State Licensing Authority / CDSCO Sugam portal',
+          'Select cleanroom turnkey contractor for modular PUF panels, HEPA H14 filtration, and epoxy antistatic floors',
+        ],
+        deliverable: 'Validated ISO 7 cleanroom civil envelope and MD-13 test batch permit.',
+      },
+      {
+        phase: 'Phase 2',
+        title: 'Microfluidics, Cleanroom SMT & Installation Qualification (IQ/OQ)',
+        durationWeeks: 'Weeks 11–24',
+        tasks: [
+          'Install reagent nanolitre plotter, ultrasonic welders, and medical-grade SMT line inside ISO 7 airlock zone',
+          'Execute Installation Qualification (IQ) and Operational Qualification (OQ) with calibrated particle counters',
+          'Lock medical-grade polymer (COC/PMMA) and sensor BOM traceability under 21 CFR Part 820 / DHR logs',
+        ],
+        deliverable: 'IQ/OQ certified pilot production line producing engineering validation lots.',
+      },
+      {
+        phase: 'Phase 3',
+        title: 'Biocompatibility, IEC 60601 & Clinical Concordance Trials',
+        durationWeeks: 'Weeks 25–38',
+        tasks: [
+          'Complete ISO 10993 cytotoxicity/sensitization and IEC 60601-1-2 medical EMC immunity testing at NABL labs',
+          'Run 3 consecutive Process Qualification (PQ) lots and clinical concordance validation at ICMR/teaching hospitals',
+          'Compile Summary Technical Documentation (STED) for CDSCO MD-15 & EU Notified Body submission',
+        ],
+        deliverable: 'CDSCO MD-15 Manufacturing License and NABL safety test reports.',
+      },
+      {
+        phase: 'Phase 4',
+        title: 'Commercial Hospital Supply & US/EU/WHO Export Launch',
+        durationWeeks: 'Weeks 39–52',
+        tasks: [
+          'Clear CE IVDR / US FDA 510(k) regulatory audit and UDI barcode serialization',
+          'Onboard hospital chains, GeM medical procurement, and global IVD distributors across US, EU, and Africa',
+        ],
+        deliverable: 'Commercial ISO 13485 production at 50,000+ cartridges or 5,000+ devices/month.',
+      },
+    ],
+    rawMaterialsAndSupplyChain: {
+      materials: [
+        'Medical-Grade Cyclic Olefin Copolymer (COC / COP) & Polycarbonate Pellets',
+        'Nitrocellulose Membranes, Gold Nanoparticles & Lyophilized Enzymes/Antibodies',
+        'Ultra-Low Noise Biosensor AFEs & BLE 5.3 SoCs (TI, Analog Devices, Nordic)',
+        'Medical Grade Silicone / Hypoallergenic Hydrogel Adhesives (3M, Dow)',
+        'Aluminum-Foil Moisture Barrier Pouches & Molecular Sieve Desiccants',
+      ],
+      primarySources: ['TOPAS Advanced Polymers', 'Cytiva / Sartorius', 'Texas Instruments', '3M Medical Specialties'],
+      indianIndustrialClusters: [
+        'AMTZ Visakhapatnam (Andhra Pradesh)',
+        'Bengaluru BioCluster / Electronic City (Karnataka)',
+        'Oragadam / Chennai MedTech Corridor (Tamil Nadu)',
+        'Hyderabad Medical Devices Park (Telangana)',
+      ],
+    },
+    certificationsAndCompliance: {
+      mandatory: [
+        'CDSCO Medical Devices Rules 2017 (Class B / C MD-15)',
+        'ISO 13485:2016 (Medical Device QMS)',
+        'IEC 60601-1 / IEC 61010 (Medical Electrical Safety & EMC)',
+        'CE IVDR (EU) & US FDA 510(k) Export Standards',
+        'ISO 10993 Biocompatibility',
+      ],
+      pollutionCategory: 'Green',
+      clearancesRequired: [
+        'CDSCO Sugam Manufacturing & Test License',
+        'Bio-Medical Waste Management Authorization (SPCB)',
+        'Factories Act & Cleanroom Fire NOC',
+      ],
+    },
+    governmentSchemes: [
+      {
+        schemeName: 'PLI Scheme for Promoting Domestic Manufacturing of Medical Devices',
+        subsidyDetails: '5% cash incentive on incremental net sales over 5 years across diagnostics & imaging equipment.',
+        eligibleBody: 'Department of Pharmaceuticals (DoP), Govt. of India',
+      },
+      {
+        schemeName: 'Promotion of Medical Devices Parks & BIRAC BIPP/SBIRI',
+        subsidyDetails: 'Up to ₹100 Cr common testing infrastructure grants at AMTZ/state parks + 50% early-stage BIRAC R&D validation.',
+        eligibleBody: 'DBT-BIRAC / Department of Pharmaceuticals',
+      },
+    ],
+    unitEconomics: {
+      typicalGrossMargin: '52% – 68%',
+      netMargin: '22% – 34%',
+      paybackPeriodYears: '2.4 – 3.6 Years',
+      breakEvenCapacityUtil: '42% Capacity Utilization',
+    },
+  },
+  {
+    slug: 'solar-inverter-bess-plant',
+    title: 'Solar PV Microinverter & Commercial BESS Assembly Line',
+    category: 'Clean Energy',
+    tagline: 'Manufacture GaN/SiC solar microinverters, string inverters, and grid-interactive commercial battery energy storage racks for India & export.',
+    overview:
+      'A solar power electronics and BESS assembly facility manufactures high-efficiency GaN/SiC microinverters, hybrid string inverters, and modular 5kWh–250kWh LFP energy storage cabinets featuring conformal-coated HV PCBAs, IP67 thermal potting, and automated grid-tie anti-islanding test benches.',
+    estimatorBaseCapExCrores: 26.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹8 Lakhs – ₹28 Lakhs',
+      midpointLakhs: 18,
+      batchSize: '25 – 250 Microinverters / 5–15kWh BESS Racks (Contract HV SMT + NISE/CPRI Pre-Scan)',
+      bridgeModel:
+        'Assemble GaN/SiC power boards at Bengaluru or Pune EMS lines with selective silicone conformal coating, machine IP67 cast-aluminum housings via job-shops, and pass IEEE 1547 / IEC 62109 grid-tie validation at CPRI/NISE before plant CapEx.',
+      indianBridgePartners: [
+        'Bommasandra / Peenya Power Electronics EMS Lines (Bengaluru)',
+        'NISE — National Institute of Solar Energy (Gurugram)',
+        'CPRI — Central Power Research Institute (Bengaluru/Bhopal)',
+        'Chakan Sheet-Metal Enclosure & Thermal Extrusion Job-Shops (Pune)',
+      ],
+      graduationGate:
+        'BIS IS 16221 / IEC 62109 safety pass + UL 1741 / CE grid-export compliance and ≥5 MW/quarter EPC order book.',
+    },
+    linkedComplianceSlug: 'bis-crs-smps-adapter',
+    linkedAssemblySlug: 'gan-microinverter-power-pcba',
+    linkedTestbedSlug: 'chroma-17020-ev-battery-cycler',
+    linkedLabs: [
+      { name: 'Pune Maker FabLab Node', city: 'Pune', href: '/labs' },
+      { name: 'Center for Innovation (CFI) — IIT Madras', city: 'Chennai', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '8504.40 (Solar Microinverters, Hybrid & Grid-Tie Inverters)',
+      '8507.60 / 8507.80 (Commercial & C&I Lithium BESS Cabinets)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'us',
+        marketLabel: 'United States (Residential & C&I Solar)',
+        certifications: ['UL 1741 SA/SB', 'IEEE 1547-2018', 'FCC Part 15 Class B', 'UL 9540'],
+        incentiveNote: 'IRA domestic/allied inverter diversification driving massive US rooftop microinverter demand.',
+      },
+      {
+        corridorSlug: 'eu',
+        marketLabel: 'European Union (Balcony & Hybrid BESS)',
+        certifications: ['CE LVD/EMC', 'VDE-AR-N 4105', 'IEC 62109-1/-2', 'EN 50549'],
+        incentiveNote: 'RoDTEP power electronics rebate + zero tariff pressure vs competing non-FTA suppliers.',
+      },
+      {
+        corridorSlug: 'africa',
+        marketLabel: 'Sub-Saharan Africa (Solar Mini-Grids)',
+        certifications: ['IEC 62109', 'SONCAP / PVoC', 'UN 38.3'],
+        incentiveNote: 'ISA (International Solar Alliance) & EXIM-backed rural clinic/telecom solar storage tenders.',
+      },
+    ],
+    marketDemand: {
+      tamGlobal: '$46 Billion',
+      tamIndia: '$6.2 Billion by 2029',
+      cagr: '21.4%',
+      importDependencyPercent: 68,
+      growthDrivers: [
+        'PM Surya Ghar Muft Bijli Yojana driving 10+ million rooftop solar inverter installations across India',
+        'Central Electricity Authority mandate pairing renewable plants with 4-hour Commercial & Utility BESS',
+        'Global shift to GaN/SiC high-frequency microinverters (>97.5% CEC efficiency) and US/EU non-FEOC sourcing',
+      ],
+    },
+    capitalRequirements: {
+      pilotCapEx: '₹4.5 Cr – ₹9.0 Cr (HV PCBA Assembly, Selective Conformal Coat & Burn-In Rig)',
+      commercialCapEx: '₹24 Cr – ₹65 Cr (Dual SMT + Automated Vacuum Potting & Commercial BESS Bay)',
+      landSqFt: '18,000 – 55,000 sq. ft.',
+      powerGridKva: '600 – 2,000 kVA (Bi-directional regenerative grid tie-back)',
+      cleanroomClass: 'ISO 8 / Controlled ESD & Humidity Zone (Conformal Coat & HV Isolation)',
+      workingCapitalMonths: 4,
+    },
+    machineryList: [
+      {
+        name: 'High-Speed Heavy-Copper SMT & Vacuum Reflow Line',
+        purpose: 'Places SiC MOSFETs, GaN FETs, and planar magnetics onto 3oz–4oz heavy-copper PCBs with void-free solder joints.',
+        estCostInr: '₹3.2 Cr – ₹6.0 Cr',
+        recommendedBrands: ['Fuji Corporation', 'Heller Vacuum Reflow', 'Koh Young 3D SPI/AOI'],
+      },
+      {
+        name: 'Automated Selective Silicone Conformal Coating & UV Cure Cell',
+        purpose: 'Protects high-voltage (600V–1500V DC) creepage/clearance nodes against monsoon humidity and salt mist.',
+        estCostInr: '₹75 Lakhs – ₹1.5 Cr',
+        recommendedBrands: ['Nordson ASYMTEK', 'PVA Coating', 'SCS'],
+      },
+      {
+        name: 'Automated Two-Part Vacuum Thermal Epoxy Potting Station',
+        purpose: 'Encapsulates outdoor rooftop microinverters inside finned aluminum enclosures achieving IP67 and 25-year thermal life.',
+        estCostInr: '₹85 Lakhs – ₹1.7 Cr',
+        recommendedBrands: ['DOPAG', 'Scheugenpflug', 'Bdtronic'],
+      },
+      {
+        name: 'Programmable AC Grid Simulator & PV Array Emulator HIL Rack',
+        purpose: 'Tests MPPT dynamic tracking (>99.5%), zero-voltage ride-through (LVRT), and <2s anti-islanding trip response.',
+        estCostInr: '₹1.4 Cr – ₹2.8 Cr',
+        recommendedBrands: ['Chroma ATE', 'Keysight Technologies', 'Regatron'],
+      },
+      {
+        name: 'Automated High-Pot (4kV) Safety & 48-Hour Burn-In Chamber',
+        purpose: 'Runs full-load thermal soak at 55°C ambient while regenerating AC power back to factory busbars.',
+        estCostInr: '₹95 Lakhs – ₹2.0 Cr',
+        recommendedBrands: ['Chroma ATE', 'Itech Electronics', 'Thermotron'],
+      },
+    ],
+    executionRoadmap: [
+      {
+        phase: 'Phase 1',
+        title: 'Power Architecture, Magnetics Tooling & BIS Registration',
+        durationWeeks: 'Weeks 1–10',
+        tasks: [
+          'Lock GaN/SiC flyback or dual-active-bridge inverter topology with planar transformer suppliers',
+          'Apply for BIS CRS IS 16221 / IEC 62109 testing slots at CPRI or ERDA Vadodara',
+          'Set up ESD-safe heavy-copper SMT and high-voltage isolation assembly floor',
+        ],
+        deliverable: 'Die-cast IP67 enclosure tooling and pre-compliance inverter prototypes.',
+      },
+      {
+        phase: 'Phase 2',
+        title: 'HV SMT, Conformal Coating & Vacuum Potting Commissioning',
+        durationWeeks: 'Weeks 11–22',
+        tasks: [
+          'Install vacuum reflow oven minimizing solder voids beneath thermal pads (<5%)',
+          'Commission selective conformal coater and vacuum potting cell for IP67 outdoor durability',
+          'Establish modular BESS cabinet assembly track with busbar torque verification and BMS CAN flashing',
+        ],
+        deliverable: 'Automated microinverter and BESS rack sub-assembly line commissioned.',
+      },
+      {
+        phase: 'Phase 3',
+        title: 'Grid-Tie Anti-Islanding & UL 1741 / CE Qualification',
+        durationWeeks: 'Weeks 23–34',
+        tasks: [
+          'Execute regenerative burn-in, 4kV Hipot, and EMC conducted/radiated emissions tests',
+          'Complete BIS IS 16221, UL 1741 SA/SB (US), and VDE-AR-N 4105 (EU) grid-code certifications',
+        ],
+        deliverable: 'Dual domestic (BIS/MNRE) and export (UL/CE) certification dossiers cleared.',
+      },
+      {
+        phase: 'Phase 4',
+        title: 'MNRE Empanelment & Global Solar Distributor Ramp',
+        durationWeeks: 'Weeks 35–44',
+        tasks: [
+          'Register on PM Surya Ghar / MNRE vendor portals and C&I solar EPC procurement lists',
+          'Ship initial container lots to US, EU, and African solar mini-grid integrators',
+        ],
+        deliverable: 'Commercial capacity of 20,000+ microinverters and 15 MWh BESS racks/month.',
+      },
+    ],
+    rawMaterialsAndSupplyChain: {
+      materials: [
+        '650V / 1200V GaN & SiC Power MOSFETs (Infineon, Navitas, Wolfspeed, ST)',
+        'High-Frequency Ferrite Cores & Planar Copper Windings',
+        '3oz/4oz Heavy-Copper FR4 PCB Laminates & Thermal Epoxy Potting Resin',
+        'ADC12 Die-Cast Finned Aluminum Heat-Sink Enclosures',
+        'Prismatic LFP Cells (280Ah/314Ah) & HV DC Contactors for BESS Racks',
+      ],
+      primarySources: ['Infineon Technologies', 'Texas Instruments', 'TDK Magnetics', 'Henkel Bergquist'],
+      indianIndustrialClusters: [
+        'Bengaluru Bommasandra / Peenya Power Electronics Hub',
+        'Pune Chakan / Bhosari Renewable & Auto Hub',
+        'Noida / Manesar Solar Inverter Cluster',
+        'Sanand / Mundra Solar Manufacturing Park (Gujarat)',
+      ],
+    },
+    certificationsAndCompliance: {
+      mandatory: [
+        'BIS IS 16221 / IEC 62109-1 & -2 (PV Inverter Safety)',
+        'MNRE / CEA Grid Connectivity & Anti-Islanding Compliance',
+        'UL 1741 SA / IEEE 1547 (US Export) & CE / VDE-AR-N 4105 (EU Export)',
+        'UN 38.3 & IEC 62619 (Commercial BESS Safety)',
+      ],
+      pollutionCategory: 'Orange',
+      clearancesRequired: [
+        'SPCB Consent for Epoxy Potting & Solvent Fume Scrubbing',
+        'CEA High-Voltage Test Bay Safety Inspection',
+        'PESO / Fire NOC for BESS Cell Quarantine Zone',
+      ],
+    },
+    governmentSchemes: [
+      {
+        schemeName: 'PLI Scheme for High-Efficiency Solar PV & Grid-Scale Battery Storage',
+        subsidyDetails: 'Production-linked incentives and domestic content preference for MNRE-compliant solar & storage systems.',
+        eligibleBody: 'Ministry of New and Renewable Energy (MNRE)',
+      },
+      {
+        schemeName: 'SPECS & RoDTEP Export Remission',
+        subsidyDetails: '25% CapEx subsidy on power electronics SMT/test capital + RoDTEP tax refunds on inverter exports.',
+        eligibleBody: 'MeitY / DGFT',
+      },
+    ],
+    unitEconomics: {
+      typicalGrossMargin: '32% – 44%',
+      netMargin: '15% – 23%',
+      paybackPeriodYears: '2.6 – 3.8 Years',
+      breakEvenCapacityUtil: '46% Capacity Utilization',
+    },
+  },
+  {
+    slug: 'technical-textiles-mill',
+    title: 'Smart Woven & Medical Nonwoven Technical Textiles Facility',
+    category: 'Technical Textiles',
+    tagline: 'Produce medical SSMMS barrier nonwovens, aramid/basalt industrial weaves, and smart conductive textiles in Surat & Tiruppur clusters.',
+    overview:
+      'Technical textiles power high-value MedTech (surgical gowns, N95 meltblown filters), MobilTech (airbag & tire cord fabrics), BuildTech (geotextiles), and smart wearable fabrics using high-speed rapier/air-jet looms, SSMMS spunbond-meltblown lines, and plasma hydrophobic finishing.',
+    estimatorBaseCapExCrores: 30.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹6 Lakhs – ₹24 Lakhs',
+      midpointLakhs: 15,
+      batchSize: '1,000 – 10,000 Metres / 500–2,000 kg Technical Fabric Trial Lots (SITRA / MANTRA CoE)',
+      bridgeModel:
+        'Rent pilot rapier loom weaving and meltblown beam hours at SITRA Coimbatore or MANTRA Surat Centres of Excellence, run ultrasonic converting at Tiruppur job-shops, and certify OEKO-TEX / hydrostatic barrier specs before ordering multi-crore continuous lines.',
+      indianBridgePartners: [
+        'SITRA — South India Textile Research Association (Coimbatore)',
+        'MANTRA — Man-Made Textiles Research Association (Surat)',
+        'Tiruppur Medical Apparel & Technical Knit Job-Shops',
+        'BTRA Technical Textiles Centre of Excellence (Mumbai)',
+      ],
+      graduationGate:
+        'OEKO-TEX Standard 100 + EN 13795 / ASTM barrier certification passed and ≥₹3 Cr export buyer LC commitment.',
+    },
+    linkedComplianceSlug: 'cdsco-med-class-b-vital-monitor',
+    linkedAssemblySlug: 'iot-wearable-sensor-pcba',
+    linkedTestbedSlug: 'thermotron-thermal-shock-chamber',
+    linkedLabs: [
+      { name: 'Coimbatore Hardware Prototyping Center', city: 'Coimbatore', href: '/labs' },
+      { name: 'Atal Tinkering Lab Vellore #042', city: 'Vellore', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '5603.11 / 5603.14 (Medical Meltblown & Spunbond Nonwovens)',
+      '5911.90 / 6307.90 (Technical Industrial Weaves, Geotextiles & Surgical Barriers)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'eu',
+        marketLabel: 'European Union (MedTech & Protective)',
+        certifications: ['OEKO-TEX Standard 100', 'EN 13795 / EN 14683', 'REACH Compliance'],
+        incentiveNote: 'RoSCTL/RoDTEP remission + high demand for sustainable medical & agro-technical textiles.',
+      },
+      {
+        corridorSlug: 'us',
+        marketLabel: 'United States (Hospital & Filtration)',
+        certifications: ['AAMI PB70 Level 3/4', 'ASTM F2100', 'FDA 510(k) Class II Surgical'],
+        incentiveNote: 'US hospital GPO diversification creating 25–35% gross margin opportunities.',
+      },
+      {
+        corridorSlug: 'uae-gcc',
+        marketLabel: 'UAE & GCC (BuildTech & Geotextiles)',
+        certifications: ['ISO 9001', 'ASTM D4533 / D4632 (Geotextiles)'],
+        incentiveNote: 'India-UAE CEPA 0% duty advantage for infrastructure geotextiles & desert shade meshes.',
+      },
+    ],
+    marketDemand: {
+      tamGlobal: '$235 Billion',
+      tamIndia: '$42 Billion by 2028',
+      cagr: '13.2%',
+      importDependencyPercent: 48,
+      growthDrivers: [
+        'PLI Scheme for Textiles (MMF Apparel, MMF Fabrics & Technical Textiles) with ₹10,683 Cr outlay',
+        'National Technical Textiles Mission (NTTM) subsidizing indigenous medical, defense, and agro-textiles',
+        'Surat & Tiruppur clusters upgrading from commodity apparel into high-margin medical nonwovens & smart fabrics',
+      ],
+    },
+    capitalRequirements: {
+      pilotCapEx: '₹5.5 Cr – ₹11.0 Cr (Pilot Rapier Technical Loom / Meltblown Line & QC Lab)',
+      commercialCapEx: '₹28 Cr – ₹85 Cr (3.2m SSMMS Medical Nonwoven Line + Air-Jet Smart Weaving)',
+      landSqFt: '30,000 – 95,000 sq. ft.',
+      powerGridKva: '1,000 – 3,200 kVA',
+      cleanroomClass: 'ISO 8 Controlled Hygiene Zone (for Medical/Surgical Nonwoven Converting)',
+      waterLpd: '40,000 Litres (Closed-loop ZLD finishing & plasma pre-treatment)',
+      workingCapitalMonths: 4,
+    },
+    machineryList: [
+      {
+        name: '3.2m SSMMS Spunbond-Meltblown Nonwoven Extrusion Line',
+        purpose: 'Produces 5-layer SMS/SSMMS medical barrier fabrics (10–80 GSM) with sub-micron meltblown filtration web.',
+        estCostInr: '₹12 Cr – ₹28 Cr',
+        recommendedBrands: ['Reifenhäuser Reicofil (Germany)', 'Oerlikon Neumag', 'Jwell Machinery'],
+      },
+      {
+        name: 'High-Speed Electronic Rapier / Air-Jet Technical Loom',
+        purpose: 'Precision weaving of high-tenacity aramid, glass, polyester, and silver-coated conductive yarns without yarn break.',
+        estCostInr: '₹2.8 Cr – ₹5.5 Cr',
+        recommendedBrands: ['Picanol (Belgium)', 'Dornier (Germany)', 'Toyota Industries'],
+      },
+      {
+        name: 'Atmospheric Plasma Surface Treatment & Antimicrobial Coating Line',
+        purpose: 'Applies fluorocarbon-free hydrophobic, flame-retardant (FR), or antimicrobial coatings with minimal water discharge.',
+        estCostInr: '₹2.2 Cr – ₹4.5 Cr',
+        recommendedBrands: ['Brückner Textile Technologies (Germany)', 'Monforts', 'Ahlbrandt'],
+      },
+      {
+        name: 'Automated Ultrasonic Surgical Gown & Filter Converting Line',
+        purpose: 'Automated slitting, ultrasonic seam welding (zero needle-hole penetration), and EO-sterile pouching.',
+        estCostInr: '₹1.1 Cr – ₹2.4 Cr',
+        recommendedBrands: ['Herrmann Ultraschall', 'Telsonic', 'Zünd Cutting'],
+      },
+      {
+        name: 'Textile Hydrostatic Head, BFE & Tensile Testing Lab',
+        purpose: 'Tests bacterial filtration efficiency (BFE >99%), hydrostatic blood penetration (AAMI Level 4), and ASTM tear strength.',
+        estCostInr: '₹55 Lakhs – ₹1.2 Cr',
+        recommendedBrands: ['James Heal (UK)', 'SDL Atlas', 'SITRA Instrumentation'],
+      },
+    ],
+    executionRoadmap: [
+      {
+        phase: 'Phase 1',
+        title: 'Textile Park Selection, NTTM/PLI Filing & ZLD Civil Works',
+        durationWeeks: 'Weeks 1–10',
+        tasks: [
+          'Secure plug-and-play industrial shed inside PM MITRA Textile Park or Surat/Tiruppur technical zone',
+          'File application under PLI Textiles (Part 1/Part 2) and NTTM indigenous machinery/R&D grants',
+          'Construct dust-free hygienic slab and closed-loop ZLD effluent recycling utility',
+        ],
+        deliverable: 'Approved textile park allotment and PLI/NTTM eligibility sign-off.',
+      },
+      {
+        phase: 'Phase 2',
+        title: 'Extrusion / Weaving & Coating Line Commissioning',
+        durationWeeks: 'Weeks 11–26',
+        tasks: [
+          'Erect SSMMS nonwoven extrusion tower or battery of Picanol/Dornier technical rapier looms',
+          'Install electrostatic electret charging unit for high-efficiency N95/HEPA filtration media',
+          'Commission plasma hydrophobic & flame-retardant stenter coating range',
+        ],
+        deliverable: 'Continuous web uniformity within ±2% GSM tolerance.',
+      },
+      {
+        phase: 'Phase 3',
+        title: 'OEKO-TEX, EN 13795 & ASTM Technical Certification',
+        durationWeeks: 'Weeks 27–36',
+        tasks: [
+          'Run SITRA / Hohenstein lab validations for OEKO-TEX Standard 100 and REACH SVHC compliance',
+          'Certify EN 13795 / AAMI PB70 Level 3–4 liquid barrier performance for hospital buyers',
+        ],
+        deliverable: 'Certified technical datasheet portfolio ready for EU/US hospital & industrial audits.',
+      },
+      {
+        phase: 'Phase 4',
+        title: 'Export Buyer Audits & Automated Converting Scale-Up',
+        durationWeeks: 'Weeks 37–46',
+        tasks: [
+          'Pass buyer SMETA/ISO 13485 facility audits and onboard global healthcare/automotive distributors',
+          'Claim RoSCTL / RoDTEP duty remissions across US, EU, and UAE export shipments',
+        ],
+        deliverable: 'Full 3-shift commercial operation exporting 400+ tonnes/month.',
+      },
+    ],
+    rawMaterialsAndSupplyChain: {
+      materials: [
+        'High-MFI Polypropylene Homopolymer Meltblown Resins (1500 MFI)',
+        'High-Tenacity Polyester, Nylon 6,6 & Para-Aramid Filament Yarns',
+        'Silver-Plated Conductive Yarns & Piezoresistive Smart Sensor Threads',
+        'PFAS-Free Hydrophobic Fluoropolymer Alternatives & Silver-Ion Antimicrobials',
+        'Medical Sterilization Tyvek / Blister Films',
+      ],
+      primarySources: ['Reliance Industries (Surat)', 'Indorama Ventures', 'Teijin Aramid', 'BASF Textile Chemicals'],
+      indianIndustrialClusters: [
+        'Surat Technical Textiles & MMF Cluster (Gujarat)',
+        'Tiruppur Knitwear & Medical Apparel Hub (Tamil Nadu)',
+        'Coimbatore SITRA Technical Textile Cluster (Tamil Nadu)',
+        'Bhiwandi / Tarapur Industrial Weaving Hub (Maharashtra)',
+      ],
+    },
+    certificationsAndCompliance: {
+      mandatory: [
+        'OEKO-TEX Standard 100 (Class I & II)',
+        'EN 13795 / AAMI PB70 (Medical Barrier Textiles)',
+        'ISO 9001 & ISO 13485 (Medical Grade Converting)',
+        'BIS IS 16546 / IS 17423 (Technical Nonwovens)',
+        'REACH & Zero Liquid Discharge (ZLD) Compliance',
+      ],
+      pollutionCategory: 'Orange',
+      clearancesRequired: [
+        'SPCB ZLD Consent for Coating/Dyeing',
+        'CDSCO Class I/II Surgical Gown Registration (for Medical Lines)',
+        'Factories Act & Boiler/Thermal Oil Heater Safety NOC',
+      ],
+    },
+    governmentSchemes: [
+      {
+        schemeName: 'PLI Scheme for Textiles (MMF & Technical Textiles)',
+        subsidyDetails: 'Up to 15% turnover-linked production incentive over 5 years on notified technical textile HSN codes.',
+        eligibleBody: 'Ministry of Textiles, Govt. of India',
+      },
+      {
+        schemeName: 'National Technical Textiles Mission (NTTM) & PM MITRA Parks',
+        subsidyDetails: 'R&D grants, testing standardization support, and plug-and-play common steam/ZLD parks.',
+        eligibleBody: 'Ministry of Textiles',
+      },
+    ],
+    unitEconomics: {
+      typicalGrossMargin: '30% – 46%',
+      netMargin: '14% – 22%',
+      paybackPeriodYears: '2.8 – 4.2 Years',
+      breakEvenCapacityUtil: '50% Capacity Utilization',
+    },
+  },
+  {
+    slug: 'agro-food-coldchain-plant',
+    title: 'Solar Cold-Chain & Value-Added Agro-Processing Equipment Plant',
+    category: 'Agro-Processing & Cold Chain',
+    tagline: 'Build off-grid solar cold rooms, phase-change thermal chillers, and vacuum freeze/heat-pump agro-dryers for Indian FPOs & global agri exports.',
+    overview:
+      'India loses over 15–20% of perishable horticulture produce post-harvest. This facility manufactures modular off-grid solar cold-storage rooms (5–20 MT), solar-DC BLDC refrigeration skids with Phase-Change Material (PCM) thermal batteries, and closed-loop heat-pump/vacuum agro-dehydrators compliant with NCCD, FSSAI, and APEDA export packhouse norms.',
+    estimatorBaseCapExCrores: 15.0,
+    pilotScaleOption: {
+      budgetRangeInr: '₹5 Lakhs – ₹22 Lakhs',
+      midpointLakhs: 14,
+      batchSize: '5 – 25 Solar Cold-Room Skids / Agro-Dehydrator Units (Sheet-Metal Job-Work + PCM Skid)',
+      bridgeModel:
+        'Laser-cut SS-304 cabinets at Coimbatore or Nashik sheet-metal job-shops, source modular cam-lock PUF panels and solar-DC compressors, and run 72-hour crop pull-down & shelf-life trials at ICAR-CIPHET or NIFTEM before building a panel laminating line.',
+      indianBridgePartners: [
+        'Coimbatore SIDCO Agri-Machinery & Pump Cluster',
+        'Nashik Agro-Export & Grape Packhouse Hub (Maharashtra)',
+        'ICAR-CIPHET (Ludhiana) & NIFTEM (Kundli) Food Tech Pilots',
+        'Rajkot Solar Compressor & Agricultural Fabrication Cluster',
+      ],
+      graduationGate:
+        'NCCD thermal pull-down & 36-hour autonomy validation + PMFME / State Horticulture subsidy empanelment for ≥30 FPO units.',
+    },
+    linkedComplianceSlug: 'wpc-eta-lora-iot',
+    linkedAssemblySlug: 'in865-lora-energy-meter-pcba',
+    linkedTestbedSlug: 'thermotron-thermal-shock-chamber',
+    linkedLabs: [
+      { name: 'Coimbatore Hardware Prototyping Center', city: 'Coimbatore', href: '/labs' },
+      { name: 'Pune Maker FabLab Node', city: 'Pune', href: '/labs' },
+    ],
+    exportHsCodes: [
+      '8418.69 (Solar Off-Grid Cold Rooms & Blast Chillers)',
+      '8419.31 (Solar Heat-Pump & Vacuum Agro-Food Dehydrators)',
+    ],
+    exportCorridors: [
+      {
+        corridorSlug: 'africa',
+        marketLabel: 'East & West Africa (Off-Grid Farm Cold Rooms)',
+        certifications: ['ISO 9001', 'IEC 60335-2-89', 'SONCAP / KEBS PVoC'],
+        incentiveNote: 'Massive off-grid dairy, mango, tomato & fish preservation demand funded by World Bank / AfDB.',
+      },
+      {
+        corridorSlug: 'uae-gcc',
+        marketLabel: 'UAE & GCC (Food Security & Date/Spice Dehydration)',
+        certifications: ['ESMA / G-Mark', 'FSSAI / HACCP Food-Contact SS-304'],
+        incentiveNote: 'India-UAE CEPA 0% duty corridor serving UAE/Saudi food-park cold-chain infrastructure.',
+      },
+      {
+        corridorSlug: 'asean',
+        marketLabel: 'ASEAN (Tropical Fruit & Seafood Cold Chain)',
+        certifications: ['CE Machinery Directive', 'ASEAN MRA Electrical Safety'],
+        incentiveNote: 'Modular 5–10 MT solar reefers and spice/coffee heat-pump dryers across Vietnam & Indonesia.',
+      },
+    ],
+    marketDemand: {
+      tamGlobal: '$38 Billion',
+      tamIndia: '₹24,000 Cr ($2.9B) by 2029',
+      cagr: '18.9%',
+      importDependencyPercent: 44,
+      growthDrivers: [
+        'PM Kisan Sampada Yojana (PMKSY) & PMFME granting 35%–50% capital subsidies to FPOs for farm-gate cold storage',
+        'APEDA fresh horticulture & spice export boom demanding residue-free solar dehydration & pre-cooling packhouses',
+        'Zero-diesel solar + PCM thermal storage replacing expensive grid/DG cold rooms across rural India & Africa',
+      ],
+    },
+    capitalRequirements: {
+      pilotCapEx: '₹2.4 Cr – ₹5.2 Cr (PUF Panel Press, SS-304 Food-Grade Fab & Solar Refrigeration Bay)',
+      commercialCapEx: '₹14 Cr – ₹36 Cr (Continuous PUF Laminator, Fiber Laser/Press Brake & IoT Skid Line)',
+      landSqFt: '15,000 – 48,000 sq. ft.',
+      powerGridKva: '300 – 950 kVA (Plus 100kWp rooftop solar test yard)',
+      workingCapitalMonths: 3,
+    },
+    machineryList: [
+      {
+        name: 'CNC Fiber Laser Cutter (4kW) & CNC Hydraulic Press Brake',
+        purpose: 'Precision cutting and hygienic radius bending of food-grade SS-304 chambers, trays, and galvanized panel skins.',
+        estCostInr: '₹1.1 Cr – ₹2.2 Cr',
+        recommendedBrands: ['Bystronic (Switzerland)', 'TRUMPF', 'SLTL Sahajanand Laser (India)'],
+      },
+      {
+        name: 'High-Pressure PUF Insulated Cold-Room Panel Laminating Press',
+        purpose: 'Injects cyclopentane/HFO polyurethane foam (42 kg/m³ density) between cam-lock PPGI/SS skins for 80–150mm panels.',
+        estCostInr: '₹1.4 Cr – ₹3.0 Cr',
+        recommendedBrands: ['Cannon Afros (Italy)', 'Hennecke (Germany)', 'KraussMaffei'],
+      },
+      {
+        name: 'Vacuum Brazing, Nitrogen Purge & Helium Leak-Detection Skid Bench',
+        purpose: 'Assembles copper evaporator/condenser coils and solar-DC BLDC compressors with zero refrigerant micro-leaks.',
+        estCostInr: '₹45 Lakhs – ₹95 Lakhs',
+        recommendedBrands: ['Inficon Leak Detectors', 'Pfeiffer Vacuum', 'CPS Products'],
+      },
+      {
+        name: 'Phase-Change Material (PCM) Thermal Bank Filling & Sealing Rig',
+        purpose: 'Produces eutectic PCM thermal storage plates delivering 30–36 hours of sub-5°C cooling without batteries or grid power.',
+        estCostInr: '₹35 Lakhs – ₹75 Lakhs',
+        recommendedBrands: ['Pluss Advanced Technologies (India)', 'Axiom Thermal', 'Custom Vacuum Sealer'],
+      },
+      {
+        name: 'Psychrometric Pull-Down Calorimeter & IoT Telemetry Calibration Yard',
+        purpose: 'Validates 45°C ambient pull-down speed, relative humidity stability (85–95% RH), and LoRaWAN/4G temperature logging.',
+        estCostInr: '₹40 Lakhs – ₹85 Lakhs',
+        recommendedBrands: ['Blue Star Industrial Rigs', 'Testo Instruments', 'Sensitech Calibration'],
+      },
+    ],
+    executionRoadmap: [
+      {
+        phase: 'Phase 1',
+        title: 'Crop Thermal Modeling, NCCD Alignment & Fabrication Setup',
+        durationWeeks: 'Weeks 1–8',
+        tasks: [
+          'Standardize 5 MT, 10 MT, and 20 MT solar cold-room SKUs aligned with NCCD technical standards',
+          'Commission CNC fiber laser, TIG hygienic welding bay, and sheet-metal powder coating',
+          'Qualify eutectic PCM thermal storage packs (-2°C to +8°C phase points) and MPPT solar charge controllers',
+        ],
+        deliverable: 'Fabrication workshop operational with prototype refrigeration skids.',
+      },
+      {
+        phase: 'Phase 2',
+        title: 'PUF Panel Press & Refrigeration Brazing Line Integration',
+        durationWeeks: 'Weeks 9–20',
+        tasks: [
+          'Install high-pressure cyclopentane PUF foaming press with cam-lock perimeter jigs',
+          'Set up automated vacuum evacuation (<250 microns) and digital refrigerant charging stations (R290/R404A)',
+          'Integrate LoRaWAN / NB-IoT remote temperature, door-open, and compressor predictive diagnostics PCBA',
+        ],
+        deliverable: 'Integrated panel and refrigeration skid assembly line producing 15 units/month.',
+      },
+      {
+        phase: 'Phase 3',
+        title: 'ICAR-CIPHET Thermal Testing & MoFPI / PMFME Empanelment',
+        durationWeeks: 'Weeks 21–30',
+        tasks: [
+          'Complete 72-hour extreme ambient (45°C) thermal holdover and humidity tests at ICAR-CIPHET or NABL labs',
+          'Certify food-contact SS-304 compliance (FSSAI / HACCP) for solar heat-pump & freeze dryers',
+          'Acquire state horticulture & PMFME / PMKSY machinery vendor empanelment',
+        ],
+        deliverable: 'Certified Indian FPO subsidy-eligible product catalog.',
+      },
+      {
+        phase: 'Phase 4',
+        title: 'FPO Network Rollout & Africa / GCC Solar Exports',
+        durationWeeks: 'Weeks 31–40',
+        tasks: [
+          'Deploy turnkey container-sized cold rooms to Nashik, Himachal, and Coimbatore FPO clusters',
+          'Ship flat-pack PUF + solar skid kits to East Africa, UAE, and ASEAN agri-export cooperatives',
+        ],
+        deliverable: 'Commercial serial production at 50+ cold rooms and agro-dryers/month.',
+      },
+    ],
+    rawMaterialsAndSupplyChain: {
+      materials: [
+        'Food-Grade SS-304 Sheets & Pre-Painted Galvanized Iron (PPGI) Coils',
+        'Polyol / Isocyanate PUF Foam Chemicals (Zero-ODP Cyclopentane Blowing)',
+        'Solar-DC Brushless Compressors (48V/72V DC) & Copper Finned Coils',
+        'Eutectic Phase-Change Material (PCM) Plates & Polypropylene Cases',
+        '4G/LoRaWAN Cold-Chain IoT Telematics & Solar MPPT Controllers',
+      ],
+      primarySources: ['Jindal Stainless', 'Danfoss / Secop Compressors', 'Covestro / BASF Polyurethanes', 'Pluss Advanced Tech'],
+      indianIndustrialClusters: [
+        'Coimbatore Agro-Machinery & Pump Cluster (Tamil Nadu)',
+        'Nashik Agro-Export & Cold-Chain Corridor (Maharashtra)',
+        'Pune / Satara Food Processing Machinery Hub (Maharashtra)',
+        'Rajkot Engineering & Solar Pump Cluster (Gujarat)',
+      ],
+    },
+    certificationsAndCompliance: {
+      mandatory: [
+        'FSSAI Food-Contact SS-304 & HACCP Hygiene Compliance',
+        'NCCD (National Centre for Cold-chain Development) Technical Standards',
+        'APEDA Packhouse & Export Cold-Chain QA',
+        'BIS IS 16590 / ASHRAE Thermal Insulation Compliance',
+        'CE Machinery Directive & RoHS (Export Models)',
+      ],
+      pollutionCategory: 'Green',
+      clearancesRequired: [
+        'SPCB Non-ODS Cyclopentane Foam Storage Clearance',
+        'Factory License & Fire NOC',
+        'PESO Approval for Hydrocarbon Refrigerant (R290) Charging Zone',
+      ],
+    },
+    governmentSchemes: [
+      {
+        schemeName: 'PM Kisan Sampada Yojana (PMKSY) & PLI Food Processing',
+        subsidyDetails: '35%–50% capital grants for integrated cold-chain, pre-cooling, and agro-processing units.',
+        eligibleBody: 'Ministry of Food Processing Industries (MoFPI)',
+      },
+      {
+        schemeName: 'PM Formalisation of Micro Food Processing Enterprises (PMFME)',
+        subsidyDetails: '35% credit-linked capital subsidy up to ₹10 Lakhs per micro unit and ₹3 Cr for FPO common infrastructure.',
+        eligibleBody: 'MoFPI / State Nodal Agencies',
+      },
+    ],
+    unitEconomics: {
+      typicalGrossMargin: '30% – 42%',
+      netMargin: '14% – 21%',
+      paybackPeriodYears: '2.0 – 3.2 Years',
+      breakEvenCapacityUtil: '40% Capacity Utilization',
     },
   },
 ];

@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { Users, ChevronRight, ArrowLeft } from 'lucide-react';
 import { SQUADS_DATA, getSquadRoomBySlug } from '@/lib/data/squads-data';
+import { buildFallbackSquadRoom, getProject } from '@/lib/data/queries';
 import { SquadRoomWorkspace } from '@/components/squad/squad-room-workspace';
 import { SocialCommunityProvider } from '@/components/social/social-context';
 import { SocialShell } from '@/components/social/social-shell';
+
+export const dynamic = 'force-dynamic';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -17,10 +19,16 @@ export async function generateStaticParams() {
   }));
 }
 
+async function resolveSquadRoom(slug: string) {
+  const existing = getSquadRoomBySlug(slug);
+  if (existing) return existing;
+  const project = await getProject(slug);
+  return buildFallbackSquadRoom(slug, project);
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const squad = getSquadRoomBySlug(slug);
-  if (!squad) return { title: 'Squad Room Not Found' };
+  const squad = await resolveSquadRoom(slug);
 
   return {
     title: `${squad.projectTitle} Squad Room`,
@@ -30,11 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProjectSquadRoomPage({ params }: Props) {
   const { slug } = await params;
-  const squad = getSquadRoomBySlug(slug);
-
-  if (!squad) {
-    notFound();
-  }
+  const squad = await resolveSquadRoom(slug);
 
   return (
     <SocialCommunityProvider>

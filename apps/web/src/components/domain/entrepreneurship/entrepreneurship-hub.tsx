@@ -9,23 +9,23 @@ import {
   ExternalLink,
   BookOpen,
   PieChart,
-  TrendingUp,
   FileText,
   Search,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Sparkles,
-  Users,
-  Compass,
   ArrowRight,
   ShieldCheck,
+  Building2,
+  Globe,
+  Factory,
+  BadgeIndianRupee,
+  Rocket,
+  FileCheck2,
 } from 'lucide-react';
 import {
   ENTREPRENEUR_COURSES,
   CURATED_ESSAYS,
   OPEN_SOURCE_FOUNDER_DOCS,
-  type EntrepreneurCourse,
 } from './entrepreneurship-data';
 import { CapTableCalculator } from './cap-table-calculator';
 import { UnitEconomicsCalculator } from './unit-economics-calculator';
@@ -59,7 +59,7 @@ export function EntrepreneurshipHub() {
   return (
     <div className="space-y-8">
       {/* Top Banner / Hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-hairline bg-gradient-to-br from-surface-1 via-surface-1 to-surface-2 p-6 sm:p-8 shadow-sm">
+      <div className="relative overflow-hidden rounded-2xl border border-accent/20 bg-gradient-to-br from-surface-1 via-surface-1 to-accent-soft p-6 sm:p-8 shadow-xs">
         <div className="max-w-3xl space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="accent" variant="solid" className="font-mono text-caption">
@@ -85,11 +85,11 @@ export function EntrepreneurshipHub() {
           </div>
           <div>
             <span className="text-[11px] font-mono text-fg-muted uppercase block">Curated Video Hours</span>
-            <span className="text-heading-sm font-mono font-bold text-emerald-400">140+ Hours</span>
+            <span className="text-heading-sm font-mono font-bold text-earn-fg">140+ Hours</span>
           </div>
           <div>
             <span className="text-[11px] font-mono text-fg-muted uppercase block">Cost to Founders</span>
-            <span className="text-heading-sm font-mono font-bold text-accent">₹0 / $0 Forever</span>
+            <span className="text-heading-sm font-mono font-bold text-accent-fg">₹0 / $0 Forever</span>
           </div>
           <div>
             <span className="text-[11px] font-mono text-fg-muted uppercase block">Legal Templates</span>
@@ -325,7 +325,7 @@ export function EntrepreneurshipHub() {
                               {lecture.title}
                             </h4>
                             <p className="text-[11px] text-fg-muted pt-0.5">
-                              <span className="text-emerald-400 font-medium">Core rule:</span> {lecture.keyTakeaway}
+                              <span className="text-earn-fg font-medium">Core rule:</span> {lecture.keyTakeaway}
                             </p>
                           </div>
                         ))}
@@ -376,7 +376,7 @@ export function EntrepreneurshipHub() {
                   <p className="text-caption text-fg-muted">
                     {essay.oneLineSummary}
                   </p>
-                  <div className="p-2.5 rounded-lg bg-surface-2 border border-hairline/60 text-[11px] font-mono text-emerald-400">
+                  <div className="p-2.5 rounded-lg bg-sunken border border-hairline text-[11px] font-mono text-earn-fg">
                     &ldquo;{essay.coreRule}&rdquo;
                   </div>
                 </div>
@@ -442,6 +442,139 @@ export function EntrepreneurshipHub() {
           </div>
         </div>
       )}
+
+      {/* INDIA MANUFACTURING, MSME & EXPORT LAUNCH STACK */}
+      <section
+        aria-labelledby="india-msme-export-stack"
+        className="rounded-2xl border border-accent/25 bg-gradient-to-br from-surface-1 via-surface-1 to-accent-soft/75 p-6 sm:p-8 shadow-xs space-y-6"
+      >
+        <SectionHeader
+          eyebrow="INDIA MSME & GLOBAL EXPORT EXECUTION"
+          title={<span id="india-msme-export-stack">India Manufacturing, MSME &amp; Export Launch Stack</span>}
+          description="Move cleanly from lab prototype to factory floor and international customs clearance using India’s zero-fee registrations, working-capital shields, and non-dilutive manufacturing grants."
+          action={
+            <Button asChild variant="primary" size="sm">
+              <Link href="/export">
+                <Globe className="size-4" aria-hidden="true" />
+                <span>Open Export Hub</span>
+              </Link>
+            </Button>
+          }
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="p-5 bg-surface-1 border-hairline space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <Badge tone="accent" variant="outline">MSME IDENTITY · ₹0 FEE</Badge>
+              <Building2 className="size-4 text-accent-fg" aria-hidden="true" />
+            </div>
+            <h3 className="font-display text-body-lg font-bold text-fg">
+              Udyam Registration
+            </h3>
+            <p className="text-body-xs text-fg-muted leading-relaxed">
+              Instant Aadhaar &amp; PAN-linked Micro/Small/Medium enterprise certificate on{' '}
+              <span className="font-mono text-fg">udyamregistration.gov.in</span>. Unlocks collateral-free CGTMSE term loans up to ₹5 Cr, TReDS invoice discounting against large OEMs, and government PSU tender EMD exemptions.
+            </p>
+            <div className="p-3 rounded-xl bg-sunken border border-hairline text-[11px] font-mono text-fg-muted">
+              Pair with DPIIT Startup Recognition for 3-year Section 80-IAC tax holiday &amp; fast-track patent rebates.
+            </div>
+          </Card>
+
+          <Card className="p-5 bg-surface-1 border-hairline space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <Badge tone="code" variant="outline">CUSTOMS &amp; PORT CODE</Badge>
+              <Globe className="size-4 text-code-fg" aria-hidden="true" />
+            </div>
+            <h3 className="font-display text-body-lg font-bold text-fg">
+              DGFT IEC &amp; ICEGATE AD Code
+            </h3>
+            <p className="text-body-xs text-fg-muted leading-relaxed">
+              Obtain your 10-digit Importer-Exporter Code via{' '}
+              <span className="font-mono text-fg">dgft.gov.in</span> (₹500 statutory fee) and register your bank’s Authorized Dealer (AD) Code on ICEGATE for Nhava Sheva, Mundra, Chennai, or Bengaluru Air Cargo before dispatching export samples or FCL containers.
+            </p>
+            <div className="p-3 rounded-xl bg-sunken border border-hairline text-[11px] font-mono text-fg-muted">
+              Mandatory for clearing commercial prototypes, EPCG capital machinery, and claiming export duty scripts.
+            </div>
+          </Card>
+
+          <Card className="p-5 bg-surface-1 border-hairline space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <Badge tone="earn" variant="outline">WORKING CAPITAL SHIELD</Badge>
+              <FileCheck2 className="size-4 text-earn-fg" aria-hidden="true" />
+            </div>
+            <h3 className="font-display text-body-lg font-bold text-fg">
+              GST Zero-Rated LUT (Form RFD-11)
+            </h3>
+            <p className="text-body-xs text-fg-muted leading-relaxed">
+              File an annual Letter of Undertaking on{' '}
+              <span className="font-mono text-fg">gst.gov.in</span> to export hardware batches and engineering design services at <strong className="text-fg">0% IGST</strong>—preserving cashflow instead of blocking 18% GST in upfront tax payouts while claiming Input Tax Credit (ITC) refunds on domestic BOMs.
+            </p>
+            <div className="p-3 rounded-xl bg-sunken border border-hairline text-[11px] font-mono text-fg-muted">
+              Combine with ECGC Whole Turnover policies to offer 45–60 day credit terms to US/EU OEMs safely.
+            </div>
+          </Card>
+
+          <Card className="p-5 bg-surface-1 border-hairline space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <Badge tone="make" variant="outline">GRANTS &amp; EXPORT INCENTIVES</Badge>
+              <BadgeIndianRupee className="size-4 text-make-fg" aria-hidden="true" />
+            </div>
+            <h3 className="font-display text-body-lg font-bold text-fg">
+              NIDHI-PRAYAS · SISFS · PLI · RoDTEP
+            </h3>
+            <p className="text-body-xs text-fg-muted leading-relaxed">
+              Stack non-dilutive hardware capital before raising equity: <strong className="text-fg">DST NIDHI-PRAYAS</strong> (up to ₹10L PoC grant via IIT/NIT TBIs), <strong className="text-fg">Startup India Seed Fund (SISFS)</strong> (₹20L grant / ₹50L convertible), <strong className="text-fg">PLI</strong> electronics/ACC/textiles schemes, and <strong className="text-fg">RoDTEP</strong> 0.5%–4.3% duty-remission scrips on exported SKUs.
+            </p>
+            <div className="p-3 rounded-xl bg-sunken border border-hairline text-[11px] font-mono text-fg-muted">
+              RoDTEP credits offset NABL, ARAI, CE/FCC, and UN 38.3 testing budgets as export volume scales.
+            </div>
+          </Card>
+        </div>
+
+        {/* Direct Execution Links */}
+        <div className="rounded-xl border border-hairline bg-surface-1 p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <div className="text-body-sm font-display font-bold text-fg">
+              Launch Your India Hardware &amp; Export Workflow
+            </div>
+            <p className="text-body-xs text-fg-muted">
+              Jump straight to factory blueprints, compliance checklists, instant manufacturing quotes, and export tools.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="primary" size="sm">
+              <Link href="/how-to-start">
+                <Factory className="size-3.5" aria-hidden="true" />
+                <span>How to Start a Plant</span>
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/export">
+                <Globe className="size-3.5" aria-hidden="true" />
+                <span>Global Export Hub</span>
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/manufacturing/rfq">
+                <span>Instant RFQ</span>
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/compliance">
+                <ShieldCheck className="size-3.5" aria-hidden="true" />
+                <span>Compliance</span>
+              </Link>
+            </Button>
+            <Button asChild variant="soft" size="sm">
+              <Link href="/launchpad">
+                <Rocket className="size-3.5" aria-hidden="true" />
+                <span>Launchpad</span>
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

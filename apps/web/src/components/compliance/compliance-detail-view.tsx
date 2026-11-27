@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Badge, Card } from '@hackerland/ui';
-import { ArrowLeft, ExternalLink, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink, FileText } from 'lucide-react';
 import type { ComplianceRoadmapItem } from '@hackerland/core';
 import { formatComplianceCost } from '@hackerland/core';
 import { PreComplianceAuditor } from './pre-compliance-auditor';
@@ -159,6 +159,38 @@ export function ComplianceDetailView({ item }: ComplianceDetailViewProps) {
                 </li>
               ))}
             </ul>
+          </Card>
+
+          <Card className="border-accent/25 bg-accent-soft/40 p-5 shadow-xs space-y-3 font-mono text-xs">
+            <h3 className="text-xs font-bold tracking-wider text-accent-fg uppercase">
+              EXPORT &amp; PRE-COMPLIANCE LAB PIPELINE
+            </h3>
+            <p className="text-[11px] font-sans text-fg-muted leading-relaxed">
+              Leverage NABL ILAC-MRA reports from this roadmap to waive ~35% of overseas CE, FCC, UL, or UAE ECAS lab re-testing.
+            </p>
+            <div className="space-y-2">
+              <Link
+                href="/export"
+                className="flex items-center justify-between rounded-xl border border-accent/30 bg-surface-1 px-3 py-2 text-accent-fg font-semibold hover:bg-accent hover:text-on-solid transition-colors"
+              >
+                <span>Global Export Bridge (/export)</span>
+                <ArrowRight className="size-3.5" />
+              </Link>
+              <Link
+                href="/emc"
+                className="flex items-center justify-between rounded-xl border border-hairline bg-surface-1 px-3 py-2 text-fg hover:border-accent/40 hover:text-accent-fg transition-colors"
+              >
+                <span>Run EMC Pre-Scan Analyzer</span>
+                <ArrowRight className="size-3.5" />
+              </Link>
+              <Link
+                href="/testbeds"
+                className="flex items-center justify-between rounded-xl border border-hairline bg-surface-1 px-3 py-2 text-fg hover:border-accent/40 hover:text-accent-fg transition-colors"
+              >
+                <span>Reserve NABL / HIL Testbed</span>
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
           </Card>
         </div>
       </div>

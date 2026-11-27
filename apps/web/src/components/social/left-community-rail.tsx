@@ -16,31 +16,41 @@ import {
   Sparkles,
   Briefcase,
   Rocket,
+  Compass,
+  Lightbulb,
+  Globe2,
+  Factory,
+  IndianRupee,
 } from 'lucide-react';
 import { Button, cn } from '@hackerland/ui';
 
 const PRIMARY_LINKS = [
-  { href: '/', label: 'Home Square', icon: Home, exact: true },
-  { href: '/feed', label: 'Explore Feed', icon: Flame },
+  { href: '/', label: 'Home Hub', icon: Home, exact: true },
+  { href: '/feed', label: 'Community Feed', icon: Flame },
+  { href: '/sectors', label: 'All 10 Sectors', icon: Compass, badge: 'New' },
+  { href: '/resources', label: 'Funding & Free Labs', icon: IndianRupee, badge: '₹0' },
+  { href: '/ideas', label: 'IdeaLab & Problems', icon: Lightbulb },
+  { href: '/learn', label: 'Learn & Academy', icon: GraduationCap },
   { href: '/projects', label: 'Builds & Squads', icon: FolderKanban },
-  { href: '/u', label: 'Makers', icon: Users },
+  { href: '/squads', label: 'Squad Rooms', icon: Users },
   { href: '/earn', label: 'Bounties & Grants', icon: Trophy },
   { href: '/sprints', label: '48H Sprints', icon: Zap, badge: 'Live' },
-  { href: '/jobs', label: 'Jobs & Residencies', icon: Briefcase },
+  { href: '/jobs', label: 'Proof-of-Work Jobs', icon: Briefcase },
+  { href: '/manufacturing', label: 'Hardware Labs', icon: Cpu },
+  { href: '/how-to-start', label: 'Pilot-to-Plant', icon: Factory },
+  { href: '/export', label: 'Global Export Hub', icon: Globe2, badge: 'Export' },
   { href: '/launchpad', label: 'Launchpad', icon: Rocket },
   { href: '/leaderboard', label: 'Leaderboard', icon: Sparkles },
-  { href: '/learn', label: 'Learn Roadmaps', icon: GraduationCap },
-  { href: '/manufacturing', label: 'Hardware Labs', icon: Cpu },
 ];
 
 const POPULAR_TAGS = [
   'open-hardware',
+  'ev-bms',
+  'agritech',
+  'medtech',
+  'textiles',
   'robotics',
-  'stm32',
-  'embedded-c',
-  'speech-ai',
-  'aerospace',
-  '3d-printing',
+  'ai-dpi',
 ];
 
 export function LeftCommunityRail() {
@@ -62,7 +72,7 @@ export function LeftCommunityRail() {
               href={item.href}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'flex items-center justify-between gap-2.5 rounded-full px-3.5 py-2.5 text-body-md font-display transition-colors',
+                'flex items-center justify-between gap-2.5 rounded-full px-3.5 py-2 text-body-sm font-display transition-colors',
                 isActive
                   ? 'bg-accent/10 text-accent-fg font-semibold'
                   : 'text-fg-muted hover:bg-surface-1 hover:text-fg',
@@ -70,7 +80,7 @@ export function LeftCommunityRail() {
             >
               <span className="flex items-center gap-3 min-w-0">
                 <Icon
-                  className={cn('size-[18px] shrink-0', isActive ? 'text-accent' : 'text-fg-subtle')}
+                  className={cn('size-[17px] shrink-0', isActive ? 'text-accent' : 'text-fg-subtle')}
                   aria-hidden="true"
                 />
                 <span className="truncate">{item.label}</span>

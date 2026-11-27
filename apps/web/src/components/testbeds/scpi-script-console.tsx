@@ -1,9 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { TestbedScriptRunner } from '@hackerland/core';
 import { validateScpiCommandScript } from '@hackerland/core';
+import { CheckCircle2, Save } from 'lucide-react';
 import { Button } from '@hackerland/ui';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
+import { useVenture } from '@/components/social/venture-context';
+import { getActiveBuilderIdentity } from '@/lib/builder-identity';
 
 interface ScpiScriptConsoleProps {
   scriptRunner: TestbedScriptRunner;
@@ -11,11 +15,101 @@ interface ScpiScriptConsoleProps {
 }
 
 export function ScpiScriptConsole({ scriptRunner, equipmentName }: ScpiScriptConsoleProps) {
+  const labShell = useLabShell();
+  const { linkWorkspaceToVenture } = useVenture();
   const [scriptCode, setScriptCode] = useState<string>(scriptRunner.sampleScript);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [savingSnapshot, setSavingSnapshot] = useState<boolean>(false);
+  const [snapshotStatus, setSnapshotStatus] = useState<string | null>(null);
 
   const validation = validateScpiCommandScript(scriptCode);
+
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: `SCPI Log · ${equipmentName}`,
+        summary: `${validation.commandCount} SCPI commands · ${terminalOutput.length} response lines`,
+        tags: ['scpi', 'testbed', 'hil-log'],
+        payload: {
+          equipmentName,
+          scriptCode,
+          terminalOutput,
+          capturedAt: new Date().toISOString(),
+        },
+      }),
+      onLoad: (ws) => {
+        const p = ws.payload ?? {};
+        if (typeof p.scriptCode === 'string') setScriptCode(p.scriptCode);
+        if (Array.isArray(p.terminalOutput)) {
+          setTerminalOutput(p.terminalOutput.filter((l): l is string => typeof l === 'string'));
+        }
+      },
+    });
+  }, [labShell, equipmentName, scriptCode, terminalOutput, validation.commandCount]);
+
+  const handleSaveScpiSnapshot = async () => {
+    setSavingSnapshot(true);
+    setSnapshotStatus(null);
+    const title = `SCPI Log · ${equipmentName}`;
+    const summary = `${validation.commandCount} SCPI commands · ${terminalOutput.length} trace lines captured`;
+    const payload = {
+      equipmentName,
+      scriptCode,
+      terminalOutput,
+      capturedAt: new Date().toISOString(),
+    };
+
+    try {
+      let workspaceId: string | undefined;
+      if (labShell) {
+        const ws = await labShell.saveWorkspace({
+          title,
+          summary,
+          tags: ['scpi', 'testbed', 'hil-log'],
+          payload,
+        });
+        workspaceId = ws?.workspaceId;
+      } else if (typeof fetch === 'function') {
+        const identity = getActiveBuilderIdentity();
+        const res = await fetch('/api/workbenches', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            kind: 'sim_preset',
+            slugOrRoute: '/testbeds',
+            title,
+            summary,
+            ownerHandle: identity.handle,
+            ownerName: identity.name,
+            tags: ['scpi', 'testbed', 'hil-log'],
+            payload,
+          }),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as { workspace?: { workspaceId: string } };
+          workspaceId = data.workspace?.workspaceId;
+        }
+      }
+
+      try {
+        const prevRaw = localStorage.getItem('hackerland_scpi_logs');
+        const prev = prevRaw ? (JSON.parse(prevRaw) as unknown[]) : [];
+        localStorage.setItem(
+          'hackerland_scpi_logs',
+          JSON.stringify([{ title, summary, ...payload }, ...(Array.isArray(prev) ? prev : [])].slice(0, 10)),
+        );
+      } catch {}
+
+      if (workspaceId) {
+        linkWorkspaceToVenture('sim_preset', workspaceId, 4);
+      }
+      setSnapshotStatus('SCPI Log Snapshot Saved!');
+      setTimeout(() => setSnapshotStatus(null), 3000);
+    } finally {
+      setSavingSnapshot(false);
+    }
+  };
 
   const runSimulation = async () => {
     setIsRunning(true);

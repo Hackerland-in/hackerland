@@ -7,6 +7,9 @@ import {
   AlertTriangle,
   Lightbulb,
   Sparkles,
+  ShieldCheck,
+  PackageSearch,
+  Globe,
 } from 'lucide-react';
 import { Badge, Button, Card } from '@hackerland/ui';
 import { MUSEUM_EXHIBITS, getMuseumExhibitBySlug } from '@/lib/data/museum-data';
@@ -52,14 +55,44 @@ export default async function MuseumExhibitPage({ params }: Props) {
               <ArrowLeft className="size-3.5" />
               <span>Museum of Failed Projects</span>
             </Link>
-            <Link href="/ideas" className="text-accent-fg hover:underline font-semibold">
-              Validate Idea in IdeaLab →
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/compliance"
+                className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 font-display font-semibold text-fg-muted hover:border-accent/40 hover:text-accent-fg transition"
+              >
+                <ShieldCheck className="size-3 text-accent-fg" aria-hidden="true" />
+                <span>Compliance</span>
+              </Link>
+              <Link
+                href="/sourcing"
+                className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 font-display font-semibold text-fg-muted hover:border-accent/40 hover:text-accent-fg transition"
+              >
+                <PackageSearch className="size-3 text-accent-fg" aria-hidden="true" />
+                <span>Sourcing</span>
+              </Link>
+              <Link
+                href="/export"
+                className="inline-flex items-center gap-1 rounded-full border border-hairline bg-sunken px-2.5 py-1 font-display font-semibold text-fg-muted hover:border-accent/40 hover:text-accent-fg transition"
+              >
+                <Globe className="size-3 text-accent-fg" aria-hidden="true" />
+                <span>Export</span>
+              </Link>
+              <Link
+                href="/ideas"
+                className="inline-flex items-center gap-1 rounded-full border border-accent/25 bg-accent-soft px-2.5 py-1 font-display font-semibold text-accent-fg hover:bg-accent hover:text-on-solid transition"
+              >
+                <Lightbulb className="size-3" aria-hidden="true" />
+                <span>IdeaLab</span>
+              </Link>
+            </div>
           </div>
 
           <header className="rounded-2xl border border-accent/20 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft p-5 sm:p-6 shadow-xs space-y-4">
             <div className="flex flex-wrap items-center gap-2 text-body-xs">
               <Badge tone="danger" variant="outline">{exhibit.primaryFailureMode}</Badge>
+              {exhibit.capitalBurned.includes('₹') && (
+                <Badge tone="accent" variant="solid">India MSME Trap · ₹50k–₹5L</Badge>
+              )}
               <span className="text-fg-subtle">{exhibit.category}</span>
               <span className="font-mono text-fg-subtle">Active: {exhibit.lifespan}</span>
             </div>
@@ -217,21 +250,48 @@ export default async function MuseumExhibitPage({ params }: Props) {
             </div>
           </section>
 
-          <Card className="border-accent/20 bg-accent-soft/50 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="space-y-1 text-center sm:text-left">
-              <h3 className="font-display text-headline-sm font-bold text-fg">
-                Building new hardware? Stress-test clearances early.
-              </h3>
-              <p className="text-body-xs text-fg-muted max-w-lg">
-                Launch the in-browser PCB Studio for DRC checks or run cost modeling in Instant RFQ.
-              </p>
+          <Card className="border-accent/25 bg-gradient-to-r from-surface-1 via-surface-1 to-accent-soft/70 p-6 space-y-4 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h3 className="font-display text-headline-sm font-bold text-fg">
+                  Prevent this failure before ordering inventory or tooling.
+                </h3>
+                <p className="text-body-xs text-fg-muted max-w-xl">
+                  Verify WPC/BIS/UN 38.3 compliance gates, qualify dual-source BOM alternates, model export readiness, or pressure-test your concept in IdeaLab.
+                </p>
+              </div>
+              <Button asChild variant="secondary" size="sm" className="shrink-0">
+                <Link href="/museum">Back to Museum</Link>
+              </Button>
             </div>
-            <div className="flex flex-wrap items-center gap-2.5">
+
+            <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-hairline">
               <Button asChild variant="primary" size="sm">
-                <Link href="/manufacturing/pcb">Open PCB Studio</Link>
+                <Link href="/compliance">
+                  <ShieldCheck className="size-3.5" aria-hidden="true" />
+                  <span>Check Compliance</span>
+                </Link>
               </Button>
               <Button asChild variant="secondary" size="sm">
-                <Link href="/museum">Back to Museum</Link>
+                <Link href="/sourcing">
+                  <PackageSearch className="size-3.5" aria-hidden="true" />
+                  <span>Qualify BOM Sourcing</span>
+                </Link>
+              </Button>
+              <Button asChild variant="secondary" size="sm">
+                <Link href="/export">
+                  <Globe className="size-3.5" aria-hidden="true" />
+                  <span>Export Readiness Hub</span>
+                </Link>
+              </Button>
+              <Button asChild variant="soft" size="sm">
+                <Link href="/ideas">
+                  <Lightbulb className="size-3.5" aria-hidden="true" />
+                  <span>Validate in IdeaLab</span>
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/manufacturing/pcb">Open PCB Studio</Link>
               </Button>
             </div>
           </Card>
