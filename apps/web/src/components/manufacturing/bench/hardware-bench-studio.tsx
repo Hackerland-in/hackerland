@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Badge, Button } from '@hackerland/ui';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
 import {
   Cpu,
   Terminal,
@@ -21,6 +22,7 @@ export interface HardwareBenchStudioProps {
 }
 
 export function HardwareBenchStudio({ initialTrackId }: HardwareBenchStudioProps) {
+  const labShell = useLabShell();
   const [selectedTrackId, setSelectedTrackId] = useState<string>(
     initialTrackId && BENCH_TRACKS.some((t) => t.pillarId === initialTrackId || t.id === initialTrackId)
       ? BENCH_TRACKS.find((t) => t.pillarId === initialTrackId || t.id === initialTrackId)!.id
@@ -40,6 +42,55 @@ export function HardwareBenchStudio({ initialTrackId }: HardwareBenchStudioProps
   const [isLoopRunning] = useState(true);
   const [logs, setLogs] = useState<string[]>(currentTrack.initialSerialLogs);
   const [activeLineIndex, setActiveLineIndex] = useState(14); // setup()
+
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: `MCU Bench: ${currentTrack.title}`,
+        summary: `Pot ${potVoltage.toFixed(2)}V · OLED "${oledText}" · LED ${ledColor} · tab=${activeTab}`,
+        tags: ['bench', 'mcu', selectedTrackId],
+        payload: {
+          selectedTrackId,
+          activeTab,
+          potVoltage,
+          buttonState,
+          ledColor,
+          oledText,
+        },
+      }),
+      onLoad: (ws) => {
+        const p = ws.payload ?? {};
+        if (typeof p.selectedTrackId === 'string') {
+          const found = BENCH_TRACKS.find((t) => t.id === p.selectedTrackId);
+          if (found) {
+            setSelectedTrackId(found.id);
+            setLogs(found.initialSerialLogs);
+          }
+        }
+        if (
+          p.activeTab === 'bench' ||
+          p.activeTab === 'serial' ||
+          p.activeTab === 'code' ||
+          p.activeTab === 'pinout'
+        ) {
+          setActiveTab(p.activeTab);
+        }
+        if (typeof p.potVoltage === 'number') setPotVoltage(p.potVoltage);
+        if (typeof p.buttonState === 'boolean') setButtonState(p.buttonState);
+        if (typeof p.ledColor === 'string') setLedColor(p.ledColor);
+        if (typeof p.oledText === 'string') setOledText(p.oledText);
+      },
+    });
+  }, [
+    labShell,
+    currentTrack.title,
+    selectedTrackId,
+    activeTab,
+    potVoltage,
+    buttonState,
+    ledColor,
+    oledText,
+  ]);
 
   // Change Track
   const handleTrackChange = (newTrackId: string) => {

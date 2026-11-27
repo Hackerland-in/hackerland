@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Badge } from '@hackerland/ui';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
 import {
   Zap,
   Sparkles,
@@ -19,6 +20,7 @@ import {
 import { Oscilloscope } from './oscilloscope';
 
 export function ActualHardwareSimulator() {
+  const labShell = useLabShell();
   const [selectedPresetId, setSelectedPresetId] = useState<string>('ohms-law-led');
   const activePreset: CircuitPreset =
     CIRCUIT_PRESETS.find((p) => p.id === selectedPresetId) ?? CIRCUIT_PRESETS[0]!;
@@ -30,6 +32,46 @@ export function ActualHardwareSimulator() {
   const [waveformHistory, setWaveformHistory] = useState<number[]>([]);
   const [selectedProbeNode, setSelectedProbeNode] = useState<string>('N_LED');
   const [simTime, setSimTime] = useState(0);
+
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: `SPICE: ${activePreset.title}`,
+        summary: `Probe ${selectedProbeNode} · ${components.length} components · ${timeDivMs}ms/div`,
+        tags: ['spice', 'circuit-sim', selectedPresetId],
+        payload: {
+          selectedPresetId,
+          components,
+          timeDivMs,
+          voltsDiv,
+          selectedProbeNode,
+          isPaused,
+        },
+      }),
+      onLoad: (ws) => {
+        const p = ws.payload ?? {};
+        if (typeof p.selectedPresetId === 'string') setSelectedPresetId(p.selectedPresetId);
+        if (Array.isArray(p.components)) {
+          setComponents(p.components as CircuitComponentState[]);
+        }
+        if (typeof p.timeDivMs === 'number') setTimeDivMs(p.timeDivMs);
+        if (typeof p.voltsDiv === 'number') setVoltsDiv(p.voltsDiv);
+        if (typeof p.selectedProbeNode === 'string') setSelectedProbeNode(p.selectedProbeNode);
+        if (typeof p.isPaused === 'boolean') setIsPaused(p.isPaused);
+        setWaveformHistory([]);
+        setSimTime(0);
+      },
+    });
+  }, [
+    labShell,
+    activePreset.title,
+    selectedPresetId,
+    components,
+    timeDivMs,
+    voltsDiv,
+    selectedProbeNode,
+    isPaused,
+  ]);
 
   // Reset preset
   const handlePresetChange = (newPresetId: string) => {

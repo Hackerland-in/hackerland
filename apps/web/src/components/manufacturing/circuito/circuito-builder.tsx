@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge, Button } from '@hackerland/ui';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
 import {
   Layers,
   Zap,
@@ -21,6 +22,7 @@ import { CircuitoWiringCanvas } from './circuito-wiring-canvas';
 import { generateCircuitCode } from './circuito-code-generator';
 
 export function CircuitoBuilder() {
+  const labShell = useLabShell();
   // Master Controller state
   const controllers = CIRCUITO_COMPONENTS.filter((c) => c.category === 'controller');
   const [selectedControllerId, setSelectedControllerId] = useState<string>('esp32-s3');
@@ -37,6 +39,42 @@ export function CircuitoBuilder() {
   const [activeTab, setActiveTab] = useState<'wiring' | 'code' | 'bom' | 'logic'>('wiring');
   const [stepIndex, setStepIndex] = useState(0);
   const [copiedCode, setCopiedCode] = useState(false);
+
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: `Circuito: ${controller.name} (${selectedComponentIds.length} sensors)`,
+        summary: `Controller ${selectedControllerId} · Modules: ${selectedComponentIds.join(', ')}`,
+        tags: ['circuito', 'wiring', selectedControllerId],
+        payload: {
+          selectedControllerId,
+          selectedComponentIds,
+          activeTab,
+          stepIndex,
+        },
+      }),
+      onLoad: (ws) => {
+        const p = ws.payload ?? {};
+        if (typeof p.selectedControllerId === 'string') {
+          setSelectedControllerId(p.selectedControllerId);
+        }
+        if (Array.isArray(p.selectedComponentIds)) {
+          setSelectedComponentIds(
+            p.selectedComponentIds.filter((id): id is string => typeof id === 'string'),
+          );
+        }
+        if (
+          p.activeTab === 'wiring' ||
+          p.activeTab === 'code' ||
+          p.activeTab === 'bom' ||
+          p.activeTab === 'logic'
+        ) {
+          setActiveTab(p.activeTab);
+        }
+        if (typeof p.stepIndex === 'number') setStepIndex(p.stepIndex);
+      },
+    });
+  }, [labShell, controller.name, selectedControllerId, selectedComponentIds, activeTab, stepIndex]);
 
   // Filter available modules for the selector
   const availableModules = CIRCUITO_COMPONENTS.filter((c) => c.category !== 'controller');

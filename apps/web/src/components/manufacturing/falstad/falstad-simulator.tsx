@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Badge, Button } from '@hackerland/ui';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
 import {
   Sparkles,
   Play,
@@ -23,6 +24,7 @@ import { FalstadCanvas } from './falstad-canvas';
 import { SpiceNetlistEditor } from './spice-netlist-editor';
 
 export function FalstadSimulator() {
+  const labShell = useLabShell();
   const [selectedPresetId, setSelectedPresetId] = useState<string>('full-bridge-rectifier');
   const activePreset: CircuitJsPreset =
     FALSTAD_PRESETS.find((p) => p.id === selectedPresetId) ?? FALSTAD_PRESETS[0]!;
@@ -35,6 +37,37 @@ export function FalstadSimulator() {
 
   // Parsed elements
   const [elements, setElements] = useState(() => parseSpiceNetlist(activePreset.spiceNetlist));
+
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: `Falstad SPICE: ${activePreset.name}`,
+        summary: `Speed ${simSpeed}x · ${elements.length} circuit elements · view=${activeTab}`,
+        tags: ['falstad', 'ngspice', selectedPresetId],
+        payload: {
+          selectedPresetId,
+          netlistText,
+          activeTab,
+          simSpeed,
+          isPaused,
+        },
+      }),
+      onLoad: (ws) => {
+        const p = ws.payload ?? {};
+        if (typeof p.selectedPresetId === 'string') setSelectedPresetId(p.selectedPresetId);
+        if (typeof p.netlistText === 'string') {
+          setNetlistText(p.netlistText);
+          setElements(parseSpiceNetlist(p.netlistText));
+        }
+        if (p.activeTab === 'canvas' || p.activeTab === 'scope' || p.activeTab === 'spice') {
+          setActiveTab(p.activeTab);
+        }
+        if (typeof p.simSpeed === 'number') setSimSpeed(p.simSpeed);
+        if (typeof p.isPaused === 'boolean') setIsPaused(p.isPaused);
+        setSimTime(0);
+      },
+    });
+  }, [labShell, activePreset.name, selectedPresetId, netlistText, activeTab, simSpeed, isPaused, elements.length]);
 
   // Change preset
   const handlePresetChange = (newPresetId: string) => {

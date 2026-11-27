@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Badge, Button } from '@hackerland/ui';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
 import {
   Cpu,
   Binary,
@@ -22,6 +23,7 @@ import { HdlWaveformViewer } from './hdl-waveform-viewer';
 import { HdlEditor } from './hdl-editor';
 
 export function HdlSimulator() {
+  const labShell = useLabShell();
   const [selectedPresetId, setSelectedPresetId] = useState<string>('counter-4bit');
   const [activeTab, setActiveTab] = useState<'all' | 'waveform' | 'code'>('all');
   const [simKey, setSimKey] = useState(0);
@@ -45,6 +47,28 @@ export function HdlSimulator() {
   const handleRunSimulation = () => {
     setSimKey((k) => k + 1);
   };
+
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: `HDL RTL: ${activePreset.title}`,
+        summary: `Verilog preset ${selectedPresetId} · view=${activeTab} · ${signals.length} signals traced`,
+        tags: ['hdl', 'verilog', selectedPresetId],
+        payload: {
+          selectedPresetId,
+          activeTab,
+        },
+      }),
+      onLoad: (ws) => {
+        const p = ws.payload ?? {};
+        if (typeof p.selectedPresetId === 'string') setSelectedPresetId(p.selectedPresetId);
+        if (p.activeTab === 'all' || p.activeTab === 'waveform' || p.activeTab === 'code') {
+          setActiveTab(p.activeTab);
+        }
+        setSimKey((k) => k + 1);
+      },
+    });
+  }, [labShell, activePreset.title, selectedPresetId, activeTab, signals.length]);
 
   return (
     <div className="space-y-6" data-testid="hdl-simulator">

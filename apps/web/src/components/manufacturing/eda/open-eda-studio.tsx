@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge, Button } from '@hackerland/ui';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
 import {
   Cpu,
   Layers,
@@ -23,12 +24,46 @@ import { EdaDrcReport } from './eda-drc-report';
 import { EdaYosysViewer } from './eda-yosys-viewer';
 
 export function OpenEdaStudio() {
+  const labShell = useLabShell();
   const [selectedPresetId, setSelectedPresetId] = useState<string>('pico-rv32');
   const [activeStage, setActiveStage] = useState<EdaStageId>('synthesis');
   const [activeTab, setActiveTab] = useState<'all' | 'layout' | 'drc' | 'source'>('all');
 
   const activePreset: EdaPreset =
     EDA_PRESETS.find((p) => p.id === selectedPresetId) ?? EDA_PRESETS[0]!;
+
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: `EDA Silicon: ${activePreset.title}`,
+        summary: `Node ${activePreset.targetNode} · Stage: ${activeStage} · Tab: ${activeTab}`,
+        tags: ['eda', 'openroad', activePreset.targetNode, selectedPresetId],
+        payload: {
+          selectedPresetId,
+          activeStage,
+          activeTab,
+        },
+      }),
+      onLoad: (ws) => {
+        const p = ws.payload ?? {};
+        if (typeof p.selectedPresetId === 'string') setSelectedPresetId(p.selectedPresetId);
+        if (
+          typeof p.activeStage === 'string' &&
+          EDA_FLOW_STAGES.some((s) => s.id === p.activeStage)
+        ) {
+          setActiveStage(p.activeStage as EdaStageId);
+        }
+        if (
+          p.activeTab === 'all' ||
+          p.activeTab === 'layout' ||
+          p.activeTab === 'drc' ||
+          p.activeTab === 'source'
+        ) {
+          setActiveTab(p.activeTab);
+        }
+      },
+    });
+  }, [labShell, activePreset.title, activePreset.targetNode, selectedPresetId, activeStage, activeTab]);
 
   const handleSelectPreset = (presetId: string) => {
     setSelectedPresetId(presetId);

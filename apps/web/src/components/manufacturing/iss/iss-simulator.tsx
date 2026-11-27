@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Badge, Button } from '@hackerland/ui';
+import { useLabShell } from '@/components/labs/full-screen-lab-shell';
 import {
   Cpu,
   Play,
@@ -25,6 +26,7 @@ import { IssMemoryView } from './iss-memory-view';
 import { IssEditor } from './iss-editor';
 
 export function IssSimulator() {
+  const labShell = useLabShell();
   const [selectedPresetId, setSelectedPresetId] = useState<string>('fibonacci');
   const [activeTab, setActiveTab] = useState<'all' | 'pipeline' | 'memory' | 'disasm'>('all');
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -41,6 +43,39 @@ export function IssSimulator() {
   );
 
   const [cpuState, setCpuState] = useState<CpuState>(() => initCpuState(activePreset));
+
+  useEffect(() => {
+    labShell?.registerSnapshotHandlers({
+      getSnapshot: () => ({
+        title: `RISC-V ISS: ${activePreset.title}`,
+        summary: `PC=0x${cpuState.pc.toString(16)} · Cycles=${cpuState.cycles} · ${simSpeedHz}Hz`,
+        tags: ['iss', 'riscv', selectedPresetId],
+        payload: {
+          selectedPresetId,
+          activeTab,
+          simSpeedHz,
+        },
+      }),
+      onLoad: (ws) => {
+        const p = ws.payload ?? {};
+        setIsRunning(false);
+        if (typeof p.selectedPresetId === 'string') {
+          const found = ISS_PRESETS.find((x) => x.id === p.selectedPresetId);
+          setSelectedPresetId(p.selectedPresetId);
+          if (found) setCpuState(initCpuState(found));
+        }
+        if (
+          p.activeTab === 'all' ||
+          p.activeTab === 'pipeline' ||
+          p.activeTab === 'memory' ||
+          p.activeTab === 'disasm'
+        ) {
+          setActiveTab(p.activeTab);
+        }
+        if (typeof p.simSpeedHz === 'number') setSimSpeedHz(p.simSpeedHz);
+      },
+    });
+  }, [labShell, activePreset.title, selectedPresetId, activeTab, simSpeedHz, cpuState.pc, cpuState.cycles]);
 
   // Switch preset
   const handleSelectPreset = (presetId: string) => {

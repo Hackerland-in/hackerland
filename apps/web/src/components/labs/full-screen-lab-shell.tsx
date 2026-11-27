@@ -387,9 +387,9 @@ export function FullScreenLabShell({
                       {badge}
                     </Badge>
                   )}
-                  <span className="truncate font-display text-sm sm:text-base font-bold text-fg">
+                  <h1 className="truncate font-display text-sm sm:text-base font-bold text-fg m-0">
                     {title}
-                  </span>
+                  </h1>
                 </div>
                 {subtitle && (
                   <p className="hidden lg:block truncate text-[12px] text-fg-muted mt-0.5">
