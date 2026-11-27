@@ -211,15 +211,6 @@ export function SettingsStudio() {
     })();
   };
 
-  if (loading) {
-    return (
-      <div className="py-16 text-center space-y-4">
-        <div className="size-10 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="font-mono text-body-sm text-fg-muted">Loading your settings…</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6 min-w-0">
       {/* Rosepaper Hero */}
@@ -228,7 +219,9 @@ export function SettingsStudio() {
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-[12px] font-display font-semibold text-accent-fg">
               <Sliders className="size-3.5" aria-hidden="true" />
-              <span>Account &amp; Maker Identity</span>
+              <span>
+                Account &amp; Maker Identity{loading ? ' · Syncing profile…' : ''}
+              </span>
             </div>
             <h1 className="font-display text-headline-lg sm:text-headline-xl font-bold tracking-tight text-fg">
               Profile Settings

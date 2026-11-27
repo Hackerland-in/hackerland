@@ -21,6 +21,7 @@ import {
   FREE_RESOURCES_LIBRARY,
   INDIA_FUNDING_PROGRAMS,
   INDIA_REGION_HUBS,
+  INDIA_STATES_AND_UTS_DIRECTORY,
   type BroadSectorCategory,
   type IndiaZoneId,
 } from '@/lib/data/india-ecosystem-data';
@@ -49,10 +50,39 @@ export function IndiaResourcesHub() {
   const [activeTab, setActiveTab] = useState<HubTab>('all_sectors_regions');
   const [selectedZone, setSelectedZone] = useState<IndiaZoneId | 'all'>('all');
   const [selectedCategory, setSelectedCategory] = useState<BroadSectorCategory | 'all'>('all');
+  const [selectedStateCode, setSelectedStateCode] = useState<string | null>(null);
+  const [showAllStates, setShowAllStates] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [noCompanyOnly, setNoCompanyOnly] = useState(false);
 
   const q = searchQuery.trim().toLowerCase();
+
+  const filteredStates = useMemo(() => {
+    return INDIA_STATES_AND_UTS_DIRECTORY.filter((st) => {
+      if (selectedZone !== 'all' && st.zone !== selectedZone) return false;
+      if (!q) return true;
+      return (
+        st.name.toLowerCase().includes(q) ||
+        st.code.toLowerCase().includes(q) ||
+        st.hubCities.toLowerCase().includes(q) ||
+        st.statePortalName.toLowerCase().includes(q) ||
+        st.highlightScheme.toLowerCase().includes(q) ||
+        st.prototypingAccess.toLowerCase().includes(q) ||
+        st.strengthSectors.some((sec) => sec.toLowerCase().includes(q))
+      );
+    });
+  }, [selectedZone, q]);
+
+  const visibleStateCards = useMemo(() => {
+    if (selectedStateCode) {
+      const exact = filteredStates.filter((s) => s.code === selectedStateCode);
+      if (exact.length > 0) return exact;
+    }
+    if (showAllStates || q.length > 0 || selectedZone !== 'all') {
+      return filteredStates;
+    }
+    return filteredStates.slice(0, 6);
+  }, [filteredStates, selectedStateCode, showAllStates, q, selectedZone]);
 
   const filteredSectors = useMemo(() => {
     return BROAD_SECTOR_SPOTLIGHTS.filter((s) => {
@@ -277,6 +307,118 @@ export function IndiaResourcesHub() {
               ))}
             </div>
           )}
+
+          {/* Pan-India 28 States + 8 UTs Ecosystem Directory */}
+          <section
+            aria-label="Pan-India 28 States and 8 Union Territories Directory"
+            className="rounded-2xl border border-hairline bg-surface-1 p-4 sm:p-5 space-y-4 min-w-0"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="space-y-0.5">
+                <h2 className="font-display text-body-md font-bold text-fg">
+                  All 28 States &amp; 8 Union Territories ({filteredStates.length}/36)
+                </h2>
+                <p className="text-body-xs text-fg-muted">
+                  Click any State or Union Territory to inspect local startup grants, free prototyping labs &amp; official state mission portals.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedStateCode && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStateCode(null)}
+                    className="text-body-xs font-display font-semibold text-fg-muted hover:text-fg underline cursor-pointer"
+                  >
+                    Clear state filter
+                  </button>
+                )}
+                {filteredStates.length > 6 && !q && selectedZone === 'all' && !selectedStateCode && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllStates((prev) => !prev)}
+                    className="text-body-xs font-display font-semibold text-accent-fg hover:underline cursor-pointer"
+                  >
+                    {showAllStates ? 'Collapse to top 6' : `Expand all ${filteredStates.length} States & UTs →`}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {filteredStates.length === 0 ? (
+              <p className="text-body-xs text-fg-muted py-2">
+                No Indian State or UT matched &ldquo;{searchQuery}&rdquo;. Clear the search box to browse all 36 ecosystems.
+              </p>
+            ) : (
+              <>
+                <div className="flex flex-wrap gap-1.5" role="list" aria-label="State and Union Territory quick selector">
+                  {filteredStates.map((st) => (
+                    <FilterChip
+                      key={st.code}
+                      selected={selectedStateCode === st.code}
+                      tone="accent"
+                      onClick={() =>
+                        setSelectedStateCode((cur) => (cur === st.code ? null : st.code))
+                      }
+                    >
+                      {st.name}
+                      {st.isUt ? ' (UT)' : ''}
+                    </FilterChip>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {visibleStateCards.map((st) => (
+                    <article
+                      key={st.code}
+                      className="rounded-xl border border-hairline bg-sunken p-3.5 flex flex-col justify-between gap-2.5 min-w-0 break-words"
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-display text-body-sm font-bold text-fg">
+                            {st.name}
+                          </h3>
+                          <Badge tone={st.isUt ? 'learn' : 'accent'} variant="outline">
+                            {st.code} · {st.isUt ? 'UT' : 'State'}
+                          </Badge>
+                        </div>
+                        <p className="text-[11px] font-mono text-fg-subtle break-words">
+                          {st.hubCities}
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {st.strengthSectors.map((sec) => (
+                            <span
+                              key={sec}
+                              className="rounded-md bg-surface-1 border border-hairline px-1.5 py-0.5 text-[10px] font-medium text-fg-muted"
+                            >
+                              {sec}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-[11px] text-fg leading-snug">
+                          <strong className="text-accent-fg">Grant/Scheme:</strong> {st.highlightScheme}
+                        </p>
+                        <p className="text-[11px] text-fg-muted leading-snug">
+                          <strong className="text-fg">Prototyping Lab:</strong> {st.prototypingAccess}
+                        </p>
+                      </div>
+
+                      <div className="pt-1.5 border-t border-hairline flex items-center justify-between gap-2">
+                        <a
+                          href={st.statePortalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-display font-semibold text-accent-fg hover:underline break-all"
+                        >
+                          <span>{st.statePortalName}</span>
+                          <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </>
+            )}
+          </section>
 
           {/* Sector Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

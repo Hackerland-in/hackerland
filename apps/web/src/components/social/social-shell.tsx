@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@hackerland/ui';
 import { LeftCommunityRail } from './left-community-rail';
+import { ActiveBuildJourneyBar } from './active-build-journey-bar';
 
 export interface SocialShellProps {
   children: ReactNode;
@@ -30,6 +31,7 @@ export function SocialShell({ children, rightRail, className }: SocialShellProps
 
         {/* Center Main Social Stream */}
         <div className="w-full min-w-0 flex-1 space-y-5">
+          <ActiveBuildJourneyBar />
           {children}
         </div>
 

@@ -1,12 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
-const localShellPath =
-  '/Users/rajasardar/Library/Caches/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-mac-arm64/chrome-headless-shell';
+const pwCache = path.join(os.homedir(), 'Library/Caches/ms-playwright');
+const candidateShellPaths = [
+  path.join(pwCache, 'chromium_headless_shell-1255/chrome-headless-shell-mac-arm64/chrome-headless-shell'),
+  path.join(pwCache, 'chromium_headless_shell-1248/chrome-headless-shell-mac-arm64/chrome-headless-shell'),
+  path.join(pwCache, 'chromium-1194/chrome-mac/Chromium.app/Contents/MacOS/Chromium'),
+];
 
-const launchOptions = fs.existsSync(localShellPath)
-  ? { executablePath: localShellPath }
-  : undefined;
+const foundShell = candidateShellPaths.find((p) => fs.existsSync(p));
+const launchOptions = foundShell ? { executablePath: foundShell } : undefined;
 
 export default defineConfig({
   testDir: './e2e',

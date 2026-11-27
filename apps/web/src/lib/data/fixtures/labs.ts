@@ -193,6 +193,152 @@ export const LAB_THUB_HYDERABAD: LabNodeView = {
   },
 };
 
+export const LAB_IITG_TIC: LabNodeView = {
+  id: 'lab-iitg-tic',
+  slug: 'iit-guwahati-tic-fablab',
+  name: 'IIT Guwahati TIC & NE Prototyping FabLab',
+  type: 'incubator',
+  institution: 'Indian Institute of Technology Guwahati',
+  location: {
+    city: 'Guwahati',
+    state: 'Assam',
+    pincode: '781039',
+  },
+  tools: ['3D Printers', 'CNC Milling', 'Oscilloscopes', 'Laser Cutters'],
+  equipmentList: [
+    { name: 'Stratasys Industrial FDM Printer', model: 'F270', count: 2, status: 'available' },
+    { name: 'Bamboo & Composite Tensile Rig', model: 'Instron 50kN', count: 1, status: 'available' },
+    { name: 'Mixed Signal Scope & DAQ Bench', model: 'Tektronix MSO44', count: 2, status: 'available' },
+  ],
+  isVerified: true,
+  contact: {
+    name: 'Dr. Bhaskar Bora',
+    role: 'Coordinator, North-East Maker Cell',
+    email: 'tic@iitg.ac.in',
+  },
+};
+
+export const LAB_IIIM_SRINAGAR: LabNodeView = {
+  id: 'lab-iiim-srinagar',
+  slug: 'csir-iiim-srinagar-bionest',
+  name: 'CSIR-IIIM Himalayan BioNEST & Clean-Tech Lab',
+  type: 'incubator',
+  institution: 'CSIR-Indian Institute of Integrative Medicine',
+  location: {
+    city: 'Srinagar',
+    state: 'Jammu & Kashmir',
+    pincode: '190005',
+  },
+  tools: ['3D Printers', 'Oscilloscopes', 'WebSerial HIL Rig'],
+  equipmentList: [
+    { name: 'Sub-Zero Cold-Climate Solar Bench', model: 'Leh/Srinagar Chamber', count: 1, status: 'available' },
+    { name: 'Microfluidic & Agro Assay Analyzer', model: 'Shimadzu HPLC/Spectro', count: 2, status: 'available' },
+  ],
+  isVerified: true,
+  contact: {
+    name: 'Dr. Shahid Ahmad',
+    role: 'BioNEST Incubation Lead',
+    email: 'bionest.srinagar@iiim.res.in',
+  },
+};
+
+export const LAB_CTTC_BHUBANESWAR: LabNodeView = {
+  id: 'lab-cttc-odisha',
+  slug: 'cttc-bhubaneswar-toolroom',
+  name: 'CTTC Central Tool Room & Training Centre',
+  type: 'fablab',
+  institution: 'Ministry of MSME — CTTC Bhubaneswar',
+  location: {
+    city: 'Bhubaneswar',
+    state: 'Odisha',
+    pincode: '751024',
+  },
+  tools: ['CNC Milling', '3D Printers', 'Laser Cutters', 'SMT Soldering'],
+  equipmentList: [
+    { name: '5-Axis CNC Precision Milling Center', model: 'DMG MORI DMU 50', count: 2, status: 'available' },
+    { name: 'EDM Wire-Cut Tooling Rig', model: 'Sodick VL400Q', count: 2, status: 'available' },
+    { name: 'CMM Coordinate Metrology Lab', model: 'Mitutoyo Crysta-Apex', count: 1, status: 'available' },
+  ],
+  isVerified: true,
+  contact: {
+    name: 'S. Mohapatra',
+    role: 'MSME Tooling Head',
+    email: 'training@cttc.gov.in',
+  },
+};
+
+export const LAB_IGTR_AHMEDABAD: LabNodeView = {
+  id: 'lab-igtr-ahmedabad',
+  slug: 'igtr-ahmedabad-msme',
+  name: 'Indo-German Tool Room (IGTR) & SSIP Makerspace',
+  type: 'fablab',
+  institution: 'MSME Tool Room Ahmedabad',
+  location: {
+    city: 'Ahmedabad',
+    state: 'Gujarat',
+    pincode: '382445',
+  },
+  tools: ['CNC Milling', '3D Printers', 'Laser Cutters'],
+  equipmentList: [
+    { name: 'CAD/CAM Precision Mold Center', model: 'Hass VF-2TR', count: 3, status: 'available' },
+    { name: 'Metal Powder SLS Add-Mfg Unit', model: 'EOS M290', count: 1, status: 'available' },
+  ],
+  isVerified: true,
+  contact: {
+    name: 'H. Patel',
+    role: 'Student & Startup Liaison',
+    email: 'ssip@igtrahd.com',
+  },
+};
+
+export const LAB_JECRC_JAIPUR: LabNodeView = {
+  id: 'lab-jecrc-jaipur',
+  slug: 'jecrc-jaipur-fablab',
+  name: 'Jaipur Makerspace & Rajasthan iStart Lab',
+  type: 'atl',
+  institution: 'JECRC / Rajasthan iStart Nest',
+  location: {
+    city: 'Jaipur',
+    state: 'Rajasthan',
+    pincode: '302022',
+  },
+  tools: ['3D Printers', 'Laser Cutters', 'SMT Soldering', 'Oscilloscopes'],
+  equipmentList: [
+    { name: 'Bambu Lab P1S Prototyping Farm', model: 'Bambu Lab', count: 6, status: 'available' },
+    { name: 'ESP32 & Craft Laser Jig Cutter', model: 'Thunder Laser 80W', count: 1, status: 'available' },
+  ],
+  isVerified: true,
+  contact: {
+    name: 'Ananya Rathore',
+    role: 'iStart FabLab Mentor',
+    email: 'fablab.jaipur@istart.rajasthan.gov.in',
+  },
+};
+
+export const LAB_IIT_INDORE: LabNodeView = {
+  id: 'lab-iit-indore',
+  slug: 'iit-indore-cipd-hub',
+  name: 'IIT Indore CIPD Central India Hub',
+  type: 'college',
+  institution: 'Indian Institute of Technology Indore',
+  location: {
+    city: 'Indore',
+    state: 'Madhya Pradesh',
+    pincode: '453552',
+  },
+  tools: ['3D Printers', 'CNC Milling', 'Oscilloscopes', 'SMT Soldering', 'WebSerial HIL Rig'],
+  equipmentList: [
+    { name: 'Agro & Cold-Chain Thermal Rig', model: 'EnvironTest 45C', count: 1, status: 'available' },
+    { name: 'PCB Reflow & AOI Bench', model: 'Essemtec Fox', count: 1, status: 'available' },
+  ],
+  isVerified: true,
+  contact: {
+    name: 'Dr. Vivek Joshi',
+    role: 'CIPD Prototyping Lead',
+    email: 'cipd@iiti.ac.in',
+  },
+};
+
 export const ALL_LAB_NODES: LabNodeView[] = [
   LAB_ATL_VELLORE,
   LAB_IITM_CFI,
@@ -200,4 +346,10 @@ export const ALL_LAB_NODES: LabNodeView[] = [
   LAB_NITT_ROBOTICS,
   LAB_COIMBATORE_MAKERS,
   LAB_THUB_HYDERABAD,
+  LAB_IITG_TIC,
+  LAB_IIIM_SRINAGAR,
+  LAB_CTTC_BHUBANESWAR,
+  LAB_IGTR_AHMEDABAD,
+  LAB_JECRC_JAIPUR,
+  LAB_IIT_INDORE,
 ];
